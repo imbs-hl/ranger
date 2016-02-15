@@ -51,23 +51,24 @@ public:
 
   // Init from c++ main or Rcpp from R
   void initCpp(std::string dependent_variable_name, MemoryMode memory_mode, std::string input_file, uint mtry,
-      std::string output_prefix, uint num_trees, std::ostream* verbose_out, uint seed, uint num_threads,
-      std::string load_forest_filename, ImportanceMode importance_mode, uint min_node_size,
+      std::string output_prefix, uint num_trees, std::ostream* verbose_out, uint seed, bool enable_threading,
+      uint num_threads, std::string load_forest_filename, ImportanceMode importance_mode, uint min_node_size,
       std::string split_select_weights_file, std::vector<std::string>& always_split_variable_names,
       std::string status_variable_name, bool sample_with_replacement,
       std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::string case_weights_file, bool predict_all, double sample_fraction);
   void initR(std::string dependent_variable_name, Data* input_data, uint mtry, uint num_trees,
-      std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
-      std::vector<std::vector<double>>& split_select_weights, std::vector<std::string>& always_split_variable_names,
-      std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
-      std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-      std::vector<double>& case_weights, bool predict_all, bool keep_inbag, double sample_fraction);
+      std::ostream* verbose_out, uint seed, bool enable_threading, uint num_threads, ImportanceMode importance_mode,
+      uint min_node_size, std::vector<std::vector<double>>& split_select_weights,
+      std::vector<std::string>& always_split_variable_names, std::string status_variable_name, bool prediction_mode,
+      bool sample_with_replacement, std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting,
+      SplitRule splitrule, std::vector<double>& case_weights, bool predict_all, bool keep_inbag,
+      double sample_fraction);
   void init(std::string dependent_variable_name, MemoryMode memory_mode, Data* input_data, uint mtry,
-      std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
-      uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
-      std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-      bool predict_all, double sample_fraction);
+      std::string output_prefix, uint num_trees, uint seed, bool enable_threading, uint num_threads,
+      ImportanceMode importance_mode, uint min_node_size, std::string status_variable_name, bool prediction_mode,
+      bool sample_with_replacement, std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting,
+      SplitRule splitrule, bool predict_all, double sample_fraction);
   virtual void initInternal(std::string status_variable_name) = 0;
 
   // Grow or predict
@@ -205,6 +206,7 @@ protected:
   std::vector<size_t> no_split_variables;
 
   // Multithreading
+  bool enable_threading;
   uint num_threads;
   std::vector<uint> thread_ranges;
 #ifndef WIN_R_BUILD
