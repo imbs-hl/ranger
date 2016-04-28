@@ -37,6 +37,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#ifdef WIN_R_BUILD
+#include <boost/random/discrete_distribution.hpp>
+#endif
 
 #include "utility.h"
 #include "globals.h"
@@ -170,7 +173,11 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
   std::vector<bool> temp;
   temp.resize(indices.size(), false);
 
+#ifdef WIN_R_BUILD
+  boost::random::discrete_distribution<> weighted_dist(weights.begin(), weights.end());
+#else
   std::discrete_distribution<> weighted_dist(weights.begin(), weights.end());
+#endif
   for (size_t i = 0; i < num_samples; ++i) {
     size_t draw;
     do {
@@ -190,7 +197,11 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
   std::vector<bool> temp;
   temp.resize(max_index + 1, false);
 
+#ifdef WIN_R_BUILD
+  boost::random::discrete_distribution<> weighted_dist(weights.begin(), weights.end());
+#else
   std::discrete_distribution<> weighted_dist(weights.begin(), weights.end());
+#endif
   for (size_t i = 0; i < num_samples; ++i) {
     size_t draw;
     do {

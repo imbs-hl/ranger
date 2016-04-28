@@ -27,6 +27,9 @@
  #-------------------------------------------------------------------------------*/
 
 #include <iterator>
+#ifdef WIN_R_BUILD
+#include <boost/random/discrete_distribution.hpp>
+#endif
 
 #include "Tree.h"
 #include "utility.h"
@@ -408,7 +411,11 @@ void Tree::bootstrapWeighted() {
   sampleIDs[0].reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-sample_fraction) + 0.1));
 
+#ifdef WIN_R_BUILD
+  boost::random::discrete_distribution<> weighted_dist(case_weights->begin(), case_weights->end());
+#else
   std::discrete_distribution<> weighted_dist(case_weights->begin(), case_weights->end());
+#endif
 
   // Start with all samples OOB
   inbag_counts.resize(num_samples, 0);
