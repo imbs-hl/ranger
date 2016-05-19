@@ -118,7 +118,16 @@ template <typename features_t, typename labels_t> class DataPython : public Data
     labels_t *ptr_labels;
 };
 
-class RandomForestClassifier : public ForestClassification
+template <typename T> struct MemoryModeMap {
+};
+template <> struct MemoryModeMap<float> {
+    static const MemoryMode memory_mode = MEM_FLOAT;
+};
+template <> struct MemoryModeMap<double> {
+    static const MemoryMode memory_mode = MEM_DOUBLE;
+};
+
+template <typename T> class RandomForestClassifier : public ForestClassification
 {
   public:
     RandomForestClassifier()
@@ -129,7 +138,7 @@ class RandomForestClassifier : public ForestClassification
     {
     }
 
-    template <typename T> void fit(py::array_t<T> X, py::array_t<size_t> y)
+    void fit(py::array_t<T> X, py::array_t<size_t> y)
     {
         DataPython<T, size_t> *dataptr;
         std::unique_ptr<DataPython<T, size_t>> uptr_data(new DataPython<T, size_t>(X));
@@ -138,12 +147,12 @@ class RandomForestClassifier : public ForestClassification
         dataptr->addLabels(y);
 
         std::vector<std::string> unordered_variable_names;
-        init("labels", MEM_FLOAT, dataptr, 0, "dummy", 100, 0, 1, IMP_GINI, 1, "statusVariableName", false, true,
-             unordered_variable_names, false, DEFAULT_SPLITRULE, false, 1, DEFAULT_ALPHA, DEFAULT_MINPROP);
+        init("labels", MemoryModeMap<T>::memory_mode, dataptr, 0, "dummy", 100, 0, 1, IMP_GINI, 1, "statusVariableName",
+             false, true, unordered_variable_names, false, DEFAULT_SPLITRULE, false, 1, DEFAULT_ALPHA, DEFAULT_MINPROP);
         run(false);
     }
 
-    template <typename T> py::array_t<size_t> predict(py::array_t<T> X)
+    py::array_t<size_t> predict(py::array_t<T> X)
     {
         DataPython<T, size_t> *dataptr;
         std::unique_ptr<DataPython<T, size_t>> uptr_data(new DataPython<T, size_t>(X));
@@ -151,8 +160,8 @@ class RandomForestClassifier : public ForestClassification
         dataptr = uptr_data.get();
 
         std::vector<std::string> unordered_variable_names;
-        init("labels", MEM_FLOAT, dataptr, 0, "dummy", 100, 0, 1, IMP_GINI, 1, "statusVariableName", true, true,
-             unordered_variable_names, false, DEFAULT_SPLITRULE, false, 1, DEFAULT_ALPHA, DEFAULT_MINPROP);
+        init("labels", MemoryModeMap<T>::memory_mode, dataptr, 0, "dummy", 100, 0, 1, IMP_GINI, 1, "statusVariableName",
+             true, true, unordered_variable_names, false, DEFAULT_SPLITRULE, false, 1, DEFAULT_ALPHA, DEFAULT_MINPROP);
         run(false);
 
         py::buffer_info info = X.request();
@@ -176,10 +185,10 @@ PYBIND11_PLUGIN(pyranger)
 {
     py::module m("pyranger", "ranger python bindings");
 
-    py::class_<RandomForestClassifier>(m, "RandomForestClassifier")
+    py::class_<RandomForestClassifier<double>>(m, "RandomForestClassifier")
         .def(py::init<>())
-        .def("fit", &RandomForestClassifier::fit<double>)
-        .def("predict", &RandomForestClassifier::predict<double>);
+        .def("fit", &RandomForestClassifier<double>::fit)
+        .def("predict", &RandomForestClassifier<double>::predict);
 
     return m.ptr();
 }
