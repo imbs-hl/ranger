@@ -55,6 +55,8 @@ template <typename features_t, typename labels_t> class DataPython : public Data
 
         have_labels = false;
         fill_varnames(variable_names);
+
+        num_cols_no_sparse = num_cols + 2;
     }
 
     void addLabels(py::array_t<labels_t> &labels)
