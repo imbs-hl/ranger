@@ -37,7 +37,4 @@ def build(bld):
 	sources_core = find_src(dirs_core)
 	sources_python = find_src([srcdir])
 
-	print(sources_python)
-
-	bld.objects(source=sources_core, target ='ranger_core', features='cxxshlib')
-	bld.shlib(features='pyext cxxshlib', source=sources_python, target='pyranger', use='openmp ranger_core')
+	bld.shlib(features='pyext cxxshlib', source=sources_core + sources_python, target='pyranger')
