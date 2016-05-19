@@ -1,0 +1,43 @@
+
+blddir = 'build'
+srcdir = 'src'
+dirs_core = ['../source/src/Forest', '../source/src/Tree', '../source/src/utility']
+dirs_include = ['../source/src']
+
+def options(opt):
+	opt.load('python')
+	opt.load('compiler_c')
+	opt.load('compiler_cxx')
+
+def configure(cfg):
+	cfg.load('compiler_c')
+	cfg.load('compiler_cxx')
+
+	cfg.load('python')
+	cfg.check_python_version((2,3))
+	cfg.check_python_headers()
+
+
+	cfg.env.append_value('CXXFLAGS', ['-std=c++11', '-Wextra', '-Wall', '-fvisibility=hidden', '-O3'])
+	cfg.env.append_value('INCLUDES', ['pybind11/include'])
+	cfg.env.append_value('INCLUDES', dirs_core)
+	cfg.env.append_value('INCLUDES', dirs_include)
+
+
+def build(bld):
+	def find_src(dirs):
+		sources = []
+		for d in dirs:
+			dirnode = bld.path.find_dir(d)
+			sources += dirnode.ant_glob('*.cpp')
+
+		return sources
+
+
+	sources_core = find_src(dirs_core)
+	sources_python = find_src([srcdir])
+
+	print(sources_python)
+
+	bld.objects(source=sources_core, target ='ranger_core', features='cxxshlib')
+	bld.shlib(features='pyext cxxshlib', source=sources_python, target='pyranger', use='openmp ranger_core')
