@@ -130,7 +130,18 @@ template <> struct MemoryModeMap<double> {
 template <typename T> class RandomForestClassifier : public ForestClassification
 {
   public:
-    RandomForestClassifier()
+    size_t n_trees;
+    size_t mtry;
+    size_t n_threads;
+    size_t min_node_size;
+    double sample_fraction;
+    double alpha;
+    double minprop;
+
+    RandomForestClassifier(size_t n_trees = 10, size_t mtry = 0, size_t n_threads = 1, size_t min_node_size = 1,
+                           double sample_fraction = 1, double alpha = DEFAULT_ALPHA, double minprop = DEFAULT_MINPROP)
+        : n_trees(n_trees), mtry(mtry), n_threads(n_threads), min_node_size(min_node_size),
+          sample_fraction(sample_fraction), alpha(alpha), minprop(minprop)
     {
     }
 
@@ -147,8 +158,9 @@ template <typename T> class RandomForestClassifier : public ForestClassification
         dataptr->addLabels(y);
 
         std::vector<std::string> unordered_variable_names;
-        init("labels", MemoryModeMap<T>::memory_mode, dataptr, 0, "dummy", 100, 0, 1, IMP_GINI, 1, "statusVariableName",
-             false, true, unordered_variable_names, false, DEFAULT_SPLITRULE, false, 1, DEFAULT_ALPHA, DEFAULT_MINPROP);
+        init("labels", MemoryModeMap<T>::memory_mode, dataptr, mtry, "dummy", n_trees, 0, n_threads, IMP_GINI,
+             min_node_size, "statusVariableName", false, true, unordered_variable_names, false, DEFAULT_SPLITRULE,
+             false, sample_fraction, alpha, minprop);
         run(false);
     }
 
@@ -160,8 +172,9 @@ template <typename T> class RandomForestClassifier : public ForestClassification
         dataptr = uptr_data.get();
 
         std::vector<std::string> unordered_variable_names;
-        init("labels", MemoryModeMap<T>::memory_mode, dataptr, 0, "dummy", 100, 0, 1, IMP_GINI, 1, "statusVariableName",
-             true, true, unordered_variable_names, false, DEFAULT_SPLITRULE, false, 1, DEFAULT_ALPHA, DEFAULT_MINPROP);
+        init("labels", MemoryModeMap<T>::memory_mode, dataptr, mtry, "dummy", n_trees, 0, n_threads, IMP_GINI,
+             min_node_size, "statusVariableName", true, true, unordered_variable_names, false, DEFAULT_SPLITRULE, false,
+             sample_fraction, alpha, minprop);
         run(false);
 
         py::buffer_info info = X.request();
@@ -186,9 +199,18 @@ PYBIND11_PLUGIN(pyranger)
     py::module m("pyranger", "ranger python bindings");
 
     py::class_<RandomForestClassifier<double>>(m, "RandomForestClassifier")
-        .def(py::init<>())
+        .def(py::init<size_t, size_t, size_t, size_t, double, double, double>(), py::arg("n_trees") = 10,
+             py::arg("mtry") = 0, py::arg("n_threads") = 1, py::arg("min_node_size") = 1,
+             py::arg("sample_fraction") = 1, py::arg("alpha") = DEFAULT_ALPHA, py::arg("minprop") = DEFAULT_MINPROP)
         .def("fit", &RandomForestClassifier<double>::fit)
-        .def("predict", &RandomForestClassifier<double>::predict);
+        .def("predict", &RandomForestClassifier<double>::predict)
+        .def_readwrite("n_trees", &RandomForestClassifier<double>::n_trees)
+        .def_readwrite("mtry", &RandomForestClassifier<double>::mtry)
+        .def_readwrite("n_threads", &RandomForestClassifier<double>::n_threads)
+        .def_readwrite("min_node_size", &RandomForestClassifier<double>::min_node_size)
+        .def_readwrite("sample_fraction", &RandomForestClassifier<double>::sample_fraction)
+        .def_readwrite("alpha", &RandomForestClassifier<double>::alpha)
+        .def_readwrite("minprop", &RandomForestClassifier<double>::minprop);
 
     return m.ptr();
 }
