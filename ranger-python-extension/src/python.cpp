@@ -45,6 +45,8 @@ template <typename features_t, typename labels_t> class DataPython : public Data
             throw std::runtime_error("X vector needs to have shape (n_instances, n_features)");
         if (info.strides[1] != sizeof(features_t))
             throw std::runtime_error("X vector needs to be c continuous.");
+        if (info.strides[0] != sizeof(labels_t) * info.shape[1])
+            throw std::runtime_error("y vector needs to be c continuous.");
 
         ptr = (features_t *)info.ptr;
 
