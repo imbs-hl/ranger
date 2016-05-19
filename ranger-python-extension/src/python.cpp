@@ -129,6 +129,9 @@ template <> struct MemoryModeMap<double> {
 
 template <typename T> class RandomForestClassifier : public ForestClassification
 {
+  private:
+    bool has_been_fitted;
+
   public:
     size_t n_trees;
     size_t mtry;
@@ -143,6 +146,7 @@ template <typename T> class RandomForestClassifier : public ForestClassification
         : n_trees(n_trees), mtry(mtry), n_threads(n_threads), min_node_size(min_node_size),
           sample_fraction(sample_fraction), alpha(alpha), minprop(minprop)
     {
+        has_been_fitted = false;
     }
 
     virtual ~RandomForestClassifier()
@@ -151,6 +155,9 @@ template <typename T> class RandomForestClassifier : public ForestClassification
 
     void fit(py::array_t<T> X, py::array_t<size_t> y)
     {
+        if (has_been_fitted)
+            throw std::runtime_error("random forest has already been fitted.");
+
         DataPython<T, size_t> *dataptr;
         std::unique_ptr<DataPython<T, size_t>> uptr_data(new DataPython<T, size_t>(X));
 
@@ -162,10 +169,15 @@ template <typename T> class RandomForestClassifier : public ForestClassification
              min_node_size, "statusVariableName", false, true, unordered_variable_names, false, DEFAULT_SPLITRULE,
              false, sample_fraction, alpha, minprop);
         run(false);
+
+        has_been_fitted = true;
     }
 
     py::array_t<size_t> predict(py::array_t<T> X)
     {
+        if (!has_been_fitted)
+            throw std::runtime_error("random forest has not been fitted yet.");
+
         DataPython<T, size_t> *dataptr;
         std::unique_ptr<DataPython<T, size_t>> uptr_data(new DataPython<T, size_t>(X));
 
