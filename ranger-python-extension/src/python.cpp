@@ -197,9 +197,62 @@ template <typename T> class RandomForestClassifier : public ForestClassification
         size_t *ptr_predictions = (size_t *)info_out.ptr;
         for (unsigned int i = 0; i < info.shape[0]; ++i) {
             ptr_predictions[i] = (size_t)predictions[i][0];
+
+            if ((size_t)predictions[i][0] > 2)
+                std::cout << predictions[i][0] << "\n";
         }
 
         return result;
+    }
+};
+
+template <typename T> class PyRandomForestClassifier
+{
+  private:
+    RandomForestClassifier<T> *rf;
+    bool has_been_fitted;
+
+  public:
+    size_t n_trees;
+    size_t mtry;
+    size_t n_threads;
+    size_t min_node_size;
+    double sample_fraction;
+    double alpha;
+    double minprop;
+
+    PyRandomForestClassifier(size_t n_trees = 10, size_t mtry = 0, size_t n_threads = 1, size_t min_node_size = 1,
+                             double sample_fraction = 1, double alpha = DEFAULT_ALPHA, double minprop = DEFAULT_MINPROP)
+        : n_trees(n_trees), mtry(mtry), n_threads(n_threads), min_node_size(min_node_size),
+          sample_fraction(sample_fraction), alpha(alpha), minprop(minprop)
+    {
+        has_been_fitted = false;
+        rf = nullptr;
+    }
+
+    ~PyRandomForestClassifier()
+    {
+        if (has_been_fitted)
+            delete rf;
+    }
+
+    void fit(py::array_t<T> X, py::array_t<size_t> y)
+    {
+        if (has_been_fitted)
+            delete rf;
+
+        rf = new RandomForestClassifier<T>(n_trees, mtry, n_threads, min_node_size, sample_fraction, alpha, minprop);
+        rf->fit(X, y);
+        has_been_fitted = true;
+    }
+
+    py::array_t<size_t> predict(py::array_t<T> X)
+    {
+        if (!has_been_fitted)
+            throw std::runtime_error("random forest has not been fitted yet.");
+
+        rf->n_threads = n_threads;
+        return rf->predict(X);
     }
 };
 }
@@ -210,19 +263,19 @@ PYBIND11_PLUGIN(pyranger)
 {
     py::module m("pyranger", "ranger python bindings");
 
-    py::class_<RandomForestClassifier<double>>(m, "RandomForestClassifier")
+    py::class_<PyRandomForestClassifier<double>>(m, "RandomForestClassifier")
         .def(py::init<size_t, size_t, size_t, size_t, double, double, double>(), py::arg("n_trees") = 10,
              py::arg("mtry") = 0, py::arg("n_threads") = 1, py::arg("min_node_size") = 1,
              py::arg("sample_fraction") = 1, py::arg("alpha") = DEFAULT_ALPHA, py::arg("minprop") = DEFAULT_MINPROP)
-        .def("fit", &RandomForestClassifier<double>::fit)
-        .def("predict", &RandomForestClassifier<double>::predict)
-        .def_readwrite("n_trees", &RandomForestClassifier<double>::n_trees)
-        .def_readwrite("mtry", &RandomForestClassifier<double>::mtry)
-        .def_readwrite("n_threads", &RandomForestClassifier<double>::n_threads)
-        .def_readwrite("min_node_size", &RandomForestClassifier<double>::min_node_size)
-        .def_readwrite("sample_fraction", &RandomForestClassifier<double>::sample_fraction)
-        .def_readwrite("alpha", &RandomForestClassifier<double>::alpha)
-        .def_readwrite("minprop", &RandomForestClassifier<double>::minprop);
+        .def("fit", &PyRandomForestClassifier<double>::fit)
+        .def("predict", &PyRandomForestClassifier<double>::predict)
+        .def_readwrite("n_trees", &PyRandomForestClassifier<double>::n_trees)
+        .def_readwrite("mtry", &PyRandomForestClassifier<double>::mtry)
+        .def_readwrite("n_threads", &PyRandomForestClassifier<double>::n_threads)
+        .def_readwrite("min_node_size", &PyRandomForestClassifier<double>::min_node_size)
+        .def_readwrite("sample_fraction", &PyRandomForestClassifier<double>::sample_fraction)
+        .def_readwrite("alpha", &PyRandomForestClassifier<double>::alpha)
+        .def_readwrite("minprop", &PyRandomForestClassifier<double>::minprop);
 
     return m.ptr();
 }

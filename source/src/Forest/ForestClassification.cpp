@@ -111,6 +111,7 @@ void ForestClassification::predictInternal() {
 
   // First dim trees, second dim samples
   size_t num_prediction_samples = data->getNumRows();
+  predictions.clear();
   predictions.reserve(num_prediction_samples);
 
   // For all samples get tree predictions
@@ -130,11 +131,12 @@ void ForestClassification::predictInternal() {
       std::unordered_map<double, size_t> class_count;
       for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
         double value = ((TreeClassification*) trees[tree_idx])->getPrediction(sample_idx);
+
         ++class_count[value];
       }
 
-      std::vector<double> temp;
-      temp.push_back(mostFrequentValue(class_count, random_number_generator));
+      double major_class = mostFrequentValue(class_count, random_number_generator);
+      std::vector<double> temp = {major_class};
       predictions.push_back(temp);
     }
 
