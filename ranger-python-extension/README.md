@@ -8,6 +8,7 @@ These are pretty minimal python bindings for ranger - they work but don't expose
 ### Installation
 
 ```
+git submodule update --init --recursive
 ./waf configure
 ./waf
 ./waf install
