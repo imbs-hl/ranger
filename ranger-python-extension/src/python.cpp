@@ -26,6 +26,7 @@
 namespace py = pybind11;
 
 #include "globals.h"
+#include "utility.h"
 #include "ForestClassification.h"
 #include "ForestRegression.h"
 #include "ForestSurvival.h"
@@ -204,6 +205,51 @@ template <typename T> class RandomForestClassifier : public ForestClassification
 
         return result;
     }
+
+    std::vector<unsigned char> serialize()
+    {
+        std::ostringstream sstream;
+
+        sstream.write((char *)&dependent_varID, sizeof(dependent_varID));
+        sstream.write((char *)&num_trees, sizeof(num_trees));
+        saveVector1D(is_ordered_variable, sstream);
+        saveToFileInternal(sstream);
+
+        for (auto &tree : trees) {
+            tree->appendToFile(sstream);
+        }
+
+        std::string str = sstream.str();
+        std::vector<unsigned char> res(str.begin(), str.end());
+        return res;
+    }
+
+    void deserialize(std::vector<unsigned char> vec_data)
+    {
+        std::string data(vec_data.begin(), vec_data.end());
+        std::istringstream sstream(data);
+
+        sstream.read((char *)&dependent_varID, sizeof(dependent_varID));
+        sstream.read((char *)&num_trees, sizeof(num_trees));
+
+        if (n_threads == 0)
+            n_threads = std::thread::hardware_concurrency();
+        num_threads = n_threads;
+
+        std::random_device random_device;
+        random_number_generator.seed(random_device());
+
+        memory_mode = MemoryModeMap<T>::memory_mode;
+        predict_all = false;
+
+        no_split_variables.push_back(dependent_varID);
+
+        readVector1D(is_ordered_variable, sstream);
+        loadFromFileInternal(sstream);
+        equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
+
+        has_been_fitted = true;
+    }
 };
 
 template <typename T> class PyRandomForestClassifier
@@ -254,6 +300,21 @@ template <typename T> class PyRandomForestClassifier
         rf->n_threads = n_threads;
         return rf->predict(X);
     }
+
+    std::vector<unsigned char> serialize()
+    {
+        return rf->serialize();
+    }
+
+    void deserialize(std::vector<unsigned char> str)
+    {
+        if (has_been_fitted)
+            delete rf;
+
+        rf = new RandomForestClassifier<T>(n_trees, mtry, n_threads, min_node_size, sample_fraction, alpha, minprop);
+        rf->deserialize(str);
+        has_been_fitted = true;
+    }
 };
 }
 
@@ -269,6 +330,8 @@ PYBIND11_PLUGIN(pyranger)
              py::arg("sample_fraction") = 1, py::arg("alpha") = DEFAULT_ALPHA, py::arg("minprop") = DEFAULT_MINPROP)
         .def("fit", &PyRandomForestClassifier<double>::fit)
         .def("predict", &PyRandomForestClassifier<double>::predict)
+        .def("serialize", &PyRandomForestClassifier<double>::serialize)
+        .def("deserialize", &PyRandomForestClassifier<double>::deserialize)
         .def_readwrite("n_trees", &PyRandomForestClassifier<double>::n_trees)
         .def_readwrite("mtry", &PyRandomForestClassifier<double>::mtry)
         .def_readwrite("n_threads", &PyRandomForestClassifier<double>::n_threads)
