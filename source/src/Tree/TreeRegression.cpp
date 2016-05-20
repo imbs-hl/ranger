@@ -69,7 +69,7 @@ double TreeRegression::estimate(size_t nodeID) {
   return (sum_responses_in_node / (double) num_samples_in_node);
 }
 
-void TreeRegression::appendToFileInternal(std::ofstream& file) {
+void TreeRegression::appendToFileInternal(std::ostream& file) {
 // Empty on purpose
 }
 

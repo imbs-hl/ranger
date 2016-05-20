@@ -217,7 +217,7 @@ void ForestProbability::writePredictionFile() {
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
-void ForestProbability::saveToFileInternal(std::ofstream& outfile) {
+void ForestProbability::saveToFileInternal(std::ostream& outfile) {
 
   // Write num_variables
   outfile.write((char*) &num_variables, sizeof(num_variables));
@@ -230,7 +230,7 @@ void ForestProbability::saveToFileInternal(std::ofstream& outfile) {
   saveVector1D(class_values, outfile);
 }
 
-void ForestProbability::loadFromFileInternal(std::ifstream& infile) {
+void ForestProbability::loadFromFileInternal(std::istream& infile) {
 
   // Read number of variables
   size_t num_variables_saved;

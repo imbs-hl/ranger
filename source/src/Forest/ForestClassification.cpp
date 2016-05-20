@@ -257,7 +257,7 @@ void ForestClassification::writePredictionFile() {
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
-void ForestClassification::saveToFileInternal(std::ofstream& outfile) {
+void ForestClassification::saveToFileInternal(std::ostream& outfile) {
 
   // Write num_variables
   outfile.write((char*) &num_variables, sizeof(num_variables));
@@ -270,7 +270,7 @@ void ForestClassification::saveToFileInternal(std::ofstream& outfile) {
   saveVector1D(class_values, outfile);
 }
 
-void ForestClassification::loadFromFileInternal(std::ifstream& infile) {
+void ForestClassification::loadFromFileInternal(std::istream& infile) {
 
   // Read number of variables
   size_t num_variables_saved;

@@ -83,7 +83,7 @@ public:
 
   // Save forest to file
   void saveToFile();
-  virtual void saveToFileInternal(std::ofstream& outfile) = 0;
+  virtual void saveToFileInternal(std::ostream& outfile) = 0;
 
   std::vector<std::vector<std::vector<size_t>>>getChildNodeIDs() {
     std::vector<std::vector<std::vector<size_t>>> result;
@@ -166,7 +166,7 @@ protected:
 
   // Load forest from file
   void loadFromFile(std::string filename);
-  virtual void loadFromFileInternal(std::ifstream& infile) = 0;
+  virtual void loadFromFileInternal(std::istream& infile) = 0;
 
   // Set split select weights and variables to be always considered for splitting
   void setSplitWeightVector(std::vector<std::vector<double>>& split_select_weights);

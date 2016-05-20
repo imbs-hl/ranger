@@ -71,8 +71,8 @@ private:
   void writeOutputInternal();
   void writeConfusionFile();
   void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  void saveToFileInternal(std::ostream& outfile);
+  void loadFromFileInternal(std::istream& infile);
 
   size_t status_varID;
   std::vector<double> unique_timepoints;

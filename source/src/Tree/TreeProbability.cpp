@@ -72,7 +72,7 @@ void TreeProbability::addToTerminalNodes(size_t nodeID) {
   }
 }
 
-void TreeProbability::appendToFileInternal(std::ofstream& file) {
+void TreeProbability::appendToFileInternal(std::ostream& file) {
 
   // Add Terminal node class counts
   // Convert to vector without empty elements and save

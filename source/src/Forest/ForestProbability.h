@@ -69,8 +69,8 @@ public:
       void writeOutputInternal();
       void writeConfusionFile();
       void writePredictionFile();
-      void saveToFileInternal(std::ofstream& outfile);
-      void loadFromFileInternal(std::ifstream& infile);
+      void saveToFileInternal(std::ostream& outfile);
+      void loadFromFileInternal(std::istream& infile);
 
       // Classes of the dependent variable and classIDs for responses
       std::vector<double> class_values;

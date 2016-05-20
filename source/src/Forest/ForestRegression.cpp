@@ -196,7 +196,7 @@ void ForestRegression::writePredictionFile() {
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
-void ForestRegression::saveToFileInternal(std::ofstream& outfile) {
+void ForestRegression::saveToFileInternal(std::ostream& outfile) {
 
 // Write num_variables
   outfile.write((char*) &num_variables, sizeof(num_variables));
@@ -206,7 +206,7 @@ void ForestRegression::saveToFileInternal(std::ofstream& outfile) {
   outfile.write((char*) &treetype, sizeof(treetype));
 }
 
-void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
+void ForestRegression::loadFromFileInternal(std::istream& infile) {
 
 // Read number of variables
   size_t num_variables_saved;

@@ -61,8 +61,8 @@ public:
 
   void computePermutationImportance(std::vector<double>* forest_importance, std::vector<double>* forest_variance);
 
-  void appendToFile(std::ofstream& file);
-  virtual void appendToFileInternal(std::ofstream& file) = 0;
+  void appendToFile(std::ostream& file);
+  virtual void appendToFileInternal(std::ostream& file) = 0;
 
   const std::vector<std::vector<size_t> >& getChildNodeIDs() const {
     return child_nodeIDs;

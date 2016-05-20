@@ -49,7 +49,7 @@ public:
 
   void addToTerminalNodes(size_t nodeID);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);
-  void appendToFileInternal(std::ofstream& file);
+  void appendToFileInternal(std::ostream& file);
 
   const std::vector<double>& getPrediction(size_t sampleID) const {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[sampleID];

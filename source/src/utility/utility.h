@@ -65,7 +65,7 @@ void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts)
  * @param file ofstream object to write to.
  */
 template<typename T>
-inline void saveVector1D(std::vector<T>& vector, std::ofstream& file) {
+inline void saveVector1D(std::vector<T>& vector, std::ostream& file) {
   // Save length
   size_t length = vector.size();
   file.write((char*) &length, sizeof(length));
@@ -73,7 +73,7 @@ inline void saveVector1D(std::vector<T>& vector, std::ofstream& file) {
 }
 
 template<>
-inline void saveVector1D(std::vector<bool>& vector, std::ofstream& file) {
+inline void saveVector1D(std::vector<bool>& vector, std::ostream& file) {
   // Save length
   size_t length = vector.size();
   file.write((char*) &length, sizeof(length));
@@ -88,10 +88,10 @@ inline void saveVector1D(std::vector<bool>& vector, std::ofstream& file) {
 /**
  * Read a 1d vector written by saveVector1D() from filestream.
  * @param result Result vector with elements of type T.
- * @param file ifstream object to read from.
+ * @param file istream object to read from.
  */
 template<typename T>
-inline void readVector1D(std::vector<T>& result, std::ifstream& file) {
+inline void readVector1D(std::vector<T>& result, std::istream& file) {
   // Read length
   size_t length;
   file.read((char*) &length, sizeof(length));
@@ -100,7 +100,7 @@ inline void readVector1D(std::vector<T>& result, std::ifstream& file) {
 }
 
 template<>
-inline void readVector1D(std::vector<bool>& result, std::ifstream& file) {
+inline void readVector1D(std::vector<bool>& result, std::istream& file) {
   // Read length
   size_t length;
   file.read((char*) &length, sizeof(length));
@@ -119,7 +119,7 @@ inline void readVector1D(std::vector<bool>& result, std::ifstream& file) {
  * @param file ofstream object to write to.
  */
 template<typename T>
-inline void saveVector2D(std::vector<std::vector<T>>& vector, std::ofstream& file) {
+inline void saveVector2D(std::vector<std::vector<T>>& vector, std::ostream& file) {
   // Save length of first dim
   size_t length = vector.size();
   file.write((char*) &length, sizeof(length));
@@ -134,10 +134,10 @@ inline void saveVector2D(std::vector<std::vector<T>>& vector, std::ofstream& fil
 /**
  * Read a 2d vector written by saveVector2D() from filestream.
  * @param result Result vector of vectors with elements of type T.
- * @param file ifstream object to read from.
+ * @param file istream object to read from.
  */
 template<typename T>
-inline void readVector2D(std::vector<std::vector<T>>& result, std::ifstream& file) {
+inline void readVector2D(std::vector<std::vector<T>>& result, std::istream& file) {
   // Read length of first dim
   size_t length;
   file.read((char*) &length, sizeof(length));

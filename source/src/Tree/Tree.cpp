@@ -223,7 +223,7 @@ void Tree::computePermutationImportance(std::vector<double>* forest_importance, 
   }
 }
 
-void Tree::appendToFile(std::ofstream& file) {
+void Tree::appendToFile(std::ostream& file) {
 
 // Save general fields
   saveVector2D(child_nodeIDs, file);

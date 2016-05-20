@@ -45,7 +45,7 @@ public:
 
   void initInternal();
 
-  void appendToFileInternal(std::ofstream& file);
+  void appendToFileInternal(std::ostream& file);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);
 
   const std::vector<std::vector<double> >& getChf() const {

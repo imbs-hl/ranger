@@ -235,7 +235,7 @@ void ForestSurvival::writePredictionFile() {
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
-void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
+void ForestSurvival::saveToFileInternal(std::ostream& outfile) {
 
   // Write num_variables
   outfile.write((char*) &num_variables, sizeof(num_variables));
@@ -251,7 +251,7 @@ void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
   saveVector1D(unique_timepoints, outfile);
 }
 
-void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
+void ForestSurvival::loadFromFileInternal(std::istream& infile) {
 
   // Read number of variables
   size_t num_variables_saved;

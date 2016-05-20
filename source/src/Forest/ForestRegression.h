@@ -53,8 +53,8 @@ private:
   void writeOutputInternal();
   void writeConfusionFile();
   void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  void saveToFileInternal(std::ostream& outfile);
+  void loadFromFileInternal(std::istream& infile);
 
   DISALLOW_COPY_AND_ASSIGN(ForestRegression);
 };
