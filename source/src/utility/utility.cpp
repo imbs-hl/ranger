@@ -427,6 +427,10 @@ double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, st
   return 2 * (1 - pstdnorm(b)) + D;
 }
 
+double maxstatPValueUnadjusted(double b) {
+  return 2*pstdnorm(-b);
+}
+
 double dstdnorm(double x) {
   return exp(-0.5 * x * x) / sqrt(2 * M_PI);
 }

@@ -346,6 +346,13 @@ double maxstatPValueLau92(double b, double minprop, double maxprop);
 double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, std::vector<size_t>& m);
 
 /**
+ * Compute unadjusted p-value for rank statistics
+ * @param b Quantile
+ * @return p-value for quantile b
+ */
+double maxstatPValueUnadjusted(double b);
+
+/**
  * Standard normal density
  * @param x Quantile
  * @return Standard normal density at quantile x
