@@ -1,3 +1,3 @@
 #ifndef RANGER_VERSION
-#define RANGER_VERSION "0.5.1"
+#define RANGER_VERSION "0.5.2"
 #endif
