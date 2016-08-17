@@ -213,12 +213,22 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
       std::vector<size_t> num_samples_left = numSamplesLeftOfCutpoint(x, indices);
       //std::vector<size_t> num_samples_left = numSamplesLeftOfCutpointInData(data, sampleIDs[nodeID], varID, indices);
 
-      // Compute p-values
-      double pvalue_lau92 = maxstatPValueLau92(best_maxstat, minprop, 1 - minprop);
-      double pvalue_lau94 = maxstatPValueLau94(best_maxstat, minprop, 1 - minprop, num_samples_node, num_samples_left);
+      // Remove largest cutpoint (all observations left)
+      num_samples_left.pop_back();
 
-      // Use minimum of Lau92 and Lau94
-      double pvalue = std::min(pvalue_lau92, pvalue_lau94);
+      // Use unadjusted p-value if only 1 split point
+      double pvalue;
+      if (num_samples_left.size() == 1) {
+        pvalue = maxstatPValueUnadjusted(best_maxstat);
+      } else {
+        // Compute p-values
+        double pvalue_lau92 = maxstatPValueLau92(best_maxstat, minprop, 1 - minprop);
+        double pvalue_lau94 = maxstatPValueLau94(best_maxstat, minprop, 1 - minprop, num_samples_node,
+            num_samples_left);
+
+        // Use minimum of Lau92 and Lau94
+        pvalue = std::min(pvalue_lau92, pvalue_lau94);
+      }
 
       // Save split stats
       pvalues.push_back(pvalue);
