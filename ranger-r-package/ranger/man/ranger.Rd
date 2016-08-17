@@ -38,7 +38,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{case.weights}{Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.}
 
-\item{splitrule}{Splitting rule, survival only. The splitting rule can be chosen of "logrank", "C" and "maxstat" with default "logrank".}
+\item{splitrule}{Splitting rule, regressiond and survival only. For regression one of "variance" or "maxstat" with default "variance". For survival "logrank", "C" or "maxstat" with default "logrank".}
 
 \item{alpha}{For "maxstat" splitrule: Significance threshold to allow splitting.}
 
@@ -101,12 +101,14 @@ Classification and regression forests are implemented as in the original Random 
 \details{
 The tree type is determined by the type of the dependent variable.
 For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
-The Gini index is used as splitting rule for classification and the estimated response variances for regression.
+The Gini index is used as splitting rule for classification.
+For regression, the estimated response variances or maximally selected rank statistics (Wright et al. 2016) can be used.
 For Survival the log-rank test, a C-index based splitting rule (Schmid et al. 2015) and maximally selected rank statistics (Wright et al. 2016) are available.
 
 With the \code{probability} option and factor dependent variable a probability forest is grown.
-Here, the estimated response variances are used for splitting, as in regression forests.
+Here, the node impurity is used for splitting, as in classification forests.
 Predictions are class probabilities for each sample.
+In contrast to other implementations, each tree returns a probability estimate and these estimates are averaged for the forest probability estimate.
 For details see Malley et al. (2012).
 
 Note that for classification and regression nodes with size smaller than min.node.size can occur, like in original Random Forest.

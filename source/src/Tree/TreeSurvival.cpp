@@ -213,12 +213,22 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
       std::vector<size_t> num_samples_left = numSamplesLeftOfCutpoint(x, indices);
       //std::vector<size_t> num_samples_left = numSamplesLeftOfCutpointInData(data, sampleIDs[nodeID], varID, indices);
 
-      // Compute p-values
-      double pvalue_lau92 = maxstatPValueLau92(best_maxstat, minprop, 1 - minprop);
-      double pvalue_lau94 = maxstatPValueLau94(best_maxstat, minprop, 1 - minprop, num_samples_node, num_samples_left);
+      // Remove largest cutpoint (all observations left)
+      num_samples_left.pop_back();
 
-      // Use minimum of Lau92 and Lau94
-      double pvalue = std::min(pvalue_lau92, pvalue_lau94);
+      // Use unadjusted p-value if only 1 split point
+      double pvalue;
+      if (num_samples_left.size() == 1) {
+        pvalue = maxstatPValueUnadjusted(best_maxstat);
+      } else {
+        // Compute p-values
+        double pvalue_lau92 = maxstatPValueLau92(best_maxstat, minprop, 1 - minprop);
+        double pvalue_lau94 = maxstatPValueLau94(best_maxstat, minprop, 1 - minprop, num_samples_node,
+            num_samples_left);
+
+        // Use minimum of Lau92 and Lau94
+        pvalue = std::min(pvalue_lau92, pvalue_lau94);
+      }
 
       // Save split stats
       pvalues.push_back(pvalue);
@@ -227,7 +237,7 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
     }
   }
 
-  double min_pvalue = 2;
+  double adjusted_best_pvalue = std::numeric_limits<double>::max();
   size_t best_varID = 0;
   double best_value = 0;
 
@@ -235,18 +245,19 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
     // Adjust p-values with Benjamini/Hochberg
     std::vector<double> adjusted_pvalues = adjustPvalues(pvalues);
 
-    // Use smallest p-value
-    for (size_t i = 0; i < adjusted_pvalues.size(); ++i) {
-      if (adjusted_pvalues[i] < min_pvalue) {
-        min_pvalue = adjusted_pvalues[i];
+    double min_pvalue = std::numeric_limits<double>::max();
+    for (size_t i = 0; i < pvalues.size(); ++i) {
+      if (pvalues[i] < min_pvalue) {
+        min_pvalue = pvalues[i];
         best_varID = candidate_varIDs[i];
         best_value = values[i];
+        adjusted_best_pvalue = adjusted_pvalues[i];
       }
     }
   }
 
   // Stop and save CHF if no good split found (this is terminal node).
-  if (min_pvalue > alpha) {
+  if (adjusted_best_pvalue > alpha) {
     computeDeathCounts(nodeID);
     computeSurvival(nodeID);
     return true;

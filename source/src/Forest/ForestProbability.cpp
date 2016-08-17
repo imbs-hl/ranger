@@ -76,21 +76,14 @@ void ForestProbability::initInternal(std::string status_variable_name) {
 
   // Create class_values and response_classIDs
   if (!prediction_mode) {
-
-    // Find all unique response values and sort them
     for (size_t i = 0; i < num_samples; ++i) {
       double value = data->get(i, dependent_varID);
+
+      // If classID is already in class_values, use ID. Else create a new one.
       uint classID = find(class_values.begin(), class_values.end(), value) - class_values.begin();
       if (classID == class_values.size()) {
         class_values.push_back(value);
       }
-    }
-    std::sort(class_values.begin(), class_values.end());
-
-    // Assign class ID to each observation
-    for (size_t i = 0; i < num_samples; ++i) {
-      double value = data->get(i, dependent_varID);
-      uint classID = find(class_values.begin(), class_values.end(), value) - class_values.begin();
       response_classIDs.push_back(classID);
     }
   }
@@ -264,9 +257,9 @@ void ForestProbability::loadFromFileInternal(std::ifstream& infile) {
 
     // Convert Terminal node class counts to vector with empty elemtents for non-terminal nodes
     std::vector<std::vector<double>> terminal_class_counts;
-    terminal_class_counts.resize(child_nodeIDs.size(), std::vector<double>());
-    for (size_t i = 0; i < terminal_nodes.size(); ++i) {
-      terminal_class_counts[terminal_nodes[i]] = terminal_class_counts_vector[i];
+    terminal_class_counts.resize(child_nodeIDs[0].size(), std::vector<double>());
+    for (size_t j = 0; j < terminal_nodes.size(); ++j) {
+      terminal_class_counts[terminal_nodes[j]] = terminal_class_counts_vector[j];
     }
 
     // If dependent variable not in test data, change variable IDs accordingly
