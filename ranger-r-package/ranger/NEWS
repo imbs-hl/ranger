@@ -1,3 +1,6 @@
+##### Version 0.5.2
+* Use unadjusted p-value for 2 categories in maxstat splitting
+
 ##### Version 0.5.1
 * Bug fixes
 
