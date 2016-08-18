@@ -277,7 +277,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
-##' @param var_IJ estimating variance by using infinitesimal jackknife
+##' @param var.IJ estimating variance by using infinitesimal jackknife
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements
 ##'   \tabular{ll}{
@@ -295,7 +295,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @export
 predict.ranger <- function(object, data, predict.all = FALSE,
                            seed = NULL, num.threads = NULL,
-                           verbose = TRUE, var_IJ = FALSE,...) {
+                           verbose = TRUE, var.IJ = FALSE, ...) {
   forest <- object$forest
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
@@ -303,22 +303,33 @@ predict.ranger <- function(object, data, predict.all = FALSE,
   result <- predict(forest, data, predict.all, seed, num.threads, verbose)
 
   ## Estimate variance by infinitesimal jackknife
-  if (var_IJ) {
+  if (var.IJ) {
+    
+    if (is.null(object$inbag.count)) {
+      stop("Error: No saved inbag.count. Please set keep.inbag to TRUE when calling ranger.")
+    }
+    
+    ## Get variables
     B <- forest$num.trees
     n <- nrow(result$predictions)
     N <- do.call(rbind, object$inbag.count)
     
+    ## Predictions of all trees
     t.star        <- as.matrix(result$predictions)
     t.star.means  <- rowMeans(t.star)
     
+    ## Estimate covariance and variance by infinitesimal jackknife
     Cov <- t(N - 1)%*%(t(t.star - t.star.means))
-    Var_IJ = colSums(Cov^2) / B^2
+    Var.IJ = colSums(Cov^2) / B^2
     
-    bias_cor <- n * rowSums((t.star - t.star.means)^2) / B^2
-    Var_IJ_U <- Var_IJ - bias_cor
+    ## Perform bias correction for Monte Carlo noise
+    bias.cor <- n * rowSums((t.star - t.star.means)^2) / B^2
+    Var.IJ.U <- Var.IJ - bias.cor
     
-    result$var_ij_u <- Var_IJ_U
+    ## Add variance to result
+    result$var.ij.u <- Var.IJ.U
   }
   
+  ## Print result
   result
 }
