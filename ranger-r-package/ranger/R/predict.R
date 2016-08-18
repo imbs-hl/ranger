@@ -36,6 +36,7 @@
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
+##' @param var_IJ estimating variance by using infinitesimal jackknife
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements
 ##'   \tabular{ll}{
@@ -53,7 +54,7 @@
 ##' @export
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   seed = NULL, num.threads = NULL,
-                                  verbose = TRUE, ...) {
+                                  verbose = TRUE, var_IJ = FALSE,...) {
   
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -212,10 +213,27 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("User interrupt or internal error.")
   }
   
+  ## Estimate variance by infinitesimal jackknife
+  if (var_IJ) {
+    B <- forest$num.trees
+    n <- nrow(result$predictions)
+    N <- do.call(rbind, forest$inbag.count)
+    
+    t.star        <- as.matrix(result$predictions)
+    t.star.means  <- rowMeans(t.star)
+    
+    Cov <- t(N - 1)%*%(t(t.star - t.star.means))
+    Var_IJ = colSums(Cov^2) / B^2
+    
+    bias_cor <- n * rowSums((t.star - t.star.means)^2) / B^2
+    Var_IJ_U <- Var_IJ - bias_cor
+  }
+  
   ## Prepare results
   result$predictions <- drop(do.call(rbind, result$predictions))
   result$num.samples <- nrow(data.final)
   result$treetype <- forest$treetype
+  result$var_ij_u <- Var_IJ_U
   
   if (forest$treetype == "Classification" & !is.null(forest$levels)) {
     if (!predict.all) {
