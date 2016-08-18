@@ -20,11 +20,11 @@ r_github_packages:
   - jimhester/covr
 
 after_success:
-  - Rscript -e 'covr::codecov(quiet = FALSE)'
+  - Rscript -e 'covr::coveralls(quiet = FALSE)'
 
 notifications:
   email:
     recipients:
-        - work@wrig.de
+        - bjoernhergen.laabs@student.uni-luebeck.de
     on_success: change
     on_failure: change
