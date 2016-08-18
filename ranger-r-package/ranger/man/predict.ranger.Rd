@@ -5,7 +5,7 @@
 \title{Ranger prediction}
 \usage{
 \method{predict}{ranger}(object, data, predict.all = FALSE, seed = NULL,
-  num.threads = NULL, verbose = TRUE, var_IJ = FALSE, ...)
+  num.threads = NULL, verbose = TRUE, var.IJ = FALSE, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger} object.}
@@ -20,7 +20,7 @@
 
 \item{verbose}{Verbose output on or off.}
 
-\item{var_IJ}{estimating variance by using infinitesimal jackknife}
+\item{var.IJ}{estimating variance by using infinitesimal jackknife}
 
 \item{...}{further arguments passed to or from other methods.}
 }
