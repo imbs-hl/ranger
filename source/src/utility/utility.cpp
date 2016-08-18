@@ -427,6 +427,10 @@ double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, st
   return 2 * (1 - pstdnorm(b)) + D;
 }
 
+double maxstatPValueUnadjusted(double b) {
+  return 2*pstdnorm(-b);
+}
+
 double dstdnorm(double x) {
   return exp(-0.5 * x * x) / sqrt(2 * M_PI);
 }
@@ -556,8 +560,11 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
   }
 
   // Get smallest and largest split to consider, -1 for compatibility with R maxstat
-  size_t minsplit = n * minprop - 1;
-  size_t maxsplit = n * (1 - minprop) - 1;
+  size_t minsplit = 0;
+  if (n * minprop > 1) {
+    minsplit = n * minprop - 1;
+  }
+  size_t maxsplit = n * maxprop - 1;
 
   // For all unique x-values
   best_maxstat = -1;
@@ -613,8 +620,11 @@ void maxstatInData(std::vector<double>& scores, Data* data, std::vector<size_t>&
   }
 
   // Get smallest and largest split to consider, -1 for compatibility with R maxstat
-  size_t minsplit = n * minprop - 1;
-  size_t maxsplit = n * (1 - minprop) - 1;
+  size_t minsplit = 0;
+  if (n * minprop > 1) {
+    minsplit = n * minprop - 1;
+  }
+  size_t maxsplit = n * maxprop - 1;
 
   // For all unique x-values
   best_maxstat = -1;
