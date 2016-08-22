@@ -100,3 +100,10 @@ test_that("OOB error is correct for 1 tree, regression", {
   expect_equal(rf$prediction.error, mean((dat$y - rf$predictions)^2, na.rm = TRUE))
 })
 
+test_that("Missing value columns detected in training", {
+  dat <- iris
+  dat[4, 5] <- NA
+  dat[25, 1] <- NA
+  expect_error(ranger(Species ~ ., dat, num.trees = 5), "Missing data in columns: Sepal.Length, Species")
+})
+

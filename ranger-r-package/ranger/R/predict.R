@@ -157,8 +157,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     variable.names <- c(variable.names, snp.names)
   }
 
+  ## Check missing values
   if (any(is.na(data.final))) {
-    stop("Missing values in data.")
+    offending_columns <- colnames(data.final)[colSums(is.na(data.final)) > 0]
+    stop("Missing data in columns: ",
+         paste0(offending_columns, collapse = ", "), ".")
   }
   
   if (sum(!(forest$independent.variable.names %in% variable.names)) > 0) {
