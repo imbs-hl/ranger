@@ -173,9 +173,11 @@ void ForestClassification::computePredictionErrorInternal() {
 
   // Compare predictions with true data
   size_t num_missclassifications = 0;
+  size_t num_predictions = 0;
   for (size_t i = 0; i < predictions.size(); ++i) {
     double predicted_value = predictions[i][0];
     if (!std::isnan(predicted_value)) {
+      ++num_predictions;
       double real_value = data->get(i, dependent_varID);
       if (predicted_value != real_value) {
         ++num_missclassifications;
@@ -183,7 +185,7 @@ void ForestClassification::computePredictionErrorInternal() {
       ++classification_table[std::make_pair(real_value, predicted_value)];
     }
   }
-  overall_prediction_error = (double) num_missclassifications / (double) predictions.size();
+  overall_prediction_error = (double) num_missclassifications / (double) num_predictions;
 }
 
 void ForestClassification::writeOutputInternal() {
