@@ -148,18 +148,24 @@ void ForestProbability::computePredictionErrorInternal() {
   }
 
   // MSE with predicted probability and true data
+  size_t num_predictions = 0;
   for (size_t i = 0; i < predictions.size(); ++i) {
     if (samples_oob_count[i] > 0) {
+      ++num_predictions;
       for (size_t j = 0; j < predictions[i].size(); ++j) {
         predictions[i][j] /= (double) samples_oob_count[i];
       }
       size_t real_classID = response_classIDs[i];
       double predicted_value = predictions[i][real_classID];
       overall_prediction_error += (1 - predicted_value) * (1 - predicted_value);
+    } else {
+      for (size_t j = 0; j < predictions[i].size(); ++j) {
+        predictions[i][j] = NAN;
+      }
     }
   }
 
-  overall_prediction_error /= (double) predictions.size();
+  overall_prediction_error /= (double) num_predictions;
 }
 
 void ForestProbability::writeOutputInternal() {
