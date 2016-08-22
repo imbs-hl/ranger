@@ -139,18 +139,20 @@ void ForestRegression::computePredictionErrorInternal() {
   }
 
 // MSE with predictions and true data
-//oob_anytree_sampleIDs.reserve(predictions.size());
+  size_t num_predictions = 0;
   for (size_t i = 0; i < predictions.size(); ++i) {
     if (samples_oob_count[i] > 0) {
-      //oob_anytree_sampleIDs.push_back(i);
+      ++num_predictions;
       predictions[i][0] /= (double) samples_oob_count[i];
       double predicted_value = predictions[i][0];
       double real_value = data->get(i, dependent_varID);
       overall_prediction_error += (predicted_value - real_value) * (predicted_value - real_value);
+    } else {
+      predictions[i][0] = NAN;
     }
   }
 
-  overall_prediction_error /= (double) predictions.size();
+  overall_prediction_error /= (double) num_predictions;
 }
 
 void ForestRegression::writeOutputInternal() {
