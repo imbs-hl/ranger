@@ -54,18 +54,18 @@ test_that("Probability estimation works correctly if labels are reversed", {
                    write.forest = TRUE, num.trees = 5)
   
   ## Check OOB predictions
-  expect_gte(mean(rf$predictions[1:n, "0"]), 0.5)
-  expect_gte(mean(rf$predictions[(n+1):(2*n), "1"]), 0.5)
+  expect_gte(mean(rf$predictions[1:n, "0"], na.rm = TRUE), 0.5)
+  expect_gte(mean(rf$predictions[(n+1):(2*n), "1"], na.rm = TRUE), 0.5)
   
-  expect_gte(mean(rf.rev$predictions[1:n, "1"]), 0.5)
-  expect_gte(mean(rf.rev$predictions[(n+1):(2*n), "0"]), 0.5)
+  expect_gte(mean(rf.rev$predictions[1:n, "1"], na.rm = TRUE), 0.5)
+  expect_gte(mean(rf.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
   
   ## Check predict() predictions
   pred <- predict(rf, dat)
-  expect_gte(mean(pred$predictions[1:n, "0"]), 0.5)
-  expect_gte(mean(pred$predictions[(n+1):(2*n), "1"]), 0.5)
+  expect_gte(mean(pred$predictions[1:n, "0"], na.rm = TRUE), 0.5)
+  expect_gte(mean(pred$predictions[(n+1):(2*n), "1"], na.rm = TRUE), 0.5)
   
   pred.rev <- predict(rf.rev, dat.rev)
-  expect_gte(mean(pred.rev$predictions[1:n, "1"]), 0.5)
-  expect_gte(mean(pred.rev$predictions[(n+1):(2*n), "0"]), 0.5)
+  expect_gte(mean(pred.rev$predictions[1:n, "1"], na.rm = TRUE), 0.5)
+  expect_gte(mean(pred.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
 })
