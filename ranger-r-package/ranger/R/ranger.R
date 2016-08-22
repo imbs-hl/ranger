@@ -208,6 +208,13 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     gwa.mode <- FALSE
   }
   
+  ## Check missing values
+  if (any(is.na(data))) {
+    offending_columns <- colnames(data)[colSums(is.na(data)) > 0]
+    stop("Missing data in columns: ",
+         paste0(offending_columns, collapse = ", "), ".")
+  }
+  
   ## Formula interface. Use whole data frame is no formula provided and depvarname given
   if (is.null(formula)) {
     if (is.null(dependent.variable.name)) {
@@ -325,7 +332,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     data.final <- data.matrix(data.selected)
   }
   variable.names <- colnames(data.final)
-  
   
   ## If gwa mode, add snp variable names
   if (gwa.mode) {
