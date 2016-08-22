@@ -78,3 +78,10 @@ test_that("Probability estimation works for empty classes", {
   expect_silent(rf <- ranger(Species ~., iris[1:100,],  num.trees = 5, probability = TRUE))
 })
 
+test_that("OOB error is correct for 1 tree", {
+  n <- 50
+  dat <- data.frame(y = factor(rbinom(n, 1, .5)), x = rnorm(n))
+  rf <- ranger(y ~ ., dat, num.trees = 1)
+  expect_equal(rf$prediction.error, mean(rf$predictions != dat$y, na.rm = TRUE))
+})
+
