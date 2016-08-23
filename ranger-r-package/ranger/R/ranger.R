@@ -212,7 +212,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (any(is.na(data))) {
     offending_columns <- colnames(data)[colSums(is.na(data)) > 0]
     stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".")
+         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
   
   ## Formula interface. Use whole data frame is no formula provided and depvarname given

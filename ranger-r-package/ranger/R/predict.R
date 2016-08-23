@@ -160,7 +160,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Check missing values
   if (any(is.na(data.final))) {
     offending_columns <- colnames(data.final)[colSums(is.na(data.final)) > 0]
-    stop("You have missing data in the following columns of your dataframe: ",
+    stop("Missing data in columns: ",
          paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
 
