@@ -54,7 +54,7 @@
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   seed = NULL, num.threads = NULL,
                                   verbose = TRUE, ...) {
-  
+
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- snp.names(data)
@@ -84,7 +84,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                          is.null(forest$chf) | is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
-  
+
   ## Create final data
   if (forest$treetype == "Survival") {
     if (forest$dependent.varID > 0 & forest$status.varID > 1) {
@@ -93,12 +93,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     } else {
       ## If formula interface used, subset data
       data.selected <- subset(data, select = forest$independent.variable.names)
-      
+
       ## Arange data as in original data
       data.used <- cbind(0, 0, data.selected)
       variable.names <- c("time", "status", forest$independent.variable.names)
     }
-      
+
   ## Index of no-recode variables
   idx.norecode <- c(-(forest$dependent.varID+1), -(forest$status.varID+1))
 
@@ -110,7 +110,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     } else {
       ## If formula interface used, subset data
       data.selected <- subset(data, select = forest$independent.variable.names)
-      
+
       ## Arange data as in original data
       if (forest$dependent.varID == 0) {
         data.used <- cbind(0, data.selected)
@@ -119,19 +119,19 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         data.used <- cbind(data.selected, 0)
         variable.names <- c(forest$independent.variable.names, "dependent")
       } else {
-        data.used <- cbind(data.selected[, 1:forest$dependent.varID], 
-                           0, 
+        data.used <- cbind(data.selected[, 1:forest$dependent.varID],
+                           0,
                            data.selected[, (forest$dependent.varID+1):ncol(data.selected)])
-        variable.names <- c(forest$independent.variable.names[1:forest$dependent.varID], 
-                            "dependent", 
+        variable.names <- c(forest$independent.variable.names[1:forest$dependent.varID],
+                            "dependent",
                             forest$independent.variable.names[(forest$dependent.varID+1):length(forest$independent.variable.names)])
       }
     }
-    
+
     ## Index of no-recode variables
     idx.norecode <- -(forest$dependent.varID+1)
   }
-  
+
   ## Recode characters
   if (!is.matrix(data.used)) {
     char.columns <- sapply(data.used, is.character)
@@ -148,7 +148,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       }
     }, data.used[, idx.norecode], forest$covariate.levels, SIMPLIFY = FALSE)
   }
-  
+
   ## Convert to data matrix
   data.final <- data.matrix(data.used)
 
@@ -161,9 +161,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (any(is.na(data.final))) {
     offending_columns <- colnames(data.final)[colSums(is.na(data.final)) > 0]
     stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".")
+         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
-  
+
   if (sum(!(forest$independent.variable.names %in% variable.names)) > 0) {
     stop("Error: One or more independent variables not found in data.")
   }
@@ -218,26 +218,26 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   keep.inbag <- FALSE
   sample.fraction <- 1
   holdout <- FALSE
-  
+
   ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
                       forest$num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, forest, sparse.data, replace, probability,
-                      unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule, 
-                      case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction, 
+                      unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
+                      case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
                       alpha, minprop, holdout)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
   }
-  
+
   ## Prepare results
   result$predictions <- drop(do.call(rbind, result$predictions))
   result$num.samples <- nrow(data.final)
   result$treetype <- forest$treetype
-  
+
   if (forest$treetype == "Classification" & !is.null(forest$levels)) {
     if (!predict.all) {
       result$predictions <- factor(result$predictions, levels = 1:length(forest$levels),
@@ -257,7 +257,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       names(result$predictions) <- forest$levels[forest$class.values]
       result$predictions <- result$predictions[forest$levels]
     }
-    
+
   }
 
   class(result) <- "ranger.prediction"
@@ -265,8 +265,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 }
 
 ##' Prediction with new data and a saved forest from Ranger.
-##' 
-##' For classification and predict.all = TRUE, a matrix of factor levels is returned. 
+##'
+##' For classification and predict.all = TRUE, a matrix of factor levels is returned.
 ##' To retrieve the corresponding factor levels, use rf$forest$levels, if rf is the ranger object.
 ##'
 ##' @title Ranger prediction
