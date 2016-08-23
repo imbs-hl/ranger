@@ -39,7 +39,7 @@ Object of class \code{ranger.prediction} with elements
 Prediction with new data and a saved forest from Ranger.
 }
 \details{
-For classification and predict.all = TRUE, a matrix of factor levels is returned. 
+For classification and predict.all = TRUE, a matrix of factor levels is returned.
 To retrieve the corresponding factor levels, use rf$forest$levels, if rf is the ranger object.
 }
 \author{
