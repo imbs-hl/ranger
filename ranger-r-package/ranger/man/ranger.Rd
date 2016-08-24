@@ -5,7 +5,7 @@
 \title{Ranger}
 \usage{
 ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
-  importance = "none", write.forest = FALSE, probability = FALSE,
+  importance = "none", write.forest = TRUE, probability = FALSE,
   min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
   1, 0.632), case.weights = NULL, splitrule = NULL, alpha = 0.5,
   minprop = 0.1, split.select.weights = NULL,
@@ -26,7 +26,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{importance}{Variable importance mode, one of 'none', 'impurity', 'permutation'. The 'impurity' measure is the Gini index for classification and the variance of the responses for regression. For survival, only 'permutation' is available.}
 
-\item{write.forest}{Save \code{ranger.forest} object, needed for prediction.}
+\item{write.forest}{Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.}
 
 \item{probability}{Grow a probability forest as in Malley et al. (2012).}
 
@@ -72,8 +72,6 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 }
 \value{
 Object of class \code{ranger} with elements
-  \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
-  \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
   \item{\code{variable.importance}}{Variable importance for each independent variable.}
