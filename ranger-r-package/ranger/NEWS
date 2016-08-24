@@ -1,3 +1,6 @@
+##### Version 0.5.4
+* Add num.trees option to predict()
+
 ##### Version 0.5.3
 * Bug fixes
 
