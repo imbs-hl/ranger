@@ -33,6 +33,7 @@
 ##' @param object Ranger \code{ranger.forest} object.
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).
+##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -52,6 +53,7 @@
 ##' @author Marvin N. Wright
 ##' @export
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
+                                  num.trees = object$num.trees, 
                                   seed = NULL, num.threads = NULL,
                                   verbose = TRUE, ...) {
 
@@ -221,7 +223,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
   ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
-                      forest$num.trees, verbose, seed, num.threads, write.forest, importance,
+                      num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, forest, sparse.data, replace, probability,
@@ -273,6 +275,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param object Ranger \code{ranger} object.
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).
+##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -292,11 +295,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @author Marvin N. Wright
 ##' @export
 predict.ranger <- function(object, data, predict.all = FALSE,
+                           num.trees = object$num.trees,
                            seed = NULL, num.threads = NULL,
                            verbose = TRUE, ...) {
   forest <- object$forest
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
   }
-  predict(forest, data, predict.all, seed, num.threads, verbose)
+  predict(forest, data, predict.all, num.trees, seed, num.threads, verbose)
 }

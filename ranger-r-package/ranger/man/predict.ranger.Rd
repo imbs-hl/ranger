@@ -4,8 +4,9 @@
 \alias{predict.ranger}
 \title{Ranger prediction}
 \usage{
-\method{predict}{ranger}(object, data, predict.all = FALSE, seed = NULL,
-  num.threads = NULL, verbose = TRUE, ...)
+\method{predict}{ranger}(object, data, predict.all = FALSE,
+  num.trees = object$num.trees, seed = NULL, num.threads = NULL,
+  verbose = TRUE, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger} object.}
@@ -13,6 +14,8 @@
 \item{data}{New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).}
 
 \item{predict.all}{Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).}
+
+\item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
 \item{seed}{Random seed used in Ranger.}
 

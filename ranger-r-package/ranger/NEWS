@@ -1,3 +1,7 @@
+##### Version 0.5.4
+* Set write.forest=TRUE by default
+* Add num.trees option to predict()
+
 ##### Version 0.5.3
 * Bug fixes
 

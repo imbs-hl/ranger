@@ -5,7 +5,7 @@
 \title{Ranger}
 \usage{
 ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
-  importance = "none", write.forest = FALSE, probability = FALSE,
+  importance = "none", write.forest = TRUE, probability = FALSE,
   min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
   1, 0.632), case.weights = NULL, splitrule = NULL, alpha = 0.5,
   minprop = 0.1, split.select.weights = NULL,
@@ -26,7 +26,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{importance}{Variable importance mode, one of 'none', 'impurity', 'permutation'. The 'impurity' measure is the Gini index for classification and the variance of the responses for regression. For survival, only 'permutation' is available.}
 
-\item{write.forest}{Save \code{ranger.forest} object, needed for prediction.}
+\item{write.forest}{Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.}
 
 \item{probability}{Grow a probability forest as in Malley et al. (2012).}
 
@@ -74,8 +74,6 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 Object of class \code{ranger} with elements
   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
-  \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
-  \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
   \item{\code{variable.importance}}{Variable importance for each independent variable.}
   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for regression the mean squared error and for survival one minus Harrell's c-index.}
   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only).}
@@ -116,6 +114,8 @@ For survival all nodes contain at least min.node.size samples.
 Variables selected with \code{always.split.variables} are tried additionaly to the mtry variables randomly selected.
 In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
 Weights do not need to sum up to 1, they will be normalized later. 
+The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
+Names of the \code{split.select.weights} vector are ignored.
 The usage of \code{split.select.weights} can increase the computation times for large forests.
 
 Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
