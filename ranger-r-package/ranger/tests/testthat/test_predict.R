@@ -45,3 +45,9 @@ test_that("Missing value columns detected in predict", {
   dat[25, 1] <- NA
   expect_error(predict(rf, dat), "Missing data in columns: Sepal.Length, Petal.Width.")
 })
+
+test_that("If num.trees set, fewer trees are used for predictions", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, iris, predict.all = TRUE, num.trees = 3)
+  expect_equal(dim(pred$predictions), c(nrow(iris), 3))
+})
