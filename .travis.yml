@@ -20,6 +20,7 @@ after_success:
 notifications:
   email:
     recipients:
-        - work@wrig.de
+      secure:
+qh6JWWLG+P2D9MstM/7zk9C1eZEehdgMA3qIRMfa+gW02YPMXJK7+I1CTPPvVzVQP7iQJKavC+LWoYKEPWdCyu0PzbzDI50PBArPbsOHNF0ZKGA+z0bFsRlCo/BzStdSO/bg3m60+zo6BCPSpPWqGWsnED4Wb2YGf20M7TLUeKZ2htmcIgQx5VmfOPTZG0lh8u3/c4SFM9jF7jxjuV3QI8C1gnvFfidic24OJH91NvIajIttWsFU7bSRLM0eKbutWFnuqPRDjVIw62zQsigXJjy3wo6Yo2CY41X95wAu88AOgO14i4GyRM6Hv7juRLJJfuts8OFUMtG8btzemx2fBx81YUeG1QRD1Puxax61elDDJtNALEghzAscAnguUoTUCdUpw9ras1nIf8R+HDErSZd9ZEJ0QpGBGJBbl5pe/4V2XWo9EPhvQe8pAO+3iXIsFnEcItxBBwe0tJqCnW+pdTd3N99szdCKP6HyuV+8SJqy7tgilBFJZpC3SGQ1ynP4FRSF59ekLUtAGlm1RYGnUTMtVAWHZVQOMmLKbZfPW3JqUwVuaMCzG7XOFEgCtpT1VmIcggvyeGMMCdXPlW4Ns42tPuSEEcxo7kmVo7v5SDIWdGu6Znqbrs9UG17GqL7oLehQsGnrbGMIuLu3CNW+5/6m7YrO45lsi4nqHaqEW8Y=
     on_success: change
     on_failure: change
