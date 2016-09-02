@@ -10,9 +10,9 @@ if (!requireNamespace("GenABEL", quietly = TRUE)) {
   rg.gwaa <- ranger(CHD ~ ., data = dat.gwaa, verbose = FALSE, write.forest = TRUE)
 }
 
-test_that("classification gwaa rf is of class ranger with 14 elements", {
+test_that("classification gwaa rf is of class ranger with 13 elements", {
   expect_is(rg.gwaa, "ranger")
-  expect_equal(length(rg.gwaa), 14)
+  expect_equal(length(rg.gwaa), 13)
 })
 
 test_that("Matrix interface works for Probability estimation", {

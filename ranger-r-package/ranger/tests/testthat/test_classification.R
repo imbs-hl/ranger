@@ -10,9 +10,9 @@ rg.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRU
 rg.mat   <- ranger(dependent.variable.name = "Species", data = dat, write.forest = TRUE, classification = TRUE)
 
 ## Basic tests (for all random forests equal)
-test_that("classification result is of class ranger with 14 elements", {
+test_that("classification result is of class ranger with 13 elements", {
   expect_is(rg.class, "ranger")
-  expect_equal(length(rg.class), 14)
+  expect_equal(length(rg.class), 13)
 })
 
 test_that("results have 500 trees", {
