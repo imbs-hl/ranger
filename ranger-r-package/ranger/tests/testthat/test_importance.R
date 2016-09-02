@@ -30,3 +30,8 @@ test_that("scaled importance is larger than 1", {
   expect_gt(rg.scale.perm$variable.importance[1], 1)
 })
 
+test_that("error thrown if no importance in object", {
+  rf <- ranger(Species ~ ., data = iris, num.trees = 5)
+  expect_error(importance(rf), "No variable importance found. Please use 'importance' option when growing the forest.")
+})
+
