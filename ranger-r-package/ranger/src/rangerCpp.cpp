@@ -174,7 +174,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     if (!prediction_mode) {
       result.push_back(forest->getMtry(), "mtry");
       result.push_back(forest->getMinNodeSize(), "min.node.size");
-      result.push_back(forest->getVariableImportance(), "variable.importance");
+      if (importance_mode != IMP_NONE) {
+        result.push_back(forest->getVariableImportance(), "variable.importance");
+      }
       result.push_back(forest->getOverallPredictionError(), "prediction.error");
     }
     
