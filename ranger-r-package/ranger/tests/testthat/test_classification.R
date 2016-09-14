@@ -108,6 +108,11 @@ test_that("confusion matrix is of right dimension", {
                rep(nlevels(iris$Species), 2))
 })
 
+test_that("confusion matrix has right dimnames", {
+  expect_equal(dimnames(rg.class$confusion.matrix),
+               list(true = levels(iris$Species), predicted = levels(iris$Species)))
+})
+
 test_that("confusion matrix rows are the true classes", {
   expect_equal(as.numeric(rowSums(rg.class$confusion.matrix)), 
                as.numeric(table(iris$Species)))
