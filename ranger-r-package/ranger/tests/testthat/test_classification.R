@@ -63,8 +63,7 @@ test_that("Majority vote of predict.all for classification is equal to forest pr
       NA
     }
   })
-  pred <- factor(pred_num, levels = 1:length(rf$forest$levels),
-                 labels = rf$forest$levels)
+  pred <- integer.to.factor(pred_num, rf$forest$levels)
   idx <- !is.na(pred)
   expect_equal(pred[idx], pred_forest$predictions[idx])
 })
