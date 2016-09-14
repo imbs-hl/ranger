@@ -585,8 +585,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Set predictions
   if (treetype == 1 & is.factor(response)) {
-    result$predictions <- factor(result$predictions, levels = 1:nlevels(response),
-                                 labels = levels(response))
+    result$predictions <- integer.to.factor(result$predictions,
+                                            levels(response))
     result$confusion.matrix <- table(unlist(data.final[, dependent.variable.name]), result$predictions, dnn = c("true", "predicted"))
   } else if (treetype == 5) {
     result$chf <- result$predictions
@@ -640,3 +640,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 
 
+integer.to.factor <- function(x, labels) {
+  factor(x, levels = seq_along(labels), labels = labels)
+}

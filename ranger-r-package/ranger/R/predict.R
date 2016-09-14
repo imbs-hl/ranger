@@ -242,8 +242,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
   if (forest$treetype == "Classification" & !is.null(forest$levels)) {
     if (!predict.all) {
-      result$predictions <- factor(result$predictions, levels = 1:length(forest$levels),
-                                   labels = forest$levels)
+      result$predictions <- integer.to.factor(result$predictions, forest$levels)
     }
   } else if (forest$treetype == "Survival") {
     result$unique.death.times <- forest$unique.death.times
