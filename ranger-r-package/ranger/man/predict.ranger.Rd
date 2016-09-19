@@ -5,8 +5,8 @@
 \title{Ranger prediction}
 \usage{
 \method{predict}{ranger}(object, data, predict.all = FALSE,
-  num.trees = object$num.trees, seed = NULL, num.threads = NULL,
-  verbose = TRUE, ...)
+  num.trees = object$num.trees, type = "response", seed = NULL,
+  num.threads = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger} object.}
@@ -16,6 +16,8 @@
 \item{predict.all}{Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).}
 
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
+
+\item{type}{Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.}
 
 \item{seed}{Random seed used in Ranger.}
 
@@ -42,6 +44,9 @@ Object of class \code{ranger.prediction} with elements
 Prediction with new data and a saved forest from Ranger.
 }
 \details{
+For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+
 For classification and predict.all = TRUE, a matrix of factor levels is returned.
 To retrieve the corresponding factor levels, use rf$forest$levels, if rf is the ranger object.
 }
