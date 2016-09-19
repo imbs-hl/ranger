@@ -63,8 +63,7 @@ test_that("Majority vote of predict.all for classification is equal to forest pr
       NA
     }
   })
-  pred <- factor(pred_num, levels = 1:length(rf$forest$levels),
-                 labels = rf$forest$levels)
+  pred <- integer.to.factor(pred_num, rf$forest$levels)
   idx <- !is.na(pred)
   expect_equal(pred[idx], pred_forest$predictions[idx])
 })
@@ -106,6 +105,11 @@ test_that("predict works for single observations, classification", {
 test_that("confusion matrix is of right dimension", {
   expect_equal(dim(rg.class$confusion.matrix), 
                rep(nlevels(iris$Species), 2))
+})
+
+test_that("confusion matrix has right dimnames", {
+  expect_equal(dimnames(rg.class$confusion.matrix),
+               list(true = levels(iris$Species), predicted = levels(iris$Species)))
 })
 
 test_that("confusion matrix rows are the true classes", {
