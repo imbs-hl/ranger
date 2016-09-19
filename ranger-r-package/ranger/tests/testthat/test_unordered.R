@@ -105,7 +105,7 @@ test_that("Warning for survival, multiclass classification/probability and maxst
                         respect.unordered.factors = 'order'))
 })
 
-test_that("No error if new levels in predict", {
+test_that("No error if new levels in predict, 1 column", {
   set.seed(1)
   n <- 20
   train <- data.frame(x = sample(c("A", "B", "C"), n, replace = TRUE), 
@@ -120,6 +120,32 @@ test_that("No error if new levels in predict", {
   rf.ignore <- ranger(y ~ ., data = train, num.trees = 5, respect.unordered.factors = 'ignore')
   expect_silent(predict(rf.ignore, test))
 
+  ## partition  
+  rf.partition <- ranger(y ~ ., data = train, num.trees = 5, respect.unordered.factors = 'partition')
+  expect_silent(predict(rf.partition, test))
+  
+  ## order
+  rf.order <- ranger(y ~ ., data = train, num.trees = 5, respect.unordered.factors = 'order')
+  expect_silent(predict(rf.order, test))
+})
+
+test_that("No error if new levels in predict, 2 columns", {
+  set.seed(1)
+  n <- 20
+  train <- data.frame(x1 = sample(c("A", "B", "C"), n, replace = TRUE), 
+                      x2 = sample(c("A", "B", "C"), n, replace = TRUE),
+                      y = rbinom(n, 1, 0.5), 
+                      stringsAsFactors = FALSE)
+  
+  test <- data.frame(x1 = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
+                     x2 = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
+                     y = rbinom(n, 1, 0.5), 
+                     stringsAsFactors = FALSE)
+  
+  ## ignore
+  rf.ignore <- ranger(y ~ ., data = train, num.trees = 5, respect.unordered.factors = 'ignore')
+  expect_silent(predict(rf.ignore, test))
+  
   ## partition  
   rf.partition <- ranger(y ~ ., data = train, num.trees = 5, respect.unordered.factors = 'partition')
   expect_silent(predict(rf.partition, test))
