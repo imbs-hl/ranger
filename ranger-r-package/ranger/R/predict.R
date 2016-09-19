@@ -146,9 +146,10 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       if(is.null(y)) {
         x
       } else {
-        factor(x, levels = y)
+        new.levels <- setdiff(levels(x), y)
+        factor(x, levels = c(y, new.levels))
       }
-    }, data.used[, idx.norecode], forest$covariate.levels, SIMPLIFY = FALSE)
+    }, data.used[, idx.norecode], forest$covariate.levels, SIMPLIFY = !is.data.frame(data.used[, idx.norecode]))
   }
 
   ## Convert to data matrix

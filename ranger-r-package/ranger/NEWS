@@ -1,3 +1,7 @@
+##### Version 0.5.5
+* Handle new factor levels in 'order' mode
+* Bug fixes
+
 ##### Version 0.5.4
 * Set write.forest=TRUE by default
 * Add num.trees option to predict()
