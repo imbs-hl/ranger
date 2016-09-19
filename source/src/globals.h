@@ -87,6 +87,12 @@ enum SplitRule {
   MAXSTAT = 4
 };
 
+// Prediction type
+enum PredictionType {
+  RESPONSE = 1,
+  TERMINALNODES = 2
+};
+
 // Default values
 const uint DEFAULT_NUM_TREE = 500;
 const uint DEFAULT_NUM_THREADS = 0;
@@ -100,6 +106,8 @@ const uint DEFAULT_MIN_NODE_SIZE_PROBABILITY = 10;
 const SplitRule DEFAULT_SPLITRULE = LOGRANK;
 const double DEFAULT_ALPHA = 0.5;
 const double DEFAULT_MINPROP = 0.1;
+
+const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
 
 // Interval to print progress in seconds
 const double STATUS_INTERVAL = 30.0;
