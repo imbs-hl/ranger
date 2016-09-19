@@ -59,3 +59,24 @@ test_that("If num.trees not set, all trees are used for prediction", {
   expect_equal(pred$num.trees, 5)
   expect_equal(dim(pred$predictions), c(nrow(iris), 5))
 })
+
+test_that("Error if unknown value for type", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  expect_error(predict(rf, iris, type = "class"))
+})
+
+test_that("Terminal nodes returned by predict are node ids", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodeIds")
+  
+  expect_equal(dim(pred), c(nrow(iris), rf$num.trees))
+})
+
+test_that("Terminal nodes returned by predict are the same as by getTerminalNodeIds", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodeIds")
+  
+  nodeIds <- getTerminalNodeIDs(rf, iris)
+  
+  expect_equal(pred$predictions, nodeIds)
+})
