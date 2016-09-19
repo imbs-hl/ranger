@@ -68,6 +68,7 @@ public:
   MemoryMode memmode;
   bool savemem;
   std::string predict;
+  PredictionType predictiontype;
   std::string splitweights;
   uint nthreads;
   bool predall;
