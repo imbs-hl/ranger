@@ -110,6 +110,7 @@ void ForestProbability::predictInternal() {
     predictions[i].resize(class_values.size(), 0);
   }
 
+  // TODO: prediction type TERMINALNODES?
   // For all samples average proportions of trees
   for (size_t sample_idx = 0; sample_idx < num_prediction_samples; ++sample_idx) {
 

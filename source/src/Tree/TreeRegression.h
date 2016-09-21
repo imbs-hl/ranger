@@ -53,6 +53,10 @@ public:
     return (split_values[terminal_nodeID]);
   }
 
+  size_t getPredictionTerminalNodeID(size_t sampleID) const {
+    return prediction_terminal_nodeIDs[sampleID];
+  }
+
 private:
   bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void createEmptyNodeInternal();
