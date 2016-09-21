@@ -123,6 +123,7 @@ void ForestSurvival::predictInternal() {
 
   predictions.reserve(num_prediction_samples);
 
+  // TODO: prediction type TERMINALNODES?
 // For each person and timepoint sum over trees
 // First dim trees, second dim samples, third dim time
   for (size_t i = 0; i < num_prediction_samples; ++i) {

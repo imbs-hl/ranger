@@ -54,7 +54,11 @@ public:
 
   const std::vector<double>& getPrediction(size_t sampleID) const {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[sampleID];
-    return (chf[terminal_nodeID]);
+    return chf[terminal_nodeID];
+  }
+
+  size_t getPredictionTerminalNodeID(size_t sampleID) const {
+    return prediction_terminal_nodeIDs[sampleID];
   }
 
 private:
@@ -72,8 +76,7 @@ private:
       double& best_value, size_t& best_varID, double& best_logrank);
   void findBestSplitValueLogRankUnordered(size_t nodeID, size_t varID, std::vector<double>& factor_levels,
       double& best_value, size_t& best_varID, double& best_logrank);
-  void findBestSplitValueAUC(size_t nodeID, size_t varID,
-      double& best_value, size_t& best_varID, double& best_auc);
+  void findBestSplitValueAUC(size_t nodeID, size_t varID, double& best_value, size_t& best_varID, double& best_auc);
 
   void computeDeathCounts(size_t nodeID);
   void computeChildDeathCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,

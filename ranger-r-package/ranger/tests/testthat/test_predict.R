@@ -69,7 +69,7 @@ test_that("Terminal nodes returned by predict are node ids", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
   pred <- predict(rf, iris, type = "terminalNodes")
   
-  expect_equal(dim(pred), c(nrow(iris), rf$num.trees))
+  expect_equal(dim(pred$predictions), c(nrow(iris), rf$num.trees))
 })
 
 test_that("Terminal nodes returned by predict are the same as by getTerminalNodeIds", {
