@@ -95,8 +95,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("Error: Invalid forest object.")
   }
   
-  ## Check type
-  if (!is.element(type, c("response", "terminalNodes"))) {
+  ## Prediction type
+  if (type == "response") {
+    prediction.type <- 1
+  } else if (type == "terminalNodes") {
+    prediction.type <- 2
+  } else {
     stop("Error: Invalid value for 'type'. Use 'response' or 'terminalNodes'.")
   }
 
@@ -243,7 +247,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       status.variable.name, prediction.mode, forest, sparse.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                      alpha, minprop, holdout)
+                      alpha, minprop, holdout, prediction.type)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
