@@ -258,7 +258,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   result$num.samples <- nrow(data.final)
   result$treetype <- forest$treetype
 
-  if (prediction.type == "response") {
+  if (type == "response") {
     if (forest$treetype == "Classification" & !is.null(forest$levels)) {
       if (!predict.all) {
         result$predictions <- integer.to.factor(result$predictions, forest$levels)
