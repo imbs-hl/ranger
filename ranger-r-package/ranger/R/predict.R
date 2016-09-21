@@ -258,25 +258,26 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   result$num.samples <- nrow(data.final)
   result$treetype <- forest$treetype
 
-  if (forest$treetype == "Classification" & !is.null(forest$levels)) {
-    if (!predict.all) {
-      result$predictions <- integer.to.factor(result$predictions, forest$levels)
+  if (prediction.type == "response") {
+    if (forest$treetype == "Classification" & !is.null(forest$levels)) {
+      if (!predict.all) {
+        result$predictions <- integer.to.factor(result$predictions, forest$levels)
+      }
+    } else if (forest$treetype == "Survival") {
+      result$unique.death.times <- forest$unique.death.times
+      result$chf <- result$predictions
+      result$predictions <- NULL
+      result$survival <- exp(-result$chf)
+    } else if (forest$treetype == "Probability estimation" & !is.null(forest$levels)) {
+      ## Set colnames and sort by levels
+      if (is.matrix(result$predictions)) {
+        colnames(result$predictions) <- forest$levels[forest$class.values]
+        result$predictions <- result$predictions[, forest$levels]
+      } else {
+        names(result$predictions) <- forest$levels[forest$class.values]
+        result$predictions <- result$predictions[forest$levels]
+      }
     }
-  } else if (forest$treetype == "Survival") {
-    result$unique.death.times <- forest$unique.death.times
-    result$chf <- result$predictions
-    result$predictions <- NULL
-    result$survival <- exp(-result$chf)
-  } else if (forest$treetype == "Probability estimation" & !is.null(forest$levels)) {
-    ## Set colnames and sort by levels
-    if (is.matrix(result$predictions)) {
-      colnames(result$predictions) <- forest$levels[forest$class.values]
-      result$predictions <- result$predictions[, forest$levels]
-    } else {
-      names(result$predictions) <- forest$levels[forest$class.values]
-      result$predictions <- result$predictions[forest$levels]
-    }
-
   }
 
   class(result) <- "ranger.prediction"
