@@ -106,21 +106,32 @@ void ForestProbability::predictInternal() {
   // First dim samples, second dim classes
   size_t num_prediction_samples = data->getNumRows();
   predictions.resize(num_prediction_samples);
-  for (size_t i = 0; i < num_prediction_samples; ++i) {
-    predictions[i].resize(class_values.size(), 0);
+  if (prediction_type == TERMINALNODES) {
+    for (size_t i = 0; i < num_prediction_samples; ++i) {
+      predictions[i].resize(num_trees, 0);
+    }
+  } else {
+    for (size_t i = 0; i < num_prediction_samples; ++i) {
+      predictions[i].resize(class_values.size(), 0);
+    }
   }
 
-  // TODO: prediction type TERMINALNODES?
   // For all samples average proportions of trees
   for (size_t sample_idx = 0; sample_idx < num_prediction_samples; ++sample_idx) {
 
     // For each sample compute proportions in each tree and average over trees
     for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-      std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
+      if (prediction_type == TERMINALNODES) {
+        predictions[sample_idx][tree_idx] = ((TreeProbability*) trees[tree_idx])->getPredictionTerminalNodeID(
+            sample_idx);
+      } else {
+        std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
 
-      for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
-        predictions[sample_idx][class_idx] += counts[class_idx] / num_trees;
+        for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
+          predictions[sample_idx][class_idx] += counts[class_idx] / num_trees;
+        }
       }
+
     }
   }
 
