@@ -28,12 +28,19 @@
 # -------------------------------------------------------------------------------
 
 ##' Prediction with new data and a saved forest from Ranger.
+##' 
+##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+##' 
+##' For classification and \code{predict.all = TRUE}, a matrix of factor levels is returned.
+##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 ##'
 ##' @title Ranger prediction
 ##' @param object Ranger \code{ranger.forest} object.
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
+##' @param type Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -54,6 +61,7 @@
 ##' @export
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
+                                  type = "response",
                                   seed = NULL, num.threads = NULL,
                                   verbose = TRUE, ...) {
 
@@ -85,6 +93,15 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (forest$treetype == "Survival" & (is.null(forest$status.varID)  |
                                          is.null(forest$chf) | is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
+  }
+  
+  ## Prediction type
+  if (type == "response") {
+    prediction.type <- 1
+  } else if (type == "terminalNodes") {
+    prediction.type <- 2
+  } else {
+    stop("Error: Invalid value for 'type'. Use 'response' or 'terminalNodes'.")
   }
 
   ## Create final data
@@ -230,7 +247,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       status.variable.name, prediction.mode, forest, sparse.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                      alpha, minprop, holdout)
+                      alpha, minprop, holdout, prediction.type)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -241,25 +258,26 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   result$num.samples <- nrow(data.final)
   result$treetype <- forest$treetype
 
-  if (forest$treetype == "Classification" & !is.null(forest$levels)) {
-    if (!predict.all) {
-      result$predictions <- integer.to.factor(result$predictions, forest$levels)
+  if (type == "response") {
+    if (forest$treetype == "Classification" & !is.null(forest$levels)) {
+      if (!predict.all) {
+        result$predictions <- integer.to.factor(result$predictions, forest$levels)
+      }
+    } else if (forest$treetype == "Survival") {
+      result$unique.death.times <- forest$unique.death.times
+      result$chf <- result$predictions
+      result$predictions <- NULL
+      result$survival <- exp(-result$chf)
+    } else if (forest$treetype == "Probability estimation" & !is.null(forest$levels)) {
+      ## Set colnames and sort by levels
+      if (is.matrix(result$predictions)) {
+        colnames(result$predictions) <- forest$levels[forest$class.values]
+        result$predictions <- result$predictions[, forest$levels]
+      } else {
+        names(result$predictions) <- forest$levels[forest$class.values]
+        result$predictions <- result$predictions[forest$levels]
+      }
     }
-  } else if (forest$treetype == "Survival") {
-    result$unique.death.times <- forest$unique.death.times
-    result$chf <- result$predictions
-    result$predictions <- NULL
-    result$survival <- exp(-result$chf)
-  } else if (forest$treetype == "Probability estimation" & !is.null(forest$levels)) {
-    ## Set colnames and sort by levels
-    if (is.matrix(result$predictions)) {
-      colnames(result$predictions) <- forest$levels[forest$class.values]
-      result$predictions <- result$predictions[, forest$levels]
-    } else {
-      names(result$predictions) <- forest$levels[forest$class.values]
-      result$predictions <- result$predictions[forest$levels]
-    }
-
   }
 
   class(result) <- "ranger.prediction"
@@ -268,6 +286,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
 ##' Prediction with new data and a saved forest from Ranger.
 ##'
+##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+##' 
 ##' For classification and predict.all = TRUE, a matrix of factor levels is returned.
 ##' To retrieve the corresponding factor levels, use rf$forest$levels, if rf is the ranger object.
 ##'
@@ -276,6 +297,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
+##' @param type Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -296,11 +318,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @export
 predict.ranger <- function(object, data, predict.all = FALSE,
                            num.trees = object$num.trees,
+                           type = "response",
                            seed = NULL, num.threads = NULL,
                            verbose = TRUE, ...) {
   forest <- object$forest
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
   }
-  predict(forest, data, predict.all, num.trees, seed, num.threads, verbose)
+  predict(forest, data, predict.all, num.trees, type, seed, num.threads, verbose)
 }
