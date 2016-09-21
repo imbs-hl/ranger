@@ -2,7 +2,7 @@
 % Please edit documentation in R/getTerminalNodeIDs.R
 \name{getTerminalNodeIDs}
 \alias{getTerminalNodeIDs}
-\title{Get terminal node IDs of observations.}
+\title{Get terminal node IDs (deprecated)}
 \usage{
 getTerminalNodeIDs(rf, dat)
 }
@@ -15,7 +15,9 @@ getTerminalNodeIDs(rf, dat)
 Matrix with terminal nodeIDs for all observations in dataset and trees.
 }
 \description{
-Get terminal node IDs of observations.
+This function is deprecated. 
+Please use predict() with \code{type = "terminalNodes"} instead.
+This function calls predict() now.
 }
 \examples{
 library(ranger)

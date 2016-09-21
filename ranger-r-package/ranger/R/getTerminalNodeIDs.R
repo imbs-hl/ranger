@@ -27,8 +27,11 @@
 # wright@imbs.uni-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Get terminal node IDs of observations.
+##' This function is deprecated. 
+##' Please use predict() with \code{type = "terminalNodes"} instead.
+##' This function calls predict() now. 
 ##'
+##' @title Get terminal node IDs (deprecated)
 ##' @param rf \code{ranger} object.
 ##' @param dat New dataset. Terminal node IDs for this dataset are obtained. 
 ##'
@@ -40,43 +43,7 @@
 ##' getTerminalNodeIDs(rf, iris)
 ##' @export
 getTerminalNodeIDs <- function(rf, dat) {
-  ## Check if forests exists
-  if (is.null(rf$forest)) {
-    stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
-  }
-  
-  ## Get terminal node IDs for each observation
-  result <- t(apply(dat, 1, function(obs) {
-    ## Drop observation down the trees
-    sapply(1:rf$num.trees, function(tree) {
-      
-      child.nodeIDs <- rf$forest$child.nodeIDs[[tree]]
-      split.varIDs <- rf$forest$split.varIDs[[tree]]
-      split.values <- rf$forest$split.values[[tree]]
-      
-      nodeID <- 1
-      while (1) {
-        
-        ## Break if terminal node
-        if (child.nodeIDs[[1]][nodeID] == 0 & child.nodeIDs[[2]][nodeID] == 0) {
-          break
-        }
-        
-        ## Move to child
-        split.varID <- split.varIDs[[nodeID]]
-        value <- obs[split.varID]
-        if (value <= split.values[[nodeID]]) {
-          ## Move to left child
-          nodeID <- child.nodeIDs[[1]][nodeID] + 1
-        } else {
-          ## Move to right child
-          nodeID <- child.nodeIDs[[2]][nodeID] + 1
-        }
-      }
-      
-      return(nodeID)
-    })
-  }))
-  
-  return(result)
+  warning("Function getTerminalNodeIDs() deprecated, calling predict().")
+  predict(rf, dat, type = "terminalNodes")$predictions
 }
+
