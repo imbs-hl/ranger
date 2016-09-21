@@ -556,6 +556,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
   predict.all <- FALSE
+  prediction.type <- 1
   
   ## No loaded forest object
   loaded.forest <- list()
@@ -571,7 +572,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       status.variable.name, prediction.mode, loaded.forest, sparse.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                      keep.inbag, sample.fraction, alpha, minprop, holdout)
+                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

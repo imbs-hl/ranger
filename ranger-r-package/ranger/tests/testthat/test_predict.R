@@ -1,6 +1,7 @@
 ## Tests for predictions
 
 library(ranger)
+library(survival)
 context("ranger_pred")
 
 ## Tests
@@ -58,4 +59,46 @@ test_that("If num.trees not set, all trees are used for prediction", {
   pred <- predict(rf, iris, predict.all = TRUE)
   expect_equal(pred$num.trees, 5)
   expect_equal(dim(pred$predictions), c(nrow(iris), 5))
+})
+
+test_that("Error if unknown value for type", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  expect_error(predict(rf, iris, type = "class"))
+})
+
+test_that("Terminal nodes returned by predict are node ids, classification", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")
+  
+  expect_equal(dim(pred$predictions), c(nrow(iris), rf$num.trees))
+  expect_true(all(pred$predictions > 0))
+  expect_true(all(pred$predictions < max(sapply(rf$forest$split.varIDs, length))))
+})
+
+
+test_that("Terminal nodes returned by predict are node ids, probability", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")
+  
+  expect_equal(dim(pred$predictions), c(nrow(iris), rf$num.trees))
+  expect_true(all(pred$predictions > 0))
+  expect_true(all(pred$predictions < max(sapply(rf$forest$split.varIDs, length))))
+})
+
+test_that("Terminal nodes returned by predict are node ids, regression", {
+  rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")
+  
+  expect_equal(dim(pred$predictions), c(nrow(iris), rf$num.trees))
+  expect_true(all(pred$predictions > 0))
+  expect_true(all(pred$predictions < max(sapply(rf$forest$split.varIDs, length))))
+})
+
+test_that("Terminal nodes returned by predict are node ids, survival", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, veteran, type = "terminalNodes")
+  
+  expect_equal(dim(pred$predictions), c(nrow(veteran), rf$num.trees))
+  expect_true(all(pred$predictions > 0))
+  expect_true(all(pred$predictions < max(sapply(rf$forest$split.varIDs, length))))
 })

@@ -1,3 +1,6 @@
+##### Version 0.5.6
+* Faster version of getTerminalNodeIDs(), included in predict()
+
 ##### Version 0.5.5
 * Handle new factor levels in 'order' mode
 * Bug fixes

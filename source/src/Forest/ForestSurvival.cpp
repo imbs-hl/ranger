@@ -127,13 +127,21 @@ void ForestSurvival::predictInternal() {
 // First dim trees, second dim samples, third dim time
   for (size_t i = 0; i < num_prediction_samples; ++i) {
     std::vector<double> sample_prediction;
-    sample_prediction.reserve(num_timepoints);
-    for (size_t j = 0; j < num_timepoints; ++j) {
-      double sample_time_prediction = 0;
+
+    if (prediction_type == TERMINALNODES) {
+      sample_prediction.reserve(num_trees);
       for (size_t k = 0; k < num_trees; ++k) {
-        sample_time_prediction += ((TreeSurvival*) trees[k])->getPrediction(i)[j];
+        sample_prediction.push_back(((TreeSurvival*) trees[k])->getPredictionTerminalNodeID(i));
       }
-      sample_prediction.push_back(sample_time_prediction / num_trees);
+    } else {
+      sample_prediction.reserve(num_timepoints);
+      for (size_t j = 0; j < num_timepoints; ++j) {
+        double sample_time_prediction = 0;
+        for (size_t k = 0; k < num_trees; ++k) {
+          sample_time_prediction += ((TreeSurvival*) trees[k])->getPrediction(i)[j];
+        }
+        sample_prediction.push_back(sample_time_prediction / num_trees);
+      }
     }
     predictions.push_back(sample_prediction);
   }
