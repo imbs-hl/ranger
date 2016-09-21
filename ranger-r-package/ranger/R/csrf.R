@@ -70,8 +70,8 @@ csrf <- function(formula, training_data, test_data, params1 = list(), params2 = 
                                          write.forest = TRUE), params1))
   
   ## Get terminal nodes
-  terminal.nodeIDs.train <- getTerminalNodeIDs(rf.proximity, training_data)
-  terminal.nodeIDs.test <- getTerminalNodeIDs(rf.proximity, test_data)
+  terminal.nodeIDs.train <- predict(rf.proximity, training_data, type = "terminalNodes")$predictions
+  terminal.nodeIDs.test <- predict(rf.proximity, test_data, type = "terminalNodes")$predictions
   
   ## Grow weighted RFs for test observations, predict the outcome
   predictions <- sapply(1:nrow(test_data), function(i) {
