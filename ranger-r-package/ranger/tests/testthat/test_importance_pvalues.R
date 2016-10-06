@@ -25,8 +25,6 @@ holdout_p100 <- holdoutRF(Species ~., dat_n100, num.trees = 100)
 test_that("Importance p-values Janitza: Error if impurity importance", {
   rf <- ranger(Species ~., iris, num.trees = 5, importance = "impurity")
   expect_error(importance_pvalues(rf, method = "janitza"))
-  #expect_error(importance_pvalues(rf, method = "altmann", 
-  #                                formula = Species~., data = iris))
 })
 
 ## Janitza

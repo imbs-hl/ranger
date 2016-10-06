@@ -92,6 +92,9 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     m2 <- x$variable.importance[x$variable.importance == 0]
     vimp <- c(m1, -m1, m2)
     
+    ## Compute p-value
+    pval <- 1 - ecdf(vimp)(x$variable.importance)
+    
     ## TODO: 100 ok? increase? 
     if (length(m1) == 0) {
       stop("No negative importance values found. Consider the 'altmann' approach.")
@@ -115,12 +118,15 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
       ranger(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
              importance = x$importance.mode, ...)$variable.importance
     })
+    
+    ## Compute p-value
+    pval <- sapply(1:nrow(vimp), function(i) {
+      1 - ecdf(vimp[i, ])(x$variable.importance[i])
+    })
+    
   } else {
     stop("Unknown p-value method. Available methods are: 'janitza' and 'altmann'.")
   }
-  
-  ## Compute p-value
-  pval <- 1 - ecdf(vimp)(x$variable.importance)
   
   ## Return VIMP and p-values
   res <- cbind(x$variable.importance, pval)
