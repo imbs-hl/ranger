@@ -21,6 +21,14 @@ rf_p100 <- ranger(Species ~., dat_n100, num.trees = 100,
                   importance = "permutation", write.forest = TRUE)
 holdout_p100 <- holdoutRF(Species ~., dat_n100, num.trees = 100)
 
+## General
+test_that("Importance p-values Janitza: Error if impurity importance", {
+  rf <- ranger(Species ~., iris, num.trees = 5, importance = "impurity")
+  expect_error(importance_pvalues(rf, method = "janitza"))
+  #expect_error(importance_pvalues(rf, method = "altmann", 
+  #                                formula = Species~., data = iris))
+})
+
 ## Janitza
 test_that("Importance p-values Janitza: warning if few negative importance values", {
   expect_warning(importance_pvalues(rf_p100, method = "janitza"))
@@ -29,7 +37,7 @@ test_that("Importance p-values Janitza: warning if few negative importance value
 test_that("Importance p-values Janitza: returns correct dimensions", {
   expect_warning(vimp <- importance_pvalues(rf_p100, method = "janitza"))
   expect_is(vimp, "matrix")
-  expect_equal(dim(vimp), c(104, 4))
+  expect_equal(dim(vimp), c(104, 2))
 })
 
 test_that("Importance p-values Janitza: error if no importance", {
@@ -55,14 +63,14 @@ test_that("Importance p-values Janitza: warning for regression", {
 test_that("Importance p-values Janitza-Holdout: returns correct dimensions", {
   expect_warning(vimp <- importance_pvalues(holdout_p100, method = "janitza"))
   expect_is(vimp, "matrix")
-  expect_equal(dim(vimp), c(104, 4))
+  expect_equal(dim(vimp), c(104, 2))
 })
 
 ## Altmann
 test_that("Importance p-values Altmann: returns correct dimensions", {
   vimp <- importance_pvalues(rf_p0, method = "altmann", formula = Species ~ ., data = iris)
   expect_is(vimp, "matrix")
-  expect_equal(dim(vimp), c(4, 4))
+  expect_equal(dim(vimp), c(4, 2))
 })
 
 test_that("Importance p-values Altmann: error if no importance", {
