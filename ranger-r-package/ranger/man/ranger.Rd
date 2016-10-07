@@ -183,7 +183,7 @@ Marvin N. Wright
 \references{
 \itemize{
   \item Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. \url{http://arxiv.org/abs/1508.04409}.
-  \item Schmid, M., Wright, M. N. & Ziegler, A. (2015). On the use of Harrell’s C for clinical risk prediction via random survival forests. Expert Systems with Applications 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
+  \item Schmid, M., Wright, M. N. & Ziegler, A. (2015). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Systems with Applications 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2016). Random forests for survival analysis using maximally selected rank statistics. Technical Report. \url{http://arxiv.org/abs/1605.03391}.
 
   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. 
