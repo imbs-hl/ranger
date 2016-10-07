@@ -498,7 +498,8 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "--catvars V1,V2,..            Comma separated list of names of (unordered) categorical variables. " << std::endl;
   std::cout << "    " << "                              Categorical variables must contain only positive integer values." << std::endl;
   std::cout << "    " << "--write                       Save forest to file <outprefix>.forest." << std::endl;
-  std::cout << "    " << "--predict FILE                Load forest from FILE and predict with new data." << std::endl;
+  std::cout << "    " << "--predict FILE                Load forest from FILE and predict with new data. The new data is expected in the exact same shape as the training data." << std::endl;
+  std::cout << "    " << "                              If the outcome of your new dataset is unknown, add a dummy column." << std::endl;
   std::cout << "    " << "--predall                     Return a matrix with individual predictions for each tree instead of aggregated " << std::endl;
   std::cout << "    " << "                              predictions for all trees (classification and regression only)." << std::endl;
   std::cout << "    " << "--predictiontype TYPE         Set type of prediction to:" << std::endl;
