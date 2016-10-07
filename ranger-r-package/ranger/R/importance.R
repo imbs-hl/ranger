@@ -51,25 +51,24 @@ importance.ranger <- function(x, ...) {
   return(x$variable.importance)
 }
 
-##' Compute variable importance with confidence intervals and p-values.
+##' Compute variable importance with p-values.
 ##'
 ##'
-##' @title ranger variable importance confidence intervals and p-values
+##' @title ranger variable importance p-values
 ##' @param x ranger or holdoutRF object.
 ##' @param method Method to compute p-values. Use "janitza" for the method by Janitza et al. (2015) or "altmann" for the non-parametric method by Altmann et al. (2010).
-##' @param conf.level Confidence level for confidence intervals.
 ##' @param num.permutations Number of permutations. Used in the "altmann" method only.
 ##' @param formula Object of class formula or character describing the model to fit. Used in the "altmann" method only.
 ##' @param data Training data of class data.frame or matrix. Used in the "altmann" method only.
 ##' @param ... Further arguments passed to ranger(). Used in the "altmann" method only.
-##' @return Variable importance, confidence intervals and p-values.
+##' @return Variable importance and p-values.
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
 ##' @references
 ##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forest for high dimensional data, Technical Report 185, University of Munich, \url{https://epub.ub.uni-muenchen.de/25587}. \cr
 ##'   Altmann, A., Tolosi, L., Sander, O. & Lengauer, T. (2010). Permutation importance: a corrected feature importance measure, Bioinformatics 26(10):1340-1347.
 ##' @export 
-importance_pvalues <- function(x, method = c("janitza", "altmann"), conf.level = 0.95, num.permutations = 100, formula = NULL, data = NULL, ...) {
+importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutations = 100, formula = NULL, data = NULL, ...) {
   if (class(x) != "ranger" & class(x) != "holdoutRF") {
     stop("Object is no ranger or holdoutRF object.")
   }
@@ -92,6 +91,9 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), conf.level =
     m1 <- x$variable.importance[x$variable.importance < 0]
     m2 <- x$variable.importance[x$variable.importance == 0]
     vimp <- c(m1, -m1, m2)
+    
+    ## Compute p-value
+    pval <- 1 - ecdf(vimp)(x$variable.importance)
     
     ## TODO: 100 ok? increase? 
     if (length(m1) == 0) {
@@ -116,20 +118,18 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), conf.level =
       ranger(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
              importance = x$importance.mode, ...)$variable.importance
     })
+    
+    ## Compute p-value
+    pval <- sapply(1:nrow(vimp), function(i) {
+      1 - ecdf(vimp[i, ])(x$variable.importance[i])
+    })
+    
   } else {
     stop("Unknown p-value method. Available methods are: 'janitza' and 'altmann'.")
   }
   
-  ## Compute p-value
-  pval <- 1 - ecdf(vimp)(x$variable.importance)
-  
-  ## Compute CI
-  width <- qnorm((1+conf.level)/2) * sd(vimp)
-  ci <- cbind(x$variable.importance - width, 
-              x$variable.importance + width)
-  
   ## Return VIMP and p-values
-  res <- cbind(x$variable.importance, ci, pval)
-  colnames(res) <- c("importance", "CI_lower", "CI_upper", "pvalue")
+  res <- cbind(x$variable.importance, pval)
+  colnames(res) <- c("importance", "pvalue")
   return(res)
 }
