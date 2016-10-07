@@ -1,22 +1,9 @@
-##### Version 0.5.6
-* Faster version of getTerminalNodeIDs(), included in predict()
-
-##### Version 0.5.5
-* Handle new factor levels in 'order' mode
-* Bug fixes
-
-##### Version 0.5.4
+##### Version 0.6.0
 * Set write.forest=TRUE by default
 * Add num.trees option to predict()
-* Bug fixes
-
-##### Version 0.5.3
-* Bug fixes
-
-##### Version 0.5.2
+* Faster version of getTerminalNodeIDs(), included in predict()
+* Handle new factor levels in 'order' mode
 * Use unadjusted p-value for 2 categories in maxstat splitting
-
-##### Version 0.5.1
 * Bug fixes
 
 ##### Version 0.5.0
