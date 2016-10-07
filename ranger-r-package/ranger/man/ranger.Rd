@@ -38,7 +38,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{case.weights}{Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.}
 
-\item{splitrule}{Splitting rule, regressiond and survival only. For regression one of "variance" or "maxstat" with default "variance". For survival "logrank", "C" or "maxstat" with default "logrank".}
+\item{splitrule}{Splitting rule, regression and survival only. For regression one of "variance" or "maxstat" with default "variance". For survival "logrank", "C" or "maxstat" with default "logrank".}
 
 \item{alpha}{For "maxstat" splitrule: Significance threshold to allow splitting.}
 
@@ -46,7 +46,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{split.select.weights}{Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 
-\item{always.split.variables}{Character vector with variable names to be always tried for splitting.}
+\item{always.split.variables}{Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.}
 
 \item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition' with default 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.}
 
@@ -58,9 +58,9 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
-\item{save.memory}{Use memory saving (but slower) splitting mode. No effect for GWAS data.}
+\item{save.memory}{Use memory saving (but slower) splitting mode. No effect for GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
 
-\item{verbose}{Verbose output on or off.}
+\item{verbose}{Show computation status and estimated runtime.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}.}
 
@@ -109,8 +109,8 @@ Predictions are class probabilities for each sample.
 In contrast to other implementations, each tree returns a probability estimate and these estimates are averaged for the forest probability estimate.
 For details see Malley et al. (2012).
 
-Note that for classification and regression nodes with size smaller than min.node.size can occur, like in original Random Forest.
-For survival all nodes contain at least min.node.size samples. 
+Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
+For survival all nodes contain at \code{min.node.size} samples. 
 Variables selected with \code{always.split.variables} are tried additionaly to the mtry variables randomly selected.
 In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
 Weights do not need to sum up to 1, they will be normalized later. 
@@ -125,9 +125,9 @@ For multiclass classification and survival outcomes, 'order' is experimental and
 The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels. 
 Note that the factors are only reordered once and not again in each split.
 
-For a large number of variables and data frame as input data the formula interface can be slow or impossible to use.
-Alternatively dependent.variable.name (and status.variable.name for survival) can be used.
-Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets.
+For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
+Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
+Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing.
 
 For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
 See the Examples section below for a demonstration using \code{Plink} data.
@@ -137,11 +137,8 @@ Note that missing values are treated as an extra category while splitting.
 
 See \url{https://github.com/imbs-hl/ranger} for the development version.
 
-To use multithreading on Microsoft Windows platforms, there are currently two options:
-\itemize{
- \item Use R-devel with the new toolchain
- \item Install a binary version of ranger, download: \url{https://github.com/imbs-hl/ranger/releases}
-}
+With recent R versions, multithreading on Windows platforms should just work. 
+If you compile yourself, the new RTools toolchain is required.
 }
 \examples{
 require(ranger)
@@ -186,7 +183,7 @@ Marvin N. Wright
 \references{
 \itemize{
   \item Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. \url{http://arxiv.org/abs/1508.04409}.
-  \item Schmid, M., Wright, M. N. & Ziegler, A. (2015). On the Use of Harrell's C for Node Splitting in Random Survival Forests. Technical Report. \url{http://arxiv.org/abs/1507.03092}. 
+  \item Schmid, M., Wright, M. N. & Ziegler, A. (2015). On the use of Harrell’s C for clinical risk prediction via random survival forests. Expert Systems with Applications 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2016). Random forests for survival analysis using maximally selected rank statistics. Technical Report. \url{http://arxiv.org/abs/1605.03391}.
 
   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. 
