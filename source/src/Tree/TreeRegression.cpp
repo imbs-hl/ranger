@@ -102,6 +102,8 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   bool stop;
   if (splitrule == MAXSTAT) {
     stop = findBestSplitMaxstat(nodeID, possible_split_varIDs);
+  } else if (splitrule == EXTRATREES) {
+    stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);
   }
@@ -453,6 +455,189 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
     return false;
+  }
+}
+
+bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+
+  size_t num_samples_node = sampleIDs[nodeID].size();
+  double best_decrease = -1;
+  size_t best_varID = 0;
+  double best_value = 0;
+
+  // Compute sum of responses in node
+  double sum_node = 0;
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    sum_node += data->get(sampleID, dependent_varID);
+  }
+
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if ((*is_ordered_variable)[varID]) {
+      findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+    } else {
+      findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
+          best_decrease);
+    }
+  }
+
+  // Stop if no good split found
+  if (best_decrease < 0) {
+    return true;
+  }
+
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+
+  // Compute decrease of impurity for this node and add to variable importance if needed
+  if (importance_mode == IMP_GINI) {
+    addImpurityImportance(nodeID, best_varID, best_decrease);
+  }
+  return false;
+}
+
+// TODO: Change
+void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+    double& best_value, size_t& best_varID, double& best_decrease) {
+
+  // TODO: Remove
+  throw std::runtime_error("ExtraTrees for regression not implemented yet.");
+
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return;
+  }
+
+  // Remove largest value because no split possible
+  possible_split_values.pop_back();
+
+  // Initialize with 0m if not in memory efficient mode, use pre-allocated space
+  size_t num_splits = possible_split_values.size();
+  double* sums_right;
+  size_t* n_right;
+  if (memory_saving_splitting) {
+    sums_right = new double[num_splits]();
+    n_right = new size_t[num_splits]();
+  } else {
+    sums_right = sums;
+    n_right = counter;
+    std::fill(sums_right, sums_right + num_splits, 0);
+    std::fill(n_right, n_right + num_splits, 0);
+  }
+
+  // Sum in right child and possbile split
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    double value = data->get(sampleID, varID);
+    double response = data->get(sampleID, dependent_varID);
+
+    // Count samples until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+      if (value > possible_split_values[i]) {
+        ++n_right[i];
+        sums_right[i] += response;
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Compute decrease of impurity for each possible split
+  for (size_t i = 0; i < num_splits; ++i) {
+
+    // Stop if one child empty
+    size_t n_left = num_samples_node - n_right[i];
+    if (n_left == 0 || n_right[i] == 0) {
+      continue;
+    }
+
+    double sum_right = sums_right[i];
+    double sum_left = sum_node - sum_right;
+    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = possible_split_values[i];
+      best_varID = varID;
+      best_decrease = decrease;
+    }
+  }
+
+  if (memory_saving_splitting) {
+    delete[] sums_right;
+    delete[] n_right;
+  }
+}
+
+// TODO: Change
+void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double sum_node,
+    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+
+  // TODO: Remove
+  throw std::runtime_error("ExtraTrees unordered for regression not implemented yet.");
+
+  // Create possible split values
+  std::vector<double> factor_levels;
+  data->getAllValues(factor_levels, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (factor_levels.size() < 2) {
+    return;
+  }
+
+  // Number of possible splits is 2^num_levels
+  size_t num_splits = (1 << factor_levels.size());
+
+  // Compute decrease of impurity for each possible split
+  // Split where all left (0) or all right (1) are excluded
+  // The second half of numbers is just left/right switched the first half -> Exclude second half
+  for (size_t local_splitID = 1; local_splitID < num_splits / 2; ++local_splitID) {
+
+    // Compute overall splitID by shifting local factorIDs to global positions
+    size_t splitID = 0;
+    for (size_t j = 0; j < factor_levels.size(); ++j) {
+      if ((local_splitID & (1 << j))) {
+        double level = factor_levels[j];
+        size_t factorID = floor(level) - 1;
+        splitID = splitID | (1 << factorID);
+      }
+    }
+
+    // Initialize
+    double sum_right = 0;
+    size_t n_right = 0;
+
+    // Sum in right child
+    for (auto& sampleID : sampleIDs[nodeID]) {
+      double response = data->get(sampleID, dependent_varID);
+      double value = data->get(sampleID, varID);
+      size_t factorID = floor(value) - 1;
+
+      // If in right child, count
+      // In right child, if bitwise splitID at position factorID is 1
+      if ((splitID & (1 << factorID))) {
+        ++n_right;
+        sum_right += response;
+      }
+    }
+    size_t n_left = num_samples_node - n_right;
+
+    // Sum of squares
+    double sum_left = sum_node - sum_right;
+    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = splitID;
+      best_varID = varID;
+      best_decrease = decrease;
+    }
   }
 }
 

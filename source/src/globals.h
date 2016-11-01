@@ -84,7 +84,8 @@ enum SplitRule {
   LOGRANK = 1,
   AUC = 2,
   AUC_IGNORE_TIES = 3,
-  MAXSTAT = 4
+  MAXSTAT = 4,
+  EXTRATREES = 5
 };
 
 // Prediction type

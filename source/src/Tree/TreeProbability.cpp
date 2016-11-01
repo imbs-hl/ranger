@@ -114,7 +114,13 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   }
 
   // Find best split, stop if no decrease of impurity
-  bool stop = findBestSplit(nodeID, possible_split_varIDs);
+  bool stop;
+  if (splitrule == EXTRATREES) {
+    stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
+  } else {
+    stop = findBestSplit(nodeID, possible_split_varIDs);
+  }
+
   if (stop) {
     addToTerminalNodes(nodeID);
     return true;
@@ -182,7 +188,7 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
           best_decrease);
     }
   }
-  
+
   delete[] class_counts;
 
   // Stop if no good split found
@@ -414,9 +420,217 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
   }
 }
 
+bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+
+  size_t num_samples_node = sampleIDs[nodeID].size();
+  size_t num_classes = class_values->size();
+  double best_decrease = -1;
+  size_t best_varID = 0;
+  double best_value = 0;
+
+  size_t* class_counts = new size_t[num_classes]();
+  // Compute overall class counts
+  for (size_t i = 0; i < num_samples_node; ++i) {
+    size_t sampleID = sampleIDs[nodeID][i];
+    uint sample_classID = (*response_classIDs)[sampleID];
+    ++class_counts[sample_classID];
+  }
+
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if ((*is_ordered_variable)[varID]) {
+      findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+          best_decrease);
+    } else {
+      findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
+          best_varID, best_decrease);
+    }
+  }
+
+  delete[] class_counts;
+
+  // Stop if no good split found
+  if (best_decrease < 0) {
+    return true;
+  }
+
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+
+  // Compute decrease of impurity for this node and add to variable importance if needed
+  if (importance_mode == IMP_GINI) {
+    addImpurityImportance(nodeID, best_varID, best_decrease);
+  }
+  return false;
+}
+
+// TODO: Change
+void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
+    size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+
+  // TODO: Remove
+  throw std::runtime_error("ExtraTrees for probability not implemented yet.");
+
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return;
+  }
+
+  // Remove largest value because no split possible
+  possible_split_values.pop_back();
+
+  // Initialize with 0, if not in memory efficient mode, use pre-allocated space
+  size_t num_splits = possible_split_values.size();
+  size_t* class_counts_right;
+  size_t* n_right;
+  if (memory_saving_splitting) {
+    class_counts_right = new size_t[num_splits * num_classes]();
+    n_right = new size_t[num_splits]();
+  } else {
+    class_counts_right = counter_per_class;
+    n_right = counter;
+    std::fill(class_counts_right, class_counts_right + num_splits * num_classes, 0);
+    std::fill(n_right, n_right + num_splits, 0);
+  }
+
+  // Count samples in right child per class and possbile split
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    double value = data->get(sampleID, varID);
+    uint sample_classID = (*response_classIDs)[sampleID];
+
+    // Count samples until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+      if (value > possible_split_values[i]) {
+        ++n_right[i];
+        ++class_counts_right[i * num_classes + sample_classID];
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Compute decrease of impurity for each possible split
+  for (size_t i = 0; i < num_splits; ++i) {
+
+    // Stop if one child empty
+    size_t n_left = num_samples_node - n_right[i];
+    if (n_left == 0 || n_right[i] == 0) {
+      continue;
+    }
+
+    // Sum of squares
+    double sum_left = 0;
+    double sum_right = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      size_t class_count_right = class_counts_right[i * num_classes + j];
+      size_t class_count_left = class_counts[j] - class_count_right;
+
+      sum_right += class_count_right * class_count_right;
+      sum_left += class_count_left * class_count_left;
+    }
+
+    // Decrease of impurity
+    double decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = possible_split_values[i];
+      best_varID = varID;
+      best_decrease = decrease;
+    }
+  }
+
+  if (memory_saving_splitting) {
+    delete[] class_counts_right;
+    delete[] n_right;
+  }
+}
+
+// TODO: Change
+void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
+    size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+
+  // TODO: Remove
+  throw std::runtime_error("ExtraTrees unordered for probability not implemented yet.");
+
+  // Create possible split values
+  std::vector<double> factor_levels;
+  data->getAllValues(factor_levels, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (factor_levels.size() < 2) {
+    return;
+  }
+
+  // Number of possible splits is 2^num_levels
+  size_t num_splits = (1 << factor_levels.size());
+
+  // Compute decrease of impurity for each possible split
+  // Split where all left (0) or all right (1) are excluded
+  // The second half of numbers is just left/right switched the first half -> Exclude second half
+  for (size_t local_splitID = 1; local_splitID < num_splits / 2; ++local_splitID) {
+
+    // Compute overall splitID by shifting local factorIDs to global positions
+    size_t splitID = 0;
+    for (size_t j = 0; j < factor_levels.size(); ++j) {
+      if ((local_splitID & (1 << j))) {
+        double level = factor_levels[j];
+        size_t factorID = floor(level) - 1;
+        splitID = splitID | (1 << factorID);
+      }
+    }
+
+    // Initialize
+    size_t* class_counts_right = new size_t[num_classes]();
+    size_t n_right = 0;
+
+    // Count classes in left and right child
+    for (auto& sampleID : sampleIDs[nodeID]) {
+      uint sample_classID = (*response_classIDs)[sampleID];
+      double value = data->get(sampleID, varID);
+      size_t factorID = floor(value) - 1;
+
+      // If in right child, count
+      // In right child, if bitwise splitID at position factorID is 1
+      if ((splitID & (1 << factorID))) {
+        ++n_right;
+        ++class_counts_right[sample_classID];
+      }
+    }
+    size_t n_left = num_samples_node - n_right;
+
+    // Sum of squares
+    double sum_left = 0;
+    double sum_right = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      size_t class_count_right = class_counts_right[j];
+      size_t class_count_left = class_counts[j] - class_count_right;
+
+      sum_right += class_count_right * class_count_right;
+      sum_left += class_count_left * class_count_left;
+    }
+
+    // Decrease of impurity
+    double decrease = sum_left / (double) n_left + sum_right / (double) n_right;
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = splitID;
+      best_varID = varID;
+      best_decrease = decrease;
+    }
+  }
+}
+
 void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double decrease) {
 
-   std::vector<size_t> class_counts;
+  std::vector<size_t> class_counts;
   class_counts.resize(class_values->size(), 0);
 
   for (auto& sampleID : sampleIDs[nodeID]) {
