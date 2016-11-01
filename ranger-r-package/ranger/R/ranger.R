@@ -489,6 +489,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       stop("Error: maxstat splitrule applicable to regression or survival data only.")
     }
+  } else if (splitrule == "extratrees") {
+    splitrule.num <- 5
   } else {
     stop("Error: Unknown splitrule.")
   }
