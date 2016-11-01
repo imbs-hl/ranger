@@ -301,6 +301,9 @@ int ArgumentHandler::processArguments() {
         case 4:
           splitrule = MAXSTAT;
           break;
+        case 5:
+          splitrule = EXTRATREES;
+          break;
         default:
           throw std::runtime_error("");
           break;
@@ -520,6 +523,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              RULE = 2: AUC for Survival, not available for Classification and Regression." << std::endl;
   std::cout << "    " << "                              RULE = 3: AUC (ignore ties) for Survival, not available for Classification and Regression." << std::endl;
   std::cout << "    " << "                              RULE = 4: MAXSTAT for Survival and Regression, not available for Classification." << std::endl;
+  std::cout << "    " << "                              RULE = 5: ExtraTrees for all tree types." << std::endl;
   std::cout << "    " << "                              (Default: 1)" << std::endl;
   std::cout << "    " << "--alpha VAL                   Significance threshold to allow splitting (MAXSTAT splitrule only)." << std::endl;
   std::cout << "    " << "--minprop VAL                 Lower quantile of covariate distribtuion to be considered for splitting (MAXSTAT splitrule only)." << std::endl;
