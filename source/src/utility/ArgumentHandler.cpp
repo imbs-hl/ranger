@@ -36,10 +36,11 @@ wright@imbs.uni-luebeck.de
 
 ArgumentHandler::ArgumentHandler(int argc, char **argv) :
     caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), predict(""), predictiontype(
-        DEFAULT_PREDICTIONTYPE), splitweights(""), nthreads(DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix(
-        "ranger_out"), probability(false), splitrule(DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(
-        true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0) {
+        DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
+        DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), file(""), impmeasure(
+        DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix("ranger_out"), probability(false), splitrule(
+        DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(true), verbose(false), write(false), treetype(
+        TREE_CLASSIFICATION), seed(0) {
   this->argc = argc;
   this->argv = argv;
 }
@@ -50,7 +51,7 @@ ArgumentHandler::~ArgumentHandler() {
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NP:Q:S:U:XZa:b:c:f:hil::m:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NP:Q:R:S:U:XZa:b:c:f:hil::m:o:pr:s:t:uvwy:z:";
 
   // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -64,6 +65,7 @@ int ArgumentHandler::processArguments() {
       { "savemem",              no_argument,        0, 'N'},
       { "predict",              required_argument,  0, 'P'},
       { "predictiontype",       required_argument,  0, 'Q'},
+      { "randomsplits",         required_argument,  0, 'R'},
       { "splitweights",         required_argument,  0, 'S'},
       { "nthreads",             required_argument,  0, 'U'},
       { "predall",              no_argument,        0, 'X'},
@@ -168,6 +170,20 @@ int ArgumentHandler::processArguments() {
             throw std::runtime_error("Illegal prediction type selected. See '--help' for details.");
           }
           break;
+
+    case 'R':
+      try {
+        int temp = std::stoi(optarg);
+        if (temp < 1) {
+          throw std::runtime_error("");
+        } else {
+          randomsplits = temp;
+        }
+      } catch (...) {
+        throw std::runtime_error(
+            "Illegal argument for option 'randomsplits'. Please give a positive integer. See '--help' for details.");
+      }
+      break;
 
     case 'S':
       splitweights = optarg;
@@ -525,6 +541,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              RULE = 4: MAXSTAT for Survival and Regression, not available for Classification." << std::endl;
   std::cout << "    " << "                              RULE = 5: ExtraTrees for all tree types." << std::endl;
   std::cout << "    " << "                              (Default: 1)" << std::endl;
+  std::cout << "    " << "--randomsplits N              Number of random splits to consider for each splitting variable (ExtraTrees splitrule only)." << std::endl;
   std::cout << "    " << "--alpha VAL                   Significance threshold to allow splitting (MAXSTAT splitrule only)." << std::endl;
   std::cout << "    " << "--minprop VAL                 Lower quantile of covariate distribtuion to be considered for splitting (MAXSTAT splitrule only)." << std::endl;
   std::cout << "    " << "--caseweights FILE            Filename of case weights file." << std::endl;

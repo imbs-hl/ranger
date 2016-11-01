@@ -178,6 +178,7 @@ protected:
   SplitRule splitrule;
   double alpha;
   double minprop;
+  uint num_random_splits;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(Tree);

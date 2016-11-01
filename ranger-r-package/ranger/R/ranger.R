@@ -88,6 +88,7 @@
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
@@ -181,8 +182,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
                    min.node.size = NULL, replace = TRUE, 
                    sample.fraction = ifelse(replace, 1, 0.632), 
-                   case.weights = NULL, 
-                   splitrule = NULL, alpha = 0.5, minprop = 0.1,
+                   case.weights = NULL, splitrule = NULL, 
+                   num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = "ignore",
                    scale.permutation.importance = FALSE,
@@ -502,6 +503,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (minprop < 0 | minprop > 0.5) {
     stop("Error: Invalid value for minprop, please give a value between 0 and 0.5.")
   }
+  
+  ## Extra trees
+  if (!is.numeric(num.random.splits) | num.random.splits < 1) {
+    stop("Error: Invalid value for num.random.splits, please give a positive integer.")
+  }
 
   ## Unordered factors  
   if (respect.unordered.factors == "partition") {
@@ -573,7 +579,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       status.variable.name, prediction.mode, loaded.forest, sparse.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type)
+                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
+                      num.random.splits)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
