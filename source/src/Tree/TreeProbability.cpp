@@ -466,24 +466,26 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   return false;
 }
 
-// TODO: Change
 void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
     size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
 
-  // TODO: Remove
-  throw std::runtime_error("ExtraTrees for probability not implemented yet.");
-
-  // Create possible split values
-  std::vector<double> possible_split_values;
-  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+  // Get min/max values of covariate in node
+  double min;
+  double max;
+  data->getMinMaxValues(min, max, sampleIDs[nodeID], varID);
 
   // Try next variable if all equal for this
-  if (possible_split_values.size() < 2) {
+  if (min == max) {
     return;
   }
 
-  // Remove largest value because no split possible
-  possible_split_values.pop_back();
+  // Create possible split values: Draw randomly between min and max
+  std::vector<double> possible_split_values;
+  std::uniform_real_distribution<double> udist(min, max);
+  possible_split_values.reserve(num_random_splits);
+  for (size_t i = 0; i < num_random_splits; ++i) {
+    possible_split_values.push_back(udist(random_number_generator));
+  }
 
   // Initialize with 0, if not in memory efficient mode, use pre-allocated space
   size_t num_splits = possible_split_values.size();
