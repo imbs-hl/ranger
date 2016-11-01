@@ -111,6 +111,8 @@ bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possibl
 
   if (splitrule == MAXSTAT) {
     return findBestSplitMaxstat(nodeID, possible_split_varIDs);
+  } else if (splitrule == EXTRATREES) {
+    return findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     return findBestSplit(nodeID, possible_split_varIDs);
   }
@@ -637,3 +639,223 @@ void TreeSurvival::computeAucSplit(double time_k, double time_l, double status_k
   }
 
 }
+
+bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+
+  double best_decrease = -1;
+  size_t num_samples_node = sampleIDs[nodeID].size();
+  size_t best_varID = 0;
+  double best_value = 0;
+
+  computeDeathCounts(nodeID);
+
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * min_node_size) {
+
+    // For all possible split variables
+    for (auto& varID : possible_split_varIDs) {
+
+      // Find best split value, if ordered consider all values as split values, else all 2-partitions
+      if ((*is_ordered_variable)[varID]) {
+        findBestSplitValueExtraTrees(nodeID, varID, best_value, best_varID, best_decrease);
+      } else {
+        findBestSplitValueExtraTreesUnordered(nodeID, varID, best_value, best_varID, best_decrease);
+      }
+
+    }
+  }
+
+  // Stop and save CHF if no good split found (this is terminal node).
+  if (best_decrease < 0) {
+    computeSurvival(nodeID);
+    return true;
+  } else {
+    // If not terminal node save best values
+    split_varIDs[nodeID] = best_varID;
+    split_values[nodeID] = best_value;
+    return false;
+  }
+}
+
+// TODO: Change
+void TreeSurvival::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
+    double& best_logrank) {
+
+  // TODO: Remove
+  throw std::runtime_error("ExtraTrees for survival not implemented yet.");
+
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return;
+  }
+
+  // Remove largest value because no split possible
+  possible_split_values.pop_back();
+
+  size_t num_splits = possible_split_values.size();
+
+  // Initialize
+  size_t* num_deaths_right_child = new size_t[num_splits * num_timepoints]();
+  size_t* delta_samples_at_risk_right_child = new size_t[num_splits * num_timepoints]();
+  size_t* num_samples_right_child = new size_t[num_splits]();
+
+  computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
+      delta_samples_at_risk_right_child, num_deaths_right_child);
+
+  // Compute logrank test for all splits and use best
+  for (size_t i = 0; i < num_splits; ++i) {
+    double numerator = 0;
+    double denominator_squared = 0;
+
+    // Stop if minimal node size reached
+    size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
+    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
+      continue;
+    }
+
+    // Compute logrank test statistic for this split
+    size_t num_samples_at_risk_right_child = num_samples_right_child[i];
+    for (size_t t = 0; t < num_timepoints; ++t) {
+      if (num_samples_at_risk[t] < 2 || num_samples_at_risk_right_child < 1) {
+        break;
+      }
+
+      if (num_deaths[t] > 0) {
+        // Numerator and demoninator for log-rank test, notation from Ishwaran et al.
+        double di = (double) num_deaths[t];
+        double di1 = (double) num_deaths_right_child[i * num_timepoints + t];
+        double Yi = (double) num_samples_at_risk[t];
+        double Yi1 = (double) num_samples_at_risk_right_child;
+        numerator += di1 - Yi1 * (di / Yi);
+        denominator_squared += (Yi1 / Yi) * (1.0 - Yi1 / Yi) * ((Yi - di) / (Yi - 1)) * di;
+      }
+
+      // Reduce number of samples at risk for next timepoint
+      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
+
+    }
+    double logrank = -1;
+    if (denominator_squared != 0) {
+      logrank = fabs(numerator / sqrt(denominator_squared));
+    }
+
+    if (logrank > best_logrank) {
+      best_value = possible_split_values[i];
+      best_varID = varID;
+      best_logrank = logrank;
+    }
+  }
+
+  delete[] num_deaths_right_child;
+  delete[] delta_samples_at_risk_right_child;
+  delete[] num_samples_right_child;
+}
+
+// TODO: Change
+void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double& best_value,
+    size_t& best_varID, double& best_logrank) {
+
+  // TODO: Remove
+  throw std::runtime_error("ExtraTrees unordered for survival not implemented yet.");
+
+  // Create possible split values
+  std::vector<double> factor_levels;
+  data->getAllValues(factor_levels, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (factor_levels.size() < 2) {
+    return;
+  }
+
+  // Number of possible splits is 2^num_levels
+  size_t num_splits = (1 << factor_levels.size());
+
+  // Compute logrank test statistic for each possible split
+  // Split where all left (0) or all right (1) are excluded
+  // The second half of numbers is just left/right switched the first half -> Exclude second half
+  for (size_t local_splitID = 1; local_splitID < num_splits / 2; ++local_splitID) {
+
+    // Compute overall splitID by shifting local factorIDs to global positions
+    size_t splitID = 0;
+    for (size_t j = 0; j < factor_levels.size(); ++j) {
+      if ((local_splitID & (1 << j))) {
+        double level = factor_levels[j];
+        size_t factorID = floor(level) - 1;
+        splitID = splitID | (1 << factorID);
+      }
+    }
+
+    // Initialize
+    size_t* num_deaths_right_child = new size_t[num_timepoints]();
+    size_t* delta_samples_at_risk_right_child = new size_t[num_timepoints]();
+    size_t num_samples_right_child = 0;
+    double numerator = 0;
+    double denominator_squared = 0;
+
+    // Count deaths in right child per timepoint
+    for (auto& sampleID : sampleIDs[nodeID]) {
+      size_t survival_timeID = (*response_timepointIDs)[sampleID];
+      double value = data->get(sampleID, varID);
+      size_t factorID = floor(value) - 1;
+
+      // If in right child, count
+      // In right child, if bitwise splitID at position factorID is 1
+      if ((splitID & (1 << factorID))) {
+        ++num_samples_right_child;
+        ++delta_samples_at_risk_right_child[survival_timeID];
+        if (data->get(sampleID, status_varID) == 1) {
+          ++num_deaths_right_child[survival_timeID];
+        }
+      }
+
+    }
+
+    // Stop if minimal node size reached
+    size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child;
+    if (num_samples_right_child < min_node_size || num_samples_left_child < min_node_size) {
+      delete[] num_deaths_right_child;
+      delete[] delta_samples_at_risk_right_child;
+      continue;
+    }
+
+    // Compute logrank test statistic for this split
+    size_t num_samples_at_risk_right_child = num_samples_right_child;
+    for (size_t t = 0; t < num_timepoints; ++t) {
+      if (num_samples_at_risk[t] < 2 || num_samples_at_risk_right_child < 1) {
+        break;
+      }
+
+      if (num_deaths[t] > 0) {
+        // Numerator and demoninator for log-rank test, notation from Ishwaran et al.
+        double di = (double) num_deaths[t];
+        double di1 = (double) num_deaths_right_child[t];
+        double Yi = (double) num_samples_at_risk[t];
+        double Yi1 = (double) num_samples_at_risk_right_child;
+        numerator += di1 - Yi1 * (di / Yi);
+        denominator_squared += (Yi1 / Yi) * (1.0 - Yi1 / Yi) * ((Yi - di) / (Yi - 1)) * di;
+      }
+
+      // Reduce number of samples at risk for next timepoint
+      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[t];
+    }
+    double logrank = -1;
+    if (denominator_squared != 0) {
+      logrank = fabs(numerator / sqrt(denominator_squared));
+    }
+
+    if (logrank > best_logrank) {
+      best_value = splitID;
+      best_varID = varID;
+      best_logrank = logrank;
+    }
+
+    delete[] num_deaths_right_child;
+    delete[] delta_samples_at_risk_right_child;
+  }
+
+}
+
