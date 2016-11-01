@@ -7,8 +7,8 @@
 ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   importance = "none", write.forest = TRUE, probability = FALSE,
   min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
-  1, 0.632), case.weights = NULL, splitrule = NULL, alpha = 0.5,
-  minprop = 0.1, split.select.weights = NULL,
+  1, 0.632), case.weights = NULL, splitrule = NULL, num.random.splits = 1,
+  alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = "ignore",
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
   holdout = FALSE, num.threads = NULL, save.memory = FALSE,
@@ -39,6 +39,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{case.weights}{Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.}
 
 \item{splitrule}{Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
+
+\item{num.random.splits}{For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.}
 
 \item{alpha}{For "maxstat" splitrule: Significance threshold to allow splitting.}
 
