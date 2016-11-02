@@ -1,3 +1,6 @@
+##### Version 0.6.1
+* Add randomized splitting (extraTrees)
+
 ##### Version 0.6.0
 * New CRAN version
 
