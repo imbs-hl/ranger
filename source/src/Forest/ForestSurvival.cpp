@@ -107,6 +107,11 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
       response_timepointIDs.push_back(timepointID);
     }
   }
+
+  // Sort data if extratrees and not memory saving mode
+  if (splitrule == EXTRATREES && !memory_saving_splitting) {
+    data->sort();
+  }
 }
 
 void ForestSurvival::growInternal() {
