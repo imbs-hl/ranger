@@ -9,9 +9,14 @@ test_that("extratrees splitting works for classification", {
 })
 
 test_that("extratrees unordered splitting works for classification", {
-  rf <- ranger(Species ~ ., iris, splitrule = "extratrees", respect.unordered.factors = "partition")
+  n <- 20
+  dat <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
+                    y = factor(rbinom(n, 1, 0.5)), 
+                    stringsAsFactors = FALSE)
+  rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2, 
+               splitrule = "extratrees", respect.unordered.factors = 'partition')
+  
   expect_is(rf, "ranger")
-  expect_lt(rf$prediction.error, 0.2)
 })
 
 test_that("extratrees splitting works for probability estimation", {
@@ -21,9 +26,13 @@ test_that("extratrees splitting works for probability estimation", {
 })
 
 test_that("extratrees unordered splitting works for probability estimation", {
-  rf <- ranger(Species ~ ., iris, probability = TRUE, splitrule = "extratrees", respect.unordered.factors = "partition")
+  n <- 20
+  dat <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
+                    y = factor(rbinom(n, 1, 0.5)), 
+                    stringsAsFactors = FALSE)
+  rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2, 
+               splitrule = "extratrees", respect.unordered.factors = 'partition')
   expect_is(rf, "ranger")
-  expect_lt(rf$prediction.error, 0.2)
 })
 
 test_that("extratrees splitting works for regression", {
