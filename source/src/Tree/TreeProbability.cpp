@@ -554,38 +554,51 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
   }
 }
 
-// TODO: Change
 void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
     size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
 
-  // TODO: Remove
-  throw std::runtime_error("ExtraTrees unordered for probability not implemented yet.");
+  size_t num_unique_values = data->getNumUniqueDataValues(varID);
 
-  // Create possible split values
-  std::vector<double> factor_levels;
-  data->getAllValues(factor_levels, sampleIDs[nodeID], varID);
-
-  // Try next variable if all equal for this
-  if (factor_levels.size() < 2) {
-    return;
+  // Get all factor indices in node
+  std::vector<bool> factor_in_node(num_unique_values, false);
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    size_t index = data->getIndex(sampleID, varID);
+    factor_in_node[index] = true;
   }
 
-  // Number of possible splits is 2^num_levels
-  size_t num_splits = (1 << factor_levels.size());
+  // Vector of indices in and out of node
+  std::vector<size_t> indices_in_node;
+  std::vector<size_t> indices_out_node;
+  indices_in_node.reserve(num_unique_values);
+  indices_out_node.reserve(num_unique_values);
+  for (size_t i = 0; i < num_unique_values; ++i) {
+    if (factor_in_node[i]) {
+      indices_in_node.push_back(i);
+    } else {
+      indices_out_node.push_back(i);
+    }
+  }
 
-  // Compute decrease of impurity for each possible split
-  // Split where all left (0) or all right (1) are excluded
-  // The second half of numbers is just left/right switched the first half -> Exclude second half
-  for (size_t local_splitID = 1; local_splitID < num_splits / 2; ++local_splitID) {
+  // Generate num_random_splits splits
+  for (size_t i = 0; i < num_random_splits; ++i) {
+    // Draw random subsets, use a random number of samples
+    std::vector<size_t> split_subset;
+    split_subset.reserve(num_unique_values);
+    if (indices_in_node.size() > 0) {
+      std::uniform_int_distribution<size_t> udist(1, indices_in_node.size());
+      drawWithoutReplacementFromVector(split_subset, indices_in_node, random_number_generator,
+          udist(random_number_generator));
+    }
+    if (indices_out_node.size() > 0) {
+      std::uniform_int_distribution<size_t> udist(1, indices_out_node.size());
+      drawWithoutReplacementFromVector(split_subset, indices_out_node, random_number_generator,
+          udist(random_number_generator));
+    }
 
-    // Compute overall splitID by shifting local factorIDs to global positions
+    // Assign union of the two subsets to right child
     size_t splitID = 0;
-    for (size_t j = 0; j < factor_levels.size(); ++j) {
-      if ((local_splitID & (1 << j))) {
-        double level = factor_levels[j];
-        size_t factorID = floor(level) - 1;
-        splitID = splitID | (1 << factorID);
-      }
+    for (auto& idx : split_subset) {
+      splitID |= 1 << idx;
     }
 
     // Initialize

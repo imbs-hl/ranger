@@ -508,6 +508,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (!is.numeric(num.random.splits) | num.random.splits < 1) {
     stop("Error: Invalid value for num.random.splits, please give a positive integer.")
   }
+  if (splitrule.num == 5 & save.memory & respect.unordered.factors == "partition") {
+    stop("Error: save.memory option not possible in extraTrees mode with unordered predictors.")
+  }
 
   ## Unordered factors  
   if (respect.unordered.factors == "partition") {

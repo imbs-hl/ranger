@@ -478,9 +478,14 @@ void ArgumentHandler::checkArguments() {
     throw std::runtime_error("Case weights required to use holdout mode.");
   }
 
-  // Unordered survival splitting only available for logrank splitrule
-  if (treetype == TREE_SURVIVAL && !catvars.empty() && splitrule != LOGRANK) {
+  // Unordered survival splitting only available for logrank or extratrees splitrule
+  if (treetype == TREE_SURVIVAL && !catvars.empty() && (splitrule != LOGRANK && splitrule != EXTRATREES)) {
     throw std::runtime_error("Unordered splitting in survival trees only available for LOGRANK splitrule.");
+  }
+
+  // Memory save option not allowed in unordered extratrees mode
+  if (splitrule == EXTRATREES && !catvars.empty() && savemem) {
+    throw std::runtime_error("savemem option not possible in extraTrees mode with unordered predictors.");
   }
 }
 
