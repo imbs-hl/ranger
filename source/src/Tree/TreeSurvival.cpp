@@ -769,13 +769,6 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
     factor_in_node[index] = true;
   }
 
-  // TODO: Remove
-//  std::cout << "factor_in_node: ";
-//  for (auto val : factor_in_node) {
-//    std::cout << val;
-//  }
-//  std::cout << std::endl;
-
   // Vector of indices in and out of node
   std::vector<size_t> indices_in_node;
   std::vector<size_t> indices_out_node;
@@ -788,20 +781,6 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
       indices_out_node.push_back(i);
     }
   }
-
-//  // TODO: Remove
-//  std::cout << "indices_in_node: ";
-//  for (auto& val : indices_in_node) {
-//    std::cout << val << " ";
-//  }
-//  std::cout << std::endl;
-//
-//  // TODO: Remove
-//  std::cout << "indices_out_node: ";
-//  for (auto& val : indices_out_node) {
-//    std::cout << val << " ";
-//  }
-//  std::cout << std::endl;
 
   // Generate num_random_splits splits
   for (size_t i = 0; i < num_random_splits; ++i) {
