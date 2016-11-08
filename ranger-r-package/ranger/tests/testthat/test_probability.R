@@ -37,7 +37,7 @@ test_that("predict works for single observations, probability prediction", {
   rf <- ranger(Species ~ ., iris, write.forest = TRUE, probability = TRUE)
   pred <- predict(rf, head(iris, 1))
   expect_is(pred$predictions, "matrix")
-  expect_equal(names(which.max(pred$predictions)), as.character(iris[1,"Species"]))
+  expect_equal(names(which.max(pred$predictions[1, ])), as.character(iris[1,"Species"]))
 })
 
 test_that("Probability estimation works correctly if labels are reversed", {
