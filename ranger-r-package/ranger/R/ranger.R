@@ -205,13 +205,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     gwa.mode <- FALSE
   }
   
-  ## Check missing values
-  if (any(is.na(data))) {
-    offending_columns <- colnames(data)[colSums(is.na(data)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
-  }
-  
   ## Formula interface. Use whole data frame is no formula provided and depvarname given
   if (is.null(formula)) {
     if (is.null(dependent.variable.name)) {
@@ -229,8 +222,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (class(formula) != "formula") {
       stop("Error: Invalid formula.")
     }
-    data.selected <- model.frame(formula, data, na.action = na.fail)
+    data.selected <- model.frame(formula, data, na.action = NULL)
     response <- data.selected[[1]]
+  }
+  
+  ## Check missing values
+  if (any(is.na(data.selected))) {
+    offending_columns <- colnames(data.selected)[colSums(is.na(data.selected)) > 0]
+    stop("Missing data in columns: ",
+         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
   
   ## Treetype
@@ -594,8 +594,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$survival <- exp(-result$chf)
   } else if (treetype == 9 & !is.matrix(data)) {
     ## Set colnames and sort by levels
+    if (!is.matrix(result$predictions)) {
+      result$predictions <- as.matrix(result$predictions)
+    }
     colnames(result$predictions) <- unique(response)
-    result$predictions <- result$predictions[, levels(droplevels(response))]
+    result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
   }
   
   ## Splitrule
