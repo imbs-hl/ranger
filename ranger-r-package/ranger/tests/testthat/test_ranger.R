@@ -104,6 +104,20 @@ test_that("Missing value columns detected in training", {
   dat <- iris
   dat[4, 5] <- NA
   dat[25, 1] <- NA
-  expect_error(ranger(Species ~ ., dat, num.trees = 5), "Missing data in columns: Sepal.Length, Species")
+  expect_error(ranger(Species ~ ., dat, num.trees = 5), "Missing data in columns: Species, Sepal.Length")
 })
+
+test_that("No error if missing value in irrelevant column, training", {
+  dat <- iris
+  dat[1, "Sepal.Width"] <- NA
+  expect_silent(ranger(Species ~ Sepal.Length, dat, num.trees = 5))
+})
+
+test_that("No error if missing value in irrelevant column, prediction", {
+  rf <- ranger(Species ~ Sepal.Length, iris, num.trees = 5)
+  dat <- iris
+  dat[1, "Sepal.Width"] <- NA
+  expect_silent(predict(rf, dat))
+})
+
 
