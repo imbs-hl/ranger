@@ -1,3 +1,6 @@
+##### Version 0.6.1
+* Bug fixes
+
 ##### Version 0.6.0
 * New CRAN version
 
