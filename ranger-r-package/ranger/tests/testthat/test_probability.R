@@ -18,6 +18,11 @@ test_that("probability estimations are a matrix with correct size", {
   expect_equal(ncol(prob$predictions), length(rg.prob$forest$levels))
 })
 
+test_that("growing works for single observations, probability prediction", {
+  rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE)
+  expect_is(rf$predictions, "matrix")
+})
+
 test_that("probability estimations are between 0 and 1 and sum to 1", {
   expect_true(all(prob$predictions > -1e-5 & prob$predictions <= 1 + 1e-5))
   expect_equal(rowSums(prob$predictions), rep(1, nrow(prob$predictions)))
