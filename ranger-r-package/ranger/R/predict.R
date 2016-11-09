@@ -263,6 +263,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       if (!predict.all) {
         result$predictions <- integer.to.factor(result$predictions, forest$levels)
       }
+    } else if (forest$treetype == "Regression") {
+      result$predictions <- drop(result$predictions)
     } else if (forest$treetype == "Survival") {
       result$unique.death.times <- forest$unique.death.times
       result$chf <- result$predictions
