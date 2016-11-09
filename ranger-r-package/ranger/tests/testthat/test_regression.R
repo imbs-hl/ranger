@@ -12,6 +12,15 @@ test_that("regression result is of class ranger with 14 elements", {
   expect_equal(length(rg.reg), 14)
 })
 
+test_that("regression prediction returns numeric vector", {
+  expect_is(rg.reg$predictions, "numeric")
+  expect_null(dim(rg.reg$predictions))
+  
+  pred <- predict(rg.reg, iris)
+  expect_is(pred$predictions, "numeric")
+  expect_null(dim(pred$predictions))
+})
+
 test_that("results have 500 trees", {
   expect_equal(rg.reg$num.trees, 500)
 })
@@ -54,7 +63,7 @@ test_that("Mean of predict.all for regression is equal to forest prediction", {
   rf <- ranger(Petal.Width ~ ., iris, num.trees = 5, write.forest = TRUE)
   pred_forest <- predict(rf, iris, predict.all = FALSE)
   pred_trees <- predict(rf, iris, predict.all = TRUE)
-  expect_equal(rowMeans(pred_trees$predictions), pred_forest$predictions[, 1])
+  expect_equal(rowMeans(pred_trees$predictions), pred_forest$predictions)
 })
 
 test_that("Alternative interface regression prediction works if only independent variable given, one independent variable", {
