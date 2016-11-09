@@ -15,6 +15,15 @@ test_that("classification result is of class ranger with 13 elements", {
   expect_equal(length(rg.class), 13)
 })
 
+test_that("classification prediction returns factor", {
+  expect_is(rg.class$predictions, "factor")
+  expect_null(dim(rg.class$predictions))
+  
+  pred <- predict(rg.class, iris)
+  expect_is(pred$predictions, "factor")
+  expect_null(dim(pred$predictions))
+})
+
 test_that("results have 500 trees", {
   expect_equal(rg.class$num.trees, 500)
 })
