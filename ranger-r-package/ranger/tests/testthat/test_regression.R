@@ -12,6 +12,15 @@ test_that("regression result is of class ranger with 14 elements", {
   expect_equal(length(rg.reg), 14)
 })
 
+test_that("regression prediction returns numeric vector", {
+  expect_is(rg.reg$predictions, "numeric")
+  expect_null(dim(rg.reg$predictions))
+  
+  pred <- predict(rg.reg, iris)
+  expect_is(pred$predictions, "numeric")
+  expect_null(dim(pred$predictions))
+})
+
 test_that("results have 500 trees", {
   expect_equal(rg.reg$num.trees, 500)
 })
