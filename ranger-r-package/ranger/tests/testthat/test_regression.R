@@ -63,7 +63,7 @@ test_that("Mean of predict.all for regression is equal to forest prediction", {
   rf <- ranger(Petal.Width ~ ., iris, num.trees = 5, write.forest = TRUE)
   pred_forest <- predict(rf, iris, predict.all = FALSE)
   pred_trees <- predict(rf, iris, predict.all = TRUE)
-  expect_equal(rowMeans(pred_trees$predictions), pred_forest$predictions[, 1])
+  expect_equal(rowMeans(pred_trees$predictions), pred_forest$predictions)
 })
 
 test_that("Alternative interface regression prediction works if only independent variable given, one independent variable", {
