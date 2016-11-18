@@ -115,7 +115,7 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
 
   // Find best split, stop if no decrease of impurity
   bool stop;
-  if (splitrule == EXTRATREES) {
+  if (splitrule == EXTRATREES || splitrule == EXTRATREES2) {
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);

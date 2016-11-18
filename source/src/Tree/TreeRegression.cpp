@@ -102,7 +102,7 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   bool stop;
   if (splitrule == MAXSTAT) {
     stop = findBestSplitMaxstat(nodeID, possible_split_varIDs);
-  } else if (splitrule == EXTRATREES) {
+  } else if (splitrule == EXTRATREES || splitrule == EXTRATREES2) {
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);

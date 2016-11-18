@@ -111,7 +111,7 @@ bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possibl
 
   if (splitrule == MAXSTAT) {
     return findBestSplitMaxstat(nodeID, possible_split_varIDs);
-  } else if (splitrule == EXTRATREES) {
+  } else if (splitrule == EXTRATREES || splitrule == EXTRATREES2) {
     return findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     return findBestSplit(nodeID, possible_split_varIDs);

@@ -320,6 +320,9 @@ int ArgumentHandler::processArguments() {
         case 5:
           splitrule = EXTRATREES;
           break;
+        case 6:
+          splitrule = EXTRATREES2;
+          break;
         default:
           throw std::runtime_error("");
           break;
@@ -479,12 +482,12 @@ void ArgumentHandler::checkArguments() {
   }
 
   // Unordered survival splitting only available for logrank or extratrees splitrule
-  if (treetype == TREE_SURVIVAL && !catvars.empty() && (splitrule != LOGRANK && splitrule != EXTRATREES)) {
+  if (treetype == TREE_SURVIVAL && !catvars.empty() && (splitrule != LOGRANK && splitrule != EXTRATREES && splitrule != EXTRATREES2)) {
     throw std::runtime_error("Unordered splitting in survival trees only available for LOGRANK splitrule.");
   }
 
   // Memory save option not allowed in unordered extratrees mode
-  if (splitrule == EXTRATREES && !catvars.empty() && savemem) {
+  if ((splitrule == EXTRATREES || splitrule == EXTRATREES2) && !catvars.empty() && savemem) {
     throw std::runtime_error("savemem option not possible in extraTrees mode with unordered predictors.");
   }
 }
