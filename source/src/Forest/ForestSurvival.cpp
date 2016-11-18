@@ -109,7 +109,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
   }
 
   // Sort data if extratrees and not memory saving mode
-  if (splitrule == EXTRATREES && !memory_saving_splitting) {
+  if ((splitrule == EXTRATREES || splitrule == EXTRATREES2) && !memory_saving_splitting) {
     data->sort();
   }
 }
