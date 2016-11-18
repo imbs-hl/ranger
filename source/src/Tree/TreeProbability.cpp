@@ -115,7 +115,7 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
 
   // Find best split, stop if no decrease of impurity
   bool stop;
-  if (splitrule == EXTRATREES || splitrule == EXTRATREES2) {
+  if (splitrule == EXTRATREES || splitrule == EXTRATREES2) {
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);
@@ -581,18 +581,43 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
 
   // Generate num_random_splits splits
   for (size_t i = 0; i < num_random_splits; ++i) {
-    // Draw random subsets, use a random number of samples
     std::vector<size_t> split_subset;
     split_subset.reserve(num_unique_values);
-    if (indices_in_node.size() > 0) {
-      std::uniform_int_distribution<size_t> udist(1, indices_in_node.size());
-      drawWithoutReplacementFromVector(split_subset, indices_in_node, random_number_generator,
-          udist(random_number_generator));
-    }
-    if (indices_out_node.size() > 0) {
-      std::uniform_int_distribution<size_t> udist(1, indices_out_node.size());
-      drawWithoutReplacementFromVector(split_subset, indices_out_node, random_number_generator,
-          udist(random_number_generator));
+
+    if (splitrule == EXTRATREES) {
+      // Draw random subsets, use a random number of samples
+      std::vector<size_t> split_subset;
+      split_subset.reserve(num_unique_values);
+      if (indices_in_node.size() > 0) {
+        std::uniform_int_distribution<size_t> udist(1, indices_in_node.size());
+        drawWithoutReplacementFromVector(split_subset, indices_in_node, random_number_generator,
+            udist(random_number_generator));
+      }
+      if (indices_out_node.size() > 0) {
+        std::uniform_int_distribution<size_t> udist(1, indices_out_node.size());
+        drawWithoutReplacementFromVector(split_subset, indices_out_node, random_number_generator,
+            udist(random_number_generator));
+      }
+    } else if (splitrule == EXTRATREES2) {
+      // Draw random subsets, sample all partitions with equal probability
+      if (indices_in_node.size() > 1) {
+        std::uniform_int_distribution<size_t> udist(1, (2 << (indices_in_node.size() - 1)) - 2);
+        size_t splitID_in_node = udist(random_number_generator);
+        for (size_t j = 0; j < indices_in_node.size(); ++j) {
+          if ((splitID_in_node & (1 << j)) > 0) {
+            split_subset.push_back(indices_in_node[j]);
+          }
+        }
+      }
+      if (indices_out_node.size() > 1) {
+        std::uniform_int_distribution<size_t> udist(0, (2 << (indices_out_node.size() - 1)) - 1);
+        size_t splitID_out_node = udist(random_number_generator);
+        for (size_t j = 0; j < indices_out_node.size(); ++j) {
+          if ((splitID_out_node & (1 << j)) > 0) {
+            split_subset.push_back(indices_out_node[j]);
+          }
+        }
+      }
     }
 
     // Assign union of the two subsets to right child
