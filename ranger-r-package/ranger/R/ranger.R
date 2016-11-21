@@ -93,7 +93,7 @@
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
-##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition' with default 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
+##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition' with default 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. For the "extratrees" splitrule the default is "partition". See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
@@ -185,7 +185,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    case.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
-                   respect.unordered.factors = "ignore",
+                   respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
                    keep.inbag = FALSE, holdout = FALSE,
                    num.threads = NULL, save.memory = FALSE,
@@ -272,7 +272,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                                                           colnames(data.selected) != status.variable.name]
   }
   
-  ## Old version of if respect.unordered.factors
+  ## respect.unordered.factors
+  if (is.null(respect.unordered.factors)) {
+    if (!is.null(splitrule) && splitrule == "extratrees") {
+      respect.unordered.factors <- "partition"
+    } else {
+      respect.unordered.factors <- "ignore"
+    }
+  }
   if (respect.unordered.factors == TRUE) {
     respect.unordered.factors <- "order"
   } else if (respect.unordered.factors == FALSE) {
