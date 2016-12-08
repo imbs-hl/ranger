@@ -158,11 +158,22 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
           << "Warning: Split select weights used. Variable importance measures are only comparable for variables with equal weights."
           << std::endl;
     }
-
+    
+    // Use first non-empty dimension of predictions
+    const std::vector<std::vector<std::vector<double>>>& predictions = forest->getPredictions();
+    if (predictions.size() == 1) {
+      if (predictions[0].size() == 1) {
+        result.push_back(forest->getPredictions()[0][0], "predictions");
+      } else {
+        result.push_back(forest->getPredictions()[0], "predictions");
+      }
+    } else {
+      result.push_back(forest->getPredictions(), "predictions");
+    }
+    
     // Return output
     result.push_back(forest->getNumTrees(), "num.trees");
     result.push_back(forest->getNumIndependentVariables(), "num.independent.variables");
-    result.push_back(forest->getPredictions(), "predictions");
     if (treetype == TREE_SURVIVAL) {
       ForestSurvival* temp = (ForestSurvival*) forest;
       result.push_back(temp->getUniqueTimepoints(), "unique.death.times");
