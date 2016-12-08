@@ -102,3 +102,32 @@ test_that("Terminal nodes returned by predict are node ids, survival", {
   expect_true(all(pred$predictions > 0))
   expect_true(all(pred$predictions < max(sapply(rf$forest$split.varIDs, length))))
 })
+
+test_that("Prediction with predict.all=TRUE returns matrix for classification", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5)
+  pred <- predict(rf, iris, predict.all = TRUE)
+  
+  expect_equal(dim(pred$predictions), c(nrow(iris), rf$num.trees))
+})
+
+test_that("Prediction with predict.all=TRUE returns matrix for regression", {
+  rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5)
+  pred <- predict(rf, iris, predict.all = TRUE)
+  
+  expect_equal(dim(pred$predictions), c(nrow(iris), rf$num.trees))
+})
+
+test_that("Prediction with predict.all=TRUE returns 3d array for probability estimation", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE)
+  pred <- predict(rf, iris, predict.all = TRUE)
+  
+  expect_equal(dim(pred$predictions), c(nrow(iris), length(rf$forest$levels), rf$num.trees))
+})
+
+test_that("Prediction with predict.all=TRUE returns 3d array for survival", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
+  pred <- predict(rf, veteran, predict.all = TRUE)
+  
+  expect_equal(dim(pred$survival), c(nrow(iris), length(pred$unique.death.times), rf$num.trees))
+  expect_equal(dim(pred$chf), c(nrow(iris), length(pred$unique.death.times), rf$num.trees))
+})
