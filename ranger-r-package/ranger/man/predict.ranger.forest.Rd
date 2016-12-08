@@ -13,7 +13,7 @@
 
 \item{data}{New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).}
 
-\item{predict.all}{Return a matrix with individual predictions for each tree instead of aggregated predictions for all trees (classification and regression only).}
+\item{predict.all}{Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).}
 
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
@@ -47,7 +47,7 @@ Prediction with new data and a saved forest from Ranger.
 For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
 For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 
-For classification and \code{predict.all = TRUE}, a matrix of factor levels is returned.
+For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 }
 \author{

@@ -91,34 +91,32 @@ void ForestRegression::growInternal() {
 void ForestRegression::predictInternal() {
 
   size_t num_prediction_samples = data->getNumRows();
-  predictions.reserve(num_prediction_samples);
+  if (predict_all || prediction_type == TERMINALNODES) {
+    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees)));
+  } else {
+    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples)));
+  }
 
   // For all samples get tree predictions
   for (size_t sample_idx = 0; sample_idx < num_prediction_samples; ++sample_idx) {
 
     if (predict_all || prediction_type == TERMINALNODES) {
       // Get all tree predictions
-      std::vector<double> sample_predictions;
-      sample_predictions.reserve(num_trees);
       for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-        double value;
         if (prediction_type == TERMINALNODES) {
-          value = ((TreeRegression*) trees[tree_idx])->getPredictionTerminalNodeID(sample_idx);
+          predictions[0][sample_idx][tree_idx] = ((TreeRegression*) trees[tree_idx])->getPredictionTerminalNodeID(
+              sample_idx);
         } else {
-          value = ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
+          predictions[0][sample_idx][tree_idx] = ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
         }
-        sample_predictions.push_back(value);
       }
-      predictions.push_back(sample_predictions);
     } else {
       // Mean over trees
       double prediction_sum = 0;
       for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
         prediction_sum += ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
       }
-      std::vector<double> temp;
-      temp.push_back(prediction_sum / num_trees);
-      predictions.push_back(temp);
+      predictions[0][0][sample_idx] = prediction_sum / num_trees;
     }
   }
 }
@@ -127,18 +125,14 @@ void ForestRegression::computePredictionErrorInternal() {
 
 // For each sample sum over trees where sample is OOB
   std::vector<size_t> samples_oob_count;
-  predictions.reserve(num_samples);
+  predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
   samples_oob_count.resize(num_samples, 0);
-  for (size_t i = 0; i < num_samples; ++i) {
-    std::vector<double> temp { 0 };
-    predictions.push_back(temp);
-  }
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
       double value = ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
 
-      predictions[sampleID][0] += value;
+      predictions[0][0][sampleID] += value;
       ++samples_oob_count[sampleID];
     }
   }
@@ -148,12 +142,12 @@ void ForestRegression::computePredictionErrorInternal() {
   for (size_t i = 0; i < predictions.size(); ++i) {
     if (samples_oob_count[i] > 0) {
       ++num_predictions;
-      predictions[i][0] /= (double) samples_oob_count[i];
-      double predicted_value = predictions[i][0];
+      predictions[0][0][i] /= (double) samples_oob_count[i];
+      double predicted_value = predictions[0][0][i];
       double real_value = data->get(i, dependent_varID);
       overall_prediction_error += (predicted_value - real_value) * (predicted_value - real_value);
     } else {
-      predictions[i][0] = NAN;
+      predictions[0][0][i] = NAN;
     }
   }
 
@@ -195,9 +189,11 @@ void ForestRegression::writePredictionFile() {
   outfile << "Predictions: " << std::endl;
   for (size_t i = 0; i < predictions.size(); ++i) {
     for (size_t j = 0; j < predictions[i].size(); ++j) {
-      outfile << predictions[i][j] << " ";
+      for (size_t k = 0; k < predictions[i][j].size(); ++k) {
+        outfile << predictions[i][j][k] << " ";
+      }
+      outfile << std::endl;
     }
-    outfile << std::endl;
   }
 
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
