@@ -75,3 +75,10 @@ test_that("Probability estimation works correctly if labels are reversed", {
   expect_gte(mean(pred.rev$predictions[1:n, "1"], na.rm = TRUE), 0.5)
   expect_gte(mean(pred.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
 })
+
+test_that("No error if unused factor levels in outcome", {
+  rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5, probability = TRUE)
+  pred <- predict(rf, iris)
+  expect_equal(ncol(pred$predictions), 2)
+})
+

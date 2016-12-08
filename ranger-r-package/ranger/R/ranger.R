@@ -269,7 +269,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                                                           colnames(data.selected) != status.variable.name]
   }
   
-  ## Old version of if respect.unordered.factors
+  ## Old version of respect.unordered.factors
   if (respect.unordered.factors == TRUE) {
     respect.unordered.factors <- "order"
   } else if (respect.unordered.factors == FALSE) {
@@ -625,7 +625,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Write forest object
   if (write.forest) {
-    result$forest$levels <- levels(response)
+    if (is.factor(response)) {
+      result$forest$levels <- levels(droplevels(response))
+    }
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
     class(result$forest) <- "ranger.forest"
