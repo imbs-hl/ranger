@@ -1,3 +1,6 @@
+##### Version 0.6.2
+* Drop unused factor levels in outcome before growing
+
 ##### Version 0.6.1
 * Bug fixes
 
