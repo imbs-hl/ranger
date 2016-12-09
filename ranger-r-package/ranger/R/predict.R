@@ -257,42 +257,44 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   result$num.samples <- nrow(data.final)
   result$treetype <- forest$treetype
 
+  if (predict.all) {
+    if (forest$treetype %in% c("Classification", "Regression")) {
+      result$predictions <- do.call(rbind, result$predictions)
+    } else {
+      ## TODO: Extract list.to.array function
+      ## TODO: Faster?
+      result$predictions <- aperm(array(unlist(result$predictions), dim = rev(c(length(result$predictions), length(result$predictions[[1]]), length(result$predictions[[1]][[1]])))))
+    }
+  } else {
+    if (is.list(result$predictions)) {
+      result$predictions <- do.call(rbind, result$predictions)
+    } 
+  }
+  
   if (type == "response") {
     if (forest$treetype == "Classification" & !is.null(forest$levels)) {
-      if (predict.all) {
-        result$predictions <- do.call(rbind, result$predictions)
-      } else {
+      if (!predict.all) {
         result$predictions <- integer.to.factor(result$predictions, forest$levels)
       }
     } else if (forest$treetype == "Regression") {
-      if (predict.all) {
-        result$predictions <- do.call(rbind, result$predictions)
-      }
+      ## Empty
     } else if (forest$treetype == "Survival") {
-      ## TODO: Extract list.to.array function
-      ## TODO: Too many dimensions?
-      ## TODO: Wrong, too?
-      result$predictions <- array(unlist(result$predictions), dim = c(length(result$predictions), length(result$predictions[[1]]), length(result$predictions[[1]][[1]])))
       result$unique.death.times <- forest$unique.death.times
       result$chf <- result$predictions
       result$predictions <- NULL
       result$survival <- exp(-result$chf)
     } else if (forest$treetype == "Probability estimation" & !is.null(forest$levels)) {
-      if (predict.all) {
-        ## TODO: Extract list.to.array function
-        ## TODO: This is wrong!
-        result$predictions <- array(unlist(result$predictions), dim = c(length(result$predictions), length(result$predictions[[1]]), length(result$predictions[[1]][[1]])))
-      } else {
-        result$predictions <- do.call(rbind, result$predictions)
+      if (!predict.all) {
+        if (is.vector(result$predictions)) {
+          result$predictions <- matrix(result$predictions, nrow = 1)
+        }
         
         ## Set colnames and sort by levels
         colnames(result$predictions) <- forest$levels[forest$class.values]
         result$predictions <- result$predictions[, forest$levels, drop = FALSE]
       }
     }
-  } else if (type == "terminalNodes") {
-    result$predictions <- do.call(rbind, result$predictions)
-  }
+  } 
 
   class(result) <- "ranger.prediction"
   return(result)
