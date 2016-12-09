@@ -190,9 +190,8 @@ void ForestRegression::writePredictionFile() {
   for (size_t i = 0; i < predictions.size(); ++i) {
     for (size_t j = 0; j < predictions[i].size(); ++j) {
       for (size_t k = 0; k < predictions[i][j].size(); ++k) {
-        outfile << predictions[i][j][k] << " ";
+        outfile << predictions[i][j][k] << std::endl;
       }
-      outfile << std::endl;
     }
   }
 
