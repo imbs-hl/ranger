@@ -202,7 +202,7 @@ void ForestProbability::writeConfusionFile() {
 
 void ForestProbability::writePredictionFile() {
 
-// Open prediction file for writing
+  // Open prediction file for writing
   std::string filename = output_prefix + ".prediction";
   std::ofstream outfile;
   outfile.open(filename, std::ios::out);
@@ -210,21 +210,22 @@ void ForestProbability::writePredictionFile() {
     throw std::runtime_error("Could not write to prediction file: " + filename + ".");
   }
 
-// Write
+  // Write
   outfile << "Class predictions, one sample per row." << std::endl;
   for (auto& class_value : class_values) {
     outfile << class_value << " ";
   }
-  outfile << std::endl;
-  outfile << std::endl;
-  for (size_t i = 0; i < predictions.size(); ++i) {
-    for (size_t j = 0; j < predictions[i].size(); ++j) {
-      for (size_t k = 0; k < predictions[i][j].size(); ++k) {
+  outfile << std::endl << std::endl;
+
+  for (size_t k = 0; k < num_trees; ++k) {
+    outfile << "Tree " << k << ":" << std::endl;
+    for (size_t i = 0; i < predictions.size(); ++i) {
+      for (size_t j = 0; j < predictions[i].size(); ++j) {
         outfile << predictions[i][j][k] << " ";
       }
       outfile << std::endl;
     }
-
+    outfile << std::endl;
   }
 
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
