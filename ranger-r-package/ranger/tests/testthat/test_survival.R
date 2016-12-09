@@ -38,6 +38,11 @@ test_that("Matrix interface prediction works for survival", {
   expect_silent(predict(rf, dat))
 })
 
+test_that("growing works for single observations, survival", {
+  rf <- ranger(Surv(time, status) ~ ., veteran[1, ], write.forest = TRUE)
+  expect_is(rf$survival, "matrix")
+})
+
 test_that("predict works for single observations, survival", {
   rf <- ranger(Surv(time, status) ~ ., veteran, write.forest = TRUE)
   pred <- predict(rf, head(veteran, 1))
@@ -66,4 +71,23 @@ test_that("Logrank splitting not working on classification data", {
 test_that("No error if survival tree without OOB observations", {
   dat <- data.frame(time = c(1,2), status = c(0,1), x = c(1,2))
   expect_silent(ranger(Surv(time, status) ~ ., dat, num.trees = 1, num.threads = 1))
+})
+
+test_that("predict.all for survival returns 3d array of size samples x times x trees", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
+  pred <- predict(rf, veteran, predict.all = TRUE)
+  
+  expect_is(pred$survival, "array")
+  expect_equal(dim(pred$survival), 
+               c(nrow(veteran), length(pred$unique.death.times), rf$num.trees))
+  expect_is(pred$chf, "array")
+  expect_equal(dim(pred$chf), 
+               c(nrow(veteran), length(pred$unique.death.times), rf$num.trees))
+})
+
+test_that("Mean of predict.all for survival is equal to forest prediction", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
+  pred_forest <- predict(rf, veteran, predict.all = FALSE)
+  pred_trees <- predict(rf, veteran, predict.all = TRUE)
+  expect_equal(apply(pred_trees$chf, 1:2, mean), pred_forest$chf)
 })

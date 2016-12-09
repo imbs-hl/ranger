@@ -576,11 +576,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Prepare results
-  result$predictions <- drop(do.call(rbind, result$predictions))
   if (importance.mode != 0) {
     names(result$variable.importance) <- all.independent.variable.names
   }
-  
+
   ## Set predictions
   if (treetype == 1 & is.factor(response)) {
     result$predictions <- integer.to.factor(result$predictions,
@@ -589,14 +588,24 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                                      levels(response))
     result$confusion.matrix <- table(true.values, result$predictions, dnn = c("true", "predicted"))
   } else if (treetype == 5) {
+    if (is.list(result$predictions)) {
+      result$predictions <- do.call(rbind, result$predictions)
+    } 
+    if (is.vector(result$predictions)) {
+      result$predictions <- matrix(result$predictions, nrow = 1)
+    }
     result$chf <- result$predictions
     result$predictions <- NULL
     result$survival <- exp(-result$chf)
   } else if (treetype == 9 & !is.matrix(data)) {
-    ## Set colnames and sort by levels
-    if (!is.matrix(result$predictions)) {
-      result$predictions <- as.matrix(result$predictions)
+    if (is.list(result$predictions)) {
+      result$predictions <- do.call(rbind, result$predictions)
+    } 
+    if (is.vector(result$predictions)) {
+      result$predictions <- matrix(result$predictions, nrow = 1)
     }
+    
+    ## Set colnames and sort by levels
     colnames(result$predictions) <- unique(response)
     result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
   }

@@ -82,3 +82,17 @@ test_that("No error if unused factor levels in outcome", {
   expect_equal(ncol(pred$predictions), 2)
 })
 
+test_that("predict.all for probability returns 3d array of size samples x classes x trees", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
+  pred <- predict(rf, iris, predict.all = TRUE)
+  expect_is(pred$predictions, "array")
+  expect_equal(dim(pred$predictions), 
+               c(nrow(iris), nlevels(iris$Species), rf$num.trees))
+})
+
+test_that("Mean of predict.all for probability is equal to forest prediction", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
+  pred_forest <- predict(rf, iris, predict.all = FALSE)
+  pred_trees <- predict(rf, iris, predict.all = TRUE)
+  expect_equivalent(apply(pred_trees$predictions, 1:2, mean), pred_forest$predictions)
+})
