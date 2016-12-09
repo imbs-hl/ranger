@@ -94,5 +94,5 @@ test_that("Mean of predict.all for probability is equal to forest prediction", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
   pred_forest <- predict(rf, iris, predict.all = FALSE)
   pred_trees <- predict(rf, iris, predict.all = TRUE)
-  expect_equal(apply(pred_trees$predictions, 1:2, mean), pred_forest$predictions)
+  expect_equivalent(apply(pred_trees$predictions, 1:2, mean), pred_forest$predictions)
 })
