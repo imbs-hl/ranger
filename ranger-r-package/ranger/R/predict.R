@@ -261,9 +261,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     if (forest$treetype %in% c("Classification", "Regression")) {
       result$predictions <- do.call(rbind, result$predictions)
     } else {
-      ## TODO: Extract list.to.array function
-      ## TODO: Faster?
-      result$predictions <- aperm(array(unlist(result$predictions), dim = rev(c(length(result$predictions), length(result$predictions[[1]]), length(result$predictions[[1]][[1]])))))
+      ## TODO: Better solution for this?
+      result$predictions <- aperm(array(unlist(result$predictions), 
+                                        dim = rev(c(length(result$predictions), 
+                                                    length(result$predictions[[1]]), 
+                                                    length(result$predictions[[1]][[1]])))))
     }
   } else {
     if (is.list(result$predictions)) {
