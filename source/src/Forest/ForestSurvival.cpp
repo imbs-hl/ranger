@@ -138,7 +138,7 @@ void ForestSurvival::predictInternal() {
       }
     } else if (prediction_type == TERMINALNODES) {
       for (size_t k = 0; k < num_trees; ++k) {
-        predictions[0][i][num_trees] = ((TreeSurvival*) trees[k])->getPredictionTerminalNodeID(i);
+        predictions[0][i][k] = ((TreeSurvival*) trees[k])->getPredictionTerminalNodeID(i);
       }
     } else {
       for (size_t j = 0; j < num_timepoints; ++j) {
