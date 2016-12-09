@@ -163,7 +163,6 @@ void ForestClassification::computePredictionErrorInternal() {
   // Compute majority vote for each sample
   predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(1, std::vector<double>(num_samples)));
   for (size_t i = 0; i < num_samples; ++i) {
-    std::vector<double> temp;
     if (!class_counts[i].empty()) {
       predictions[0][0][i] = mostFrequentValue(class_counts[i], random_number_generator);
     } else {
