@@ -120,30 +120,35 @@ void ForestSurvival::predictInternal() {
 
   size_t num_prediction_samples = data->getNumRows();
   size_t num_timepoints = unique_timepoints.size();
-
-  predictions.reserve(num_prediction_samples);
+  if (predict_all) {
+    predictions = std::vector<std::vector<std::vector<double>>>(num_prediction_samples, std::vector<std::vector<double>>(num_timepoints, std::vector<double>(num_trees, 0)));
+  } else if (prediction_type == TERMINALNODES) {
+    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees, 0)));
+  } else {
+    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_timepoints, 0)));
+  }
 
 // For each person and timepoint sum over trees
-// First dim trees, second dim samples, third dim time
   for (size_t i = 0; i < num_prediction_samples; ++i) {
-    std::vector<double> sample_prediction;
-
-    if (prediction_type == TERMINALNODES) {
-      sample_prediction.reserve(num_trees);
+    if (predict_all) {
+      for (size_t j = 0; j < num_timepoints; ++j) {
+        for (size_t k = 0; k < num_trees; ++k) {
+          predictions[i][j][k] = ((TreeSurvival*) trees[k])->getPrediction(i)[j];
+        }
+      }
+    } else if (prediction_type == TERMINALNODES) {
       for (size_t k = 0; k < num_trees; ++k) {
-        sample_prediction.push_back(((TreeSurvival*) trees[k])->getPredictionTerminalNodeID(i));
+        predictions[0][i][k] = ((TreeSurvival*) trees[k])->getPredictionTerminalNodeID(i);
       }
     } else {
-      sample_prediction.reserve(num_timepoints);
       for (size_t j = 0; j < num_timepoints; ++j) {
         double sample_time_prediction = 0;
         for (size_t k = 0; k < num_trees; ++k) {
           sample_time_prediction += ((TreeSurvival*) trees[k])->getPrediction(i)[j];
         }
-        sample_prediction.push_back(sample_time_prediction / num_trees);
+        predictions[0][i][j] = sample_time_prediction / num_trees;
       }
     }
-    predictions.push_back(sample_prediction);
   }
 
 }
@@ -155,19 +160,15 @@ void ForestSurvival::computePredictionErrorInternal() {
   // For each sample sum over trees where sample is OOB
   std::vector<size_t> samples_oob_count;
   samples_oob_count.resize(num_samples, 0);
-  predictions.reserve(num_samples);
-  for (size_t i = 0; i < num_samples; ++i) {
-    std::vector<double> temp;
-    temp.resize(num_timepoints, 0);
-    predictions.push_back(temp);
-  }
+  predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_samples, std::vector<double>(num_timepoints, 0)));
+
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
       std::vector<double> tree_sample_chf = ((TreeSurvival*) trees[tree_idx])->getPrediction(sample_idx);
 
       for (size_t time_idx = 0; time_idx < tree_sample_chf.size(); ++time_idx) {
-        predictions[sampleID][time_idx] += tree_sample_chf[time_idx];
+        predictions[0][sampleID][time_idx] += tree_sample_chf[time_idx];
       }
       ++samples_oob_count[sampleID];
     }
@@ -175,13 +176,13 @@ void ForestSurvival::computePredictionErrorInternal() {
 
   // Divide sample predictions by number of trees where sample is oob and compute summed chf for samples
   std::vector<double> sum_chf;
-  sum_chf.reserve(predictions.size());
-  for (size_t i = 0; i < predictions.size(); ++i) {
+  sum_chf.reserve(predictions[0].size());
+  for (size_t i = 0; i < predictions[0].size(); ++i) {
     if (samples_oob_count[i] > 0) {
       double sum = 0;
-      for (size_t j = 0; j < predictions[i].size(); ++j) {
-        predictions[i][j] /= samples_oob_count[i];
-        sum += predictions[i][j];
+      for (size_t j = 0; j < predictions[0][i].size(); ++j) {
+        predictions[0][i][j] /= samples_oob_count[i];
+        sum += predictions[0][i][j];
       }
       sum_chf.push_back(sum);
     }
@@ -232,12 +233,28 @@ void ForestSurvival::writePredictionFile() {
     outfile << timepoint << " ";
   }
   outfile << std::endl << std::endl;
+
   outfile << "Cumulative hazard function, one row per sample: " << std::endl;
-  for (size_t i = 0; i < predictions.size(); ++i) {
-    for (size_t j = 0; j < predictions[i].size(); ++j) {
-      outfile << predictions[i][j] << " ";
+  if (predict_all) {
+    for (size_t k = 0; k < num_trees; ++k) {
+      outfile << "Tree " << k << ":" << std::endl;
+      for (size_t i = 0; i < predictions.size(); ++i) {
+        for (size_t j = 0; j < predictions[i].size(); ++j) {
+          outfile << predictions[i][j][k] << " ";
+        }
+        outfile << std::endl;
+      }
+      outfile << std::endl;
     }
-    outfile << std::endl;
+  } else {
+    for (size_t i = 0; i < predictions.size(); ++i) {
+      for (size_t j = 0; j < predictions[i].size(); ++j) {
+        for (size_t k = 0; k < predictions[i][j].size(); ++k) {
+          outfile << predictions[i][j][k] << " ";
+        }
+        outfile << std::endl;
+      }
+    }
   }
 
   *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
