@@ -1,3 +1,6 @@
+##### Version 0.6.3
+* Bug fixes
+
 ##### Version 0.6.2
 * Drop unused factor levels in outcome before growing
 * Add predict.all for probability and survival prediction
