@@ -98,10 +98,11 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
 
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     std::vector<size_t>& skip, size_t num_samples) {
-  if (num_samples < max / 2) {
+  if (num_samples < max / 10) {
     drawWithoutReplacementSimple(result, random_number_generator, max, skip, num_samples);
   } else {
-    drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
+    //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
+    drawWithoutReplacementFisherYates(result, random_number_generator, max, skip, num_samples);
   }
 }
 
@@ -159,6 +160,28 @@ void drawWithoutReplacementKnuth(std::vector<size_t>& result, std::mt19937_64& r
       i++;
     }
   }
+}
+
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+    size_t max, std::vector<size_t>& skip, size_t num_samples) {
+
+  // Create indices
+  result.resize(max);
+  std::iota(result.begin(), result.end(), 0);
+
+   // Skip indices
+  for (size_t i = 0; i < skip.size(); ++i) {
+    result.erase(result.begin() + skip[skip.size() - 1 - i]);
+  }
+
+  // Draw without replacement using Fisher Yates algorithm
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  for (int i = 0; i < num_samples; ++i) {
+    size_t j = i + distribution(random_number_generator) * (max - skip.size() - i);
+    std::swap(result[i], result[j]);
+  }
+
+  result.resize(num_samples);
 }
 
 void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
@@ -428,7 +451,7 @@ double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, st
 }
 
 double maxstatPValueUnadjusted(double b) {
-  return 2*pstdnorm(-b);
+  return 2 * pstdnorm(-b);
 }
 
 double dstdnorm(double x) {

@@ -208,13 +208,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     gwa.mode <- FALSE
   }
   
-  ## Check missing values
-  if (any(is.na(data))) {
-    offending_columns <- colnames(data)[colSums(is.na(data)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
-  }
-  
   ## Formula interface. Use whole data frame is no formula provided and depvarname given
   if (is.null(formula)) {
     if (is.null(dependent.variable.name)) {
@@ -232,8 +225,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (class(formula) != "formula") {
       stop("Error: Invalid formula.")
     }
-    data.selected <- model.frame(formula, data, na.action = na.fail)
+    data.selected <- model.frame(formula, data, na.action = NULL)
     response <- data.selected[[1]]
+  }
+  
+  ## Check missing values
+  if (any(is.na(data.selected))) {
+    offending_columns <- colnames(data.selected)[colSums(is.na(data.selected)) > 0]
+    stop("Missing data in columns: ",
+         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
   
   ## Treetype
@@ -280,6 +280,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       respect.unordered.factors <- "ignore"
     }
   }
+
+  ## Old version of respect.unordered.factors
   if (respect.unordered.factors == TRUE) {
     respect.unordered.factors <- "order"
   } else if (respect.unordered.factors == FALSE) {
@@ -597,11 +599,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Prepare results
-  result$predictions <- drop(do.call(rbind, result$predictions))
   if (importance.mode != 0) {
     names(result$variable.importance) <- all.independent.variable.names
   }
-  
+
   ## Set predictions
   if (treetype == 1 & is.factor(response)) {
     result$predictions <- integer.to.factor(result$predictions,
@@ -610,13 +611,26 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                                      levels(response))
     result$confusion.matrix <- table(true.values, result$predictions, dnn = c("true", "predicted"))
   } else if (treetype == 5) {
+    if (is.list(result$predictions)) {
+      result$predictions <- do.call(rbind, result$predictions)
+    } 
+    if (is.vector(result$predictions)) {
+      result$predictions <- matrix(result$predictions, nrow = 1)
+    }
     result$chf <- result$predictions
     result$predictions <- NULL
     result$survival <- exp(-result$chf)
   } else if (treetype == 9 & !is.matrix(data)) {
+    if (is.list(result$predictions)) {
+      result$predictions <- do.call(rbind, result$predictions)
+    } 
+    if (is.vector(result$predictions)) {
+      result$predictions <- matrix(result$predictions, nrow = 1)
+    }
+    
     ## Set colnames and sort by levels
     colnames(result$predictions) <- unique(response)
-    result$predictions <- result$predictions[, levels(droplevels(response))]
+    result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
   }
   
   ## Splitrule
@@ -643,7 +657,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Write forest object
   if (write.forest) {
-    result$forest$levels <- levels(response)
+    if (is.factor(response)) {
+      result$forest$levels <- levels(droplevels(response))
+    }
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
     class(result$forest) <- "ranger.forest"

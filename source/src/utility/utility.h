@@ -180,7 +180,7 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
     std::vector<size_t>& skip, size_t num_samples);
 
 /**
- * Knuth's algorithm for sampling without replacement, faster for larger num_samples
+ * Knuth's algorithm for sampling without replacement, faster for larger num_samples. Result is ordered.
  * Idea from Knuth 1985, The Art of Computer Programming, Vol. 2, Sec. 3.4.2 Algorithm S
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
@@ -189,6 +189,17 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
  * @param num_samples Number of samples to draw
  */
 void drawWithoutReplacementKnuth(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    std::vector<size_t>& skip, size_t num_samples);
+
+/**
+ * Fisher Yates algorithm for sampling without replacement.
+ * @param result Vector to add results to. Will not be cleaned before filling.
+ * @param random_number_generator Random number generator
+ * @param max Length of range. Interval to draw from: 0..max-1
+ * @param skip Values to skip
+ * @param num_samples Number of samples to draw
+ */
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     std::vector<size_t>& skip, size_t num_samples);
 
 /**
