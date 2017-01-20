@@ -84,7 +84,8 @@ enum SplitRule {
   LOGRANK = 1,
   AUC = 2,
   AUC_IGNORE_TIES = 3,
-  MAXSTAT = 4
+  MAXSTAT = 4,
+  EXTRATREES = 5
 };
 
 // Prediction type
@@ -108,6 +109,7 @@ const double DEFAULT_ALPHA = 0.5;
 const double DEFAULT_MINPROP = 0.1;
 
 const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
+const uint DEFAULT_NUM_RANDOM_SPLITS = 1;
 
 // Interval to print progress in seconds
 const double STATUS_INTERVAL = 30.0;

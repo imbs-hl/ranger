@@ -102,6 +102,8 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   bool stop;
   if (splitrule == MAXSTAT) {
     stop = findBestSplitMaxstat(nodeID, possible_split_varIDs);
+  } else if (splitrule == EXTRATREES) {
+    stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);
   }
@@ -453,6 +455,215 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
     return false;
+  }
+}
+
+bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+
+  size_t num_samples_node = sampleIDs[nodeID].size();
+  double best_decrease = -1;
+  size_t best_varID = 0;
+  double best_value = 0;
+
+  // Compute sum of responses in node
+  double sum_node = 0;
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    sum_node += data->get(sampleID, dependent_varID);
+  }
+
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if ((*is_ordered_variable)[varID]) {
+      findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+    } else {
+      findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
+          best_decrease);
+    }
+  }
+
+  // Stop if no good split found
+  if (best_decrease < 0) {
+    return true;
+  }
+
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+
+  // Compute decrease of impurity for this node and add to variable importance if needed
+  if (importance_mode == IMP_GINI) {
+    addImpurityImportance(nodeID, best_varID, best_decrease);
+  }
+  return false;
+}
+
+void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+    double& best_value, size_t& best_varID, double& best_decrease) {
+
+  // Get min/max values of covariate in node
+  double min;
+  double max;
+  data->getMinMaxValues(min, max, sampleIDs[nodeID], varID);
+
+  // Try next variable if all equal for this
+  if (min == max) {
+    return;
+  }
+
+  // Create possible split values: Draw randomly between min and max
+  std::vector<double> possible_split_values;
+  std::uniform_real_distribution<double> udist(min, max);
+  possible_split_values.reserve(num_random_splits);
+  for (size_t i = 0; i < num_random_splits; ++i) {
+    possible_split_values.push_back(udist(random_number_generator));
+  }
+
+  // Initialize with 0m if not in memory efficient mode, use pre-allocated space
+  size_t num_splits = possible_split_values.size();
+  double* sums_right;
+  size_t* n_right;
+  if (memory_saving_splitting) {
+    sums_right = new double[num_splits]();
+    n_right = new size_t[num_splits]();
+  } else {
+    sums_right = sums;
+    n_right = counter;
+    std::fill(sums_right, sums_right + num_splits, 0);
+    std::fill(n_right, n_right + num_splits, 0);
+  }
+
+  // Sum in right child and possbile split
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    double value = data->get(sampleID, varID);
+    double response = data->get(sampleID, dependent_varID);
+
+    // Count samples until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+      if (value > possible_split_values[i]) {
+        ++n_right[i];
+        sums_right[i] += response;
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Compute decrease of impurity for each possible split
+  for (size_t i = 0; i < num_splits; ++i) {
+
+    // Stop if one child empty
+    size_t n_left = num_samples_node - n_right[i];
+    if (n_left == 0 || n_right[i] == 0) {
+      continue;
+    }
+
+    double sum_right = sums_right[i];
+    double sum_left = sum_node - sum_right;
+    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = possible_split_values[i];
+      best_varID = varID;
+      best_decrease = decrease;
+    }
+  }
+
+  if (memory_saving_splitting) {
+    delete[] sums_right;
+    delete[] n_right;
+  }
+}
+
+void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double sum_node,
+    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+
+  size_t num_unique_values = data->getNumUniqueDataValues(varID);
+
+  // Get all factor indices in node
+  std::vector<bool> factor_in_node(num_unique_values, false);
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    size_t index = data->getIndex(sampleID, varID);
+    factor_in_node[index] = true;
+  }
+
+  // Vector of indices in and out of node
+  std::vector<size_t> indices_in_node;
+  std::vector<size_t> indices_out_node;
+  indices_in_node.reserve(num_unique_values);
+  indices_out_node.reserve(num_unique_values);
+  for (size_t i = 0; i < num_unique_values; ++i) {
+    if (factor_in_node[i]) {
+      indices_in_node.push_back(i);
+    } else {
+      indices_out_node.push_back(i);
+    }
+  }
+
+  // Generate num_random_splits splits
+  for (size_t i = 0; i < num_random_splits; ++i) {
+    std::vector<size_t> split_subset;
+    split_subset.reserve(num_unique_values);
+
+    // Draw random subsets, sample all partitions with equal probability
+    if (indices_in_node.size() > 1) {
+      size_t num_partitions = (2 << (indices_in_node.size() - 1)) - 2; // 2^n-2 (don't allow full or empty)
+      std::uniform_int_distribution<size_t> udist(1, num_partitions);
+      size_t splitID_in_node = udist(random_number_generator);
+      for (size_t j = 0; j < indices_in_node.size(); ++j) {
+        if ((splitID_in_node & (1 << j)) > 0) {
+          split_subset.push_back(indices_in_node[j]);
+        }
+      }
+    }
+    if (indices_out_node.size() > 1) {
+      size_t num_partitions = (2 << (indices_out_node.size() - 1)) - 1; // 2^n-1 (allow full or empty)
+      std::uniform_int_distribution<size_t> udist(0, num_partitions);
+      size_t splitID_out_node = udist(random_number_generator);
+      for (size_t j = 0; j < indices_out_node.size(); ++j) {
+        if ((splitID_out_node & (1 << j)) > 0) {
+          split_subset.push_back(indices_out_node[j]);
+        }
+      }
+    }
+
+    // Assign union of the two subsets to right child
+    size_t splitID = 0;
+    for (auto& idx : split_subset) {
+      splitID |= 1 << idx;
+    }
+
+    // Initialize
+    double sum_right = 0;
+    size_t n_right = 0;
+
+    // Sum in right child
+    for (auto& sampleID : sampleIDs[nodeID]) {
+      double response = data->get(sampleID, dependent_varID);
+      double value = data->get(sampleID, varID);
+      size_t factorID = floor(value) - 1;
+
+      // If in right child, count
+      // In right child, if bitwise splitID at position factorID is 1
+      if ((splitID & (1 << factorID))) {
+        ++n_right;
+        sum_right += response;
+      }
+    }
+    size_t n_left = num_samples_node - n_right;
+
+    // Sum of squares
+    double sum_left = sum_node - sum_right;
+    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = splitID;
+      best_varID = varID;
+      best_decrease = decrease;
+    }
   }
 }
 
