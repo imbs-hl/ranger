@@ -58,3 +58,7 @@ test_that("extratrees unordered splitting works for survival", {
   expect_is(rf, "ranger")
   expect_lt(rf$prediction.error, 0.4)
 })
+
+test_that("extratrees splitting works for large number of random splits", {
+  expect_silent(ranger(Species ~ ., iris, splitrule = "extratrees", num.random.splits = 100))
+})
