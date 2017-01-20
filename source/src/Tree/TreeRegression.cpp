@@ -53,9 +53,15 @@ TreeRegression::~TreeRegression() {
 void TreeRegression::initInternal() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {
-    size_t max_num_unique_values = data->getMaxNumUniqueValues();
-    counter = new size_t[max_num_unique_values];
-    sums = new double[max_num_unique_values];
+    size_t max_num_splits = data->getMaxNumUniqueValues();
+
+    // Use number of random splits for extratrees
+    if (splitrule == EXTRATREES && num_random_splits > max_num_splits) {
+      max_num_splits = num_random_splits;
+    }
+
+    counter = new size_t[max_num_splits];
+    sums = new double[max_num_splits];
   }
 }
 

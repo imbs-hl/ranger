@@ -49,9 +49,15 @@ void TreeProbability::initInternal() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {
     size_t num_classes = class_values->size();
-    size_t max_num_unique_values = data->getMaxNumUniqueValues();
-    counter = new size_t[max_num_unique_values];
-    counter_per_class = new size_t[num_classes * max_num_unique_values];
+    size_t max_num_splits = data->getMaxNumUniqueValues();
+
+    // Use number of random splits for extratrees
+    if (splitrule == EXTRATREES && num_random_splits > max_num_splits) {
+      max_num_splits = num_random_splits;
+    }
+
+    counter = new size_t[max_num_splits];
+    counter_per_class = new size_t[num_classes * max_num_splits];
   }
 }
 
