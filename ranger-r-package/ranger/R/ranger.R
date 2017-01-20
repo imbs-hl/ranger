@@ -499,8 +499,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   } else if (splitrule == "extratrees") {
     splitrule.num <- 5
-  } else if (splitrule == "extratrees2") {
-    splitrule.num <- 6
   } else {
     stop("Error: Unknown splitrule.")
   }
@@ -512,13 +510,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (minprop < 0 | minprop > 0.5) {
     stop("Error: Invalid value for minprop, please give a value between 0 and 0.5.")
   }
-  
-  ## TODO: Change when extratrees2 removed
+
   ## Extra trees
   if (!is.numeric(num.random.splits) | num.random.splits < 1) {
     stop("Error: Invalid value for num.random.splits, please give a positive integer.")
   }
-  if ((splitrule.num == 5 | splitrule.num == 6) & save.memory & respect.unordered.factors == "partition") {
+  if (splitrule.num == 5 & save.memory & respect.unordered.factors == "partition") {
     stop("Error: save.memory option not possible in extraTrees mode with unordered predictors.")
   }
 
