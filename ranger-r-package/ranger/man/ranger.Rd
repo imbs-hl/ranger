@@ -50,7 +50,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{always.split.variables}{Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.}
 
-\item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition' with default 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. For the "extratrees" splitrule the default is "partition". See below for details.}
+\item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.}
 
 \item{scale.permutation.importance}{Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
 
