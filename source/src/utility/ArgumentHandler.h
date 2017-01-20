@@ -69,6 +69,7 @@ public:
   bool savemem;
   std::string predict;
   PredictionType predictiontype;
+  uint randomsplits;
   std::string splitweights;
   uint nthreads;
   bool predall;

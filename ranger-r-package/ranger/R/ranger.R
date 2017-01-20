@@ -33,9 +33,10 @@
 ##'
 ##' The tree type is determined by the type of the dependent variable.
 ##' For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
-##' The Gini index is used as splitting rule for classification.
+##' The Gini index is used as default splitting rule for classification.
 ##' For regression, the estimated response variances or maximally selected rank statistics (Wright et al. 2016) can be used.
 ##' For Survival the log-rank test, a C-index based splitting rule (Schmid et al. 2015) and maximally selected rank statistics (Wright et al. 2016) are available.
+##' For all tree types, forests of extremely randomized trees (Geurts et al. 2006) can be grown.
 ##'
 ##' With the \code{probability} option and factor dependent variable a probability forest is grown.
 ##' Here, the node impurity is used for splitting, as in classification forests.
@@ -86,12 +87,13 @@
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
-##' @param splitrule Splitting rule, regression and survival only. For regression one of "variance" or "maxstat" with default "variance". For survival "logrank", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
-##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition' with default 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
+##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
@@ -165,9 +167,10 @@
 ##'   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2016). Random forests for survival analysis using maximally selected rank statistics. Technical Report. \url{http://arxiv.org/abs/1605.03391}.
 ##' 
 ##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. 
-##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat, 841-860. 
-##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med, 51(1), 74.
+##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. 
+##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81.
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
+##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
 ##' @useDynLib ranger
@@ -179,10 +182,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
                    min.node.size = NULL, replace = TRUE, 
                    sample.fraction = ifelse(replace, 1, 0.632), 
-                   case.weights = NULL, 
-                   splitrule = NULL, alpha = 0.5, minprop = 0.1,
+                   case.weights = NULL, splitrule = NULL, 
+                   num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
-                   respect.unordered.factors = "ignore",
+                   respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
                    keep.inbag = FALSE, holdout = FALSE,
                    num.threads = NULL, save.memory = FALSE,
@@ -269,6 +272,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                                                           colnames(data.selected) != status.variable.name]
   }
   
+  ## respect.unordered.factors
+  if (is.null(respect.unordered.factors)) {
+    if (!is.null(splitrule) && splitrule == "extratrees") {
+      respect.unordered.factors <- "partition"
+    } else {
+      respect.unordered.factors <- "ignore"
+    }
+  }
+
   ## Old version of respect.unordered.factors
   if (respect.unordered.factors == TRUE) {
     respect.unordered.factors <- "order"
@@ -487,6 +499,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       stop("Error: maxstat splitrule applicable to regression or survival data only.")
     }
+  } else if (splitrule == "extratrees") {
+    splitrule.num <- 5
   } else {
     stop("Error: Unknown splitrule.")
   }
@@ -497,6 +511,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   if (minprop < 0 | minprop > 0.5) {
     stop("Error: Invalid value for minprop, please give a value between 0 and 0.5.")
+  }
+
+  ## Extra trees
+  if (!is.numeric(num.random.splits) | num.random.splits < 1) {
+    stop("Error: Invalid value for num.random.splits, please give a positive integer.")
+  }
+  if (splitrule.num == 5 & save.memory & respect.unordered.factors == "partition") {
+    stop("Error: save.memory option not possible in extraTrees mode with unordered predictors.")
   }
 
   ## Unordered factors  
@@ -569,7 +591,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       status.variable.name, prediction.mode, loaded.forest, sparse.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type)
+                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
+                      num.random.splits)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

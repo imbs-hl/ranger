@@ -1,3 +1,6 @@
+##### Version 0.6.4
+* Add randomized splitting (extraTrees)
+
 ##### Version 0.6.3
 * Bug fixes
 

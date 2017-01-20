@@ -54,6 +54,8 @@ public:
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
 
+  void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
+
   size_t getIndex(size_t row, size_t col) const {
     if (col < num_cols_no_sparse) {
       return index_data[col * num_rows + row];
