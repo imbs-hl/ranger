@@ -93,7 +93,7 @@
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
-##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition' with default 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. For the "extratrees" splitrule the default is "partition". See below for details. 
+##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
