@@ -1,5 +1,15 @@
-##### Version 0.6.1
+##### Version 0.6.4
 * Add randomized splitting (extraTrees)
+
+##### Version 0.6.3
+* Bug fixes
+
+##### Version 0.6.2
+* Drop unused factor levels in outcome before growing
+* Add predict.all for probability and survival prediction
+
+##### Version 0.6.1
+* Bug fixes
 
 ##### Version 0.6.0
 * New CRAN version

@@ -114,7 +114,7 @@ public:
   double getOverallPredictionError() const {
     return overall_prediction_error;
   }
-  const std::vector<std::vector<double> >& getPredictions() const {
+  const std::vector<std::vector<std::vector<double>> >& getPredictions() const {
     return predictions;
   }
   size_t getDependentVarId() const {
@@ -225,7 +225,7 @@ protected:
   std::vector<Tree*> trees;
   Data* data;
 
-  std::vector<std::vector<double>> predictions;
+  std::vector<std::vector<std::vector<double>>> predictions;
   double overall_prediction_error;
 
   // Weight vector for selecting possible split variables, one weight between 0 (never select) and 1 (always select) for each variable

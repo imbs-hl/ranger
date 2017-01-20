@@ -18,6 +18,11 @@ test_that("probability estimations are a matrix with correct size", {
   expect_equal(ncol(prob$predictions), length(rg.prob$forest$levels))
 })
 
+test_that("growing works for single observations, probability prediction", {
+  rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE)
+  expect_is(rf$predictions, "matrix")
+})
+
 test_that("probability estimations are between 0 and 1 and sum to 1", {
   expect_true(all(prob$predictions > -1e-5 & prob$predictions <= 1 + 1e-5))
   expect_equal(rowSums(prob$predictions), rep(1, nrow(prob$predictions)))
@@ -31,7 +36,8 @@ test_that("save.memory option works for probability", {
 test_that("predict works for single observations, probability prediction", {
   rf <- ranger(Species ~ ., iris, write.forest = TRUE, probability = TRUE)
   pred <- predict(rf, head(iris, 1))
-  expect_equal(names(which.max(pred$predictions)), as.character(iris[1,"Species"]))
+  expect_is(pred$predictions, "matrix")
+  expect_equal(names(which.max(pred$predictions[1, ])), as.character(iris[1,"Species"]))
 })
 
 test_that("Probability estimation works correctly if labels are reversed", {
@@ -68,4 +74,25 @@ test_that("Probability estimation works correctly if labels are reversed", {
   pred.rev <- predict(rf.rev, dat.rev)
   expect_gte(mean(pred.rev$predictions[1:n, "1"], na.rm = TRUE), 0.5)
   expect_gte(mean(pred.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
+})
+
+test_that("No error if unused factor levels in outcome", {
+  rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5, probability = TRUE)
+  pred <- predict(rf, iris)
+  expect_equal(ncol(pred$predictions), 2)
+})
+
+test_that("predict.all for probability returns 3d array of size samples x classes x trees", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
+  pred <- predict(rf, iris, predict.all = TRUE)
+  expect_is(pred$predictions, "array")
+  expect_equal(dim(pred$predictions), 
+               c(nrow(iris), nlevels(iris$Species), rf$num.trees))
+})
+
+test_that("Mean of predict.all for probability is equal to forest prediction", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
+  pred_forest <- predict(rf, iris, predict.all = FALSE)
+  pred_trees <- predict(rf, iris, predict.all = TRUE)
+  expect_equivalent(apply(pred_trees$predictions, 1:2, mean), pred_forest$predictions)
 })
