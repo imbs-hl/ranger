@@ -225,8 +225,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (class(formula) != "formula") {
       stop("Error: Invalid formula.")
     }
-    data.selected <- model.frame(formula, data, na.action = NULL)
-    response <- data.selected[[1]]
+    data.selected <- parse.formula(formula, data)
+    response <- data.selected[, 1]
   }
   
   ## Check missing values
