@@ -1,3 +1,6 @@
+##### Version 0.6.5
+* Better formula interface: Support interactions terms and faster computation
+
 ##### Version 0.6.4
 * Add randomized splitting (extraTrees)
 
