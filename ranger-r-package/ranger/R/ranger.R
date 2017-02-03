@@ -76,7 +76,7 @@
 ##' If you compile yourself, the new RTools toolchain is required.
 ##' 
 ##' @title Ranger
-##' @param formula Object of class \code{formula} or \code{character} describing the model to fit.
+##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
