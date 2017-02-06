@@ -76,7 +76,7 @@
 ##' If you compile yourself, the new RTools toolchain is required.
 ##' 
 ##' @title Ranger
-##' @param formula Object of class \code{formula} or \code{character} describing the model to fit.
+##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
@@ -225,8 +225,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (class(formula) != "formula") {
       stop("Error: Invalid formula.")
     }
-    data.selected <- model.frame(formula, data, na.action = NULL)
-    response <- data.selected[[1]]
+    data.selected <- parse.formula(formula, data)
+    response <- data.selected[, 1]
   }
   
   ## Check missing values

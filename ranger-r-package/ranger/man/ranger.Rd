@@ -16,7 +16,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   status.variable.name = NULL, classification = NULL)
 }
 \arguments{
-\item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}
+\item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
 
 \item{data}{Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).}
 
