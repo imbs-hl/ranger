@@ -299,8 +299,8 @@ void TreeSurvival::computeDeathCounts(size_t nodeID) {
 }
 
 void TreeSurvival::computeChildDeathCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
-    size_t* num_samples_right_child, size_t* delta_samples_at_risk_right_child, size_t* num_deaths_right_child) {
-  size_t num_splits = possible_split_values.size();
+    size_t* num_samples_right_child, size_t* delta_samples_at_risk_right_child, size_t* num_deaths_right_child,
+    size_t num_splits) {
 
   // Count deaths in right child per timepoint and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
@@ -335,10 +335,8 @@ void TreeSurvival::findBestSplitValueLogRank(size_t nodeID, size_t varID, double
     return;
   }
 
-  // Remove largest value because no split possible
-  possible_split_values.pop_back();
-
-  size_t num_splits = possible_split_values.size();
+  // -1 because no split possible at largest value
+  size_t num_splits = possible_split_values.size() - 1;
 
   // Initialize
   size_t* num_deaths_right_child = new size_t[num_splits * num_timepoints]();
@@ -346,7 +344,7 @@ void TreeSurvival::findBestSplitValueLogRank(size_t nodeID, size_t varID, double
   size_t* num_samples_right_child = new size_t[num_splits]();
 
   computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
-      delta_samples_at_risk_right_child, num_deaths_right_child);
+      delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
 
   // Compute logrank test for all splits and use best
   for (size_t i = 0; i < num_splits; ++i) {
@@ -386,7 +384,7 @@ void TreeSurvival::findBestSplitValueLogRank(size_t nodeID, size_t varID, double
     }
 
     if (logrank > best_logrank) {
-      best_value = possible_split_values[i];
+      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_logrank = logrank;
     }
@@ -509,11 +507,8 @@ void TreeSurvival::findBestSplitValueAUC(size_t nodeID, size_t varID, double& be
     return;
   }
 
-  // Remove largest value because no split possible
-  possible_split_values.pop_back();
-
   size_t num_node_samples = sampleIDs[nodeID].size();
-  size_t num_splits = possible_split_values.size();
+  size_t num_splits = possible_split_values.size() - 1;
   size_t num_possible_pairs = num_node_samples * (num_node_samples - 1) / 2;
 
   // Initialize
@@ -561,7 +556,7 @@ void TreeSurvival::findBestSplitValueAUC(size_t nodeID, size_t varID, double& be
     } else {
       double auc = fabs((num_count[i] / 2) / num_total[i] - 0.5);
       if (auc > best_auc) {
-        best_value = possible_split_values[i];
+        best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
         best_varID = varID;
         best_auc = auc;
       }
@@ -706,7 +701,7 @@ void TreeSurvival::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, dou
   size_t* num_samples_right_child = new size_t[num_splits]();
 
   computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
-      delta_samples_at_risk_right_child, num_deaths_right_child);
+      delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
 
   // Compute logrank test for all splits and use best
   for (size_t i = 0; i < num_splits; ++i) {
