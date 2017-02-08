@@ -143,3 +143,28 @@ test_that("Split points are at (A+B)/2 for numeric features, regression maxstat 
   )
   expect_equal(split_points, rep(0.5, rf$num.trees))
 })
+
+test_that("Split points are at (A+B)/2 for numeric features, classification", {
+  dat <- data.frame(y = factor(rbinom(100, 1, .5)), x = rbinom(100, 1, .5))
+  rf <- ranger(y ~ x, dat, num.trees = 10)
+  split_points <- mapply(function(varID, value) {
+    value[varID > 0]
+  }, 
+  rf$forest$split.varIDs, 
+  rf$forest$split.values
+  )
+  expect_equal(split_points, rep(0.5, rf$num.trees))
+})
+
+test_that("Split points are at (A+B)/2 for numeric features, probability", {
+  dat <- data.frame(y = factor(rbinom(100, 1, .5)), x = rbinom(100, 1, .5))
+  rf <- ranger(y ~ x, dat, num.trees = 10)
+  split_points <- mapply(function(varID, value) {
+    value[varID > 0]
+  }, 
+  rf$forest$split.varIDs, 
+  rf$forest$split.values
+  )
+  expect_equal(split_points, rep(0.5, rf$num.trees))
+})
+
