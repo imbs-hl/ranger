@@ -158,7 +158,7 @@ test_that("Split points are at (A+B)/2 for numeric features, classification", {
 
 test_that("Split points are at (A+B)/2 for numeric features, probability", {
   dat <- data.frame(y = factor(rbinom(100, 1, .5)), x = rbinom(100, 1, .5))
-  rf <- ranger(y ~ x, dat, num.trees = 10)
+  rf <- ranger(y ~ x, dat, num.trees = 10, probability = TRUE)
   split_points <- mapply(function(varID, value) {
     value[varID > 0]
   }, 
