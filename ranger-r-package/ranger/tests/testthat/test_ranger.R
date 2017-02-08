@@ -168,3 +168,38 @@ test_that("Split points are at (A+B)/2 for numeric features, probability", {
   expect_equal(split_points, rep(0.5, rf$num.trees))
 })
 
+test_that("Split points are at (A+B)/2 for numeric features, survival logrank splitting", {
+  dat <- data.frame(time = runif(100, 1, 10), status = rbinom(100, 1, .5), x = rbinom(100, 1, .5))
+  rf <- ranger(Surv(time, status) ~ x, dat, num.trees = 10, splitrule = "logrank")
+  split_points <- mapply(function(varID, value) {
+    value[varID > 0]
+  }, 
+  rf$forest$split.varIDs, 
+  rf$forest$split.values
+  )
+  expect_equal(split_points, rep(0.5, rf$num.trees))
+})
+
+test_that("Split points are at (A+B)/2 for numeric features, survival C-index splitting", {
+  dat <- data.frame(time = runif(100, 1, 10), status = rbinom(100, 1, .5), x = rbinom(100, 1, .5))
+  rf <- ranger(Surv(time, status) ~ x, dat, num.trees = 10, splitrule = "C")
+  split_points <- mapply(function(varID, value) {
+    value[varID > 0]
+  }, 
+  rf$forest$split.varIDs, 
+  rf$forest$split.values
+  )
+  expect_equal(split_points, rep(0.5, rf$num.trees))
+})
+
+test_that("Split points are at (A+B)/2 for numeric features, survival maxstat splitting", {
+  dat <- data.frame(time = runif(100, 1, 10), status = rbinom(100, 1, .5), x = rbinom(100, 1, .5))
+  rf <- ranger(Surv(time, status) ~ x, dat, num.trees = 10, splitrule = "maxstat", alpha = 1)
+  split_points <- mapply(function(varID, value) {
+    value[varID > 0]
+  }, 
+  rf$forest$split.varIDs, 
+  rf$forest$split.values
+  )
+  expect_equal(split_points, rep(0.5, rf$num.trees))
+})
