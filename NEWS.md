@@ -1,3 +1,6 @@
+##### Version 0.6.6
+* Split at mid-point between candidate values
+
 ##### Version 0.6.5
 * Better formula interface: Support interactions terms and faster computation
 
