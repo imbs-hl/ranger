@@ -120,9 +120,21 @@ test_that("No error if missing value in irrelevant column, prediction", {
   expect_silent(predict(rf, dat))
 })
 
-test_that("Split points are at (A+B)/2 for numeric features", {
+test_that("Split points are at (A+B)/2 for numeric features, regression variance splitting", {
   dat <- data.frame(y = rbinom(100, 1, .5), x = rbinom(100, 1, .5))
   rf <- ranger(y ~ x, dat, num.trees = 10)
+  split_points <- mapply(function(varID, value) {
+    value[varID > 0]
+    }, 
+    rf$forest$split.varIDs, 
+    rf$forest$split.values
+  )
+  expect_equal(split_points, rep(0.5, rf$num.trees))
+})
+
+test_that("Split points are at (A+B)/2 for numeric features, regression maxstat splitting", {
+  dat <- data.frame(y = rbinom(100, 1, .5), x = rbinom(100, 1, .5))
+  rf <- ranger(y ~ x, dat, num.trees = 10, splitrule = "maxstat", alpha = 1)
   split_points <- mapply(function(varID, value) {
     value[varID > 0]
     }, 
