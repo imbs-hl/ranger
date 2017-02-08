@@ -215,11 +215,9 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     return;
   }
 
-  // Remove largest value because no split possible
-  possible_split_values.pop_back();
-
   // Initialize with 0, if not in memory efficient mode, use pre-allocated space
-  size_t num_splits = possible_split_values.size();
+  // -1 because no split possible at largest value
+  size_t num_splits = possible_split_values.size() - 1;
   size_t* class_counts_right;
   size_t* n_right;
   if (memory_saving_splitting) {
@@ -273,7 +271,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
 
     // If better than before, use this
     if (decrease > best_decrease) {
-      best_value = possible_split_values[i];
+      best_value =  (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
     }
@@ -337,7 +335,7 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
 
     // If better than before, use this
     if (decrease > best_decrease) {
-      best_value = data->getUniqueDataValue(varID, i);
+      best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, i + 1)) / 2;
       best_varID = varID;
       best_decrease = decrease;
     }
