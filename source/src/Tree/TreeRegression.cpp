@@ -303,8 +303,14 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
 
     // If better than before, use this
     if (decrease > best_decrease) {
+      // Find next value in this node
+      size_t j = i + 1;
+      while(j < num_unique && counter[j] == 0) {
+        ++j;
+      }
+
       // Use mid-point split
-      best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, i + 1)) / 2;
+      best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
     }
