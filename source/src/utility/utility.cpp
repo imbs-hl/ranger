@@ -621,7 +621,13 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
 
     if (T > best_maxstat) {
       best_maxstat = T;
-      best_split_value = x[indices[i]];
+
+      // Use mid-point split if possible
+      if (i < n - 1) {
+        best_split_value = (x[indices[i]] + x[indices[i + 1]]) / 2;
+      } else {
+        best_split_value = x[indices[i]];
+      }
     }
   }
 }
