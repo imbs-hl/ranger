@@ -64,6 +64,11 @@ test_that("Importance p-values Janitza-Holdout: returns correct dimensions", {
   expect_equal(dim(vimp), c(104, 2))
 })
 
+test_that("Importance p-values Janitza-Holdout: No zero p-values", {
+  expect_warning(vimp <- importance_pvalues(holdout_p100, method = "janitza"))
+  expect_false(any(vimp[, "pvalue"] == 0))
+})
+
 ## Altmann
 test_that("Importance p-values Altmann: returns correct dimensions", {
   vimp <- importance_pvalues(rf_p0, method = "altmann", formula = Species ~ ., data = iris)
