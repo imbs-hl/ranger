@@ -162,15 +162,14 @@
 ##' @author Marvin N. Wright
 ##' @references
 ##' \itemize{
-##'   \item Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. \url{http://arxiv.org/abs/1508.04409}.
-##'   \item Schmid, M., Wright, M. N. & Ziegler, A. (2015). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Systems with Applications 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
-##'   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2016). Random forests for survival analysis using maximally selected rank statistics. Technical Report. \url{http://arxiv.org/abs/1605.03391}.
-##' 
-##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. 
-##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. 
-##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81.
+##'   \item Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw, in press. \url{http://arxiv.org/abs/1508.04409}.
+##'   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
+##'   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med. \url{http://dx.doi.org/10.1002/sim.7212}.
+##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{http://dx.doi.org/10.1023/A:1010933404324}. 
+##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{http://dx.doi.org/10.1097/JTO.0b013e318233d835}. 
+##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{http://dx.doi.org/10.3414/ME00-01-0052}.
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42.
+##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}. 
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
 ##' @useDynLib ranger
