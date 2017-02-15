@@ -533,7 +533,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       use.unordered.factor.variables <- TRUE
       ## Check level count
       num.levels <- sapply(data.selected[, factor.idx & !ordered.idx & independent.idx, drop = FALSE], nlevels)
-      max.level.count <- 8*.Machine$sizeof.pointer - 1
+      max.level.count <- .Machine$double.digits
       if (max(num.levels) > max.level.count) {
         stop(paste("Too many levels in unordered categorical variable ", unordered.factor.variables[which.max(num.levels)], 
                    ". Only ", max.level.count, " levels allowed on this system. Consider using the 'order' option.", sep = ""))
