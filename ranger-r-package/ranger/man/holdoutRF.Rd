@@ -21,7 +21,7 @@ Related to the novel permutation variable importance by Janitza et al. (2015).
 Marvin N. Wright
 }
 \references{
-Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forest for high dimensional data, Technical Report 185, University of Munich, \url{https://epub.ub.uni-muenchen.de/25587}. \cr
+Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{http://dx.doi.org/10.1007/s11634-016-0276-4}. \cr
 }
 \seealso{
 \code{\link{ranger}}
