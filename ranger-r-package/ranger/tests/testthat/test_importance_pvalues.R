@@ -85,6 +85,11 @@ test_that("Importance p-values Altmann: not working for holdoutRF", {
   expect_error(importance_pvalues(holdout_p0, method = "altmann", formula = Species ~ ., data = iris))
 })
 
+test_that("Importance p-values Janitza-Holdout: No zero p-values", {
+  vimp <- importance_pvalues(rf_p0, method = "altmann", formula = Species ~ ., data = iris)
+  expect_false(any(vimp[, "pvalue"] == 0))
+})
+
 ## Hold-out RF
 test_that("HoldoutRF working", {
   expect_is(holdout_p0, "holdoutRF")
