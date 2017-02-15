@@ -123,10 +123,13 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     })
     
     ## Compute p-value
+    # pval <- sapply(1:nrow(vimp), function(i) {
+    #   1 - ecdf(vimp[i, ])(x$variable.importance[i])
+    # })
     pval <- sapply(1:nrow(vimp), function(i) {
-      1 - ecdf(vimp[i, ])(x$variable.importance[i])
+      (sum(vimp[i, ] >= x$variable.importance[i]) + 1)/(ncol(vimp) + 1)
     })
-    
+
   } else {
     stop("Unknown p-value method. Available methods are: 'janitza' and 'altmann'.")
   }
