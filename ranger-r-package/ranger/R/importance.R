@@ -65,7 +65,7 @@ importance.ranger <- function(x, ...) {
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
 ##' @references
-##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forest for high dimensional data, Technical Report 185, University of Munich, \url{https://epub.ub.uni-muenchen.de/25587}. \cr
+##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{http://dx.doi.org/10.1007/s11634-016-0276-4}. \cr
 ##'   Altmann, A., Tolosi, L., Sander, O. & Lengauer, T. (2010). Permutation importance: a corrected feature importance measure, Bioinformatics 26(10):1340-1347.
 ##' @export 
 importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutations = 100, formula = NULL, data = NULL, ...) {
@@ -93,7 +93,10 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     vimp <- c(m1, -m1, m2)
     
     ## Compute p-value
-    pval <- 1 - ecdf(vimp)(x$variable.importance)
+    #pval <- 1 - ecdf(vimp)(x$variable.importance)
+    pval <- sapply(x$variable.importance, function(y) {
+      (sum(vimp >= y) + 1)/(length(vimp) + 1)
+    })
     
     ## TODO: 100 ok? increase? 
     if (length(m1) == 0) {

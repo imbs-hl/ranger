@@ -1,3 +1,6 @@
+##### Version 0.6.7
+* Improvements in holdoutRF and importance p-value estimation
+
 ##### Version 0.6.6
 * Split at mid-point between candidate values
 
