@@ -32,16 +32,23 @@
 ##' Related to the novel permutation variable importance by Janitza et al. (2015).
 ##'
 ##' @title Hold-out random forests
-##' @param formula Object of class \code{formula} or \code{character} describing the model to fit.
-##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
-##' @param ... Further arguments passed to ranger(). 
+##' @param ... All arguments are passed to \code{\link{ranger}()} (except \code{importance}, \code{case.weights}, \code{replace} and \code{holdout}.). 
 ##' @return Hold-out random forests with variable importance.
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
 ##' @references
 ##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forest for high dimensional data, Technical Report 185, University of Munich, \url{https://epub.ub.uni-muenchen.de/25587}. \cr
 ##' @export 
-holdoutRF <- function(formula, data, ...) {
+holdoutRF <- function(...) {
+  
+  ## Get data from arguments
+  args <- list(...)
+  if ("data" %in% names(args)) {
+    data <- args$data
+  } else {
+    data <- args[[2]]
+  }
+  
   ## Split data
   if ("gwaa.data" %in% class(data)) {
     n <- nrow(data@phdata) 
@@ -50,12 +57,26 @@ holdoutRF <- function(formula, data, ...) {
   }
   weights <- rbinom(n, 1, 0.5)
   
+  ## Check args
+  if ("case.weights" %in% names(args)) {
+    stop("Error: Argument 'case.weights' not supported in holdoutRF.")
+  }
+  if ("holdout" %in% names(args)) {
+    stop("Error: Argument 'holdout' not supported in holdoutRF.")
+  }
+  if ("importance" %in% names(args)) {
+    stop("Error: Argument 'importance' not supported in holdoutRF. Always set to 'permutation'.")
+  }
+  if ("replace" %in% names(args)) {
+    stop("Error: Argument 'replace' not supported in holdoutRF.")
+  }
+  
   ## Grow RFs
   res <- list(
-    rf1 = ranger(formula = formula, data = data, importance = "permutation",  
-                 case.weights = weights, replace = FALSE, holdout = TRUE, ...),
-    rf2 = ranger(formula = formula, data = data, importance = "permutation",
-                 case.weights = 1-weights, replace = FALSE, holdout = TRUE, ...)
+    rf1 = ranger(..., importance = "permutation",  
+                 case.weights = weights, replace = FALSE, holdout = TRUE),
+    rf2 = ranger(..., importance = "permutation",
+                 case.weights = 1-weights, replace = FALSE, holdout = TRUE)
   )
   
   ## Compute importance

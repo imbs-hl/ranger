@@ -95,7 +95,34 @@ test_that("HoldoutRF ... argument working", {
   expect_equal(rf$rf1$num.trees, 10)
 })
 
+test_that("HoldoutRF working with formula", {
+  rf <- holdoutRF(Species ~., iris, num.trees = 10)
+  expect_equal(rf$rf1$treetype, "Classification")
+  
+  rf <- holdoutRF(Species ~., data = iris, num.trees = 10)
+  expect_equal(rf$rf1$treetype, "Classification")
+  
+  rf <- holdoutRF(formula = Species ~., iris, num.trees = 10)
+  expect_equal(rf$rf1$treetype, "Classification")
+  
+  rf <- holdoutRF(data = iris, formula = Species ~., num.trees = 10)
+  expect_equal(rf$rf1$treetype, "Classification")
+})
+
 test_that("HoldoutRF working with dependent.variable.name", {
   rf <- holdoutRF(dependent.variable.name = "Species", data = iris, num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
+  
+  rf <- holdoutRF(data = iris, dependent.variable.name = "Species", num.trees = 10)
+  expect_equal(rf$rf1$treetype, "Classification")
+})
+
+test_that("HoldoutRF not working if importance argument used", {
+  expect_error(holdoutRF(Species ~., iris, num.trees = 10, importance = "impurity"), 
+               "Error: Argument 'importance' not supported in holdoutRF.")
+})
+
+test_that("HoldoutRF not working if replace argument used", {
+  expect_error(holdoutRF(Species ~., iris, num.trees = 10, replace = TRUE), 
+               "Error: Argument 'replace' not supported in holdoutRF.")
 })

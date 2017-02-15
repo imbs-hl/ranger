@@ -4,14 +4,10 @@
 \alias{holdoutRF}
 \title{Hold-out random forests}
 \usage{
-holdoutRF(formula, data, ...)
+holdoutRF(...)
 }
 \arguments{
-\item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}
-
-\item{data}{Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).}
-
-\item{...}{Further arguments passed to ranger().}
+\item{...}{All arguments are passed to \code{\link{ranger}()} (except \code{importance}, \code{case.weights}, \code{replace} and \code{holdout}.).}
 }
 \value{
 Hold-out random forests with variable importance.
