@@ -94,3 +94,8 @@ test_that("HoldoutRF ... argument working", {
   rf <- holdoutRF(Species ~., iris, num.trees = 10)
   expect_equal(rf$rf1$num.trees, 10)
 })
+
+test_that("HoldoutRF working with dependent.variable.name", {
+  rf <- holdoutRF(dependent.variable.name = "Species", data = iris, num.trees = 10)
+  expect_equal(rf$rf1$treetype, "Classification")
+})
