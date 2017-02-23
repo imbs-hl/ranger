@@ -169,7 +169,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
   result.resize(max);
   std::iota(result.begin(), result.end(), 0);
 
-   // Skip indices
+  // Skip indices
   for (size_t i = 0; i < skip.size(); ++i) {
     result.erase(result.begin() + skip[skip.size() - 1 - i]);
   }
@@ -227,6 +227,9 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
 double mostFrequentValue(std::unordered_map<double, size_t>& class_count, std::mt19937_64 random_number_generator) {
   std::vector<double> major_classes;
 
+  // TODO: Remove
+//  std::cout << "mostFrequentValue ..." << std::endl;
+
   // Find maximum count
   size_t max_count = 0;
   for (auto& class_value : class_count) {
@@ -238,6 +241,9 @@ double mostFrequentValue(std::unordered_map<double, size_t>& class_count, std::m
       major_classes.push_back(class_value.first);
     }
   }
+
+  // TODO: Remove
+//  std::cout << "major_classes.size(): " << major_classes.size() << std::endl;
 
   if (major_classes.size() == 1) {
     return major_classes[0];

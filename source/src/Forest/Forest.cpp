@@ -276,6 +276,12 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, D
   if ((size_t) num_samples * sample_fraction < 1) {
     throw std::runtime_error("sample_fraction too small, no observations sampled.");
   }
+
+  // Permute samples for unbiased Gini importance
+  if (importance_mode == IMP_GINI_UNBIASED) {
+    data->permuteSampleIDs(random_number_generator);
+  }
+
 }
 
 void Forest::run(bool verbose) {

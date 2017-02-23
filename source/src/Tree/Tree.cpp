@@ -125,7 +125,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
     ++i;
   }
 
-// Delete sampleID vector to save memory
+  // Delete sampleID vector to save memory
   sampleIDs.clear();
   cleanUpInternal();
 }
@@ -159,8 +159,21 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 
       // Move to child
       size_t split_varID = split_varIDs[nodeID];
-      double value = prediction_data->get(sample_idx, split_varID);
-      if ((*is_ordered_variable)[split_varID]) {
+
+      // TODO: Better way?
+      size_t real_split_varID = split_varID;
+      if (importance_mode == IMP_GINI_UNBIASED && split_varID >= data->getNumCols()) {
+        real_split_varID -= data->getNumCols();
+
+        for (auto& skip : *no_split_variables) {
+          if (real_split_varID >= skip) {
+            ++real_split_varID;
+          }
+        }
+      }
+
+      double value = prediction_data->get(sample_idx, real_split_varID);
+      if ((*is_ordered_variable)[real_split_varID]) {
         if (value <= split_values[nodeID]) {
           // Move to left child
           nodeID = child_nodeIDs[0][nodeID];
@@ -239,13 +252,21 @@ void Tree::appendToFile(std::ofstream& file) {
 
 void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 
-// Always use deterministic variables
+  size_t num_vars = data->getNumCols();
+
+  // For Unbiased Gini splitting add dummy variables
+  if (importance_mode == IMP_GINI_UNBIASED) {
+    num_vars += data->getNumCols() - no_split_variables->size();
+  }
+
+  // Always use deterministic variables
   std::copy(deterministic_varIDs->begin(), deterministic_varIDs->end(), std::inserter(result, result.end()));
 
-// Randomly add non-deterministic variables (according to weights if needed)
+  // Randomly add non-deterministic variables (according to weights if needed)
   if (split_select_weights->empty()) {
-    drawWithoutReplacementSkip(result, random_number_generator, data->getNumCols(), *no_split_variables, mtry);
+    drawWithoutReplacementSkip(result, random_number_generator, num_vars, *no_split_variables, mtry);
   } else {
+    // TODO: Handle unbiased Gini splitting here?
     size_t num_draws = mtry - result.size();
     drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, num_draws,
         *split_select_weights);
@@ -254,11 +275,11 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 
 bool Tree::splitNode(size_t nodeID) {
 
-// Select random subset of variables to possibly split at
+  // Select random subset of variables to possibly split at
   std::vector<size_t> possible_split_varIDs;
   createPossibleSplitVarSubset(possible_split_varIDs);
 
-// Call subclass method, sets split_varIDs and split_values
+  // Call subclass method, sets split_varIDs and split_values
   bool stop = splitNodeInternal(nodeID, possible_split_varIDs);
   if (stop) {
     // Terminal node
@@ -268,7 +289,7 @@ bool Tree::splitNode(size_t nodeID) {
   size_t split_varID = split_varIDs[nodeID];
   double split_value = split_values[nodeID];
 
-// Create child nodes
+  // Create child nodes
   size_t left_child_nodeID = sampleIDs.size();
   child_nodeIDs[0][nodeID] = left_child_nodeID;
   createEmptyNode();
@@ -277,33 +298,57 @@ bool Tree::splitNode(size_t nodeID) {
   child_nodeIDs[1][nodeID] = right_child_nodeID;
   createEmptyNode();
 
+  // TODO: What to do for prediction?
+  size_t real_split_varID = split_varID;
+  if (importance_mode == IMP_GINI_UNBIASED && split_varID >= data->getNumCols()) {
+    real_split_varID -= data->getNumCols();
+
+    for (auto& skip : *no_split_variables) {
+      if (real_split_varID >= skip) {
+        ++real_split_varID;
+      }
+    }
+  }
+
 // For each sample in node, assign to left or right child
-  if ((*is_ordered_variable)[split_varID]) {
+  if ((*is_ordered_variable)[real_split_varID]) {
     // Ordered: left is <= splitval and right is > splitval
     for (auto& sampleID : sampleIDs[nodeID]) {
-      if (data->get(sampleID, split_varID) <= split_value) {
-        sampleIDs[left_child_nodeID].push_back(sampleID);
+
+      size_t real_sampleID = sampleID;
+      if (importance_mode == IMP_GINI_UNBIASED && split_varID >= data->getNumCols()) {
+        real_sampleID = data->getPermutedSampleID(sampleID);
+      }
+
+      if (data->get(real_sampleID, real_split_varID) <= split_value) {
+        sampleIDs[left_child_nodeID].push_back(real_sampleID);
       } else {
-        sampleIDs[right_child_nodeID].push_back(sampleID);
+        sampleIDs[right_child_nodeID].push_back(real_sampleID);
       }
     }
   } else {
     // Unordered: If bit at position is 1 -> right, 0 -> left
     for (auto& sampleID : sampleIDs[nodeID]) {
-      double level = data->get(sampleID, split_varID);
+
+      size_t real_sampleID = sampleID;
+      if (importance_mode == IMP_GINI_UNBIASED && split_varID >= data->getNumCols()) {
+        real_sampleID = data->getPermutedSampleID(sampleID);
+      }
+
+      double level = data->get(real_sampleID, real_split_varID);
       size_t factorID = floor(level) - 1;
       size_t splitID = floor(split_value);
 
       // Left if 0 found at position factorID
       if (!(splitID & (1 << factorID))) {
-        sampleIDs[left_child_nodeID].push_back(sampleID);
+        sampleIDs[left_child_nodeID].push_back(real_sampleID);
       } else {
-        sampleIDs[right_child_nodeID].push_back(sampleID);
+        sampleIDs[right_child_nodeID].push_back(real_sampleID);
       }
     }
   }
 
-// No terminal node
+  // No terminal node
   return false;
 }
 

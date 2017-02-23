@@ -122,8 +122,10 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   // Find best split, stop if no decrease of impurity
   bool stop;
   if (splitrule == EXTRATREES) {
+    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
+    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplit(nodeID, possible_split_varIDs);
   }
 

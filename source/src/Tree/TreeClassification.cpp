@@ -86,13 +86,13 @@ void TreeClassification::appendToFileInternal(std::ofstream& file) {
 
 bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-// Check node size, stop if maximum reached
+  // Check node size, stop if maximum reached
   if (sampleIDs[nodeID].size() <= min_node_size) {
     split_values[nodeID] = estimate(nodeID);
     return true;
   }
 
-// Check if node is pure and set split_value to estimate and stop if pure
+  // Check if node is pure and set split_value to estimate and stop if pure
   bool pure = true;
   double pure_value = 0;
   for (size_t i = 0; i < sampleIDs[nodeID].size(); ++i) {
@@ -111,6 +111,7 @@ bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& p
   // Find best split, stop if no decrease of impurity
   bool stop;
   if (splitrule == EXTRATREES) {
+    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);
@@ -161,8 +162,20 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
 
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
+    // TODO: Solve differently
+    size_t real_varID = varID;
+    if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+      real_varID -= data->getNumCols();
+
+      for (auto& skip : *no_split_variables) {
+        if (real_varID >= skip) {
+          ++real_varID;
+        }
+      }
+    }
+
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if ((*is_ordered_variable)[real_varID]) {
 
       // Use memory saving method if option set
       if (memory_saving_splitting) {
@@ -180,6 +193,7 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
         }
       }
     } else {
+      // TODO: Handle Unbiased Gini importance here?
       findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
           best_decrease);
     }
@@ -198,7 +212,9 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
 
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI) {
-    addGiniImportance(nodeID, best_varID, best_decrease);
+    // TODO: Change back to normal Gini importance
+    // addGiniImportance(nodeID, best_varID, best_decrease);
+    addGiniImportanceTest(nodeID, best_varID, best_decrease);
   } else if (importance_mode == IMP_GINI_UNBIASED) {
     addUnbiasedGiniImportance(nodeID, best_varID, best_decrease);
   }
@@ -208,17 +224,21 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
 void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
     size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
 
-  // Create possible split values
+// Create possible split values
   std::vector<double> possible_split_values;
-  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    data->getAllValuesPermuted(possible_split_values, sampleIDs[nodeID], varID);
+  } else {
+    data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+  }
 
   // Try next variable if all equal for this
   if (possible_split_values.size() < 2) {
     return;
   }
 
-  // Initialize with 0, if not in memory efficient mode, use pre-allocated space
-  // -1 because no split possible at largest value
+// Initialize with 0, if not in memory efficient mode, use pre-allocated space
+// -1 because no split possible at largest value
   size_t num_splits = possible_split_values.size() - 1;
   size_t* class_counts_right;
   size_t* n_right;
@@ -232,9 +252,28 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     std::fill(n_right, n_right + num_splits, 0);
   }
 
+  size_t real_varID = varID;
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    real_varID -= data->getNumCols();
+
+    // TODO: Better way?
+    for (auto& skip : *no_split_variables) {
+      if (real_varID >= skip) {
+        ++real_varID;
+      }
+    }
+  }
+
   // Count samples in right child per class and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
-    double value = data->get(sampleID, varID);
+    double value;
+    if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+
+      value = data->get(data->getPermutedSampleID(sampleID), real_varID);
+    } else {
+      value = data->get(sampleID, varID);
+    }
+
     uint sample_classID = (*response_classIDs)[sampleID];
 
     // Count samples until split_value reached
@@ -273,8 +312,13 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
 
     // If better than before, use this
     if (decrease > best_decrease) {
-      best_value =  (possible_split_values[i] + possible_split_values[i + 1]) / 2;
+      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
+      // TODO: What to do for prediction?
+//      if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+//        best_varID = varID - data->getNumCols();
+//      } else {
       best_varID = varID;
+//      }
       best_decrease = decrease;
     }
   }
@@ -288,14 +332,31 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
 void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
     size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
 
+  // TODO: Better way?
+  size_t real_varID = varID;
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    real_varID -= data->getNumCols();
+
+    for (auto& skip : *no_split_variables) {
+      if (real_varID >= skip) {
+        ++real_varID;
+      }
+    }
+  }
+
   // Set counters to 0
-  size_t num_unique = data->getNumUniqueDataValues(varID);
+  size_t num_unique = data->getNumUniqueDataValues(real_varID);
   std::fill(counter_per_class, counter_per_class + num_unique * num_classes, 0);
   std::fill(counter, counter + num_unique, 0);
 
   // Count values
   for (auto& sampleID : sampleIDs[nodeID]) {
-    size_t index = data->getIndex(sampleID, varID);
+    size_t index;
+    if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+      index = data->getIndex(data->getPermutedSampleID(sampleID), real_varID);
+    } else {
+      index = data->getIndex(sampleID, varID);
+    }
     size_t classID = (*response_classIDs)[sampleID];
 
     ++counter[index];
@@ -339,12 +400,13 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
     if (decrease > best_decrease) {
       // Find next value in this node
       size_t j = i + 1;
-      while(j < num_unique && counter[j] == 0) {
+      while (j < num_unique && counter[j] == 0) {
         ++j;
       }
 
+      // TODO: What to do for prediction?
       // Use mid-point split
-      best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
+      best_value = (data->getUniqueDataValue(real_varID, i) + data->getUniqueDataValue(real_varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
     }
@@ -468,10 +530,10 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
 
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI) {
-     addGiniImportance(nodeID, best_varID, best_decrease);
-   } else if (importance_mode == IMP_GINI_UNBIASED) {
-     addUnbiasedGiniImportance(nodeID, best_varID, best_decrease);
-   }
+    addGiniImportance(nodeID, best_varID, best_decrease);
+  } else if (importance_mode == IMP_GINI_UNBIASED) {
+    addUnbiasedGiniImportance(nodeID, best_varID, best_decrease);
+  }
   return false;
 }
 
@@ -692,6 +754,103 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
 
 // TODO: Change
 void TreeClassification::addUnbiasedGiniImportance(size_t nodeID, size_t varID, double decrease) {
+
+  // Compute standard Gini importance
+  std::vector<size_t> class_counts;
+  class_counts.resize(class_values->size(), 0);
+
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    uint sample_classID = (*response_classIDs)[sampleID];
+    class_counts[sample_classID]++;
+  }
+  double sum_node = 0;
+  for (auto& class_count : class_counts) {
+    sum_node += class_count * class_count;
+  }
+  double best_gini_biased = decrease - sum_node / (double) sampleIDs[nodeID].size();
+
+  double best_gini = best_gini_biased;
+
+//  // Compute Gini importance for permuted outcome
+//
+//  std::vector<uint> response_classIDs_permuted(*response_classIDs);
+//  std::shuffle(response_classIDs_permuted.begin(), response_classIDs_permuted.end(), random_number_generator);
+//
+//  // Class counts
+//  size_t n_right = 0;
+//  std::vector<size_t> class_counts_right;
+//  class_counts_right.resize(class_values->size(), 0);
+//  for (auto& sampleID : sampleIDs[nodeID]) {
+//    double value = data->get(sampleID, varID);
+//    // uint sample_classID = (*response_classIDs)[sampleID];
+//    uint sample_classID = response_classIDs_permuted[sampleID];
+//
+//    // Count samples until split_value reached
+//    if (value > split_values[nodeID]) {
+//      ++n_right;
+//      ++class_counts_right[sample_classID];
+//    }
+//  }
+//
+//  // Sum of squares
+//  size_t n_left = sampleIDs[nodeID].size() - n_right;
+//  double sum_left = 0;
+//  double sum_right = 0;
+//  for (size_t j = 0; j < class_values->size(); ++j) {
+//    size_t class_count_right = class_counts_right[j];
+//    size_t class_count_left = class_counts[j] - class_count_right;
+//
+//    sum_right += class_count_right * class_count_right;
+//    sum_left += class_count_left * class_count_left;
+//  }
+//
+//  // Decrease of impurity
+//  double decrease_permuted = sum_left / (double) n_left + sum_right / (double) n_right;
+//  double best_gini_permuted = decrease_permuted - sum_node / (double) sampleIDs[nodeID].size();
+//
+//  double best_gini;
+//  if (decrease_permuted > decrease) {
+//    best_gini = -best_gini_permuted;
+//  } else {
+//    best_gini = best_gini_biased;
+//  }
+//
+////  std::cout << "n_right: " << n_right << std::endl;
+////  std::cout << "n_left: " << n_left << std::endl;
+////
+////  std::cout << "best_gini_biased: " << best_gini_biased << std::endl;
+////  std::cout << "best_gini_permuted: " << best_gini_permuted << std::endl;
+////  std::cout << "best_gini: " << best_gini << std::endl;
+////  std::cout << std::endl;
+
+  size_t real_varID = varID;
+
+  // Subtract from importance of original var
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    real_varID -= data->getNumCols();
+    best_gini = -best_gini;
+
+    for (auto& skip : *no_split_variables) {
+      if (real_varID >= skip) {
+        ++real_varID;
+      }
+    }
+  }
+
+  // No variable importance for no split variables
+  size_t tempvarID = real_varID;
+  for (auto& skip : *no_split_variables) {
+    if (real_varID >= skip) {
+      --tempvarID;
+    }
+  }
+
+  (*variable_importance)[tempvarID] += best_gini;
+
+}
+
+// TODO: Remove
+void TreeClassification::addGiniImportanceTest(size_t nodeID, size_t varID, double decrease) {
 
   std::vector<size_t> class_counts;
   class_counts.resize(class_values->size(), 0);

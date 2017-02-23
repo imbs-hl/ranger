@@ -107,10 +107,13 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   // Find best split, stop if no decrease of impurity
   bool stop;
   if (splitrule == MAXSTAT) {
+    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitMaxstat(nodeID, possible_split_varIDs);
   } else if (splitrule == EXTRATREES) {
+    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
+    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplit(nodeID, possible_split_varIDs);
   }
 
