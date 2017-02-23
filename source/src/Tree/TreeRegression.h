@@ -81,6 +81,7 @@ private:
       double& best_value, size_t& best_varID, double& best_decrease);
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
+  void addUnbiasedImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
   double computePredictionMSE();
 

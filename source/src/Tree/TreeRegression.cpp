@@ -189,6 +189,8 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
 // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
+  } else if (importance_mode == IMP_GINI_UNBIASED) {
+    addUnbiasedImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
 }
@@ -305,7 +307,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     if (decrease > best_decrease) {
       // Find next value in this node
       size_t j = i + 1;
-      while(j < num_unique && counter[j] == 0) {
+      while (j < num_unique && counter[j] == 0) {
         ++j;
       }
 
@@ -506,6 +508,8 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
+  } else if (importance_mode == IMP_GINI_UNBIASED) {
+    addUnbiasedImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
 }
@@ -679,6 +683,25 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
 }
 
 void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double decrease) {
+
+  double sum_node = 0;
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    sum_node += data->get(sampleID, dependent_varID);
+  }
+  double best_decrease = decrease - sum_node * sum_node / (double) sampleIDs[nodeID].size();
+
+// No variable importance for no split variables
+  size_t tempvarID = varID;
+  for (auto& skip : *no_split_variables) {
+    if (varID >= skip) {
+      --tempvarID;
+    }
+  }
+  (*variable_importance)[tempvarID] += best_decrease;
+}
+
+// TODO: Change
+void TreeRegression::addUnbiasedImpurityImportance(size_t nodeID, size_t varID, double decrease) {
 
   double sum_node = 0;
   for (auto& sampleID : sampleIDs[nodeID]) {
