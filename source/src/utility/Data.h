@@ -31,6 +31,8 @@
 
 #include <vector>
 #include <iostream>
+#include <numeric>
+#include <random>
 
 #include "globals.h"
 
@@ -53,6 +55,7 @@ public:
   bool loadFromFileOther(std::ifstream& input_file, std::string header_line, char seperator);
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
+  void getAllValuesPermuted(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
 
   void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
 
@@ -113,6 +116,20 @@ public:
     }
   }
 
+  void permuteSampleIDs(std::mt19937_64 random_number_generator) {
+    permuted_sampleIDs.resize(num_rows);
+    std::iota(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), 0);
+    std::shuffle(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), random_number_generator);
+  }
+
+  const std::vector<size_t>& getPermutedSampleIDs() const {
+    return permuted_sampleIDs;
+  }
+
+  const size_t getPermutedSampleID(size_t sampleID) const {
+    return permuted_sampleIDs[sampleID];
+  }
+
 protected:
   std::vector<std::string> variable_names;
   size_t num_rows;
@@ -127,6 +144,9 @@ protected:
   size_t* index_data;
   std::vector<std::vector<double>> unique_data_values;
   size_t max_num_unique_values;
+
+  // Permuted samples for unbiased impurity importance
+  std::vector<size_t> permuted_sampleIDs;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(Data);

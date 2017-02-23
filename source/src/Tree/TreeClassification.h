@@ -82,6 +82,9 @@ private:
   void addGiniImportance(size_t nodeID, size_t varID, double decrease);
   void addUnbiasedGiniImportance(size_t nodeID, size_t varID, double decrease);
 
+  // TODO: Remove
+  void addGiniImportanceTest(size_t nodeID, size_t varID, double decrease);
+
   void cleanUpInternal() {
     if (counter != 0) {
       delete[] counter;
