@@ -4,11 +4,13 @@ library(ranger)
 context("ranger_imp")
 
 ## Initialize the random forests
-rg.imp <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.imp <- ranger(Species ~ ., data = iris, num.trees = 10,
                  importance = "impurity")
-rg.perm <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.unbiased <- ranger(Species ~ ., data = iris, num.trees = 10,
+                      importance = "impurity_unbiased")
+rg.perm <- ranger(Species ~ ., data = iris, num.trees = 10,
                  importance = "permutation")
-rg.scale.perm <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.scale.perm <- ranger(Species ~ ., data = iris, num.trees = 10,
                  importance = "permutation", scale.permutation.importance = TRUE)
 
 ## Tests
@@ -21,6 +23,11 @@ test_that("importance measures work", {
 test_that("gini importance is larger than 1", {
   expect_gt(rg.imp$variable.importance[1], 1)
 })
+
+test_that("Unbiased gini importance is larger than 1", {
+  expect_gt(rg.unbiased$variable.importance[1], 1)
+})
+
 
 test_that("unscaled importance is smaller than 1", {
   expect_lt(rg.perm$variable.importance[1], 1)

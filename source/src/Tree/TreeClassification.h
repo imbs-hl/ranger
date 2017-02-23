@@ -80,6 +80,7 @@ private:
       size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
 
   void addGiniImportance(size_t nodeID, size_t varID, double decrease);
+  void addUnbiasedGiniImportance(size_t nodeID, size_t varID, double decrease);
 
   void cleanUpInternal() {
     if (counter != 0) {

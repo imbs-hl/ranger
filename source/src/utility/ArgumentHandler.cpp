@@ -530,6 +530,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              TYPE = 1: Node impurity: Gini for Classification, variance for Regression." << std::endl;
   std::cout << "    " << "                              TYPE = 2: Permutation importance, scaled by standard errors." << std::endl;
   std::cout << "    " << "                              TYPE = 3: Permutation importance, no scaling." << std::endl;
+  std::cout << "    " << "                              TYPE = 5: Corrected node impurity: Gini for Classification, variance for Regression." << std::endl;
   std::cout << "    " << "                              (Default: 0)" << std::endl;
   std::cout << "    " << "--noreplace                   Sample without replacement." << std::endl;
   std::cout << "    " << "--fraction X                  Fraction of observations to sample. Default is 1 for sampling with replacement " << std::endl;

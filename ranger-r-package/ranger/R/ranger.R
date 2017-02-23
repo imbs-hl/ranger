@@ -80,7 +80,7 @@
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
-##' @param importance Variable importance mode, one of 'none', 'impurity', 'permutation'. The 'impurity' measure is the Gini index for classification and the variance of the responses for regression. For survival, only 'permutation' is available.
+##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_unbiased', 'permutation'. The 'impurity' measure is the Gini index for classification and the variance of the responses for regression. For survival, only 'permutation' is available.
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
@@ -396,6 +396,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 0
   } else if (importance == "impurity") {
     importance.mode <- 1
+    if (treetype == 5) {
+      stop("Node impurity variable importance not supported for survival forests.")
+    }
+  } else if (importance == "impurity_unbiased") {
+    importance.mode <- 5
     if (treetype == 5) {
       stop("Node impurity variable importance not supported for survival forests.")
     }
