@@ -55,6 +55,8 @@ public:
   bool loadFromFileOther(std::ifstream& input_file, std::string header_line, char seperator);
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
+
+  // TODO: Used?
   void getAllValuesPermuted(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
 
   void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
@@ -122,10 +124,12 @@ public:
     std::shuffle(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), random_number_generator);
   }
 
+  // TODO: Used?
   const std::vector<size_t>& getPermutedSampleIDs() const {
     return permuted_sampleIDs;
   }
 
+  // TODO: Used?
   const size_t getPermutedSampleID(size_t sampleID) const {
     return permuted_sampleIDs[sampleID];
   }
