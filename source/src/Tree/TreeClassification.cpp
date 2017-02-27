@@ -43,8 +43,8 @@ TreeClassification::TreeClassification(std::vector<double>* class_values, std::v
 
 TreeClassification::TreeClassification(std::vector<std::vector<size_t>>& child_nodeIDs,
     std::vector<size_t>& split_varIDs, std::vector<double>& split_values, std::vector<double>* class_values,
-    std::vector<uint>* response_classIDs, std::vector<bool>* is_ordered_variable) :
-    Tree(child_nodeIDs, split_varIDs, split_values, is_ordered_variable), class_values(class_values), response_classIDs(
+    std::vector<uint>* response_classIDs) :
+    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(
         response_classIDs), counter(0), counter_per_class(0) {
 }
 
@@ -167,11 +167,8 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
 
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
-    // TODO: Use function for is_ordered, remove real_...
-    size_t real_varID = data->getUnpermutedVarID(varID);
-
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[real_varID]) {
+    if (data->isOrderedVariable(varID)) {
 
       // Use memory saving method if option set
       if (memory_saving_splitting) {
@@ -455,7 +452,7 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
       findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
           best_decrease);
     } else {

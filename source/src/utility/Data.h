@@ -140,18 +140,36 @@ public:
     std::sort(no_split_variables.begin(), no_split_variables.end());
   }
 
+  std::vector<bool>& getIsOrderedVariable() {
+    return is_ordered_variable;
+  }
+
+  void setIsOrderedVariable(std::vector<std::string>& unordered_variable_names) {
+    is_ordered_variable.resize(num_cols, true);
+    for (auto& variable_name : unordered_variable_names) {
+      size_t varID = getVariableID(variable_name);
+      is_ordered_variable[varID] = false;
+    }
+  }
+
+  void setIsOrderedVariable(std::vector<bool>& is_ordered_variable) {
+    this->is_ordered_variable = is_ordered_variable;
+  }
+
+  bool isOrderedVariable(size_t varID) {
+    // Use permuted data for unbiased impurity importance
+    if (varID >= num_cols) {
+      varID = getUnpermutedVarID(varID);
+    }
+    return is_ordered_variable[varID];
+  }
+
   void permuteSampleIDs(std::mt19937_64 random_number_generator) {
     permuted_sampleIDs.resize(num_rows);
     std::iota(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), 0);
     std::shuffle(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), random_number_generator);
   }
 
-  // TODO: Used?
-  const std::vector<size_t>& getPermutedSampleIDs() const {
-    return permuted_sampleIDs;
-  }
-
-  // TODO: Used?
   const size_t getPermutedSampleID(size_t sampleID) const {
     return permuted_sampleIDs[sampleID];
   }
@@ -186,6 +204,9 @@ protected:
 
   // Variable to not split at (only dependent_varID for non-survival trees)
   std::vector<size_t> no_split_variables;
+
+  // For each varID true if ordered
+  std::vector<bool> is_ordered_variable;
 
   // Permuted samples for unbiased impurity importance
   std::vector<size_t> permuted_sampleIDs;

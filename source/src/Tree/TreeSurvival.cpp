@@ -46,10 +46,9 @@ TreeSurvival::TreeSurvival(std::vector<double>* unique_timepoints, size_t status
 
 TreeSurvival::TreeSurvival(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values, std::vector<std::vector<double>> chf, std::vector<double>* unique_timepoints,
-    std::vector<size_t>* response_timepointIDs, std::vector<bool>* is_ordered_variable) :
-    Tree(child_nodeIDs, split_varIDs, split_values, is_ordered_variable), status_varID(0), unique_timepoints(
-        unique_timepoints), response_timepointIDs(response_timepointIDs), chf(chf), num_deaths(0), num_samples_at_risk(
-        0) {
+    std::vector<size_t>* response_timepointIDs) :
+    Tree(child_nodeIDs, split_varIDs, split_values), status_varID(0), unique_timepoints(unique_timepoints), response_timepointIDs(
+        response_timepointIDs), chf(chf), num_deaths(0), num_samples_at_risk(0) {
   this->num_timepoints = unique_timepoints->size();
 }
 
@@ -134,7 +133,7 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
     for (auto& varID : possible_split_varIDs) {
 
       // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if ((*is_ordered_variable)[varID]) {
+      if (data->isOrderedVariable(varID)) {
         if (splitrule == LOGRANK) {
           findBestSplitValueLogRank(nodeID, varID, best_value, best_varID, best_decrease);
         } else if (splitrule == AUC || splitrule == AUC_IGNORE_TIES) {
@@ -651,7 +650,7 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
     for (auto& varID : possible_split_varIDs) {
 
       // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if ((*is_ordered_variable)[varID]) {
+      if (data->isOrderedVariable(varID)) {
         findBestSplitValueExtraTrees(nodeID, varID, best_value, best_varID, best_decrease);
       } else {
         findBestSplitValueExtraTreesUnordered(nodeID, varID, best_value, best_varID, best_decrease);

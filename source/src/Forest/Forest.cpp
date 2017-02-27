@@ -248,11 +248,7 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, D
 
   // Set unordered factor variables
   if (!prediction_mode) {
-    is_ordered_variable.resize(num_variables, true);
-    for (auto& variable_name : unordered_variable_names) {
-      size_t varID = data->getVariableID(variable_name);
-      is_ordered_variable[varID] = false;
-    }
+    data->setIsOrderedVariable(unordered_variable_names);
   }
 
   data->addNoSplitVariable(dependent_varID);
@@ -389,7 +385,7 @@ void Forest::saveToFile() {
   outfile.write((char*) &num_trees, sizeof(num_trees));
 
   // Write is_ordered_variable
-  saveVector1D(is_ordered_variable, outfile);
+  saveVector1D(data->getIsOrderedVariable(), outfile);
 
   saveToFileInternal(outfile);
 
@@ -430,9 +426,8 @@ void Forest::grow() {
     }
 
     trees[i]->init(data, mtry, dependent_varID, num_samples, tree_seed, &deterministic_varIDs, &split_select_varIDs,
-        tree_split_select_weights, importance_mode, min_node_size, sample_with_replacement, &is_ordered_variable,
-        memory_saving_splitting, splitrule, &case_weights, keep_inbag, sample_fraction, alpha, minprop, holdout,
-        num_random_splits);
+        tree_split_select_weights, importance_mode, min_node_size, sample_with_replacement, memory_saving_splitting,
+        splitrule, &case_weights, keep_inbag, sample_fraction, alpha, minprop, holdout, num_random_splits);
   }
 
 // Init variable importance
@@ -750,7 +745,7 @@ void Forest::loadFromFile(std::string filename) {
   infile.read((char*) &num_trees, sizeof(num_trees));
 
 // Read is_ordered_variable
-  readVector1D(is_ordered_variable, infile);
+  readVector1D(data->getIsOrderedVariable(), infile);
 
 // Read tree data. This is different for tree types -> virtual function
   loadFromFileInternal(infile);
