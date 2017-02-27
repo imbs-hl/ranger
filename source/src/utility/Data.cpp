@@ -187,9 +187,6 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
 // TODO: Permute outcome instead?
 void Data::getAllValuesPermuted(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
 
-  // Get real variable
-  varID -= num_cols;
-
   // All values for varID (no duplicates) for given sampleIDs
   if (varID < num_cols_no_sparse) {
 

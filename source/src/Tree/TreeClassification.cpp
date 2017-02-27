@@ -77,7 +77,12 @@ double TreeClassification::estimate(size_t nodeID) {
     ++class_count[value];
   }
 
-  return (mostFrequentValue(class_count, random_number_generator));
+  if (sampleIDs[nodeID].size() > 0) {
+    return (mostFrequentValue(class_count, random_number_generator));
+  } else {
+    throw std::runtime_error("Error: Empty node.");
+  }
+
 }
 
 void TreeClassification::appendToFileInternal(std::ofstream& file) {
@@ -224,10 +229,22 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
 void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
     size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
 
+  size_t real_varID = varID;
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    real_varID -= data->getNumCols();
+
+    // TODO: Better way?
+    for (auto& skip : *no_split_variables) {
+      if (real_varID >= skip) {
+        ++real_varID;
+      }
+    }
+  }
+
 // Create possible split values
   std::vector<double> possible_split_values;
   if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
-    data->getAllValuesPermuted(possible_split_values, sampleIDs[nodeID], varID);
+    data->getAllValuesPermuted(possible_split_values, sampleIDs[nodeID], real_varID);
   } else {
     data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
   }
@@ -250,18 +267,6 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     n_right = counter;
     std::fill(class_counts_right, class_counts_right + num_splits * num_classes, 0);
     std::fill(n_right, n_right + num_splits, 0);
-  }
-
-  size_t real_varID = varID;
-  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
-    real_varID -= data->getNumCols();
-
-    // TODO: Better way?
-    for (auto& skip : *no_split_variables) {
-      if (real_varID >= skip) {
-        ++real_varID;
-      }
-    }
   }
 
   // Count samples in right child per class and possbile split
