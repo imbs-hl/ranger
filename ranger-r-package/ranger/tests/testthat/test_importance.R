@@ -10,7 +10,7 @@ rg.unbiased <- ranger(Species ~ ., data = iris, num.trees = 10,
                       importance = "impurity_unbiased")
 rg.perm <- ranger(Species ~ ., data = iris, num.trees = 10,
                  importance = "permutation")
-rg.scale.perm <- ranger(Species ~ ., data = iris, num.trees = 10,
+rg.scale.perm <- ranger(Species ~ ., data = iris, num.trees = 50,
                  importance = "permutation", scale.permutation.importance = TRUE)
 
 ## Tests
@@ -18,6 +18,7 @@ test_that("importance measures work", {
   expect_is(rg.imp$variable.importance, "numeric")
   expect_is(rg.perm$variable.importance, "numeric")
   expect_is(rg.scale.perm$variable.importance, "numeric")
+  expect_is(rg.unbiased$variable.importance, "numeric")
 })
 
 test_that("gini importance is larger than 1", {
