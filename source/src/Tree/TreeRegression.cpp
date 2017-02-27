@@ -82,7 +82,7 @@ void TreeRegression::appendToFileInternal(std::ofstream& file) {
 
 bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-// Check node size, stop if maximum reached
+  // Check node size, stop if maximum reached
   if (sampleIDs[nodeID].size() <= min_node_size) {
     split_values[nodeID] = estimate(nodeID);
     return true;
@@ -107,13 +107,10 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   // Find best split, stop if no decrease of impurity
   bool stop;
   if (splitrule == MAXSTAT) {
-    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitMaxstat(nodeID, possible_split_varIDs);
   } else if (splitrule == EXTRATREES) {
-    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
-    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplit(nodeID, possible_split_varIDs);
   }
 
@@ -190,10 +187,8 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   split_values[nodeID] = best_value;
 
 // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
-  } else if (importance_mode == IMP_GINI_UNBIASED) {
-    addUnbiasedImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
 }
@@ -509,10 +504,8 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   split_values[nodeID] = best_value;
 
   // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
-  } else if (importance_mode == IMP_GINI_UNBIASED) {
-    addUnbiasedImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
 }
@@ -693,32 +686,19 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
   }
   double best_decrease = decrease - sum_node * sum_node / (double) sampleIDs[nodeID].size();
 
-// No variable importance for no split variables
-  size_t tempvarID = varID;
+  // No variable importance for no split variables
+  size_t tempvarID = data->getUnpermutedVarID(varID);
   for (auto& skip : data->getNoSplitVariables()) {
-    if (varID >= skip) {
+    if (tempvarID >= skip) {
       --tempvarID;
     }
   }
-  (*variable_importance)[tempvarID] += best_decrease;
-}
 
-// TODO: Change
-void TreeRegression::addUnbiasedImpurityImportance(size_t nodeID, size_t varID, double decrease) {
-
-  double sum_node = 0;
-  for (auto& sampleID : sampleIDs[nodeID]) {
-    sum_node += data->get(sampleID, dependent_varID);
+  // Subtract if unbiased importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    (*variable_importance)[tempvarID] -= best_decrease;
+  } else {
+    (*variable_importance)[tempvarID] += best_decrease;
   }
-  double best_decrease = decrease - sum_node * sum_node / (double) sampleIDs[nodeID].size();
-
-// No variable importance for no split variables
-  size_t tempvarID = varID;
-  for (auto& skip : data->getNoSplitVariables()) {
-    if (varID >= skip) {
-      --tempvarID;
-    }
-  }
-  (*variable_importance)[tempvarID] += best_decrease;
 }
 

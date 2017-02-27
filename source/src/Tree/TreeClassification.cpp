@@ -44,8 +44,8 @@ TreeClassification::TreeClassification(std::vector<double>* class_values, std::v
 TreeClassification::TreeClassification(std::vector<std::vector<size_t>>& child_nodeIDs,
     std::vector<size_t>& split_varIDs, std::vector<double>& split_values, std::vector<double>* class_values,
     std::vector<uint>* response_classIDs) :
-    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(
-        response_classIDs), counter(0), counter_per_class(0) {
+    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), counter(
+        0), counter_per_class(0) {
 }
 
 TreeClassification::~TreeClassification() {
@@ -116,7 +116,6 @@ bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& p
   // Find best split, stop if no decrease of impurity
   bool stop;
   if (splitrule == EXTRATREES) {
-    // TODO: Handle Unbiased Gini importance here?
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);
@@ -186,7 +185,6 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
         }
       }
     } else {
-      // TODO: Handle Unbiased Gini importance here?
       findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
           best_decrease);
     }
@@ -348,7 +346,6 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
         ++j;
       }
 
-      // TODO: What to do for prediction?
       // Use mid-point split
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
