@@ -482,6 +482,11 @@ void ArgumentHandler::checkArguments() {
   if (splitrule == EXTRATREES && !catvars.empty() && savemem) {
     throw std::runtime_error("savemem option not possible in extraTrees mode with unordered predictors.");
   }
+
+  // Unbiased impurity importance not allowed if split weights used
+  if (!splitweights.empty() && impmeasure == IMP_GINI_UNBIASED) {
+    throw std::runtime_error("Unbiased impurity importance not supported in combination with splitweights.");
+  }
 }
 
 void ArgumentHandler::displayHelp() {
