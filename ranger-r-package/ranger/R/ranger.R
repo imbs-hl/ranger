@@ -404,6 +404,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (treetype == 5) {
       stop("Node impurity variable importance not supported for survival forests.")
     }
+    if (!is.null(split.select.weights)) {
+      stop("Unbiased impurity importance not supported in combination with split.select.weights.")
+    }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {
       importance.mode <- 2
