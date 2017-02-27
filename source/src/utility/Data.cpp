@@ -184,24 +184,6 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
   }
 }
 
-// TODO: Permute outcome instead?
-void Data::getAllValuesPermuted(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
-
-  // All values for varID (no duplicates) for given sampleIDs
-  if (varID < num_cols_no_sparse) {
-
-    all_values.reserve(sampleIDs.size());
-    for (size_t i = 0; i < sampleIDs.size(); ++i) {
-      all_values.push_back(get(permuted_sampleIDs[sampleIDs[i]], varID));
-    }
-    std::sort(all_values.begin(), all_values.end());
-    all_values.erase(unique(all_values.begin(), all_values.end()), all_values.end());
-  } else {
-    // If GWA data just use 0, 1, 2
-    all_values = std::vector<double>( { 0, 1, 2 });
-  }
-}
-
 void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID) {
   if (sampleIDs.size() > 0) {
     min = get(sampleIDs[0], varID);

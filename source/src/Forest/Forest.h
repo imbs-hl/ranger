@@ -211,9 +211,6 @@ protected:
   // For each varID true if ordered
   std::vector<bool> is_ordered_variable;
 
-  // Variable to not split at (only dependent_varID for non-survival forests)
-  std::vector<size_t> no_split_variables;
-
   // Multithreading
   uint num_threads;
   std::vector<uint> thread_ranges;

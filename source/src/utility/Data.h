@@ -56,12 +56,15 @@ public:
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
 
-  // TODO: Used?
-  void getAllValuesPermuted(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
-
   void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
 
   size_t getIndex(size_t row, size_t col) const {
+    // Use permuted data for unbiased impurity importance
+    if (col >= num_cols) {
+      col = getUnpermutedVarID(col);
+      row = getPermutedSampleID(row);
+    }
+
     if (col < num_cols_no_sparse) {
       return index_data[col * num_rows + row];
     } else {
@@ -79,6 +82,11 @@ public:
   }
 
   double getUniqueDataValue(size_t varID, size_t index) const {
+    // Use permuted data for unbiased impurity importance
+    if (varID >= num_cols) {
+      varID = getUnpermutedVarID(varID);
+    }
+
     if (varID < num_cols_no_sparse) {
       return unique_data_values[varID][index];
     } else {
@@ -88,6 +96,11 @@ public:
   }
 
   size_t getNumUniqueDataValues(size_t varID) const {
+    // Use permuted data for unbiased impurity importance
+    if (varID >= num_cols) {
+      varID = getUnpermutedVarID(varID);
+    }
+
     if (varID < num_cols_no_sparse) {
       return unique_data_values[varID].size();
     } else {
@@ -118,6 +131,15 @@ public:
     }
   }
 
+  std::vector<size_t>& getNoSplitVariables() {
+    return no_split_variables;
+  }
+
+  void addNoSplitVariable(size_t varID) {
+    no_split_variables.push_back(varID);
+    std::sort(no_split_variables.begin(), no_split_variables.end());
+  }
+
   void permuteSampleIDs(std::mt19937_64 random_number_generator) {
     permuted_sampleIDs.resize(num_rows);
     std::iota(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), 0);
@@ -134,6 +156,19 @@ public:
     return permuted_sampleIDs[sampleID];
   }
 
+  const size_t getUnpermutedVarID(size_t varID) const {
+    if (varID >= num_cols) {
+      varID -= num_cols;
+
+      for (auto& skip : no_split_variables) {
+        if (varID >= skip) {
+          ++varID;
+        }
+      }
+    }
+    return varID;
+  }
+
 protected:
   std::vector<std::string> variable_names;
   size_t num_rows;
@@ -148,6 +183,9 @@ protected:
   size_t* index_data;
   std::vector<std::vector<double>> unique_data_values;
   size_t max_num_unique_values;
+
+  // Variable to not split at (only dependent_varID for non-survival trees)
+  std::vector<size_t> no_split_variables;
 
   // Permuted samples for unbiased impurity importance
   std::vector<size_t> permuted_sampleIDs;
