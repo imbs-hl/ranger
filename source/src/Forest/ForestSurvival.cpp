@@ -74,7 +74,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
     status_varID = data->getVariableID(status_variable_name);
   }
 
-  no_split_variables.push_back(status_varID);
+  data->addNoSplitVariable(status_varID);
 
   // If mtry not set, use floored square root of number of independent variables.
   if (mtry == 0) {

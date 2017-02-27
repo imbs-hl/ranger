@@ -688,7 +688,7 @@ void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double 
 
 // No variable importance for no split variables
   size_t tempvarID = varID;
-  for (auto& skip : *no_split_variables) {
+  for (auto& skip : data->getNoSplitVariables()) {
     if (varID >= skip) {
       --tempvarID;
     }
@@ -714,7 +714,7 @@ void TreeProbability::addUnbiasedImpurityImportance(size_t nodeID, size_t varID,
 
 // No variable importance for no split variables
   size_t tempvarID = varID;
-  for (auto& skip : *no_split_variables) {
+  for (auto& skip : data->getNoSplitVariables()) {
     if (varID >= skip) {
       --tempvarID;
     }

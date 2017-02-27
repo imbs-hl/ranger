@@ -255,14 +255,11 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, D
     }
   }
 
-  no_split_variables.push_back(dependent_varID);
+  data->addNoSplitVariable(dependent_varID);
 
   initInternal(status_variable_name);
 
-  num_independent_variables = num_variables - no_split_variables.size();
-
-  // Sort no split variables in ascending order
-  std::sort(no_split_variables.begin(), no_split_variables.end());
+  num_independent_variables = num_variables - data->getNoSplitVariables().size();
 
   // Init split select weights
   split_select_weights.push_back(std::vector<double>());
@@ -362,7 +359,7 @@ void Forest::writeImportanceFile() {
   // Write importance to file
   for (size_t i = 0; i < variable_importance.size(); ++i) {
     size_t varID = i;
-    for (auto& skip : no_split_variables) {
+    for (auto& skip : data->getNoSplitVariables()) {
       if (varID >= skip) {
         ++varID;
       }
@@ -433,9 +430,9 @@ void Forest::grow() {
     }
 
     trees[i]->init(data, mtry, dependent_varID, num_samples, tree_seed, &deterministic_varIDs, &split_select_varIDs,
-        tree_split_select_weights, importance_mode, min_node_size, &no_split_variables, sample_with_replacement,
-        &is_ordered_variable, memory_saving_splitting, splitrule, &case_weights, keep_inbag, sample_fraction, alpha,
-        minprop, holdout, num_random_splits);
+        tree_split_select_weights, importance_mode, min_node_size, sample_with_replacement, &is_ordered_variable,
+        memory_saving_splitting, splitrule, &case_weights, keep_inbag, sample_fraction, alpha, minprop, holdout,
+        num_random_splits);
   }
 
 // Init variable importance
@@ -794,7 +791,7 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
 
       if (i == 0) {
         size_t varID = j;
-        for (auto& skip : no_split_variables) {
+        for (auto& skip : data->getNoSplitVariables()) {
           if (varID >= skip) {
             ++varID;
           }
