@@ -156,7 +156,7 @@ public:
     this->is_ordered_variable = is_ordered_variable;
   }
 
-  bool isOrderedVariable(size_t varID) {
+  const bool isOrderedVariable(size_t varID) const {
     // Use permuted data for unbiased impurity importance
     if (varID >= num_cols) {
       varID = getUnpermutedVarID(varID);

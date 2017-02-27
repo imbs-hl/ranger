@@ -54,9 +54,8 @@ Tree::~Tree() {
 void Tree::init(Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
     std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
     std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
-    bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
-    std::vector<double>* case_weights, bool keep_inbag, double sample_fraction, double alpha, double minprop,
-    bool holdout, uint num_random_splits) {
+    bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
+    bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits) {
 
   this->data = data;
   this->mtry = mtry;
@@ -157,10 +156,8 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
       // Move to child
       size_t split_varID = split_varIDs[nodeID];
 
-      // TODO: Add permuted data in predict mode or split at non-permuted?
-
       double value = prediction_data->get(sample_idx, split_varID);
-      if (data->isOrderedVariable(split_varID)) {
+      if (prediction_data->isOrderedVariable(split_varID)) {
         if (value <= split_values[nodeID]) {
           // Move to left child
           nodeID = child_nodeIDs[0][nodeID];
@@ -275,6 +272,9 @@ bool Tree::splitNode(size_t nodeID) {
 
   size_t split_varID = split_varIDs[nodeID];
   double split_value = split_values[nodeID];
+
+  // Save non-permuted variable for prediction
+  split_varIDs[nodeID] = data->getUnpermutedVarID(split_varID);
 
   // Create child nodes
   size_t left_child_nodeID = sampleIDs.size();
