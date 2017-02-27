@@ -42,8 +42,8 @@ TreeRegression::TreeRegression() :
 }
 
 TreeRegression::TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
-    std::vector<double>& split_values, std::vector<bool>* is_ordered_variable) :
-    Tree(child_nodeIDs, split_varIDs, split_values, is_ordered_variable), counter(0), sums(0) {
+    std::vector<double>& split_values) :
+    Tree(child_nodeIDs, split_varIDs, split_values), counter(0), sums(0) {
 }
 
 TreeRegression::~TreeRegression() {
@@ -161,7 +161,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   for (auto& varID : possible_split_varIDs) {
 
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
 
       // Use memory saving method if option set
       if (memory_saving_splitting) {
@@ -491,7 +491,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   for (auto& varID : possible_split_varIDs) {
 
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
       findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
     } else {
       findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,

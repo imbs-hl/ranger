@@ -52,14 +52,14 @@ void ForestSurvival::loadForest(size_t dependent_varID, size_t num_trees,
   this->dependent_varID = dependent_varID;
   this->status_varID = status_varID;
   this->num_trees = num_trees;
-  this->is_ordered_variable = is_ordered_variable;
   this->unique_timepoints = unique_timepoints;
+  data->setIsOrderedVariable(is_ordered_variable);
 
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     Tree* tree = new TreeSurvival(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
-        forest_chf[i], &this->unique_timepoints, &response_timepointIDs, &this->is_ordered_variable);
+        forest_chf[i], &this->unique_timepoints, &response_timepointIDs);
     trees.push_back(tree);
   }
 
@@ -345,7 +345,7 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
 
     // Create tree
     Tree* tree = new TreeSurvival(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
-        &response_timepointIDs, &is_ordered_variable);
+        &response_timepointIDs);
     trees.push_back(tree);
   }
 }
