@@ -33,6 +33,7 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <algorithm>
 
 #include "globals.h"
 
