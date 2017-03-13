@@ -357,6 +357,8 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
       best_decrease = decrease;
     }
   }
+
+  delete[] class_counts_left;
 }
 
 void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
