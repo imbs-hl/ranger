@@ -107,8 +107,18 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Create final data
   if (forest$treetype == "Survival") {
     if (forest$dependent.varID > 0 & forest$status.varID > 1) {
-      ## If alternative interface used, don't subset data
-      data.used <- data
+      if (ncol(data) == length(forest$independent.variable.names)+2) {
+        ## If alternative interface used and same data structure, don't subset data
+        data.used <- data
+      } else if (ncol(data) == length(forest$independent.variable.names)) {
+        data.selected <- subset(data, select = forest$independent.variable.names)
+        data.used <- cbind(0, 0, data.selected)
+        variable.names <- c("time", "status", forest$independent.variable.names)
+        forest$dependent.varID <- 0
+        forest$status.varID <- 1
+      } else {
+        stop("Invalid prediction data. Include both time and status variable or none.")
+      }
     } else {
       ## If formula interface used, subset data
       data.selected <- subset(data, select = forest$independent.variable.names)
@@ -124,7 +134,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   } else {
     ## No survival
     if (ncol(data) == length(forest$independent.variable.names)+1 & forest$dependent.varID > 0) {
-      ## If alternative interface used, don't subset data
+      ## If alternative interface used and same data structure, don't subset data
       data.used <- data
     } else {
       ## If formula interface used, subset data
