@@ -154,6 +154,12 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+
+    // Compute decrease of impurity for this node and add to variable importance if needed
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+      addImpurityImportance(nodeID, best_varID, best_decrease);
+    }
+
     return false;
   }
 }
@@ -667,6 +673,12 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+
+    // Compute decrease of impurity for this node and add to variable importance if needed
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+      addImpurityImportance(nodeID, best_varID, best_decrease);
+    }
+
     return false;
   }
 }
@@ -878,3 +890,20 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
   }
 }
 
+void TreeSurvival::addImpurityImportance(size_t nodeID, size_t varID, double decrease) {
+
+  // No variable importance for no split variables
+  size_t tempvarID = data->getUnpermutedVarID(varID);
+  for (auto& skip : data->getNoSplitVariables()) {
+    if (tempvarID >= skip) {
+      --tempvarID;
+    }
+  }
+
+  // Subtract if unbiased importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+    (*variable_importance)[tempvarID] -= decrease;
+  } else {
+    (*variable_importance)[tempvarID] += decrease;
+  }
+}
