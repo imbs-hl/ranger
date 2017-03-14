@@ -426,9 +426,9 @@ void ArgumentHandler::checkArguments() {
     throw std::runtime_error("Option '--statusvarname' only applicable for survival forest. See '--help' for details.");
   }
 
-  if (treetype == TREE_SURVIVAL && impmeasure == IMP_GINI) {
+  if (treetype == TREE_SURVIVAL && splitrule == MAXSTAT && impmeasure == IMP_GINI) {
     throw std::runtime_error(
-        "Node impurity variable importance not supported for survival forests. See '--help' for details.");
+        "Node impurity variable importance not supported for survival forests with MAXSTAT splitrule. See '--help' for details.");
   }
 
   if (treetype != TREE_CLASSIFICATION && probability) {
@@ -532,10 +532,10 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              (Default: 1)" << std::endl;
   std::cout << "    " << "--impmeasure TYPE             Set importance mode to:" << std::endl;
   std::cout << "    " << "                              TYPE = 0: none." << std::endl;
-  std::cout << "    " << "                              TYPE = 1: Node impurity: Gini for Classification, variance for Regression." << std::endl;
+  std::cout << "    " << "                              TYPE = 1: Node impurity: Gini for Classification, variance for Regression, sum of test statistic for Survival." << std::endl;
   std::cout << "    " << "                              TYPE = 2: Permutation importance, scaled by standard errors." << std::endl;
   std::cout << "    " << "                              TYPE = 3: Permutation importance, no scaling." << std::endl;
-  std::cout << "    " << "                              TYPE = 5: Corrected node impurity: Gini for Classification, variance for Regression." << std::endl;
+  std::cout << "    " << "                              TYPE = 5: Corrected node impurity: Unbiased version of node impurity importance." << std::endl;
   std::cout << "    " << "                              (Default: 0)" << std::endl;
   std::cout << "    " << "--noreplace                   Sample without replacement." << std::endl;
   std::cout << "    " << "--fraction X                  Fraction of observations to sample. Default is 1 for sampling with replacement " << std::endl;
