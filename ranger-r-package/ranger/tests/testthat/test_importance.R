@@ -1,6 +1,7 @@
 ## Tests for importance measures
 
 library(ranger)
+library(survival)
 context("ranger_imp")
 
 ## Initialize the random forests
@@ -46,5 +47,20 @@ test_that("Error thrown if Unbiased gini importance used with split.select.weigh
   expect_error(ranger(Species ~ ., data = iris, num.trees = 5, 
                       split.select.weights = rep(.5, 4), importance = "impurity_unbiased"), 
                "Unbiased impurity importance not supported in combination with split.select.weights.")
+})
+
+test_that("Survival permutation importance is smaller than 1", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "permutation")
+  expect_lt(rf$variable.importance[1], 1)
+})
+
+test_that("Survival impurity importance is larger than 1", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "impurity")
+  expect_gt(rf$variable.importance[1], 1)
+})
+
+test_that("Survival corrected impurity importance is smaller than 1", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "impurity_unbiased")
+  expect_lt(rf$variable.importance[1], 1)
 })
 
