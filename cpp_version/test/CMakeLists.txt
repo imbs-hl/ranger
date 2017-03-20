@@ -10,18 +10,18 @@ set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS -pthread)
 ## ======================================================================================##
 ## Dependencies
 ## ======================================================================================##
-include_directories(../source/src ../source/src/utility ../source/src/Forest ../source/src/Tree)
-add_subdirectory(../source ranger_build)
+include_directories(../src ../src/utility ../src/Forest ../src/Tree)
+add_subdirectory(../ ranger_build)
 
 ## ======================================================================================##
 ## Subdirectories and source files
 ## ======================================================================================##
 file(GLOB TEST_SOURCES *.cpp)
-file(GLOB_RECURSE RG_SOURCES ../source/src/*.cpp)
+file(GLOB_RECURSE RG_SOURCES ../src/*.cpp)
 
 ## Remove main file from ranger
 get_filename_component(MAIN_FILE . ABSOLUTE)
-SET(MAIN_FILE "${MAIN_FILE}/../source/src/main.cpp")
+SET(MAIN_FILE "${MAIN_FILE}/../src/main.cpp")
 list(REMOVE_ITEM RG_SOURCES "${MAIN_FILE}")
 ##
 
