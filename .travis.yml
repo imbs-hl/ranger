@@ -3,9 +3,6 @@ sudo: required
 dist: trusty
 warnings_are_errors: true
 
-before_install:
-  - cd ./ranger-r-package/ranger
-
 r:
   - oldrel
   - release
