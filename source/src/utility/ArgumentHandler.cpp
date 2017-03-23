@@ -570,13 +570,16 @@ void ArgumentHandler::displayVersion() {
   std::cout << "Ranger version: " << RANGER_VERSION << std::endl;
   std::cout << std::endl;
   std::cout << "Please cite Ranger: " << std::endl;
-  std::cout << "Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press." << std::endl;
+  std::cout << "Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software 77:1-17." << std::endl;
   std::cout << std::endl;
   std::cout << "BibTeX:" << std::endl;
   std::cout << "@Article{," << std::endl;
-  std::cout << "    title = {ranger: {{A}} fast implementation of random forests for high dimensional data in {{C}}++ and {{R}}}," << std::endl;
+  std::cout << "    title = {{ranger}: A Fast Implementation of Random Forests for High Dimensional Data in {C++} and {R}," << std::endl;
   std::cout << "    author = {Wright, Marvin N. and Ziegler, Andreas}," << std::endl;
   std::cout << "    journal = {Journal of Statistical Software}," << std::endl;
-  std::cout << "    year = {2016}," << std::endl;
+  std::cout << "    year = {2017}," << std::endl;
+  std::cout << "    number = {1}," << std::endl;
+  std::cout << "    pages = {1--17}," << std::endl;
+  std::cout << "    doi = {10.18637/jss.v077.i01}," << std::endl;
   std::cout << "}" << std::endl;
 }
