@@ -2,6 +2,11 @@ project(ranger)
 cmake_minimum_required(VERSION 2.0)
 
 ## ======================================================================================##
+## build options
+## ======================================================================================##
+option(BUILD_SHARED_LIB "Should a shared lib be built")
+
+## ======================================================================================##
 ## Check for C++11. For GCC this is >=4.7
 ## ======================================================================================##
 include(CheckCXXCompilerFlag)
@@ -33,7 +38,7 @@ endif()
 ## Subdirectories and source files
 ## ======================================================================================##
 include_directories(src src/utility src/Forest src/Tree)
-file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
 
 ## ======================================================================================##
 ## Debug and release targets
@@ -53,7 +58,17 @@ ADD_CUSTOM_TARGET(release
   )
 
 ## ======================================================================================##
+## library
+## ======================================================================================##
+if (${BUILD_SHARED_LIB})
+    add_library(ranger SHARED ${SOURCES})
+else()
+    add_library(ranger STATIC ${SOURCES})
+endif()
+
+## ======================================================================================##
 ## Executable
 ## ======================================================================================##
-add_executable(ranger ${SOURCES})
-
+add_executable(ranger-bin src/main.cpp)
+set_target_properties(ranger-bin PROPERTIES OUTPUT_NAME "ranger")
+target_link_libraries(ranger-bin ranger)
