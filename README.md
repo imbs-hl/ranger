@@ -8,14 +8,14 @@ Marvin N. Wright, wright@imbs.uni-luebeck.de
 ### Introduction
 ranger is a fast implementation of random forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data. Classification, regression, probability estimation and survival forests are supported. Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008). For probability estimation forests see Malley et al. (2012). 
 
-ranger is written in C++, but a version for R is available, too. We recommend to use the R version. It is easy to install and use and the results are readily available for further analysis. The R version is as fast as the pure C++ version.
+ranger is written in C++, but a version for R is available, too. We recommend to use the R version. It is easy to install and use and the results are readily available for further analysis. The R version is as fast as the standalone C++ version.
 
 ### Installation
 #### R version
 To install the ranger R package from CRAN, just run
 
 ```R
-install.packages("ranger”)
+install.packages("ranger")
 ```
 
 R version >= 3.1 is required. With recent R versions, multithreading on Windows platforms should just work. If you compile yourself, the new RTools toolchain is required.
@@ -23,14 +23,14 @@ R version >= 3.1 is required. With recent R versions, multithreading on Windows 
 To install the development version from GitHub using `devtools`, run
 
 ```R
-devtools::install_github("imbs-hl/ranger", subdir = "ranger-r-package/ranger")
+devtools::install_github("imbs-hl/ranger")
 ```
 
-#### Pure C++ version
+#### Standalone C++ version
 To install the C++ version of ranger in Linux or Mac OS X you will need a compiler supporting C++11 (i.e. gcc >= 4.7 or Clang >= 3.0) and Cmake. To build start a terminal from the ranger main directory and run the following commands
 
 ```bash
-cd source
+cd cpp_version
 mkdir build
 cd build
 cmake ..
@@ -49,7 +49,7 @@ For usage of the R version see ?ranger in R. Most importantly, see the Examples 
 ranger(Species ~ ., data = iris)
 ```
 
-#### Pure C++ version
+#### Standalone C++ version
 In the C++ version type 
 
 ```bash
