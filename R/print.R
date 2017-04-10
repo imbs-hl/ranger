@@ -52,11 +52,13 @@ print.ranger <- function(x, ...) {
   }
   if (x$treetype == "Classification") {
     cat("OOB prediction error:            ", sprintf("%1.2f %%", 100*x$prediction.error), "\n")
+  } else if (x$treetype == "Regression") {
+    cat("OOB prediction error (MSE):      ", x$prediction.error, "\n")
   } else {
     cat("OOB prediction error:            ", x$prediction.error, "\n")
   }
   if (x$treetype == "Regression") {
-    cat("R squared:                       ", x$r.squared, "\n")
+    cat("R squared (OOB):                 ", x$r.squared, "\n")
   }
 }
 

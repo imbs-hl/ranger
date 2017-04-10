@@ -176,7 +176,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
 
   // Draw without replacement using Fisher Yates algorithm
   std::uniform_real_distribution<double> distribution(0.0, 1.0);
-  for (int i = 0; i < num_samples; ++i) {
+  for (size_t i = 0; i < num_samples; ++i) {
     size_t j = i + distribution(random_number_generator) * (max - skip.size() - i);
     std::swap(result[i], result[j]);
   }
@@ -346,7 +346,7 @@ size_t roundToNextMultiple(size_t value, uint multiple) {
     return value;
   }
 
-  int remainder = value % multiple;
+  size_t remainder = value % multiple;
   if (remainder == 0) {
     return value;
   }
