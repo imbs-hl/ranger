@@ -1,3 +1,6 @@
+##### Version 0.7.0
+* New CRAN version
+
 ##### Version 0.6.7
 * Improvements in holdoutRF and importance p-value estimation
 

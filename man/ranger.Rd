@@ -78,7 +78,7 @@ Object of class \code{ranger} with elements
   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
   \item{\code{variable.importance}}{Variable importance for each independent variable.}
   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for regression the mean squared error and for survival one minus Harrell's c-index.}
-  \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only).}
+  \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
   \item{\code{unique.death.times}}{Unique death times (survival only).}
   \item{\code{chf}}{Estimated cumulative hazard function for each sample (survival only).}
@@ -185,7 +185,7 @@ Marvin N. Wright
 }
 \references{
 \itemize{
-  \item Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw, in press. \url{http://arxiv.org/abs/1508.04409}.
+  \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med. \url{http://dx.doi.org/10.1002/sim.7212}.
   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{http://dx.doi.org/10.1023/A:1010933404324}. 
