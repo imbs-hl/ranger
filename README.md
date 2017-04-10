@@ -15,7 +15,7 @@ ranger is written in C++, but a version for R is available, too. We recommend to
 To install the ranger R package from CRAN, just run
 
 ```R
-install.packages("ranger”)
+install.packages("ranger")
 ```
 
 R version >= 3.1 is required. With recent R versions, multithreading on Windows platforms should just work. If you compile yourself, the new RTools toolchain is required.
@@ -23,7 +23,7 @@ R version >= 3.1 is required. With recent R versions, multithreading on Windows 
 To install the development version from GitHub using `devtools`, run
 
 ```R
-devtools::install_github("mnwright/ranger")
+devtools::install_github("imbs-hl/ranger")
 ```
 
 #### Standalone C++ version
