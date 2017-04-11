@@ -112,3 +112,42 @@ test_that("Alternative interface regression prediction: Results not all the same
 test_that("Variance splitting not working on classification data", {
   expect_error(ranger(Species ~ ., iris, splitrule = "variance"))
 })
+
+## Splitrule
+test_that("default splitrule is variance for regression", {
+  set.seed(42)
+  rf1 <- ranger(Sepal.Length ~ ., iris, num.trees = 5)
+  
+  set.seed(42)
+  rf2 <- ranger(Sepal.Length ~ ., iris, num.trees = 5, splitrule = "variance")
+  
+  expect_equal(rf1$splitrule, "variance")
+  expect_equal(rf2$splitrule, "variance")
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+})
+
+test_that("splitrule extratrees is different from variance for regression", {
+  set.seed(42)
+  rf1 <- ranger(Sepal.Length ~ ., iris, num.trees = 5, splitrule = "extratrees")
+  
+  set.seed(42)
+  rf2 <- ranger(Sepal.Length ~ ., iris, num.trees = 5, splitrule = "variance")
+  
+  expect_equal(rf1$splitrule, "extratrees")
+  expect_equal(rf2$splitrule, "variance")
+  expect_false(rf1$prediction.error == rf2$prediction.error)
+})
+
+test_that("splitrule maxstat is different from variance for regression", {
+  set.seed(42)
+  rf1 <- ranger(Sepal.Length ~ ., iris, num.trees = 5, splitrule = "maxstat")
+  
+  set.seed(42)
+  rf2 <- ranger(Sepal.Length ~ ., iris, num.trees = 5, splitrule = "variance")
+  
+  expect_equal(rf1$splitrule, "maxstat")
+  expect_equal(rf2$splitrule, "variance")
+  expect_false(rf1$prediction.error == rf2$prediction.error)
+})
+
+
