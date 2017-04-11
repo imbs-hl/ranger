@@ -12,7 +12,7 @@ Description: A fast implementation of Random Forests, particularly suited for hi
           class 'gwaa.data' (R package 'GenABEL') can be directly analyzed.
 License: GPL-3
 Imports: Rcpp (>= 0.11.2)
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo
 Depends: R (>= 3.1)
 Suggests: survival, testthat, GenABEL
 RoxygenNote: 5.0.1

@@ -167,7 +167,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Recode characters
-  if (!is.matrix(data.used)) {
+  if (!is.matrix(data.used) & !inherits(data.used, "Matrix")) {
     char.columns <- sapply(data.used, is.character)
     data.used[char.columns] <- lapply(data.used[char.columns], factor)
   }
@@ -185,7 +185,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Convert to data matrix
-  data.final <- data.matrix(data.used)
+  if (is.matrix(data.used) | inherits(data.used, "Matrix")) {
+    data.final <- data.used
+  } else {
+    data.final <- data.matrix(data.used)
+  }
+  
 
   ## If gwa mode, add snp variable names
   if (gwa.mode) {
@@ -254,7 +259,17 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   sample.fraction <- 1
   holdout <- FALSE
   num.random.splits <- 1
-
+  
+  ## Use sparse matrix
+  if ("dgCMatrix" %in% class(data.final)) {
+    sparse.data <- data.final
+    data.final <- matrix(c(0, 0))
+    use.sparse.data <- TRUE
+  } else {
+    sparse.data <- Matrix(matrix(c(0, 0)))
+    use.sparse.data <- FALSE
+  }
+  
   ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
@@ -263,7 +278,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       status.variable.name, prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                      alpha, minprop, holdout, prediction.type, num.random.splits)
+                      alpha, minprop, holdout, prediction.type, num.random.splits, sparse.data, use.sparse.data)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
