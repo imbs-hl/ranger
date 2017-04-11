@@ -176,6 +176,7 @@
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
 ##' @import utils
+##' @importFrom Matrix Matrix
 ##' @export
 ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
@@ -213,7 +214,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Currently only sparse data of class 'dgCMatrix' supported.")
     }
   
-    ## TODO: Possible with formula
     if (!is.null(formula)) {
       stop("Error: Sparse matrices only supported with alternative interface. Use dependent.variable.name instead of formula.")
     }

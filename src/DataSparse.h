@@ -29,7 +29,7 @@
 #ifndef DATASPARSE_H_
 #define DATASPARSE_H_
 
-#include <RcppArmadillo.h>
+#include <RcppEigen.h>
 
 #include "globals.h"
 #include "utility.h"
@@ -38,7 +38,7 @@
 class DataSparse: public Data {
 public:
   DataSparse();
-  DataSparse(arma::sp_mat* data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) :
+  DataSparse(Eigen::SparseMatrix<double>* data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) :
       data(data) {
     this->variable_names = variable_names;
     this->num_rows = num_rows;
@@ -49,7 +49,7 @@ public:
 
   double get(size_t row, size_t col) const {
     //if (col < num_cols_no_snp) {
-      return data->at(row, col);
+      return data->coeff(row, col);
 //    } else {
 //      // Get data out of snp storage. -1 because of GenABEL coding.
 //      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
@@ -59,15 +59,15 @@ public:
   }
 
   void reserveMemory() {
-    data = new arma::sp_mat(num_rows, num_cols);
+    data = new Eigen::SparseMatrix<double>(num_rows, num_cols);
   }
 
   void set(size_t col, size_t row, double value, bool& error) {
-    data->at(row, col) = value;
+    data->coeffRef(row, col) = value;
   }
 
 private:
-  arma::sp_mat* data;
+  Eigen::SparseMatrix<double>* data;
 
   DISALLOW_COPY_AND_ASSIGN(DataSparse);
 };
