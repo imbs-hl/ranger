@@ -125,3 +125,25 @@ test_that("confusion matrix rows are the true classes", {
   expect_equal(as.numeric(rowSums(rg.class$confusion.matrix)), 
                as.numeric(table(iris$Species)))
 })
+
+## Splitrule
+test_that("default splitrule is Gini", {
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., iris, num.trees = 5)
+  
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "gini")
+  
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+})
+
+test_that("splitrule extratrees is different from Gini", {
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "extratrees")
+  
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "gini")
+  
+  expect_false(rf1$prediction.error == rf2$prediction.error)
+})
+
