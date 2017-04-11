@@ -36,7 +36,7 @@
 #include "utility.h"
 
 Data::Data() :
-    num_rows(0), num_rows_rounded(0), num_cols(0), sparse_data(0), num_cols_no_sparse(0), externalData(true), index_data(
+    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(
         0), max_num_unique_values(0) {
 }
 
@@ -54,10 +54,10 @@ size_t Data::getVariableID(std::string variable_name) {
   return (std::distance(variable_names.begin(), it));
 }
 
-void Data::addSparseData(unsigned char* sparse_data, size_t num_cols_sparse) {
-  num_cols = num_cols_no_sparse + num_cols_sparse;
+void Data::addSnpData(unsigned char* snp_data, size_t num_cols_snp) {
+  num_cols = num_cols_no_snp + num_cols_snp;
   num_rows_rounded = roundToNextMultiple(num_rows, 4);
-  this->sparse_data = sparse_data;
+  this->snp_data = snp_data;
 }
 
 bool Data::loadFromFile(std::string filename) {
@@ -108,7 +108,7 @@ bool Data::loadFromFileWhitespace(std::ifstream& input_file, std::string header_
     variable_names.push_back(header_token);
   }
   num_cols = variable_names.size();
-  num_cols_no_sparse = num_cols;
+  num_cols_no_snp = num_cols;
 
   // Read body
   reserveMemory();
@@ -143,7 +143,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
     variable_names.push_back(header_token);
   }
   num_cols = variable_names.size();
-  num_cols_no_sparse = num_cols;
+  num_cols_no_snp = num_cols;
 
   // Read body
   reserveMemory();
@@ -170,7 +170,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
 void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
 
   // All values for varID (no duplicates) for given sampleIDs
-  if (varID < num_cols_no_sparse) {
+  if (varID < num_cols_no_snp) {
 
     all_values.reserve(sampleIDs.size());
     for (size_t i = 0; i < sampleIDs.size(); ++i) {
@@ -203,10 +203,10 @@ void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleI
 void Data::sort() {
 
   // Reserve memory
-  index_data = new size_t[num_cols_no_sparse * num_rows];
+  index_data = new size_t[num_cols_no_snp * num_rows];
 
   // For all columns, get unique values and save index for each observation
-  for (size_t col = 0; col < num_cols_no_sparse; ++col) {
+  for (size_t col = 0; col < num_cols_no_snp; ++col) {
 
     // Get all unique values
     std::vector<double> unique_values(num_rows);

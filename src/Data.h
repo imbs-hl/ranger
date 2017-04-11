@@ -46,7 +46,7 @@ public:
   virtual void reserveMemory() = 0;
   virtual void set(size_t col, size_t row, double value, bool& error) = 0;
 
-  void addSparseData(unsigned char* sparse_data, size_t num_cols_sparse);
+  void addSnpData(unsigned char* snp_data, size_t num_cols_snp);
 
   bool loadFromFile(std::string filename);
   bool loadFromFileWhitespace(std::ifstream& input_file, std::string header_line);
@@ -57,12 +57,12 @@ public:
   void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
 
   size_t getIndex(size_t row, size_t col) const {
-    if (col < num_cols_no_sparse) {
+    if (col < num_cols_no_snp) {
       return index_data[col * num_rows + row];
     } else {
-      // Get data out of sparse storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_sparse) * num_rows_rounded + row;
-      size_t result = (((sparse_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      // Get data out of snp storage. -1 because of GenABEL coding.
+      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
+      size_t result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
 
       // TODO: Better way to treat missing values?
       if (result > 2) {
@@ -74,7 +74,7 @@ public:
   }
 
   double getUniqueDataValue(size_t varID, size_t index) const {
-    if (varID < num_cols_no_sparse) {
+    if (varID < num_cols_no_snp) {
       return unique_data_values[varID][index];
     } else {
       // For GWAS data the index is the value
@@ -83,7 +83,7 @@ public:
   }
 
   size_t getNumUniqueDataValues(size_t varID) const {
-    if (varID < num_cols_no_sparse) {
+    if (varID < num_cols_no_snp) {
       return unique_data_values[varID].size();
     } else {
       // For GWAS data 0,1,2
@@ -104,11 +104,11 @@ public:
   }
 
   size_t getMaxNumUniqueValues() const {
-    if (sparse_data == 0 || max_num_unique_values > 3) {
-      // If no sparse data or one variable with more than 3 unique values, return that value
+    if (snp_data == 0 || max_num_unique_values > 3) {
+      // If no snp data or one variable with more than 3 unique values, return that value
       return max_num_unique_values;
     } else {
-      // If sparse data and no variable with more than 3 unique values, return 3
+      // If snp data and no variable with more than 3 unique values, return 3
       return 3;
     }
   }
@@ -119,8 +119,8 @@ protected:
   size_t num_rows_rounded;
   size_t num_cols;
 
-  unsigned char* sparse_data;
-  size_t num_cols_no_sparse;
+  unsigned char* snp_data;
+  size_t num_cols_no_snp;
 
   bool externalData;
 

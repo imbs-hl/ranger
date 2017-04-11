@@ -47,7 +47,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     uint seed, uint num_threads, bool write_forest, uint importance_mode_r, uint min_node_size,
     std::vector<std::vector<double>>& split_select_weights, bool use_split_select_weights,
     std::vector<std::string>& always_split_variable_names, bool use_always_split_variable_names,
-    std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix sparse_data,
+    std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,
     bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
     std::vector<double>& case_weights, bool use_case_weights, bool predict_all, 
@@ -86,9 +86,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     // Initialize data with double memmode
     data = new DataDouble(input_data.begin(), variable_names, num_rows, num_cols);
 
-    // If there is sparse data, add it
-    if (sparse_data.nrow() > 1) {
-      data->addSparseData(sparse_data.begin(), sparse_data.ncol());
+    // If there is snp data, add it
+    if (snp_data.nrow() > 1) {
+      data->addSnpData(snp_data.begin(), snp_data.ncol());
     }
 
     switch (treetype) {
