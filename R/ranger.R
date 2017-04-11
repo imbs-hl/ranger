@@ -466,6 +466,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       splitrule <- "logrank"
     } else if (treetype == 3) {
       splitrule <- "variance"
+    } else if (treetype %in% c(1, 9)) {
+      splitrule <- "gini"
     }
     splitrule.num <- 1
   } else if (splitrule == "logrank") {
@@ -473,6 +475,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       splitrule.num <- 1
     } else {
       stop("Error: logrank splitrule applicable to survival data only.")
+    }
+  } else if (splitrule == "gini") {
+    if (treetype %in% c(1, 9)) {
+      splitrule.num <- 1
+    } else {
+      stop("Error: Gini splitrule applicable to classification data only.")
     }
   } else if (splitrule == "variance") {
     if (treetype == 3) {
@@ -633,9 +641,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Splitrule
-  if (treetype == 3 | treetype == 5) {
-    result$splitrule <- splitrule
-  }
+  result$splitrule <- splitrule
   
   ## Set treetype
   if (treetype == 1) {
