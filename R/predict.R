@@ -58,6 +58,7 @@
 ##'   }
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
+##' @importFrom Matrix Matrix
 ##' @export
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
