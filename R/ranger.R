@@ -484,7 +484,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   } else if (splitrule == "variance") {
     if (treetype == 3) {
-      splitrule.num <- 2
+      splitrule.num <- 1
     } else {
       stop("Error: variance splitrule applicable to regression data only.")
     }
