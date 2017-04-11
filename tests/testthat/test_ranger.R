@@ -12,7 +12,7 @@ if (!requireNamespace("GenABEL", quietly = TRUE)) {
 
 test_that("classification gwaa rf is of class ranger with 13 elements", {
   expect_is(rg.gwaa, "ranger")
-  expect_equal(length(rg.gwaa), 13)
+  expect_equal(length(rg.gwaa), 14)
 })
 
 test_that("Matrix interface works for Probability estimation", {
