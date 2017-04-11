@@ -68,12 +68,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- snp.names(data)
-    sparse.data <- data@gtdata@gtps@.Data
+    snp.data <- data@gtdata@gtps@.Data
     data <- data@phdata[, -1]
     gwa.mode <- TRUE
     variable.names <- c(names(data), snp.names)
   } else {
-    sparse.data <- as.matrix(0)
+    snp.data <- as.matrix(0)
     gwa.mode <- FALSE
     variable.names <- colnames(data)
   }
@@ -260,7 +260,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, forest, sparse.data, replace, probability,
+                      status.variable.name, prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
                       alpha, minprop, holdout, prediction.type, num.random.splits)

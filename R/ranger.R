@@ -195,7 +195,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- data@gtdata@snpnames
-    sparse.data <- data@gtdata@gtps@.Data
+    snp.data <- data@gtdata@gtps@.Data
     data <- data@phdata
     if ("id" %in% names(data)) {
       data$"id" <- NULL
@@ -203,7 +203,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     gwa.mode <- TRUE
     save.memory <- FALSE
   } else {
-    sparse.data <- as.matrix(0)
+    snp.data <- as.matrix(0)
     gwa.mode <- FALSE
   }
   
@@ -595,7 +595,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, loaded.forest, sparse.data,
+                      status.variable.name, prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
                       keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
