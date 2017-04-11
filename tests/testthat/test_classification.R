@@ -12,7 +12,7 @@ rg.mat   <- ranger(dependent.variable.name = "Species", data = dat, write.forest
 ## Basic tests (for all random forests equal)
 test_that("classification result is of class ranger with 13 elements", {
   expect_is(rg.class, "ranger")
-  expect_equal(length(rg.class), 13)
+  expect_equal(length(rg.class), 14)
 })
 
 test_that("classification prediction returns factor", {
@@ -127,23 +127,51 @@ test_that("confusion matrix rows are the true classes", {
 })
 
 ## Splitrule
-test_that("default splitrule is Gini", {
+test_that("default splitrule is Gini for classification", {
   set.seed(42)
   rf1 <- ranger(Species ~ ., iris, num.trees = 5)
   
   set.seed(42)
   rf2 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "gini")
   
+  expect_equal(rf1$splitrule, "gini")
+  expect_equal(rf2$splitrule, "gini")
   expect_equal(rf1$prediction.error, rf2$prediction.error)
 })
 
-test_that("splitrule extratrees is different from Gini", {
+test_that("default splitrule is Gini for probability", {
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE)
+  
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE, splitrule = "gini")
+  
+  expect_equal(rf1$splitrule, "gini")
+  expect_equal(rf2$splitrule, "gini")
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+})
+
+test_that("splitrule extratrees is different from Gini for classification", {
   set.seed(42)
   rf1 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "extratrees")
   
   set.seed(42)
   rf2 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "gini")
   
+  expect_equal(rf1$splitrule, "extratrees")
+  expect_equal(rf2$splitrule, "gini")
+  expect_false(rf1$prediction.error == rf2$prediction.error)
+})
+
+test_that("splitrule extratrees is different from Gini for probability", {
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE, splitrule = "extratrees")
+  
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE, splitrule = "gini")
+  
+  expect_equal(rf1$splitrule, "extratrees")
+  expect_equal(rf2$splitrule, "gini")
   expect_false(rf1$prediction.error == rf2$prediction.error)
 })
 
