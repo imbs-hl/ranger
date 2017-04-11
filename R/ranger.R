@@ -207,6 +207,18 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     gwa.mode <- FALSE
   }
   
+  ## Sparse matrix data
+  if (inherits(data, "Matrix")) {
+    if (!("dgCMatrix" %in% class(data))) {
+      stop("Error: Currently only sparse data of class 'dgCMatrix' supported.")
+    }
+  
+    ## TODO: Possible with formula
+    if (!is.null(formula)) {
+      stop("Error: Sparse matrices only supported with alternative interface. Use dependent.variable.name instead of formula.")
+    }
+  }
+    
   ## Formula interface. Use whole data frame is no formula provided and depvarname given
   if (is.null(formula)) {
     if (is.null(dependent.variable.name)) {
@@ -288,7 +300,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Recode characters as factors and recode factors if 'order' mode
-  if (!is.matrix(data.selected)) {
+  if (!is.matrix(data.selected) & !inherits(data.selected, "Matrix")) {
     character.idx <- sapply(data.selected, is.character)
     
     if (respect.unordered.factors == "order") {
@@ -334,7 +346,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                               data.selected[-1]))
     colnames(data.final) <- c(dependent.variable.name, status.variable.name,
                               independent.variable.names)
-  } else if (is.matrix(data.selected)) {
+  } else if (is.matrix(data.selected) | inherits(data.selected, "Matrix")) {
     data.final <- data.selected
   } else {
     data.final <- data.matrix(data.selected)
@@ -587,9 +599,19 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## No loaded forest object
   loaded.forest <- list()
   
+  ## Use sparse matrix
+  if ("dgCMatrix" %in% class(data.final)) {
+    sparse.data <- data.final
+    data.final <- matrix(c(0, 0))
+    use.sparse.data <- TRUE
+  } else {
+    sparse.data <- Matrix(matrix(c(0, 0)))
+    use.sparse.data <- FALSE
+  }
+  
   ## Clean up
   rm("data.selected")
-  
+
   ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
@@ -599,7 +621,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
                       keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits)
+                      num.random.splits, sparse.data, use.sparse.data)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

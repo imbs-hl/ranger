@@ -26,10 +26,10 @@
  wright@imbs.uni-luebeck.de
  #-------------------------------------------------------------------------------*/
 
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
 #include <vector>
 #include <sstream>
-
+ 
 #include "globals.h"
 #include "Forest.h"
 #include "ForestClassification.h"
@@ -40,7 +40,9 @@
 #include "DataChar.h"
 #include "DataDouble.h"
 #include "DataFloat.h"
-
+#include "DataSparse.h"
+ 
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     Rcpp::NumericMatrix input_data, std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose,
@@ -52,7 +54,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
     std::vector<double>& case_weights, bool use_case_weights, bool predict_all, 
     bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r, 
-    uint num_random_splits) {
+    uint num_random_splits, arma::sp_mat sparse_data, bool use_sparse_data) {
 
   Rcpp::List result;
   Forest* forest = 0;
@@ -80,11 +82,22 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       verbose_out = new std::stringstream;
     }
 
-    size_t num_rows = input_data.nrow();
-    size_t num_cols = input_data.ncol();
-
-    // Initialize data with double memmode
-    data = new DataDouble(input_data.begin(), variable_names, num_rows, num_cols);
+    size_t num_rows;
+    size_t num_cols;
+    if (use_sparse_data) {
+      num_rows = sparse_data.n_rows;
+      num_cols = sparse_data.n_cols;
+    } else {
+      num_rows = input_data.nrow();
+      num_cols = input_data.ncol();
+    }
+    
+    // Initialize data 
+    if (use_sparse_data) {
+      data = new DataSparse(&sparse_data, variable_names, num_rows, num_cols);
+    } else {
+      data = new DataDouble(input_data.begin(), variable_names, num_rows, num_cols);
+    }
 
     // If there is snp data, add it
     if (snp_data.nrow() > 1) {
@@ -150,10 +163,10 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
             class_values, terminal_class_counts, is_ordered);
       }
     }
-
+    
     // Run Ranger
     forest->run(false);
-
+    
     if (use_split_select_weights && importance_mode != IMP_NONE) {
       *verbose_out
           << "Warning: Split select weights used. Variable importance measures are only comparable for variables with equal weights."
