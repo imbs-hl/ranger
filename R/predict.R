@@ -95,6 +95,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("Error: Invalid forest object.")
   }
   
+  ## Check for old ranger version
+  if (length(forest$child.nodeIDs) != forest$num.trees | length(forest$child.nodeIDs[[1]]) != 2) {
+    stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
+  }
+  
   ## Prediction type
   if (type == "response") {
     prediction.type <- 1
