@@ -1,5 +1,6 @@
 ##### Version 0.7.1
 * Allow devtools::install_github() without subdir and on Windows
+* Bug fixes
 
 ##### Version 0.7.0
 * New CRAN version
