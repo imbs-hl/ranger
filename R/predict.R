@@ -275,7 +275,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
   if (predict.all) {
     if (forest$treetype %in% c("Classification", "Regression")) {
-      result$predictions <- do.call(rbind, result$predictions)
+      if (is.list(result$predictions)) {
+        result$predictions <- do.call(rbind, result$predictions)
+      } else {
+        result$predictions <- array(result$predictions, dim = c(1, length(result$predictions)))
+      }
     } else {
       ## TODO: Better solution for this?
       result$predictions <- aperm(array(unlist(result$predictions), 
