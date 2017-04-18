@@ -102,3 +102,8 @@ test_that("Terminal nodes returned by predict are node ids, survival", {
   expect_true(all(pred$predictions > 0))
   expect_true(all(pred$predictions < max(sapply(rf$forest$split.varIDs, length))))
 })
+
+test_that("predict.all works for single observation", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  pred <- predict(rf, iris[1, ], predict.all = TRUE)
+})
