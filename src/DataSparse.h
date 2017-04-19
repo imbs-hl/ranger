@@ -48,14 +48,7 @@ public:
   virtual ~DataSparse();
 
   double get(size_t row, size_t col) const {
-    //if (col < num_cols_no_snp) {
-      return data->coeff(row, col);
-//    } else {
-//      // Get data out of snp storage. -1 because of GenABEL coding.
-//      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-//      double result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
-//      return result;
-//    }
+    return data->coeff(row, col);
   }
 
   void reserveMemory() {
