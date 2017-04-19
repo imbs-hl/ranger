@@ -85,19 +85,19 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   } else {
     forest <- object
   }
-  if (is.null(forest$dependent.varID) | is.null(forest$num.trees) |
-        is.null(forest$child.nodeIDs)  | is.null(forest$split.varIDs) |
-        is.null(forest$split.values) | is.null(forest$independent.variable.names) |
+  if (is.null(forest$dependent.varID) || is.null(forest$num.trees) ||
+        is.null(forest$child.nodeIDs) || is.null(forest$split.varIDs) ||
+        is.null(forest$split.values) || is.null(forest$independent.variable.names) ||
         is.null(forest$treetype)) {
     stop("Error: Invalid forest object.")
   }
-  if (forest$treetype == "Survival" & (is.null(forest$status.varID)  |
-                                         is.null(forest$chf) | is.null(forest$unique.death.times))) {
+  if (forest$treetype == "Survival" && (is.null(forest$status.varID)  ||
+                                        is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
   
   ## Check for old ranger version
-  if (length(forest$child.nodeIDs) != forest$num.trees | length(forest$child.nodeIDs[[1]]) != 2) {
+  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
   }
   
@@ -112,7 +112,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
   ## Create final data
   if (forest$treetype == "Survival") {
-    if (forest$dependent.varID > 0 & forest$status.varID > 1) {
+    if (forest$dependent.varID > 0 && forest$status.varID > 1) {
       if (ncol(data) == length(forest$independent.variable.names)+2) {
         ## If alternative interface used and same data structure, don't subset data
         data.used <- data
@@ -139,7 +139,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
   } else {
     ## No survival
-    if (ncol(data) == length(forest$independent.variable.names)+1 & forest$dependent.varID > 0) {
+    if (ncol(data) == length(forest$independent.variable.names)+1 && forest$dependent.varID > 0) {
       ## If alternative interface used and same data structure, don't subset data
       data.used <- data
     } else {
@@ -168,7 +168,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Recode characters
-  if (!is.matrix(data.used) & !inherits(data.used, "Matrix")) {
+  if (!is.matrix(data.used) && !inherits(data.used, "Matrix")) {
     char.columns <- sapply(data.used, is.character)
     data.used[char.columns] <- lapply(data.used[char.columns], factor)
   }
@@ -186,7 +186,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Convert to data matrix
-  if (is.matrix(data.used) | inherits(data.used, "Matrix")) {
+  if (is.matrix(data.used) || inherits(data.used, "Matrix")) {
     data.final <- data.used
   } else {
     data.final <- data.matrix(data.used)
@@ -213,7 +213,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
     num.threads = 0
-  } else if (!is.numeric(num.threads) | num.threads < 0) {
+  } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
 
@@ -310,7 +310,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   if (type == "response") {
-    if (forest$treetype == "Classification" & !is.null(forest$levels)) {
+    if (forest$treetype == "Classification" && !is.null(forest$levels)) {
       if (!predict.all) {
         result$predictions <- integer.to.factor(result$predictions, forest$levels)
       }
@@ -321,7 +321,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       result$chf <- result$predictions
       result$predictions <- NULL
       result$survival <- exp(-result$chf)
-    } else if (forest$treetype == "Probability estimation" & !is.null(forest$levels)) {
+    } else if (forest$treetype == "Probability estimation" && !is.null(forest$levels)) {
       if (!predict.all) {
         if (is.vector(result$predictions)) {
           result$predictions <- matrix(result$predictions, nrow = 1)

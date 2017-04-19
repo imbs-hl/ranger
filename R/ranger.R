@@ -254,7 +254,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       treetype <- 1
     }
-  } else if (is.numeric(response) & is.vector(response)) {
+  } else if (is.numeric(response) && is.vector(response)) {
     if (!is.null(classification) && classification) {
       treetype <- 1
     } else if (probability) {
@@ -262,7 +262,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       treetype <- 3
     }
-  } else if (class(response) == "Surv" | is.data.frame(response) | is.matrix(response)) {
+  } else if (class(response) == "Surv" || is.data.frame(response) || is.matrix(response)) {
     treetype <- 5
   } else {
     stop("Error: Unsupported type of dependent variable.")
@@ -300,7 +300,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Recode characters as factors and recode factors if 'order' mode
-  if (!is.matrix(data.selected) & !inherits(data.selected, "Matrix")) {
+  if (!is.matrix(data.selected) && !inherits(data.selected, "Matrix")) {
     character.idx <- sapply(data.selected, is.character)
     
     if (respect.unordered.factors == "order") {
@@ -341,12 +341,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Input data and variable names, create final data matrix
-  if (!is.null(formula) & treetype == 5) {
+  if (!is.null(formula) && treetype == 5) {
     data.final <- data.matrix(cbind(response[, 1], response[, 2],
                               data.selected[-1]))
     colnames(data.final) <- c(dependent.variable.name, status.variable.name,
                               independent.variable.names)
-  } else if (is.matrix(data.selected) | inherits(data.selected, "Matrix")) {
+  } else if (is.matrix(data.selected) || inherits(data.selected, "Matrix")) {
     data.final <- data.selected
   } else {
     data.final <- data.matrix(data.selected)
@@ -362,14 +362,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Number of trees
-  if (!is.numeric(num.trees) | num.trees < 1) {
+  if (!is.numeric(num.trees) || num.trees < 1) {
     stop("Error: Invalid value for num.trees.")
   }
   
   ## mtry
   if (is.null(mtry)) {
     mtry <- 0
-  } else if (!is.numeric(mtry) | mtry < 0) {
+  } else if (!is.numeric(mtry) || mtry < 0) {
     stop("Error: Invalid value for mtry")
   }
   
@@ -387,24 +387,24 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
     num.threads = 0
-  } else if (!is.numeric(num.threads) | num.threads < 0) {
+  } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
   
   ## Minumum node size
   if (is.null(min.node.size)) {
     min.node.size <- 0
-  } else if (!is.numeric(min.node.size) | min.node.size < 0) {
+  } else if (!is.numeric(min.node.size) || min.node.size < 0) {
     stop("Error: Invalid value for min.node.size")
   }
   
   ## Sample fraction
-  if (!is.numeric(sample.fraction) | sample.fraction <= 0 | sample.fraction > 1) {
+  if (!is.numeric(sample.fraction) || sample.fraction <= 0 || sample.fraction > 1) {
     stop("Error: Invalid value for sample.fraction. Please give a value in (0,1].")
   }
   
   ## Importance mode
-  if (is.null(importance) | importance == "none") {
+  if (is.null(importance) || importance == "none") {
     importance.mode <- 0
   } else if (importance == "impurity") {
     importance.mode <- 1
@@ -468,7 +468,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     use.always.split.variables <- TRUE
   }
   
-  if (use.split.select.weights & use.always.split.variables) {
+  if (use.split.select.weights && use.always.split.variables) {
     stop("Error: Please use only one option of split.select.weights and always.split.variables.")
   }
   
@@ -500,20 +500,20 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       stop("Error: variance splitrule applicable to regression data only.")
     }
-  } else if (splitrule == "auc" | splitrule == "C") {
+  } else if (splitrule == "auc" || splitrule == "C") {
     if (treetype == 5) {
       splitrule.num <- 2
     } else {
       stop("Error: C index splitrule applicable to survival data only.")
     }
-  } else if (splitrule == "auc_ignore_ties" | splitrule == "C_ignore_ties") {
+  } else if (splitrule == "auc_ignore_ties" || splitrule == "C_ignore_ties") {
     if (treetype == 5) {
       splitrule.num <- 3
     } else {
       stop("Error: C index splitrule applicable to survival data only.")
     }
   } else if (splitrule == "maxstat") {
-    if (treetype == 5 | treetype == 3) {
+    if (treetype == 5 || treetype == 3) {
       splitrule.num <- 4
     } else {
       stop("Error: maxstat splitrule applicable to regression or survival data only.")
@@ -525,18 +525,18 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Maxstat splitting
-  if (alpha < 0 | alpha > 1) {
+  if (alpha < 0 || alpha > 1) {
     stop("Error: Invalid value for alpha, please give a value between 0 and 1.")
   }
-  if (minprop < 0 | minprop > 0.5) {
+  if (minprop < 0 || minprop > 0.5) {
     stop("Error: Invalid value for minprop, please give a value between 0 and 0.5.")
   }
 
   ## Extra trees
-  if (!is.numeric(num.random.splits) | num.random.splits < 1) {
+  if (!is.numeric(num.random.splits) || num.random.splits < 1) {
     stop("Error: Invalid value for num.random.splits, please give a positive integer.")
   }
-  if (splitrule.num == 5 & save.memory & respect.unordered.factors == "partition") {
+  if (splitrule.num == 5 && save.memory && respect.unordered.factors == "partition") {
     stop("Error: save.memory option not possible in extraTrees mode with unordered predictors.")
   }
 
@@ -561,7 +561,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       unordered.factor.variables <- c("0", "0")
       use.unordered.factor.variables <- FALSE
     } 
-  } else if (respect.unordered.factors == "ignore" | respect.unordered.factors == "order") {
+  } else if (respect.unordered.factors == "ignore" || respect.unordered.factors == "order") {
     ## Ordering for "order" is handled above
     unordered.factor.variables <- c("0", "0")
     use.unordered.factor.variables <- FALSE
@@ -570,7 +570,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   ## Unordered maxstat splitting not possible
-  if (use.unordered.factor.variables & !is.null(splitrule)) {
+  if (use.unordered.factor.variables && !is.null(splitrule)) {
     if (splitrule == "maxstat") {
       stop("Error: Unordered factor splitting not implemented for 'maxstat' splitting rule.")
     } else if (splitrule %in% c("C", "auc", "C_ignore_ties", "auc_ignore_ties")) {
@@ -582,11 +582,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (respect.unordered.factors == "order") {
     if (treetype == 5) {
       warning("Warning: The 'order' mode for unordered factor handling for survival outcomes is experimental.")
-    } else if (treetype == 1 | treetype == 9) {
+    } else if (treetype == 1 || treetype == 9) {
       if (nlevels(response) > 2) {
         warning("Warning: The 'order' mode for unordered factor handling for multiclass classification is experimental.")
       }
-    } else if (treetype == 3 & splitrule == "maxstat") {
+    } else if (treetype == 3 && splitrule == "maxstat") {
       warning("Warning: The 'order' mode for unordered factor handling with the 'maxstat' splitrule is experimental.")
     }
   }
@@ -633,7 +633,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   ## Set predictions
-  if (treetype == 1 & is.factor(response)) {
+  if (treetype == 1 && is.factor(response)) {
     result$predictions <- integer.to.factor(result$predictions,
                                             levels(response))
     true.values <- integer.to.factor(unlist(data.final[, dependent.variable.name]),
@@ -649,7 +649,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$chf <- result$predictions
     result$predictions <- NULL
     result$survival <- exp(-result$chf)
-  } else if (treetype == 9 & !is.matrix(data)) {
+  } else if (treetype == 9 && !is.matrix(data)) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
     } 
@@ -692,7 +692,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     class(result$forest) <- "ranger.forest"
     
     ## In 'ordered' mode, save covariate levels
-    if (respect.unordered.factors == "order" & !is.matrix(data)) {
+    if (respect.unordered.factors == "order" && !is.matrix(data)) {
       result$forest$covariate.levels <- covariate.levels
     }
   }
