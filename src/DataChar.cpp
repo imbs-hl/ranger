@@ -26,6 +26,9 @@ http://www.imbs-luebeck.de
 wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
+// Ignore in coverage report (not used in R package)
+// #nocov start
+
 #include <limits.h>
 #include <math.h>
 #include <iostream>
@@ -66,3 +69,5 @@ DataChar::~DataChar() {
     delete[] data;
   }
 }
+
+// #nocov end

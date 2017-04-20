@@ -2,3 +2,5 @@
 .Rcheck
 ranger.Rcheck/
 *.Rproj
+.project
+.cproject

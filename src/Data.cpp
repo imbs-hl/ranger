@@ -60,6 +60,7 @@ void Data::addSparseData(unsigned char* sparse_data, size_t num_cols_sparse) {
   this->sparse_data = sparse_data;
 }
 
+// #nocov start
 bool Data::loadFromFile(std::string filename) {
 
   bool result;
@@ -166,6 +167,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
   num_rows = row;
   return error;
 }
+// #nocov end
 
 void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
 

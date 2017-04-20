@@ -154,6 +154,7 @@ void ForestRegression::computePredictionErrorInternal() {
   overall_prediction_error /= (double) num_predictions;
 }
 
+// #nocov start
 void ForestRegression::writeOutputInternal() {
   *verbose_out << "Tree type:                         " << "Regression" << std::endl;
 }
@@ -257,4 +258,4 @@ void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
     trees.push_back(tree);
   }
 }
-
+// #nocov end

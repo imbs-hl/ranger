@@ -198,6 +198,7 @@ void ForestSurvival::computePredictionErrorInternal() {
   overall_prediction_error = 1 - computeConcordanceIndex(data, sum_chf, dependent_varID, status_varID, temp);
 }
 
+// #nocov start
 void ForestSurvival::writeOutputInternal() {
   *verbose_out << "Tree type:                         " << "Survival" << std::endl;
   *verbose_out << "Status variable name:              " << data->getVariableNames()[status_varID] << std::endl;
@@ -349,4 +350,5 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
     trees.push_back(tree);
   }
 }
+// #nocov end
 
