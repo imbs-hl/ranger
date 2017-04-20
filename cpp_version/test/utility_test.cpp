@@ -962,7 +962,7 @@ TEST(maxstat, trt) {
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 });
 
   const double expect_maxstat = 0.095071135385996;
-  const double expect_split = 1;
+  const double expect_split = 1.5;
 
   // Order
   std::vector<size_t> indices = order(x, false);
@@ -985,7 +985,7 @@ TEST(maxstat, celltype) {
   //  library(survival)
   //  library(maxstat)
   //  y <- Surv(veteran$time, veteran$status)
-  //  x <- veteran$trt
+  //  x <- veteran$celltype
   //  m <- maxstat(y, x, pmethod = "Lau92", smethod = "LogRank")
   //  dput(y[, 1], control = NULL)
   //  dput(y[, 2], control = NULL)
@@ -1012,7 +1012,7 @@ TEST(maxstat, celltype) {
       2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 });
 
   const double expect_maxstat = 3.44263138354529;
-  const double expect_split = 1;
+  const double expect_split = 1.5;
 
   // Order
   std::vector<size_t> indices = order(x, false);
@@ -1035,7 +1035,7 @@ TEST(maxstat, karno) {
   //  library(survival)
   //  library(maxstat)
   //  y <- Surv(veteran$time, veteran$status)
-  //  x <- veteran$age
+  //  x <- veteran$karno
   //  m <- maxstat(y, x, pmethod = "Lau92", smethod = "LogRank")
   //  dput(y[, 1], control = NULL)
   //  dput(y[, 2], control = NULL)
@@ -1064,7 +1064,7 @@ TEST(maxstat, karno) {
       60, 80, 75, 60, 70, 80, 30 });
 
   const double expect_maxstat = 4.61806159115936;
-  const double expect_split = 40;
+  const double expect_split = 45;
 
   // Order
   std::vector<size_t> indices = order(x, false);
@@ -1087,7 +1087,7 @@ TEST(maxstat, diagtime) {
   //  library(survival)
   //  library(maxstat)
   //  y <- Surv(veteran$time, veteran$status)
-  //  x <- veteran$age
+  //  x <- veteran$diagtime
   //  m <- maxstat(y, x, pmethod = "Lau92", smethod = "LogRank")
   //  dput(y[, 1], control = NULL)
   //  dput(y[, 2], control = NULL)
@@ -1115,7 +1115,7 @@ TEST(maxstat, diagtime) {
       4, 15, 4, 12, 5, 11, 10, 1, 5, 18, 4, 3 });
 
   const double expect_maxstat = 0.800489478294775;
-  const double expect_split = 3;
+  const double expect_split = 3.5;
 
   // Order
   std::vector<size_t> indices = order(x, false);
@@ -1167,7 +1167,7 @@ TEST(maxstat, age) {
       49, 64, 65, 64, 67, 65, 37 });
 
   const double expect_maxstat = 1.7992993341166;
-  const double expect_split = 58;
+  const double expect_split = 58.5;
 
   // Order
   std::vector<size_t> indices = order(x, false);
@@ -1190,7 +1190,7 @@ TEST(maxstat, prior) {
   //  library(survival)
   //  library(maxstat)
   //  y <- Surv(veteran$time, veteran$status)
-  //  x <- veteran$age
+  //  x <- veteran$prior
   //  m <- maxstat(y, x, pmethod = "Lau92", smethod = "LogRank")
   //  dput(y[, 1], control = NULL)
   //  dput(y[, 2], control = NULL)
@@ -1218,7 +1218,7 @@ TEST(maxstat, prior) {
       10, 10, 0, 0, 10, 10, 0, 0, 10, 0, 0 });
 
   const double expect_maxstat = 0.7158562778385;
-  const double expect_split = 0;
+  const double expect_split = 5;
 
   // Order
   std::vector<size_t> indices = order(x, false);
@@ -1274,7 +1274,7 @@ TEST(maxstat, regression) {
     3.4, 3 });
 
   const double expect_maxstat = 3.73535181856697;
-  const double expect_split = 3.3;
+  const double expect_split = 3.35;
 
   // Order x
   std::vector<size_t> indices = order(x, false);
