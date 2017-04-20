@@ -26,6 +26,9 @@ http://www.imbs-luebeck.de
 wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
+// Ignore in coverage report (not used in R package)
+// #nocov start
+ 
 #ifndef DATACHAR_H_
 #define DATACHAR_H_
 
@@ -71,3 +74,4 @@ private:
 };
 
 #endif /* DATACHAR_H_ */
+// #nocov end
