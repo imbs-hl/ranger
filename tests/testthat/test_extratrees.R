@@ -31,7 +31,8 @@ test_that("extratrees unordered splitting works for probability estimation", {
                     y = factor(rbinom(n, 1, 0.5)), 
                     stringsAsFactors = FALSE)
   rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2, 
-               splitrule = "extratrees", respect.unordered.factors = 'partition')
+               splitrule = "extratrees", respect.unordered.factors = 'partition', 
+               probability = TRUE)
   expect_is(rf, "ranger")
 })
 
