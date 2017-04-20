@@ -67,6 +67,16 @@ test_that("Same results if no unordered factors", {
                rf3$confusion.matrix)
 })
 
+test_that("Unordered splitting working for classification", {
+  n <- 20
+  dt <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
+                   y = factor(rbinom(n, 1, 0.5)),
+                   stringsAsFactors = FALSE)
+  
+  rf <- ranger(y ~ ., data = dt, num.trees = 5, min.node.size = n/2, respect.unordered.factors = 'partition')
+  expect_true(any(!rf$forest$is.ordered))
+})
+
 test_that("Error if too many factors in 'partition' mode", {
   n <- 100
   dt <- data.frame(x = factor(1:100, ordered = FALSE),  
