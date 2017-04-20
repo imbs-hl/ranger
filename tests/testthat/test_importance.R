@@ -71,11 +71,11 @@ test_that("unscaled importance is smaller than 1", {
   expect_lt(rg.perm.surv$variable.importance[3], 1)
 })
 
-test_that("scaled importance is larger than 1", {
-  expect_gt(rg.scale.perm.class$variable.importance[1], 1)
-  expect_gt(rg.scale.perm.prob$variable.importance[1], 1)
-  expect_gt(rg.scale.perm.regr$variable.importance[1], 1)
-  expect_gt(rg.scale.perm.surv$variable.importance[3], 1)
+test_that("scaled importance is larger than unscaled importance", {
+  expect_gt(abs(rg.scale.perm.class$variable.importance[1]), abs(rg.perm.class$variable.importance[1]))
+  expect_gt(abs(rg.scale.perm.prob$variable.importance[1]), abs(rg.perm.prob$variable.importance[1]))
+  expect_gt(abs(rg.scale.perm.regr$variable.importance[1]), abs(rg.perm.regr$variable.importance[1]))
+  expect_gt(abs(rg.scale.perm.surv$variable.importance[1]), abs(rg.perm.surv$variable.importance[1]))
 })
 
 test_that("error thrown if no importance in object", {
