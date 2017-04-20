@@ -58,6 +58,7 @@ Forest::~Forest() {
   }
 }
 
+// #nocov start
 void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode, std::string input_file, uint mtry,
     std::string output_prefix, uint num_trees, std::ostream* verbose_out, uint seed, uint num_threads,
     std::string load_forest_filename, ImportanceMode importance_mode, uint min_node_size,
@@ -149,6 +150,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     }
   }
 }
+// #nocov end
 
 void Forest::initR(std::string dependent_variable_name, Data* input_data, uint mtry, uint num_trees,
     std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
@@ -306,6 +308,7 @@ void Forest::run(bool verbose) {
   }
 }
 
+// #nocov start
 void Forest::writeOutput() {
 
   *verbose_out << std::endl;
@@ -399,6 +402,7 @@ void Forest::saveToFile() {
   outfile.close();
   *verbose_out << "Saved forest to file " << filename << "." << std::endl;
 }
+// #nocov end
 
 void Forest::grow() {
 
@@ -732,6 +736,7 @@ void Forest::computeTreePermutationImportanceInThread(uint thread_idx, std::vect
 }
 #endif
 
+// #nocov start
 void Forest::loadFromFile(std::string filename) {
   *verbose_out << "Loading forest from file " << filename << "." << std::endl;
 
@@ -757,6 +762,7 @@ void Forest::loadFromFile(std::string filename) {
 // Create thread ranges
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
+// #nocov end
 
 void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select_weights) {
 

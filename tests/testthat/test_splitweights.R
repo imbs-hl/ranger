@@ -17,3 +17,8 @@ test_that("Tree-wise split select weights work", {
   weights <- replicate(num.trees+1, runif(ncol(iris)-1), simplify = FALSE)
   expect_error(ranger(Species ~ ., iris, num.trees = num.trees, split.select.weights = weights))
 })
+
+test_that("always split variables work", {
+  expect_silent(ranger(Species ~ ., iris, num.trees = 10, 
+                       always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
+})

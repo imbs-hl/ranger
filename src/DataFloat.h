@@ -26,6 +26,9 @@ http://www.imbs-luebeck.de
 wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
+// Ignore in coverage report (not used in R package)
+// #nocov start
+ 
 #ifndef DATAFLOAT_H_
 #define DATAFLOAT_H_
 
@@ -63,3 +66,5 @@ private:
 };
 
 #endif /* DATAFLOAT_H_ */
+// #nocov end
+

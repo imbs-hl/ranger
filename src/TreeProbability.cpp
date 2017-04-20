@@ -79,7 +79,7 @@ void TreeProbability::addToTerminalNodes(size_t nodeID) {
   }
 }
 
-void TreeProbability::appendToFileInternal(std::ofstream& file) {
+void TreeProbability::appendToFileInternal(std::ofstream& file) { // #nocov start
 
   // Add Terminal node class counts
   // Convert to vector without empty elements and save
@@ -93,7 +93,7 @@ void TreeProbability::appendToFileInternal(std::ofstream& file) {
   }
   saveVector1D(terminal_nodes, file);
   saveVector2D(terminal_class_counts_vector, file);
-}
+} // #nocov end
 
 bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 

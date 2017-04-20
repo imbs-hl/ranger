@@ -80,9 +80,9 @@ double TreeClassification::estimate(size_t nodeID) {
   return (mostFrequentValue(class_count, random_number_generator));
 }
 
-void TreeClassification::appendToFileInternal(std::ofstream& file) {
+void TreeClassification::appendToFileInternal(std::ofstream& file) { // #nocov start
   // Empty on purpose
-}
+} // #nocov end
 
 bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 

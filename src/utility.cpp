@@ -77,7 +77,7 @@ void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts)
   }
 }
 
-void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename) {
+void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename) { // #nocov start
 
   // Open input file
   std::ifstream input_file;
@@ -94,7 +94,7 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
   while (line_stream >> token) {
     result.push_back(token);
   }
-}
+} // #nocov end
 
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     std::vector<size_t>& skip, size_t num_samples) {
@@ -128,37 +128,6 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
     } while (temp[draw]);
     temp[draw] = true;
     result.push_back(draw);
-  }
-}
-
-void drawWithoutReplacementKnuth(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples) {
-
-  size_t size_no_skip = max - skip.size();
-  result.resize(num_samples);
-  double u;
-  size_t final_value;
-
-  std::uniform_real_distribution<double> distribution(0.0, 1.0);
-
-  size_t i = 0;
-  size_t j = 0;
-  while (i < num_samples) {
-    u = distribution(random_number_generator);
-
-    if ((size_no_skip - j) * u >= num_samples - i) {
-      j++;
-    } else {
-      final_value = j;
-      for (auto& skip_value : skip) {
-        if (final_value >= skip_value) {
-          ++final_value;
-        }
-      }
-      result[i] = final_value;
-      j++;
-      i++;
-    }
   }
 }
 
@@ -307,7 +276,7 @@ std::string uintToString(uint number) {
 #endif
 }
 
-std::string beautifyTime(uint seconds) {
+std::string beautifyTime(uint seconds) { // #nocov start
   std::string result;
 
   // Add seconds, minutes, hours, days if larger than zero
@@ -338,7 +307,7 @@ std::string beautifyTime(uint seconds) {
     result = uintToString(out_days) + " days, " + result;
   }
   return result;
-}
+} // #nocov end
 
 size_t roundToNextMultiple(size_t value, uint multiple) {
 
@@ -354,7 +323,7 @@ size_t roundToNextMultiple(size_t value, uint multiple) {
   return value + multiple - remainder;
 }
 
-void splitString(std::vector<std::string>& result, std::string input, char split_char) {
+void splitString(std::vector<std::string>& result, std::string input, char split_char) { // #nocov start
 
   std::istringstream ss(input);
   std::string token;
@@ -362,7 +331,7 @@ void splitString(std::vector<std::string>& result, std::string input, char split
   while (std::getline(ss, token, split_char)) {
     result.push_back(token);
   }
-}
+} // #nocov end
 
 void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all, size_t n_first,
     std::mt19937_64 random_number_generator) {
@@ -382,7 +351,7 @@ void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& secon
   first_part.resize(n_first);
 }
 
-std::string checkUnorderedVariables(Data* data, std::vector<std::string> unordered_variable_names) {
+std::string checkUnorderedVariables(Data* data, std::vector<std::string> unordered_variable_names) { // #nocov start
   size_t num_rows = data->getNumRows();
   std::vector<size_t> sampleIDs(num_rows);
   std::iota(sampleIDs.begin(), sampleIDs.end(), 0);
@@ -406,16 +375,16 @@ std::string checkUnorderedVariables(Data* data, std::vector<std::string> unorder
     }
   }
   return "";
-}
+} // #nocov end
 
-bool checkPositiveIntegers(std::vector<double>& all_values) {
+bool checkPositiveIntegers(std::vector<double>& all_values) { // #nocov start
   for (auto& value : all_values) {
     if (value < 1 || !(floor(value) == value)) {
       return false;
     }
   }
   return true;
-}
+} // #nocov end
 
 double maxstatPValueLau92(double b, double minprop, double maxprop) {
 
@@ -481,22 +450,6 @@ std::vector<double> adjustPvalues(std::vector<double>& unadjusted_pvalues) {
   return adjusted_pvalues;
 }
 
-std::vector<size_t> orderInData(Data* data, std::vector<size_t>& sampleIDs, size_t varID, bool decreasing) {
-  // Create index vector
-  std::vector<size_t> indices(sampleIDs.size());
-  std::iota(indices.begin(), indices.end(), 0);
-
-  // Sort index vector based on value vector
-  if (decreasing) {
-    std::sort(std::begin(indices), std::end(indices),
-        [&](size_t i1, size_t i2) {return data->get(sampleIDs[i1], varID) > data->get(sampleIDs[i2], varID);});
-  } else {
-    std::sort(std::begin(indices), std::end(indices),
-        [&](size_t i1, size_t i2) {return data->get(sampleIDs[i1], varID) < data->get(sampleIDs[i2], varID);});
-  }
-  return indices;
-}
-
 std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>& status) {
   size_t n = time.size();
   std::vector<double> scores(n);
@@ -520,43 +473,6 @@ std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>
     }
     for (size_t j = last_unique + 1; j <= i; ++j) {
       scores[indices[j]] = status[indices[j]] - cumsum;
-    }
-
-    // Save last computed value
-    last_unique = i;
-  }
-
-  return scores;
-}
-
-std::vector<double> logrankScoresData(Data* data, size_t time_varID, size_t status_varID,
-    std::vector<size_t> sampleIDs) {
-
-  size_t n = sampleIDs.size();
-  std::vector<double> scores(n);
-
-  // Get order of timepoints
-  std::vector<size_t> indices(n);
-  std::iota(indices.begin(), indices.end(), 0);
-  std::sort(std::begin(indices), std::end(indices),
-      [&](size_t i1, size_t i2) {return data->get(sampleIDs[i1], time_varID) < data->get(sampleIDs[i2], time_varID);});
-
-  // Compute scores
-  double cumsum = 0;
-  size_t last_unique = -1;
-  for (size_t i = 0; i < n; ++i) {
-
-    // Continue if next value is the same
-    if (i < n - 1 && data->get(sampleIDs[indices[i]], time_varID) == data->get(sampleIDs[indices[i + 1]], time_varID)) {
-      continue;
-    }
-
-    // Compute sum and scores for all non-unique values in a row
-    for (size_t j = last_unique + 1; j <= i; ++j) {
-      cumsum += data->get(sampleIDs[indices[j]], status_varID) / (n - i);
-    }
-    for (size_t j = last_unique + 1; j <= i; ++j) {
-      scores[indices[j]] = data->get(sampleIDs[indices[j]], status_varID) - cumsum;
     }
 
     // Save last computed value
@@ -632,67 +548,6 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
   }
 }
 
-void maxstatInData(std::vector<double>& scores, Data* data, std::vector<size_t>& sampleIDs, size_t varID,
-    std::vector<size_t>& indices, double& best_maxstat, double& best_split_value, double minprop, double maxprop) {
-  size_t n = sampleIDs.size();
-
-  double sum_all_scores = 0;
-  for (size_t i = 0; i < n; ++i) {
-    sum_all_scores += scores[indices[i]];
-  }
-
-  // Compute sum of differences from mean for variance
-  double mean_scores = sum_all_scores / n;
-  double sum_mean_diff = 0;
-  for (size_t i = 0; i < n; ++i) {
-    sum_mean_diff += (scores[i] - mean_scores) * (scores[i] - mean_scores);
-  }
-
-  // Get smallest and largest split to consider, -1 for compatibility with R maxstat
-  size_t minsplit = 0;
-  if (n * minprop > 1) {
-    minsplit = n * minprop - 1;
-  }
-  size_t maxsplit = n * maxprop - 1;
-
-  // For all unique x-values
-  best_maxstat = -1;
-  best_split_value = -1;
-  double sum_scores = 0;
-  size_t n_left = 0;
-  for (size_t i = 0; i <= maxsplit; ++i) {
-
-    sum_scores += scores[indices[i]];
-    n_left++;
-
-    // Dont consider splits smaller than minsplit for splitting (but count)
-    if (i < minsplit) {
-      continue;
-    }
-
-    // Consider only unique values
-    double xi = data->get(sampleIDs[indices[i]], varID);
-    if (i < n - 1 && xi == data->get(sampleIDs[indices[i + 1]], varID)) {
-      continue;
-    }
-
-    // If value is largest possible value, stop
-    if (xi == data->get(sampleIDs[indices[n - 1]], varID)) {
-      break;
-    }
-
-    double S = sum_scores;
-    double E = (double) n_left / (double) n * sum_all_scores;
-    double V = (double) n_left * (double) (n - n_left) / (double) (n * (n - 1)) * sum_mean_diff;
-    double T = fabs((S - E) / sqrt(V));
-
-    if (T > best_maxstat) {
-      best_maxstat = T;
-      best_split_value = xi;
-    }
-  }
-}
-
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector<size_t>& indices) {
   std::vector<size_t> num_samples_left;
   num_samples_left.reserve(x.size());
@@ -701,26 +556,6 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector
     if (i == 0) {
       num_samples_left.push_back(1);
     } else if (x[indices[i]] == x[indices[i - 1]]) {
-      ++num_samples_left[num_samples_left.size() - 1];
-    } else {
-      num_samples_left.push_back(num_samples_left[num_samples_left.size() - 1] + 1);
-    }
-  }
-
-  return num_samples_left;
-}
-
-std::vector<size_t> numSamplesLeftOfCutpointInData(Data* data, std::vector<size_t>& sampleIDs, size_t varID,
-    std::vector<size_t>& indices) {
-  size_t n = indices.size();
-
-  std::vector<size_t> num_samples_left;
-  num_samples_left.reserve(n);
-
-  for (size_t i = 0; i < n; ++i) {
-    if (i == 0) {
-      num_samples_left.push_back(1);
-    } else if (data->get(sampleIDs[indices[i]], varID) == data->get(sampleIDs[indices[i - 1]], varID)) {
       ++num_samples_left[num_samples_left.size() - 1];
     } else {
       num_samples_left.push_back(num_samples_left[num_samples_left.size() - 1] + 1);
