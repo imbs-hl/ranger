@@ -77,7 +77,7 @@ void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts)
   }
 }
 
-void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename) {
+void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename) { // #nocov start
 
   // Open input file
   std::ifstream input_file;
@@ -94,7 +94,7 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
   while (line_stream >> token) {
     result.push_back(token);
   }
-}
+} // #nocov end
 
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     std::vector<size_t>& skip, size_t num_samples) {
@@ -307,7 +307,7 @@ std::string uintToString(uint number) {
 #endif
 }
 
-std::string beautifyTime(uint seconds) {
+std::string beautifyTime(uint seconds) { // #nocov start
   std::string result;
 
   // Add seconds, minutes, hours, days if larger than zero
@@ -338,7 +338,7 @@ std::string beautifyTime(uint seconds) {
     result = uintToString(out_days) + " days, " + result;
   }
   return result;
-}
+} // #nocov end
 
 size_t roundToNextMultiple(size_t value, uint multiple) {
 

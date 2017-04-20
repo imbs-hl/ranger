@@ -53,6 +53,7 @@
  */
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts);
 
+// #nocov start
 /**
  * Write a 1d vector to filestream. First the size is written as size_t, then all vector elements.
  * @param vector Vector with elements of type T to write to file.
@@ -156,6 +157,7 @@ inline void readVector2D(std::vector<std::vector<T>>& result, std::ifstream& fil
  * @param filename filename of input file
  */
 void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename);
+// #nocov end
 
 /**
  * Draw random numbers in a range without replacement and skip values.
