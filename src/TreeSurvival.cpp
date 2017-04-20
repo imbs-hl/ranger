@@ -62,7 +62,7 @@ void TreeSurvival::initInternal() {
   num_samples_at_risk = new size_t[num_timepoints];
 }
 
-void TreeSurvival::appendToFileInternal(std::ofstream& file) {
+void TreeSurvival::appendToFileInternal(std::ofstream& file) {  // #nocov start
 
   // Convert to vector without empty elements and save
   std::vector<size_t> terminal_nodes;
@@ -75,7 +75,7 @@ void TreeSurvival::appendToFileInternal(std::ofstream& file) {
   }
   saveVector1D(terminal_nodes, file);
   saveVector2D(chf_vector, file);
-}
+} // #nocov end
 
 void TreeSurvival::createEmptyNodeInternal() {
   chf.push_back(std::vector<double>());
