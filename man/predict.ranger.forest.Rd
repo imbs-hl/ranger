@@ -6,7 +6,7 @@
 \usage{
 \method{predict}{ranger.forest}(object, data, predict.all = FALSE,
   num.trees = object$num.trees, type = "response", seed = NULL,
-  num.threads = NULL, verbose = TRUE, ...)
+  num.threads = NULL, verbose = TRUE, inbag.counts = NULL, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger.forest} object.}
@@ -17,13 +17,15 @@
 
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
-\item{type}{Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.}
+\item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.}
 
 \item{seed}{Random seed used in Ranger.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
 \item{verbose}{Verbose output on or off.}
+
+\item{inbag.counts}{Number of times the observations are in-bag in the trees.}
 
 \item{...}{further arguments passed to or from other methods.}
 }
@@ -45,6 +47,7 @@ Prediction with new data and a saved forest from Ranger.
 }
 \details{
 For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+For \code{type = 'se'}, the standard error of the predictions are returned (regression only).
 For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.

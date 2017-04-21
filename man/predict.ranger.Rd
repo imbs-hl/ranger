@@ -17,7 +17,7 @@
 
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
-\item{type}{Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.}
+\item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.}
 
 \item{seed}{Random seed used in Ranger.}
 
@@ -45,6 +45,7 @@ Prediction with new data and a saved forest from Ranger.
 }
 \details{
 For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+For \code{type = 'se'}, the standard error of the predictions are returned (regression only).
 For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.

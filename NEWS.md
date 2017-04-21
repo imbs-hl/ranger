@@ -1,3 +1,6 @@
+##### Version 0.7.2
+* Add prediction of standard errors to predict()
+
 ##### Version 0.7.1
 * Allow devtools::install_github() without subdir and on Windows
 * Bug fixes
