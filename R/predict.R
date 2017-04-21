@@ -30,6 +30,7 @@
 ##' Prediction with new data and a saved forest from Ranger.
 ##' 
 ##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only).
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
@@ -40,10 +41,11 @@
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
-##' @param type Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.
+##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
+##' @param inbag.counts Number of times the observations are in-bag in the trees.
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements
 ##'   \tabular{ll}{
@@ -63,7 +65,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
                                   type = "response",
                                   seed = NULL, num.threads = NULL,
-                                  verbose = TRUE, ...) {
+                                  verbose = TRUE, inbag.counts = NULL,...) {
 
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -101,12 +103,27 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Prediction type
-  if (type == "response") {
+  if (type == "response" || type == "se") {
     prediction.type <- 1
   } else if (type == "terminalNodes") {
     prediction.type <- 2
   } else {
     stop("Error: Invalid value for 'type'. Use 'response' or 'terminalNodes'.")
+  }
+  
+  ## Type "se" only for regression
+  if (type == "se" && forest$treetype != "Regression") {
+    stop("Error: Standard error prediction currently only available for regression.")
+  }
+  
+  ## Type "se" requires keep.inbag=TRUE
+  if (type == "se" && is.null(inbag.counts)) {
+    stop("Error: No saved inbag counts in ranger object. Please set keep.inbag=TRUE when calling ranger.")
+  }
+  
+  ## Set predict.all if type is "se"
+  if (type == "se") {
+    predict.all <- TRUE
   }
 
   ## Create final data
@@ -318,6 +335,35 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     }
   } 
 
+  ## Compute Jackknife
+  if (type == "se") {
+    ## Aggregated predictions
+    yhat <- rowMeans(result$predictions)
+
+    ## Get inbag counts, keep only observations that are OOB at least once
+    inbag.counts <- simplify2array(inbag.counts) 
+    if (is.vector(inbag.counts)) {
+      inbag.counts <- t(as.matrix(inbag.counts))
+    }
+    inbag.counts <- inbag.counts[rowSums(inbag.counts == 0) > 0, , drop = FALSE] 
+    n <- nrow(inbag.counts)
+    oob <- inbag.counts == 0
+    
+    if (all(!oob)) {
+      stop("Error: No OOB observations found, consider increasing num.trees or reducing sample.fraction.")
+    }
+
+    ## Compute Jackknife
+    jack.n <- apply(oob, 1, function(x) rowMeans(result$predictions[, x, drop = FALSE]))
+    if (is.vector(jack.n)) {
+      jack.n <- t(as.matrix(jack.n))
+    }
+    jack <- (n - 1) / n * rowSums((jack.n - yhat)^2)
+    bias <- (exp(1) - 1) * n / result$num.trees^2 * rowSums((result$predictions - yhat)^2)
+    jab <- pmax(jack - bias, 0)
+    result$predictions <- sqrt(jab)
+  }
+
   class(result) <- "ranger.prediction"
   return(result)
 }
@@ -325,6 +371,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' Prediction with new data and a saved forest from Ranger.
 ##' 
 ##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only).
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
@@ -335,7 +382,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
-##' @param type Type of prediction. One of 'response' or 'terminalNodes' with default 'response'. See below for details.
+##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -363,5 +410,5 @@ predict.ranger <- function(object, data, predict.all = FALSE,
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
   }
-  predict(forest, data, predict.all, num.trees, type, seed, num.threads, verbose)
+  predict(forest, data, predict.all, num.trees, type, seed, num.threads, verbose, object$inbag.counts, ...)
 }
