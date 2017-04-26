@@ -41,17 +41,17 @@ public:
     this->variable_names = variable_names;
     this->num_rows = num_rows;
     this->num_cols = num_cols;
-    this->num_cols_no_sparse = num_cols;
+    this->num_cols_no_snp = num_cols;
   }
   virtual ~DataDouble();
 
   double get(size_t row, size_t col) const {
-    if (col < num_cols_no_sparse) {
+    if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
-      // Get data out of sparse storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_sparse) * num_rows_rounded + row;
-      double result = (((sparse_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      // Get data out of snp storage. -1 because of GenABEL coding.
+      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
+      double result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
       return result;
     }
   }
