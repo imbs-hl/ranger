@@ -176,6 +176,7 @@
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
 ##' @import utils
+##' @importFrom Matrix Matrix
 ##' @export
 ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
@@ -195,7 +196,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- data@gtdata@snpnames
-    sparse.data <- data@gtdata@gtps@.Data
+    snp.data <- data@gtdata@gtps@.Data
     data <- data@phdata
     if ("id" %in% names(data)) {
       data$"id" <- NULL
@@ -203,10 +204,21 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     gwa.mode <- TRUE
     save.memory <- FALSE
   } else {
-    sparse.data <- as.matrix(0)
+    snp.data <- as.matrix(0)
     gwa.mode <- FALSE
   }
   
+  ## Sparse matrix data
+  if (inherits(data, "Matrix")) {
+    if (!("dgCMatrix" %in% class(data))) {
+      stop("Error: Currently only sparse data of class 'dgCMatrix' supported.")
+    }
+  
+    if (!is.null(formula)) {
+      stop("Error: Sparse matrices only supported with alternative interface. Use dependent.variable.name instead of formula.")
+    }
+  }
+    
   ## Formula interface. Use whole data frame is no formula provided and depvarname given
   if (is.null(formula)) {
     if (is.null(dependent.variable.name)) {
@@ -288,7 +300,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Recode characters as factors and recode factors if 'order' mode
-  if (!is.matrix(data.selected)) {
+  if (!is.matrix(data.selected) && !inherits(data.selected, "Matrix")) {
     character.idx <- sapply(data.selected, is.character)
     
     if (respect.unordered.factors == "order") {
@@ -334,7 +346,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                               data.selected[-1]))
     colnames(data.final) <- c(dependent.variable.name, status.variable.name,
                               independent.variable.names)
-  } else if (is.matrix(data.selected)) {
+  } else if (is.matrix(data.selected) || inherits(data.selected, "Matrix")) {
     data.final <- data.selected
   } else {
     data.final <- data.matrix(data.selected)
@@ -501,7 +513,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: C index splitrule applicable to survival data only.")
     }
   } else if (splitrule == "maxstat") {
-    if (treetype == 5 | treetype == 3) {
+    if (treetype == 5 || treetype == 3) {
       splitrule.num <- 4
     } else {
       stop("Error: maxstat splitrule applicable to regression or survival data only.")
@@ -587,19 +599,29 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## No loaded forest object
   loaded.forest <- list()
   
+  ## Use sparse matrix
+  if ("dgCMatrix" %in% class(data.final)) {
+    sparse.data <- data.final
+    data.final <- matrix(c(0, 0))
+    use.sparse.data <- TRUE
+  } else {
+    sparse.data <- Matrix(matrix(c(0, 0)))
+    use.sparse.data <- FALSE
+  }
+  
   ## Clean up
   rm("data.selected")
-  
+
   ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, loaded.forest, sparse.data,
+                      status.variable.name, prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
                       keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits)
+                      num.random.splits, sparse.data, use.sparse.data)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -670,7 +692,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     class(result$forest) <- "ranger.forest"
     
     ## In 'ordered' mode, save covariate levels
-    if (respect.unordered.factors == "order" & !is.matrix(data)) {
+    if (respect.unordered.factors == "order" && !is.matrix(data)) {
       result$forest$covariate.levels <- covariate.levels
     }
   }

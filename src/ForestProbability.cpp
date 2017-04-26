@@ -179,6 +179,7 @@ void ForestProbability::computePredictionErrorInternal() {
   overall_prediction_error /= (double) num_predictions;
 }
 
+// #nocov start
 void ForestProbability::writeOutputInternal() {
   *verbose_out << "Tree type:                         " << "Probability estimation" << std::endl;
 }
@@ -309,4 +310,4 @@ void ForestProbability::loadFromFileInternal(std::ifstream& infile) {
     trees.push_back(tree);
   }
 }
-
+// #nocov end

@@ -26,6 +26,9 @@ http://www.imbs-luebeck.de
 wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
+// Ignore in coverage report (not used in R package)
+// #nocov start
+ 
 #ifndef DATAFLOAT_H_
 #define DATAFLOAT_H_
 
@@ -39,12 +42,12 @@ public:
   virtual ~DataFloat();
 
   double get(size_t row, size_t col) const {
-    if (col < num_cols_no_sparse) {
+    if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
-      // Get data out of sparse storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_sparse) * num_rows_rounded + row;
-      return (((sparse_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      // Get data out of snp storage. -1 because of GenABEL coding.
+      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
+      return (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
     }
   }
 
@@ -63,3 +66,5 @@ private:
 };
 
 #endif /* DATAFLOAT_H_ */
+// #nocov end
+

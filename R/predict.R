@@ -58,6 +58,7 @@
 ##'   }
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
+##' @importFrom Matrix Matrix
 ##' @export
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
@@ -68,12 +69,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- snp.names(data)
-    sparse.data <- data@gtdata@gtps@.Data
+    snp.data <- data@gtdata@gtps@.Data
     data <- data@phdata[, -1]
     gwa.mode <- TRUE
     variable.names <- c(names(data), snp.names)
   } else {
-    sparse.data <- as.matrix(0)
+    snp.data <- as.matrix(0)
     gwa.mode <- FALSE
     variable.names <- colnames(data)
   }
@@ -85,13 +86,13 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     forest <- object
   }
   if (is.null(forest$dependent.varID) || is.null(forest$num.trees) ||
-        is.null(forest$child.nodeIDs)  || is.null(forest$split.varIDs) ||
+        is.null(forest$child.nodeIDs) || is.null(forest$split.varIDs) ||
         is.null(forest$split.values) || is.null(forest$independent.variable.names) ||
         is.null(forest$treetype)) {
     stop("Error: Invalid forest object.")
   }
   if (forest$treetype == "Survival" && (is.null(forest$status.varID)  ||
-                                         is.null(forest$chf) || is.null(forest$unique.death.times))) {
+                                        is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
   
@@ -167,7 +168,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Recode characters
-  if (!is.matrix(data.used)) {
+  if (!is.matrix(data.used) && !inherits(data.used, "Matrix")) {
     char.columns <- sapply(data.used, is.character)
     data.used[char.columns] <- lapply(data.used[char.columns], factor)
   }
@@ -185,7 +186,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Convert to data matrix
-  data.final <- data.matrix(data.used)
+  if (is.matrix(data.used) || inherits(data.used, "Matrix")) {
+    data.final <- data.used
+  } else {
+    data.final <- data.matrix(data.used)
+  }
+  
 
   ## If gwa mode, add snp variable names
   if (gwa.mode) {
@@ -254,16 +260,26 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   sample.fraction <- 1
   holdout <- FALSE
   num.random.splits <- 1
-
+  
+  ## Use sparse matrix
+  if ("dgCMatrix" %in% class(data.final)) {
+    sparse.data <- data.final
+    data.final <- matrix(c(0, 0))
+    use.sparse.data <- TRUE
+  } else {
+    sparse.data <- Matrix(matrix(c(0, 0)))
+    use.sparse.data <- FALSE
+  }
+  
   ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, forest, sparse.data, replace, probability,
+                      status.variable.name, prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                      alpha, minprop, holdout, prediction.type, num.random.splits)
+                      alpha, minprop, holdout, prediction.type, num.random.splits, sparse.data, use.sparse.data)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

@@ -26,6 +26,9 @@ http://www.imbs-luebeck.de
 wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
+// Ignore in coverage report (not used in R package)
+// #nocov start
+ 
 #include <iostream>
 #include <vector>
 
@@ -39,7 +42,7 @@ DataFloat::DataFloat(double* data_double, std::vector<std::string> variable_name
   this->variable_names = variable_names;
   this->num_rows = num_rows;
   this->num_cols = num_cols;
-  this->num_cols_no_sparse = num_cols;
+  this->num_cols_no_snp = num_cols;
 
   reserveMemory();
   for (size_t i = 0; i < num_cols; ++i) {
@@ -54,4 +57,6 @@ DataFloat::~DataFloat() {
     delete[] data;
   }
 }
+
+// #nocov end
 

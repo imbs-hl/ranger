@@ -76,9 +76,9 @@ double TreeRegression::estimate(size_t nodeID) {
   return (sum_responses_in_node / (double) num_samples_in_node);
 }
 
-void TreeRegression::appendToFileInternal(std::ofstream& file) {
+void TreeRegression::appendToFileInternal(std::ofstream& file) { // #nocov start
 // Empty on purpose
-}
+} // #nocov end
 
 bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
