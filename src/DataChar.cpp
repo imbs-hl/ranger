@@ -26,6 +26,9 @@ http://www.imbs-luebeck.de
 wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
+// Ignore in coverage report (not used in R package)
+// #nocov start
+
 #include <limits.h>
 #include <math.h>
 #include <iostream>
@@ -42,7 +45,7 @@ DataChar::DataChar(double* data_double, std::vector<std::string> variable_names,
   this->variable_names = variable_names;
   this->num_rows = num_rows;
   this->num_cols = num_cols;
-  this->num_cols_no_sparse = num_cols;
+  this->num_cols_no_snp = num_cols;
 
   reserveMemory();
 
@@ -66,3 +69,5 @@ DataChar::~DataChar() {
     delete[] data;
   }
 }
+
+// #nocov end

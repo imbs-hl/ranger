@@ -53,6 +53,7 @@
  */
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts);
 
+// #nocov start
 /**
  * Write a 1d vector to filestream. First the size is written as size_t, then all vector elements.
  * @param vector Vector with elements of type T to write to file.
@@ -156,6 +157,7 @@ inline void readVector2D(std::vector<std::vector<T>>& result, std::ifstream& fil
  * @param filename filename of input file
  */
 void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename);
+// #nocov end
 
 /**
  * Draw random numbers in a range without replacement and skip values.
@@ -177,18 +179,6 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
  * @param num_samples Number of samples to draw
  */
 void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples);
-
-/**
- * Knuth's algorithm for sampling without replacement, faster for larger num_samples. Result is ordered.
- * Idea from Knuth 1985, The Art of Computer Programming, Vol. 2, Sec. 3.4.2 Algorithm S
- * @param result Vector to add results to. Will not be cleaned before filling.
- * @param random_number_generator Random number generator
- * @param range_length Length of range. Interval to draw from: 0..max-1
- * @param skip Values to skip
- * @param num_samples Number of samples to draw
- */
-void drawWithoutReplacementKnuth(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     std::vector<size_t>& skip, size_t num_samples);
 
 /**
@@ -429,16 +419,6 @@ std::vector<size_t> order(std::vector<T>& values, bool decreasing) {
 }
 
 /**
- * Get indices of sorted values, compute in-place of Data.
- * @param data Data object
- * @param sampleIDs IDs of samples to sort
- * @param varID ID of variable to sort by
- * @param decreasing Order decreasing
- * @return Indices of sorted values
- */
-std::vector<size_t> orderInData(Data* data, std::vector<size_t>& sampleIDs, size_t varID, bool decreasing);
-
-/**
  * Sample ranks starting from 1. Ties are given the average rank.
  * @param values Values to rank
  * @return Ranks of input values
@@ -478,17 +458,6 @@ std::vector<double> rank(std::vector<T>& values) {
 std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>& status);
 
 /**
- * Compute Logrank scores for survival times directly from Data object
- * @param data Pointer to Data object
- * @param time_varID variable ID for time column
- * @param status_varID Variable ID for status column
- * @param sampleIDs IDs of samples to include
- * @return Logrank scores
- */
-std::vector<double> logrankScoresData(Data* data, size_t time_varID, size_t status_varID,
-    std::vector<size_t> sampleIDs);
-
-/**
  * Compute maximally selected rank statistics
  * @param scores Scores for dependent variable (y)
  * @param x Independent variable
@@ -502,38 +471,12 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
     double& best_split_value, double minprop, double maxprop);
 
 /**
- * Compute maximally selected rank statistics in Data object
- * @param scores Scores for dependent variable (y)
- * @param data Data object
- * @param sampleIDs IDs of samples to consider
- * @param varID ID of variable to consider
- * @param indices Ordering of x values
- * @param best_maxstat Maximally selected statistic (output)
- * @param best_split_value Split value for maximally selected statistic (output)
- * @param minprop Minimal proportion of observations left of cutpoint
- * @param maxprop Maximal proportion of observations left of cutpoint
- */
-void maxstatInData(std::vector<double>& scores, Data* data, std::vector<size_t>& sampleIDs, size_t varID,
-    std::vector<size_t>& indices, double& best_maxstat, double& best_split_value, double minprop, double maxprop);
-
-/**
  * Compute number of samples smaller or equal than each unique value in x
  * @param x Value vector
  * @param indices Ordering of x
  * @return Vector of number of samples smaller or equal than each unique value in x
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector<size_t>& indices);
-
-/**
- * Compute number of samples smaller or equal than each unique value in data
- * @param data Data object
- * @param sampleIDs IDs of samples to consider
- * @param varID ID of variable to consider
- * @param indices Ordering of x
- * @return Vector of number of samples smaller or equal than each unique value in x
- */
-std::vector<size_t> numSamplesLeftOfCutpointInData(Data* data, std::vector<size_t>& sampleIDs, size_t varID,
-    std::vector<size_t>& indices);
 
 // User interrupt from R
 #ifdef R_BUILD

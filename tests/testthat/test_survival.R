@@ -98,3 +98,19 @@ test_that("Mean of predict.all for survival is equal to forest prediction", {
   pred_trees <- predict(rf, veteran, predict.all = TRUE)
   expect_equal(apply(pred_trees$chf, 1:2, mean), pred_forest$chf)
 })
+
+test_that("timepoints() function returns timepoints", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
+  expect_equal(timepoints(rf), rf$unique.death.times)
+  
+  pred <- predict(rf, veteran)
+  expect_equal(timepoints(pred), rf$unique.death.times)
+})
+
+test_that("timepoints() working on survival forest only", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5)
+  expect_error(timepoints(rf), "No timepoints found. Object is no Survival forest.")
+  
+  pred <- predict(rf, iris)
+  expect_error(timepoints(pred), "No timepoints found. Object is no Survival prediction object.")
+})
