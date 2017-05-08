@@ -6,112 +6,41 @@
 * Bug fixes
 
 ##### Version 0.7.0
-* New CRAN version
-
-##### Version 0.6.7
-* Improvements in holdoutRF and importance p-value estimation
-
-##### Version 0.6.6
-* Split at mid-point between candidate values
-
-##### Version 0.6.5
-* Better formula interface: Support interactions terms and faster computation
-
-##### Version 0.6.4
 * Add randomized splitting (extraTrees)
-
-##### Version 0.6.3
-* Bug fixes
-
-##### Version 0.6.2
+* Better formula interface: Support interactions terms and faster computation
+* Split at mid-point between candidate values
+* Improvements in holdoutRF and importance p-value estimation
 * Drop unused factor levels in outcome before growing
 * Add predict.all for probability and survival prediction
-
-##### Version 0.6.1
 * Bug fixes
 
 ##### Version 0.6.0
-* New CRAN version
-
-##### Version 0.5.6
-* Faster version of getTerminalNodeIDs(), included in predict()
-
-##### Version 0.5.5
-* Handle new factor levels in 'order' mode
-* Bug fixes
-
-##### Version 0.5.4
 * Set write.forest=TRUE by default
 * Add num.trees option to predict()
-* Bug fixes
-
-##### Version 0.5.3
-* Bug fixes
-
-##### Version 0.5.2
+* Faster version of getTerminalNodeIDs(), included in predict()
+* Handle new factor levels in 'order' mode
 * Use unadjusted p-value for 2 categories in maxstat splitting
-
-##### Version 0.5.1
 * Bug fixes
 
 ##### Version 0.5.0
-* New CRAN version
-
-##### Version 0.4.7
-* Add splitting by maximally selected rank statistics for regression forests
-
-##### Version 0.4.6
-* Bug fixes
-
-##### Version 0.4.5
-* Use faster method for unordered factor splitting
-
-##### Version 0.4.4
-* Add p-values for variable importance
-* Bug fixes
-
-##### Version 0.4.3
-* Add splitting by maximally selected rank statistics for survival forests
-* Bug fixes
-
-##### Version 0.4.2
 * Add Windows multithreading support for new toolchain
-
-##### Version 0.4.1
+* Add splitting by maximally selected rank statistics for survival and regression forests
+* Faster method for unordered factor splitting
+* Add p-values for variable importance
 * Runtime improvement for regression forests on classification data
+* Bug fixes
 
 ##### Version 0.4.0
-* New CRAN version. New CRAN versions will be 0.x.0, development versions 0.x.y
-
-##### Version 0.3.9
 * Reduce memory usage of savest forest objects (changed child.nodeIDs interface)
-
-##### Version 0.3.8
-* Remove tuning functions, please use mlr or caret
-
-##### Version 0.3.7
-* Fix bug with alternative interface and prediction
-* Small fixes
-
-##### Version 0.3.6
 * Add keep.inbag option to track in-bag counts
 * Add option sample.fraction for fraction of sampled observations
-
-##### Version 0.3.5
 * Add tree-wise split.select.weights
-
-##### Version 0.3.4
 * Add predict.all option in predict() to get individual predictions for each tree for classification and regression
-* Small changes in documentation
-
-##### Version 0.3.3
 * Add case-specific random forests
-
-##### Version 0.3.2
 * Add case weights (weighted bootstrapping or subsampling)
-
-##### Version 0.3.1
+* Remove tuning functions, please use mlr or caret
 * Catch error of outdated gcc not supporting C++11 completely
+* Bug fixes
 
 ##### Version 0.3.0
 * Allow the user to interrupt computation from R
