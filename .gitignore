@@ -1,1 +1,6 @@
 .Rproj.user
+.Rcheck
+ranger.Rcheck/
+*.Rproj
+.project
+.cproject
