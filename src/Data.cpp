@@ -172,7 +172,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
 void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
 
   // All values for varID (no duplicates) for given sampleIDs
-  if (varID < num_cols_no_snp) {
+  if (getUnpermutedVarID(varID) < num_cols_no_snp) {
 
     all_values.reserve(sampleIDs.size());
     for (size_t i = 0; i < sampleIDs.size(); ++i) {
