@@ -361,6 +361,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     all.independent.variable.names <- independent.variable.names
   }
   
+  ## Error if no covariates
+  if (length(all.independent.variable.names) < 1) {
+    stop("Error: No covariates found.")
+  }
+  
   ## Number of trees
   if (!is.numeric(num.trees) || num.trees < 1) {
     stop("Error: Invalid value for num.trees.")
