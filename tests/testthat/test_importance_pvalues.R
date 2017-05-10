@@ -165,18 +165,18 @@ test_that("Survival importance p-values Altmann: returns correct dimensions", {
   expect_equal(dim(vimp), c(6, 2))
 })
 
-test_that("Survival importance p-values Altmann working with unbiased impurity importance", {
+test_that("Survival importance p-values Altmann working with corrected impurity importance", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10, 
-               importance = "impurity_unbiased")
+               importance = "impurity_corrected")
   
   vimp <- importance_pvalues(rf, method = "altmann", formula = Surv(time, status) ~ ., data = veteran)
   expect_is(vimp, "matrix")
   expect_equal(dim(vimp), c(6, 2))
 })
 
-test_that("Survival importance p-values Janitza working with unbiased impurity importance", {
+test_that("Survival importance p-values Janitza working with corrected impurity importance", {
   rf <- ranger(Surv(time, status) ~ ., dat_n100_surv, num.trees = 10, 
-               importance = "impurity_unbiased")
+               importance = "impurity_corrected")
   
   expect_warning(vimp <- importance_pvalues(rf, method = "janitza"))
   expect_is(vimp, "matrix")

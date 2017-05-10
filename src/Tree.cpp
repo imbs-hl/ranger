@@ -238,8 +238,8 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 
   size_t num_vars = data->getNumCols();
 
-  // For Unbiased Gini splitting add dummy variables
-  if (importance_mode == IMP_GINI_UNBIASED) {
+  // For corrected Gini importance add dummy variables
+  if (importance_mode == IMP_GINI_CORRECTED) {
     num_vars += data->getNumCols() - data->getNoSplitVariables().size();
   }
 
@@ -250,7 +250,7 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
   if (split_select_weights->empty()) {
     drawWithoutReplacementSkip(result, random_number_generator, num_vars, data->getNoSplitVariables(), mtry);
   } else {
-    // No unbiased splitting supported for weighted splitting
+    // No corrected Gini importance supported for weighted splitting
     size_t num_draws = mtry - result.size();
     drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, num_draws,
         *split_select_weights);

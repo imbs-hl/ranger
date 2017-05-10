@@ -207,7 +207,7 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   split_values[nodeID] = best_value;
 
   // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -473,7 +473,7 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   split_values[nodeID] = best_value;
 
   // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -690,8 +690,8 @@ void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double 
     }
   }
 
-  // Subtract if unbiased importance and permuted variable, else add
-  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+  // Subtract if corrected importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
     (*variable_importance)[tempvarID] -= best_gini;
   } else {
     (*variable_importance)[tempvarID] += best_gini;

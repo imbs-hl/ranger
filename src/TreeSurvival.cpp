@@ -156,7 +156,7 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
     split_values[nodeID] = best_value;
 
     // Compute decrease of impurity for this node and add to variable importance if needed
-    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
       addImpurityImportance(nodeID, best_varID, best_decrease);
     }
 
@@ -675,7 +675,7 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
     split_values[nodeID] = best_value;
 
     // Compute decrease of impurity for this node and add to variable importance if needed
-    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
       addImpurityImportance(nodeID, best_varID, best_decrease);
     }
 
@@ -900,8 +900,8 @@ void TreeSurvival::addImpurityImportance(size_t nodeID, size_t varID, double dec
     }
   }
 
-  // Subtract if unbiased importance and permuted variable, else add
-  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+  // Subtract if corrected importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
     (*variable_importance)[tempvarID] -= decrease;
   } else {
     (*variable_importance)[tempvarID] += decrease;
