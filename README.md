@@ -3,7 +3,7 @@
 ![CRAN Downloads month](http://cranlogs.r-pkg.org/badges/ranger?color=brightgreen)
 ![CRAN Downloads overall](http://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen)
 ## ranger: A Fast Implementation of Random Forests
-Marvin N. Wright, wright@imbs.uni-luebeck.de
+Marvin N. Wright
 
 ### Introduction
 ranger is a fast implementation of random forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data. Classification, regression, probability estimation and survival forests are supported. Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008). For probability estimation forests see Malley et al. (2012). 
