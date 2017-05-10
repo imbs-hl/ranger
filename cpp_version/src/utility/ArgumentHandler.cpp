@@ -483,9 +483,9 @@ void ArgumentHandler::checkArguments() {
     throw std::runtime_error("savemem option not possible in extraTrees mode with unordered predictors.");
   }
 
-  // Unbiased impurity importance not allowed if split weights used
-  if (!splitweights.empty() && impmeasure == IMP_GINI_UNBIASED) {
-    throw std::runtime_error("Unbiased impurity importance not supported in combination with splitweights.");
+  // Corrected impurity importance not allowed if split weights used
+  if (!splitweights.empty() && impmeasure == IMP_GINI_CORRECTED) {
+    throw std::runtime_error("Corrected impurity importance not supported in combination with splitweights.");
   }
 }
 
@@ -535,7 +535,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              TYPE = 1: Node impurity: Gini for Classification, variance for Regression, sum of test statistic for Survival." << std::endl;
   std::cout << "    " << "                              TYPE = 2: Permutation importance, scaled by standard errors." << std::endl;
   std::cout << "    " << "                              TYPE = 3: Permutation importance, no scaling." << std::endl;
-  std::cout << "    " << "                              TYPE = 5: Corrected node impurity: Unbiased version of node impurity importance." << std::endl;
+  std::cout << "    " << "                              TYPE = 5: Corrected node impurity: Bias-corrected version of node impurity importance." << std::endl;
   std::cout << "    " << "                              (Default: 0)" << std::endl;
   std::cout << "    " << "--noreplace                   Sample without replacement." << std::endl;
   std::cout << "    " << "--fraction X                  Fraction of observations to sample. Default is 1 for sampling with replacement " << std::endl;

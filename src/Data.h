@@ -60,7 +60,7 @@ public:
   void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
 
   size_t getIndex(size_t row, size_t col) const {
-    // Use permuted data for unbiased impurity importance
+    // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
@@ -83,7 +83,7 @@ public:
   }
 
   double getUniqueDataValue(size_t varID, size_t index) const {
-    // Use permuted data for unbiased impurity importance
+    // Use permuted data for corrected impurity importance
     if (varID >= num_cols) {
       varID = getUnpermutedVarID(varID);
     }
@@ -97,7 +97,7 @@ public:
   }
 
   size_t getNumUniqueDataValues(size_t varID) const {
-    // Use permuted data for unbiased impurity importance
+    // Use permuted data for corrected impurity importance
     if (varID >= num_cols) {
       varID = getUnpermutedVarID(varID);
     }
@@ -158,7 +158,7 @@ public:
   }
 
   const bool isOrderedVariable(size_t varID) const {
-    // Use permuted data for unbiased impurity importance
+    // Use permuted data for corrected impurity importance
     if (varID >= num_cols) {
       varID = getUnpermutedVarID(varID);
     }
@@ -209,7 +209,7 @@ protected:
   // For each varID true if ordered
   std::vector<bool> is_ordered_variable;
 
-  // Permuted samples for unbiased impurity importance
+  // Permuted samples for corrected impurity importance
   std::vector<size_t> permuted_sampleIDs;
 
 private:

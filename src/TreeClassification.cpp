@@ -202,7 +202,7 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   split_values[nodeID] = best_value;
 
   // Compute gini index for this node and to variable importance if needed
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -470,7 +470,7 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   split_values[nodeID] = best_value;
 
   // Compute gini index for this node and to variable importance if needed
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_UNBIASED) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -689,8 +689,8 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     }
   }
 
-  // Subtract if unbiased importance and permuted variable, else add
-  if (importance_mode == IMP_GINI_UNBIASED && varID >= data->getNumCols()) {
+  // Subtract if corrected importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
     (*variable_importance)[tempvarID] -= best_gini;
   } else {
     (*variable_importance)[tempvarID] += best_gini;

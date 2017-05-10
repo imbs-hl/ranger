@@ -24,7 +24,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{mtry}{Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables.}
 
-\item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_unbiased', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.}
+\item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.}
 
 \item{write.forest}{Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.}
 
