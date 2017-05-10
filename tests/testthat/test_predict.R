@@ -115,3 +115,8 @@ test_that("predict.all works for single observation", {
   
   expect_equal(dim(pred$predictions), c(1, rf$num.trees))
 })
+
+test_that("Warning if predicting with corrected impurity importance", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, importance = "impurity_corrected")
+  expect_warning(predict(rf, iris))
+})
