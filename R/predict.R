@@ -381,7 +381,10 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     jack <- (n - 1) / n * rowSums((jack.n - yhat)^2)
     bias <- (exp(1) - 1) * n / result$num.trees^2 * rowSums((result$predictions - yhat)^2)
     jab <- pmax(jack - bias, 0)
-    result$predictions <- sqrt(jab)
+    result$se <- sqrt(jab)
+    
+    ## Response as predictions
+    result$predictions <- yhat
   }
 
   class(result) <- "ranger.prediction"
