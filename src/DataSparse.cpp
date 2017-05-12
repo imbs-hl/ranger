@@ -26,37 +26,16 @@
  http://www.imbs-luebeck.de
  #-------------------------------------------------------------------------------*/
 
-#ifndef FORESTREGRESSION_H_
-#define FORESTREGRESSION_H_
+#include "DataSparse.h"
 
-#include <iostream>
-#include <vector>
+DataSparse::DataSparse() :
+    data(0) {
+}
 
-#include "globals.h"
-#include "Forest.h"
+DataSparse::~DataSparse() {
+  if (!externalData) {
+    delete[] data;
+  }
+}
 
-class ForestRegression: public Forest {
-public:
-  ForestRegression();
-  virtual ~ForestRegression();
 
-  void loadForest(size_t dependent_varID, size_t num_trees,
-      std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
-      std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-      std::vector<bool>& is_ordered_variable);
-
-private:
-  void initInternal(std::string status_variable_name);
-  void growInternal();
-  void predictInternal();
-  void computePredictionErrorInternal();
-  void writeOutputInternal();
-  void writeConfusionFile();
-  void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
-
-  DISALLOW_COPY_AND_ASSIGN(ForestRegression);
-};
-
-#endif /* FORESTREGRESSION_H_ */
