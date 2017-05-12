@@ -165,3 +165,33 @@ test_that("standard error prediction working for single testing observation", {
   expect_equal(length(pred$predictions), nrow(test))
 })
 
+test_that("standard error response prediction is the same as response prediction", {
+  idx <- sample(nrow(iris), 10)
+  test <- iris[idx, ]
+  train <- iris[-idx, ]
+  
+  set.seed(100)
+  rf_se <- ranger(Petal.Length ~ ., train, num.trees = 5, keep.inbag = TRUE)
+  pred_se <- predict(rf_se, test, type = "se")
+  
+  set.seed(100)
+  rf_resp <- ranger(Petal.Length ~ ., train, num.trees = 5)
+  pred_resp <- predict(rf_resp, test, type = "response")
+  
+  expect_equal(pred_se$predictions, pred_resp$predictions)
+})
+
+test_that("standard error is larger for fewer trees", {
+  idx <- sample(nrow(iris), 10)
+  test <- iris[idx, ]
+  train <- iris[-idx, ]
+  
+  rf5 <- ranger(Petal.Length ~ ., train, num.trees = 5, keep.inbag = TRUE)
+  pred5 <- predict(rf5, test, type = "se")
+  
+  rf50 <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
+  pred50 <- predict(rf50, test, type = "se")
+  
+  expect_lt(mean(pred50$se), mean(pred5$se))
+})
+
