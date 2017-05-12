@@ -21,42 +21,47 @@
  Universität zu Lübeck
  Ratzeburger Allee 160
  23562 Lübeck
- Germany
 
  http://www.imbs-luebeck.de
  #-------------------------------------------------------------------------------*/
 
-#ifndef FORESTREGRESSION_H_
-#define FORESTREGRESSION_H_
+#ifndef DATASPARSE_H_
+#define DATASPARSE_H_
 
-#include <iostream>
-#include <vector>
+#include <RcppEigen.h>
 
 #include "globals.h"
-#include "Forest.h"
+#include "utility.h"
+#include "Data.h"
 
-class ForestRegression: public Forest {
+class DataSparse: public Data {
 public:
-  ForestRegression();
-  virtual ~ForestRegression();
+  DataSparse();
+  DataSparse(Eigen::SparseMatrix<double>* data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) :
+      data(data) {
+    this->variable_names = variable_names;
+    this->num_rows = num_rows;
+    this->num_cols = num_cols;
+    this->num_cols_no_snp = num_cols;
+  }
+  virtual ~DataSparse();
 
-  void loadForest(size_t dependent_varID, size_t num_trees,
-      std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
-      std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-      std::vector<bool>& is_ordered_variable);
+  double get(size_t row, size_t col) const {
+    return data->coeff(row, col);
+  }
+
+  void reserveMemory() {
+    data = new Eigen::SparseMatrix<double>(num_rows, num_cols);
+  }
+
+  void set(size_t col, size_t row, double value, bool& error) {
+    data->coeffRef(row, col) = value;
+  }
 
 private:
-  void initInternal(std::string status_variable_name);
-  void growInternal();
-  void predictInternal();
-  void computePredictionErrorInternal();
-  void writeOutputInternal();
-  void writeConfusionFile();
-  void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  Eigen::SparseMatrix<double>* data;
 
-  DISALLOW_COPY_AND_ASSIGN(ForestRegression);
+  DISALLOW_COPY_AND_ASSIGN(DataSparse);
 };
 
-#endif /* FORESTREGRESSION_H_ */
+#endif /* DATASPARSE_H_ */

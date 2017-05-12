@@ -23,13 +23,12 @@
  23562 Lübeck
 
  http://www.imbs-luebeck.de
- wright@imbs.uni-luebeck.de
  #-------------------------------------------------------------------------------*/
 
-#include <Rcpp.h>
+#include <RcppEigen.h>
 #include <vector>
 #include <sstream>
-
+ 
 #include "globals.h"
 #include "Forest.h"
 #include "ForestClassification.h"
@@ -40,19 +39,21 @@
 #include "DataChar.h"
 #include "DataDouble.h"
 #include "DataFloat.h"
-
+#include "DataSparse.h"
+ 
+// [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
 Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     Rcpp::NumericMatrix input_data, std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose,
     uint seed, uint num_threads, bool write_forest, uint importance_mode_r, uint min_node_size,
     std::vector<std::vector<double>>& split_select_weights, bool use_split_select_weights,
     std::vector<std::string>& always_split_variable_names, bool use_always_split_variable_names,
-    std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix sparse_data,
+    std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,
     bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
     std::vector<double>& case_weights, bool use_case_weights, bool predict_all, 
     bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r, 
-    uint num_random_splits) {
+    uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
 
   Rcpp::List result;
   Forest* forest = 0;
@@ -80,15 +81,26 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       verbose_out = new std::stringstream;
     }
 
-    size_t num_rows = input_data.nrow();
-    size_t num_cols = input_data.ncol();
+    size_t num_rows;
+    size_t num_cols;
+    if (use_sparse_data) {
+      num_rows = sparse_data.rows();
+      num_cols = sparse_data.cols();
+    } else {
+      num_rows = input_data.nrow();
+      num_cols = input_data.ncol();
+    }
+    
+    // Initialize data 
+    if (use_sparse_data) {
+      data = new DataSparse(&sparse_data, variable_names, num_rows, num_cols);
+    } else {
+      data = new DataDouble(input_data.begin(), variable_names, num_rows, num_cols);
+    }
 
-    // Initialize data with double memmode
-    data = new DataDouble(input_data.begin(), variable_names, num_rows, num_cols);
-
-    // If there is sparse data, add it
-    if (sparse_data.nrow() > 1) {
-      data->addSparseData(sparse_data.begin(), sparse_data.ncol());
+    // If there is snp data, add it
+    if (snp_data.nrow() > 1) {
+      data->addSnpData(snp_data.begin(), snp_data.ncol());
     }
 
     switch (treetype) {
@@ -150,10 +162,10 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
             class_values, terminal_class_counts, is_ordered);
       }
     }
-
+    
     // Run Ranger
     forest->run(false);
-
+    
     if (use_split_select_weights && importance_mode != IMP_NONE) {
       *verbose_out
           << "Warning: Split select weights used. Variable importance measures are only comparable for variables with equal weights."
