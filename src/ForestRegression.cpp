@@ -64,7 +64,7 @@ void ForestRegression::loadForest(size_t dependent_varID, size_t num_trees,
 
 void ForestRegression::initInternal(std::string status_variable_name) {
 
-  // If mtry not set, use number of independent variables / 3.
+  // If mtry not set, use floored square root of number of independent variables
   if (mtry == 0) {
     unsigned long temp = sqrt((double) (num_variables - 1));
     mtry = std::max((unsigned long) 1, temp);

@@ -20,6 +20,11 @@ parse.formula <- function(formula, data) {
   independent_vars <- attr(t, "term.labels")
   interaction_idx <- grepl(":", independent_vars)
   
+  ## Error if illegal column name
+  if (!all(make.names(independent_vars[!interaction_idx]) == independent_vars[!interaction_idx])) {
+    stop("Error: Illegal column names in formula interface. Fix column names or use alternative interface in ranger.")
+  }
+  
   ## Shortcut if no interactions
   if (all(!interaction_idx)) {
     return(data.frame(response, data[, independent_vars, drop = FALSE], check.names = FALSE))
