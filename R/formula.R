@@ -21,7 +21,7 @@ parse.formula <- function(formula, data) {
   interaction_idx <- grepl(":", independent_vars)
   
   ## Error if illegal column name
-  if (!all(make.names(independent_vars) == independent_vars)) {
+  if (!all(make.names(independent_vars[!interaction_idx]) == independent_vars[!interaction_idx])) {
     stop("Error: Illegal column names in formula interface. Fix column names or use alternative interface in ranger.")
   }
   
