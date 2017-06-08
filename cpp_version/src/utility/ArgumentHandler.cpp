@@ -21,9 +21,9 @@ Institut für Medizinische Biometrie und Statistik
 Universität zu Lübeck
 Ratzeburger Allee 160
 23562 Lübeck
+Germany
 
 http://www.imbs-luebeck.de
-wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
 #include <fstream>
@@ -512,8 +512,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "--ntree N                     Set number of trees to N." << std::endl;
   std::cout << "    " << "                              (Default: 500)" << std::endl;
   std::cout << "    " << "--mtry N                      Number of variables to possibly split at in each node." << std::endl;
-  std::cout << "    " << "                              (Default: sqrt(p) for Classification and Survival, p/3 for Regression. " << std::endl;
-  std::cout << "    " << "                               p = number of independent variables)" << std::endl;
+  std::cout << "    " << "                              (Default: sqrt(p) with p = number of independent variables)" << std::endl;
   std::cout << "    " << "--targetpartitionsize N       Set minimal node size to N." << std::endl;
   std::cout << "    " << "                              For Classification and Regression growing is stopped if a node reaches a size smaller than N." << std::endl;
   std::cout << "    " << "                              For Survival growing is stopped if one child would reach a size smaller than N." << std::endl;

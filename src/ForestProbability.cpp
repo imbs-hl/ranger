@@ -21,9 +21,9 @@
  Universität zu Lübeck
  Ratzeburger Allee 160
  23562 Lübeck
+ Germany
 
  http://www.imbs-luebeck.de
- wright@imbs.uni-luebeck.de
  #-------------------------------------------------------------------------------*/
 
 #include <stdexcept>
@@ -115,7 +115,7 @@ void ForestProbability::predictInternal() {
   // For all samples average proportions of trees
   for (size_t sample_idx = 0; sample_idx < num_prediction_samples; ++sample_idx) {
 
-    // For each sample compute proportions in each tree and average over trees
+    // For each sample compute proportions in each tree
     for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
       if (predict_all) {
         std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
@@ -130,10 +130,16 @@ void ForestProbability::predictInternal() {
         std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
 
         for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
-          predictions[0][sample_idx][class_idx] += counts[class_idx] / num_trees;
+          predictions[0][sample_idx][class_idx] += counts[class_idx];
         }
       }
+    }
 
+    // Average over trees
+    if (!predict_all && prediction_type != TERMINALNODES) {
+      for (size_t class_idx = 0; class_idx < predictions[0][sample_idx].size(); ++class_idx) {
+        predictions[0][sample_idx][class_idx] /= num_trees;
+      }
     }
   }
 

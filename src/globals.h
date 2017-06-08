@@ -21,9 +21,9 @@ Institut für Medizinische Biometrie und Statistik
 Universität zu Lübeck
 Ratzeburger Allee 160
 23562 Lübeck
+Germany
 
 http://www.imbs-luebeck.de
-wright@imbs.uni-luebeck.de
 #-------------------------------------------------------------------------------*/
 
 #ifndef GLOBALS_H_

@@ -24,7 +24,6 @@
 # Germany
 #
 # http://www.imbs-luebeck.de
-# wright@imbs.uni-luebeck.de
 # -------------------------------------------------------------------------------
 
 ##' Print contents of Ranger object.
