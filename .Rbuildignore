@@ -6,3 +6,4 @@
 ^.*\.tar.gz$
 ^\.travis.yml$
 ^cpp\_version$
+^appveyor\.yml$
