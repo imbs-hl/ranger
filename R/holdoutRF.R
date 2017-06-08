@@ -24,7 +24,6 @@
 # Germany
 #
 # http://www.imbs-luebeck.de
-# wright@imbs.uni-luebeck.de
 # -------------------------------------------------------------------------------
 
 ##' Grow two random forests on two cross-validation folds. 

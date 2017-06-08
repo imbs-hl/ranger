@@ -21,9 +21,9 @@
  Universität zu Lübeck
  Ratzeburger Allee 160
  23562 Lübeck
+ Germany
 
  http://www.imbs-luebeck.de
- wright@imbs.uni-luebeck.de
  #-------------------------------------------------------------------------------*/
 
 #include <unordered_map>

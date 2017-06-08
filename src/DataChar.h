@@ -23,7 +23,6 @@
  23562 Lübeck
 
  http://www.imbs-luebeck.de
- wright@imbs.uni-luebeck.de
  #-------------------------------------------------------------------------------*/
 
 // Ignore in coverage report (not used in R package)
