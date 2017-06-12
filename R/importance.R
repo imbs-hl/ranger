@@ -113,10 +113,14 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     }
     
     ## Permute and compute importance again
-    dependent.variable.name <- all.vars(formula)[1]
+    if (x$treetype == "Survival") {
+      dependent.variable.name <- all.vars(formula)[1:2]
+    } else {
+      dependent.variable.name <- all.vars(formula)[1]
+    }
     vimp <- replicate(num.permutations, {
       dat <- data
-      dat[, dependent.variable.name] <- sample(dat[, dependent.variable.name])
+      dat[, dependent.variable.name] <- dat[sample(nrow(dat)), dependent.variable.name]
       ranger(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
              importance = x$importance.mode, ...)$variable.importance
     })
