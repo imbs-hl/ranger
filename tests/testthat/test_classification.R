@@ -175,3 +175,9 @@ test_that("splitrule extratrees is different from Gini for probability", {
   expect_false(rf1$prediction.error == rf2$prediction.error)
 })
 
+test_that("Working with numerically almost exact splitting values", {
+  dat <- data.frame(a = factor(1:2), 
+                    z = c(1.7629414498915687570246291215880773, 
+                          1.7629414498915689790692340466193854))
+  expect_silent(ranger(a ~ ., data = dat, num.threads = 1, num.trees = 1))
+})
