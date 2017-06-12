@@ -274,6 +274,11 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       best_value =  (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
+
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == possible_split_values[i + 1]) {
+        best_value = possible_split_values[i];
+      }
     }
   }
 
@@ -345,6 +350,11 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
+
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == data->getUniqueDataValue(varID, j)) {
+        best_value = data->getUniqueDataValue(varID, i);
+      }
     }
   }
 
