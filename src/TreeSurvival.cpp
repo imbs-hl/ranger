@@ -387,6 +387,11 @@ void TreeSurvival::findBestSplitValueLogRank(size_t nodeID, size_t varID, double
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_logrank = logrank;
+
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == possible_split_values[i + 1]) {
+        best_value = possible_split_values[i];
+      }
     }
   }
 
@@ -559,6 +564,11 @@ void TreeSurvival::findBestSplitValueAUC(size_t nodeID, size_t varID, double& be
         best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
         best_varID = varID;
         best_auc = auc;
+
+        // Use smaller value if average is numerically the same as the larger value
+        if (best_value == possible_split_values[i + 1]) {
+          best_value = possible_split_values[i];
+        }
       }
     }
   }
