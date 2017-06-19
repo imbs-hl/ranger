@@ -4,7 +4,7 @@ Title: A Fast Implementation of Random Forests
 Version: 0.8.0
 Date: 2017-06-19
 Author: Marvin N. Wright
-Maintainer: Marvin N. Wright <marv@wrig.de>
+Maintainer: Marvin N. Wright <cran@wrig.de>
 Description: A fast implementation of Random Forests, particularly suited for high
           dimensional data. Ensembles of classification, regression, survival and
           probability prediction trees are supported. Data from genome-wide association
