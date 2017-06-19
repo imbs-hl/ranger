@@ -19,4 +19,3 @@ Parse formula and return dataset containing selected columns.
 Interactions are supported for numerical columns only. 
 An interaction column is the product of all interacting columns.
 }
-

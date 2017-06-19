@@ -17,10 +17,9 @@ Unique death times
 \description{
 Extract unique death times of Ranger Survival prediction object.
 }
-\author{
-Marvin N. Wright
-}
 \seealso{
 \code{\link{ranger}}
 }
-
+\author{
+Marvin N. Wright
+}
