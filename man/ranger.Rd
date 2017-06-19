@@ -60,7 +60,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
-\item{save.memory}{Use memory saving (but slower) splitting mode. No effect for GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
+\item{save.memory}{Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
 
 \item{verbose}{Show computation status and estimated runtime.}
 
@@ -180,9 +180,6 @@ ranger(trait ~ ., data = dat.gwaa)
 }
 
 }
-\author{
-Marvin N. Wright
-}
 \references{
 \itemize{
   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
@@ -198,4 +195,6 @@ Marvin N. Wright
 \seealso{
 \code{\link{predict.ranger}}
 }
-
+\author{
+Marvin N. Wright
+}
