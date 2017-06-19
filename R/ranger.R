@@ -97,7 +97,7 @@
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
-##' @param save.memory Use memory saving (but slower) splitting mode. No effect for GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
+##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. 
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
