@@ -1,3 +1,9 @@
+##### Version 0.8.1
+* Bug fixes
+
+##### Version 0.8.0
+* New CRAN version
+
 ##### Version 0.7.2
 * Handle sparse data of class Matrix::dgCMatrix
 * Add prediction of standard errors to predict()
