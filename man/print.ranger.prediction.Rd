@@ -17,4 +17,3 @@ Print contents of Ranger prediction object.
 \author{
 Marvin N. Wright
 }
-

@@ -14,10 +14,9 @@
 \description{
 Print contents of Ranger object.
 }
-\author{
-Marvin N. Wright
-}
 \seealso{
 \code{\link{ranger}}
 }
-
+\author{
+Marvin N. Wright
+}

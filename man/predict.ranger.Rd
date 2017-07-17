@@ -51,9 +51,6 @@ For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 }
-\author{
-Marvin N. Wright
-}
 \references{
 \itemize{
   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
@@ -63,4 +60,6 @@ Marvin N. Wright
 \seealso{
 \code{\link{ranger}}
 }
-
+\author{
+Marvin N. Wright
+}

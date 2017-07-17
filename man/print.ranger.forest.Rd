@@ -17,4 +17,3 @@ Print contents of Ranger forest object.
 \author{
 Marvin N. Wright
 }
-

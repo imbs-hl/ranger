@@ -24,4 +24,3 @@ library(ranger)
 rf <- ranger(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
 getTerminalNodeIDs(rf, iris)
 }
-

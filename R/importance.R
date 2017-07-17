@@ -119,7 +119,7 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
       dat <- data
       dat[, dependent.variable.name] <- dat[sample(nrow(dat)), dependent.variable.name]
       ranger(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
-             importance = x$importance.mode, ...)$variable.importance
+             importance = x$importance.mode, replace = x$replace, ...)$variable.importance
     })
     
     ## Compute p-value
