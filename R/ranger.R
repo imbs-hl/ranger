@@ -637,7 +637,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                                             levels(response))
     true.values <- integer.to.factor(unlist(data.final[, dependent.variable.name]),
                                      levels(response))
-    result$confusion.matrix <- table(true.values, result$predictions, dnn = c("true", "predicted"))
+    result$confusion.matrix <- table(true.values, result$predictions, 
+                                     dnn = c("true", "predicted"), useNA = "ifany")
   } else if (treetype == 5) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
