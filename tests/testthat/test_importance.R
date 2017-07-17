@@ -100,6 +100,6 @@ test_that("Survival impurity importance is larger than 1", {
 })
 
 test_that("Survival corrected impurity importance is smaller than 1", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "impurity_corrected")
-  expect_lt(rf$variable.importance[1], 1)
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 20, importance = "impurity_corrected")
+  expect_lt(abs(rf$variable.importance[1]), 1)
 })
