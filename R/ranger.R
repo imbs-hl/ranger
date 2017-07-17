@@ -680,6 +680,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   result$call <- sys.call()
   result$importance.mode <- importance
   result$num.samples <- nrow(data.final)
+  result$replace <- replace
   
   ## Write forest object
   if (write.forest) {
