@@ -79,7 +79,7 @@
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
-##' @param importance Variable importance mode, one of 'none', 'impurity', 'permutation'. The 'impurity' measure is the Gini index for classification and the variance of the responses for regression. For survival, only 'permutation' is available.
+##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
@@ -360,6 +360,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     all.independent.variable.names <- independent.variable.names
   }
   
+  ## Error if no covariates
+  if (length(all.independent.variable.names) < 1) {
+    stop("Error: No covariates found.")
+  }
+  
   ## Number of trees
   if (!is.numeric(num.trees) || num.trees < 1) {
     stop("Error: Invalid value for num.trees.")
@@ -407,8 +412,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 0
   } else if (importance == "impurity") {
     importance.mode <- 1
-    if (treetype == 5) {
-      stop("Node impurity variable importance not supported for survival forests.")
+  } else if (importance == "impurity_corrected" || importance == "impurity_unbiased") {
+    importance.mode <- 5
+    if (!is.null(split.select.weights)) {
+      stop("Corrected impurity importance not supported in combination with split.select.weights.")
     }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {

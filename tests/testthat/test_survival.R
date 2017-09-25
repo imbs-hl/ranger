@@ -114,3 +114,8 @@ test_that("timepoints() working on survival forest only", {
   pred <- predict(rf, iris)
   expect_error(timepoints(pred), "No timepoints found. Object is no Survival prediction object.")
 })
+
+test_that("Survival error without covariates", {
+  expect_error(ranger(Surv(time, status) ~ ., veteran[, c("time", "status")], num.trees = 5), 
+               "Error: No covariates found.")
+})

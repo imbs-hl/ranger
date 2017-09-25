@@ -123,21 +123,18 @@ public:
   size_t getNumTrees() const {
     return num_trees;
   }
-  uint getMtry() const
-  {
+  uint getMtry() const {
     return mtry;
   }
-  uint getMinNodeSize() const
-  {
+  uint getMinNodeSize() const {
     return min_node_size;
   }
-  size_t getNumIndependentVariables() const
-  {
+  size_t getNumIndependentVariables() const {
     return num_independent_variables;
   }
-  const std::vector<bool>& getIsOrderedVariable() const
-  {
-    return is_ordered_variable;
+
+  const std::vector<bool>& getIsOrderedVariable() const {
+    return data->getIsOrderedVariable();
   }
 
   std::vector<std::vector<size_t>> getInbagCounts() const {
@@ -207,12 +204,6 @@ protected:
   // MAXSTAT splitrule
   double alpha;
   double minprop;
-
-  // For each varID true if ordered
-  std::vector<bool> is_ordered_variable;
-
-  // Variable to not split at (only dependent_varID for non-survival forests)
-  std::vector<size_t> no_split_variables;
 
   // Multithreading
   uint num_threads;

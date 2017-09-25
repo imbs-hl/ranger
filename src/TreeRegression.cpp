@@ -42,8 +42,8 @@ TreeRegression::TreeRegression() :
 }
 
 TreeRegression::TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
-    std::vector<double>& split_values, std::vector<bool>* is_ordered_variable) :
-    Tree(child_nodeIDs, split_varIDs, split_values, is_ordered_variable), counter(0), sums(0) {
+    std::vector<double>& split_values) :
+    Tree(child_nodeIDs, split_varIDs, split_values), counter(0), sums(0) {
 }
 
 TreeRegression::~TreeRegression() {
@@ -82,7 +82,7 @@ void TreeRegression::appendToFileInternal(std::ofstream& file) { // #nocov start
 
 bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-// Check node size, stop if maximum reached
+  // Check node size, stop if maximum reached
   if (sampleIDs[nodeID].size() <= min_node_size) {
     split_values[nodeID] = estimate(nodeID);
     return true;
@@ -158,7 +158,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   for (auto& varID : possible_split_varIDs) {
 
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
 
       // Use memory saving method if option set
       if (memory_saving_splitting) {
@@ -187,7 +187,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   split_values[nodeID] = best_value;
 
 // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -310,7 +310,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     if (decrease > best_decrease) {
       // Find next value in this node
       size_t j = i + 1;
-      while(j < num_unique && counter[j] == 0) {
+      while (j < num_unique && counter[j] == 0) {
         ++j;
       }
 
@@ -496,7 +496,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   for (auto& varID : possible_split_varIDs) {
 
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
       findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
     } else {
       findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
@@ -514,7 +514,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   split_values[nodeID] = best_value;
 
   // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -696,13 +696,19 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
   }
   double best_decrease = decrease - sum_node * sum_node / (double) sampleIDs[nodeID].size();
 
-// No variable importance for no split variables
-  size_t tempvarID = varID;
-  for (auto& skip : *no_split_variables) {
-    if (varID >= skip) {
+  // No variable importance for no split variables
+  size_t tempvarID = data->getUnpermutedVarID(varID);
+  for (auto& skip : data->getNoSplitVariables()) {
+    if (tempvarID >= skip) {
       --tempvarID;
     }
   }
-  (*variable_importance)[tempvarID] += best_decrease;
+
+  // Subtract if corrected importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
+    (*variable_importance)[tempvarID] -= best_decrease;
+  } else {
+    (*variable_importance)[tempvarID] += best_decrease;
+  }
 }
 

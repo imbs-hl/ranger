@@ -138,7 +138,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
   result.resize(max);
   std::iota(result.begin(), result.end(), 0);
 
-   // Skip indices
+  // Skip indices
   for (size_t i = 0; i < skip.size(); ++i) {
     result.erase(result.begin() + skip[skip.size() - 1 - i]);
   }

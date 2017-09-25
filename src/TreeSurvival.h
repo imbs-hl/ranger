@@ -39,7 +39,7 @@ public:
   // Create from loaded forest
   TreeSurvival(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
       std::vector<double>& split_values, std::vector<std::vector<double>> chf, std::vector<double>* unique_timepoints,
-      std::vector<size_t>* response_timepointIDs, std::vector<bool>* is_ordered_variable);
+      std::vector<size_t>* response_timepointIDs);
 
   virtual ~TreeSurvival();
 
@@ -96,6 +96,8 @@ private:
       double& best_logrank);
   void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
       double& best_logrank);
+
+  void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
   void cleanUpInternal() {
     delete[] num_deaths;

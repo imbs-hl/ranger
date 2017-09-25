@@ -46,6 +46,12 @@ public:
   virtual ~DataDouble();
 
   double get(size_t row, size_t col) const {
+    // Use permuted data for corrected impurity importance
+    if (col >= num_cols) {
+      col = getUnpermutedVarID(col);
+      row = getPermutedSampleID(row);
+    }
+
     if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
