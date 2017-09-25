@@ -1,3 +1,7 @@
+##### Version 0.8.2
+* Add bias-corrected impurity importance
+* Add impurity importance for survival forests
+
 ##### Version 0.8.1
 * Bug fixes
 
