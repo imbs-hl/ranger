@@ -126,6 +126,12 @@ test_that("confusion matrix rows are the true classes", {
                as.numeric(table(iris$Species)))
 })
 
+test_that("confusion matrix rows are the true classes if using case weights", {
+  rf <- ranger(Species ~ ., data = iris, num.trees = 5, 
+               case.weights = c(rep(100, 5), rep(5, 145)))
+  expect_equal(as.numeric(rowSums(rf$confusion.matrix)), 
+               as.numeric(table(iris$Species)))
+})
 ## Splitrule
 test_that("default splitrule is Gini for classification", {
   set.seed(42)
