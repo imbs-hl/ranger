@@ -1,4 +1,5 @@
 library(ranger)
+library(survival)
 
 context("importance")
 
@@ -130,4 +131,49 @@ test_that("HoldoutRF not working if importance argument used", {
 test_that("HoldoutRF not working if replace argument used", {
   expect_error(holdoutRF(Species ~., iris, num.trees = 10, replace = TRUE), 
                "Error: Argument 'replace' not supported in holdoutRF.")
+})
+
+## Survival, 0 noise variables
+rf_p0_surv <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10, 
+                     importance = "permutation", write.forest = TRUE)
+#holdout_p0_surv <- holdoutRF(Surv(time, status) ~ ., veteran, num.trees = 10)
+
+## Survival, 100 noise variables
+p <- 100
+noise <- replicate(p, rnorm(nrow(veteran)))
+colnames(noise) <- paste0("noise", 1:p)
+dat_n100_surv <- cbind(veteran, noise)
+
+rf_p100_surv <- ranger(Surv(time, status) ~., dat_n100_surv, num.trees = 10,
+                       importance = "permutation", write.forest = TRUE)
+#holdout_p100_surv <- holdoutRF(Surv(time, status) ~., dat_n100_surv, num.trees = 10)
+
+test_that("Survival importance p-values Janitza: returns correct dimensions", {
+  expect_warning(vimp <- importance_pvalues(rf_p100_surv, method = "janitza"))
+  expect_is(vimp, "matrix")
+  expect_equal(dim(vimp), c(106, 2))
+})
+
+test_that("Survival importance p-values Altmann: returns correct dimensions", {
+  vimp <- importance_pvalues(rf_p0_surv, method = "altmann", formula = Surv(time, status) ~ ., data = veteran)
+  expect_is(vimp, "matrix")
+  expect_equal(dim(vimp), c(6, 2))
+})
+
+test_that("Survival importance p-values Altmann working with corrected impurity importance", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10, 
+               importance = "impurity_corrected")
+  
+  vimp <- importance_pvalues(rf, method = "altmann", formula = Surv(time, status) ~ ., data = veteran)
+  expect_is(vimp, "matrix")
+  expect_equal(dim(vimp), c(6, 2))
+})
+
+test_that("Survival importance p-values Janitza working with corrected impurity importance", {
+  rf <- ranger(Surv(time, status) ~ ., dat_n100_surv, num.trees = 10, 
+               importance = "impurity_corrected")
+  
+  expect_warning(vimp <- importance_pvalues(rf, method = "janitza"))
+  expect_is(vimp, "matrix")
+  expect_equal(dim(vimp), c(106, 2))
 })

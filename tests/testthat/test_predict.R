@@ -116,6 +116,11 @@ test_that("predict.all works for single observation", {
   expect_equal(dim(pred$predictions), c(1, rf$num.trees))
 })
 
+test_that("Warning if predicting with corrected impurity importance", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, importance = "impurity_corrected")
+  expect_warning(predict(rf, iris))
+})
+
 test_that("standard error prediction working for regression", {
   idx <- sample(nrow(iris), 10)
   test <- iris[idx, ]
@@ -194,4 +199,3 @@ test_that("standard error is larger for fewer trees", {
   
   expect_lt(mean(pred50$se), mean(pred5$se))
 })
-

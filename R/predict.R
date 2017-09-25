@@ -438,5 +438,9 @@ predict.ranger <- function(object, data, predict.all = FALSE,
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
   }
+  if (object$importance.mode %in% c("impurity_corrected", "impurity_unbiased")) {
+    warning("Forest was grown with 'impurity_corrected' variable importance. For prediction it is STRONGLY advised to grow another forest without this importance setting.")
+  }
+  
   predict(forest, data, predict.all, num.trees, type, seed, num.threads, verbose, object$inbag.counts, ...)
 }

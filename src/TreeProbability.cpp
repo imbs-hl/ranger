@@ -36,9 +36,9 @@ TreeProbability::TreeProbability(std::vector<double>* class_values, std::vector<
 
 TreeProbability::TreeProbability(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
-    std::vector<std::vector<double>>& terminal_class_counts, std::vector<bool>* is_ordered_variable) :
-    Tree(child_nodeIDs, split_varIDs, split_values, is_ordered_variable), class_values(class_values), response_classIDs(
-        response_classIDs), terminal_class_counts(terminal_class_counts), counter(0), counter_per_class(0) {
+    std::vector<std::vector<double>>& terminal_class_counts) :
+    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), terminal_class_counts(
+        terminal_class_counts), counter(0), counter_per_class(0) {
 }
 
 TreeProbability::~TreeProbability() {
@@ -172,7 +172,7 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
 
       // Use memory saving method if option set
       if (memory_saving_splitting) {
@@ -207,7 +207,7 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   split_values[nodeID] = best_value;
 
   // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -352,7 +352,7 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
     if (decrease > best_decrease) {
       // Find next value in this node
       size_t j = i + 1;
-      while(j < num_unique && counter[j] == 0) {
+      while (j < num_unique && counter[j] == 0) {
         ++j;
       }
 
@@ -462,7 +462,7 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
     // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if ((*is_ordered_variable)[varID]) {
+    if (data->isOrderedVariable(varID)) {
       findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
           best_decrease);
     } else {
@@ -483,7 +483,7 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   split_values[nodeID] = best_value;
 
   // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   return false;
@@ -692,13 +692,19 @@ void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double 
   }
   double best_gini = decrease - sum_node / (double) sampleIDs[nodeID].size();
 
-// No variable importance for no split variables
-  size_t tempvarID = varID;
-  for (auto& skip : *no_split_variables) {
-    if (varID >= skip) {
+  // No variable importance for no split variables
+  size_t tempvarID = data->getUnpermutedVarID(varID);
+  for (auto& skip : data->getNoSplitVariables()) {
+    if (tempvarID >= skip) {
       --tempvarID;
     }
   }
-  (*variable_importance)[tempvarID] += best_gini;
+
+  // Subtract if corrected importance and permuted variable, else add
+  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
+    (*variable_importance)[tempvarID] -= best_gini;
+  } else {
+    (*variable_importance)[tempvarID] += best_gini;
+  }
 }
 
