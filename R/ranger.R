@@ -86,7 +86,7 @@
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
-##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
@@ -526,6 +526,17 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   } else if (splitrule == "extratrees") {
     splitrule.num <- 5
+  } else if (splitrule == "beta") {
+    if (treetype == 3) {
+      splitrule.num <- 6
+    } else {
+      stop("Error: beta splitrule applicable to regression data only.")
+    }
+    
+    ## Check for 0..1 outcome
+    if (min(response) < 0 || max(response) > 1) {
+      stop("Error: beta splitrule applicable to regression data with outcome between 0 and 1 only.")
+    }
   } else {
     stop("Error: Unknown splitrule.")
   }
@@ -581,6 +592,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Unordered factor splitting not implemented for 'maxstat' splitting rule.")
     } else if (splitrule %in% c("C", "auc", "C_ignore_ties", "auc_ignore_ties")) {
       stop("Error: Unordered factor splitting not implemented for 'C' splitting rule.")
+    } else if (splitrule == "beta") {
+      stop("Error: Unordered factor splitting not implemented for 'beta' splitting rule.")
     }
   }
   
