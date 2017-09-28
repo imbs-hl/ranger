@@ -478,6 +478,9 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector<size_t>& indices);
 
+// TODO: Documentation
+double betaLogLik(double y, double mean, double phi);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {

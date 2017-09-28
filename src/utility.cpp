@@ -564,3 +564,9 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector
 
   return num_samples_left;
 }
+
+double betaLogLik(double y, double mean, double phi) {
+  return (lgamma(phi) - lgamma(mean * phi) - lgamma((1 - mean) * phi)
+      + (mean * phi - 1) * log(y) + ((1 - mean) * phi - 1) * log(1 - y));
+}
+
