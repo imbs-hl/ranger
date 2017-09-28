@@ -320,6 +320,9 @@ int ArgumentHandler::processArguments() {
         case 5:
           splitrule = EXTRATREES;
           break;
+        case 6:
+          splitrule = BETA;
+          break;
         default:
           throw std::runtime_error("");
           break;
