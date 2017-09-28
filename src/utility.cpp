@@ -566,6 +566,24 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector
 }
 
 double betaLogLik(double y, double mean, double phi) {
+
+  // Avoid 0 and 1
+  if (y <= 0) {
+    y = std::numeric_limits<double>::epsilon();
+  } else if (y >= 1) {
+    y = 1 - std::numeric_limits<double>::epsilon();
+  }
+  if (mean <= 0) {
+    mean = std::numeric_limits<double>::epsilon();
+  } else if (mean >= 1) {
+    mean = 1 - std::numeric_limits<double>::epsilon();
+  }
+  if (phi <= 0) {
+    phi = std::numeric_limits<double>::epsilon();
+  } else if (mean >= 1) {
+    phi = 1 - std::numeric_limits<double>::epsilon();
+  }
+
   return (lgamma(phi) - lgamma(mean * phi) - lgamma((1 - mean) * phi)
       + (mean * phi - 1) * log(y) + ((1 - mean) * phi - 1) * log(1 - y));
 }

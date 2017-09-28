@@ -693,7 +693,7 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
 bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
   size_t num_samples_node = sampleIDs[nodeID].size();
-  double best_decrease = -1;
+  double best_decrease = -std::numeric_limits<double>::infinity();
   size_t best_varID = 0;
   double best_value = 0;
 
@@ -709,7 +709,7 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Stop if no good split found
-  if (best_decrease < 0) {
+  if (isinf(-best_decrease)) {
     return true;
   }
 
@@ -724,11 +724,9 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   return false;
 }
 
+// TODO: Faster computation?
 void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
     double& best_value, size_t& best_varID, double& best_decrease) {
-
-  // TODO: Remove
-  //std::cout << std::endl << std::endl << "Split var " << varID << std::endl;
 
   // Create possible split values
   std::vector<double> possible_split_values;
@@ -739,7 +737,6 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     return;
   }
 
-  // TODO: Really need n_right and sums_right
   // Initialize with 0 if not in memory efficient mode, use pre-allocated space
   // -1 because no split possible at largest value
   size_t num_splits = possible_split_values.size() - 1;
@@ -774,10 +771,6 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
   // Compute LogLik of beta distribution for each possible split
   for (size_t i = 0; i < num_splits; ++i) {
 
-    // TODO: Remove
-    //std::cout << std::endl << "Split value " << possible_split_values[i] << std::endl;
-
-    // TODO: What to do for small childs?
     // Stop if one child too small
     size_t n_left = num_samples_node - n_right[i];
     if (n_left < 2 || n_right[i] < 2) {
@@ -806,7 +799,6 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     var_right /= (double) n_right[i] - 1;
     var_left /= (double) n_left - 1;
 
-    // TODO: What to do for 0 variance?
     // Stop if zero variance
     if (var_right == 0 || var_left == 0) {
       continue;
@@ -833,27 +825,9 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     // Split statistic is sum of both log-likelihoods
     double decrease = beta_loglik_right + beta_loglik_left;
 
-    // TODO: Why inf?
-    if (isinf(beta_loglik_right) || isinf(beta_loglik_left) || isinf(-beta_loglik_right) || isinf(-beta_loglik_left)) {
+    // Stop if no result
+    if (isnan(decrease)) {
       continue;
-    }
-
-    // TODO: Why nan?
-    if (isnan(beta_loglik_right) || isnan(beta_loglik_left)) {
-      continue;
-    }
-
-    // TODO: Remove
-    if (std::isnan(decrease)) {
-      std::cout << "n_right " << n_right[i] << std::endl;
-      std::cout << "n_left " << n_left << std::endl;
-
-      std::cout << "mean_right " << mean_right << std::endl;
-      std::cout << "var_right " << var_right << std::endl;
-      std::cout << "phi_right " << phi_right << std::endl;
-      std::cout << "beta_loglik_right " << beta_loglik_right << std::endl;
-      std::cout << "beta_loglik_left " << beta_loglik_left << std::endl;
-      std::cout << "decrease " << decrease << std::endl;
     }
 
     // If better than before, use this
