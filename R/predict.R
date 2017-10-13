@@ -29,8 +29,10 @@
 ##' Prediction with new data and a saved forest from Ranger.
 ##' 
 ##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
-##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
+##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap or infinitesimal jackknife for bagging is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+##' 
+##' If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife after bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 ##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
@@ -41,6 +43,7 @@
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
+##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -68,7 +71,7 @@
 ##' @export
 predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
-                                  type = "response",
+                                  type = "response", se.method = "infjack",
                                   seed = NULL, num.threads = NULL,
                                   verbose = TRUE, inbag.counts = NULL,...) {
 
@@ -116,9 +119,16 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("Error: Invalid value for 'type'. Use 'response' or 'terminalNodes'.")
   }
   
-  ## Type "se" only for regression
-  if (type == "se" && forest$treetype != "Regression") {
-    stop("Error: Standard error prediction currently only available for regression.")
+  ## Type "se" only for certain tree types
+  if (type == "se" && se.method == "jack" && forest$treetype != "Regression") {
+    stop("Error: Jackknife standard error prediction currently only available for regression.")
+  }
+  if (type == "se" && se.method == "infjack") {
+   if (forest$treetype == "Survival") {
+     stop("Error: Infinitesimal jackknife standard error prediction not yet available for survival.")
+   } else if (forest$treetype == "Classification") {
+     stop("Error: Not a probability forest. Set probability=TRUE to use the infinitesimal jackknife standard error prediction for classification.")
+   }
   }
   
   ## Type "se" requires keep.inbag=TRUE
@@ -358,7 +368,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Compute Jackknife
   if (type == "se") {
     ## Aggregated predictions
-    yhat <- rowMeans(result$predictions)
+    if (length(dim(result$predictions)) > 2) {
+      yhat <- apply(result$predictions, c(1, 2), mean)
+    } else {
+      yhat <- rowMeans(result$predictions)
+    }
 
     ## Get inbag counts, keep only observations that are OOB at least once
     inbag.counts <- simplify2array(inbag.counts) 
@@ -372,16 +386,30 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     if (all(!oob)) {
       stop("Error: No OOB observations found, consider increasing num.trees or reducing sample.fraction.")
     }
-
-    ## Compute Jackknife
-    jack.n <- apply(oob, 1, function(x) rowMeans(result$predictions[, x, drop = FALSE]))
-    if (is.vector(jack.n)) {
-      jack.n <- t(as.matrix(jack.n))
+    
+    if (se.method == "jack") {
+      ## Compute Jackknife
+      jack.n <- apply(oob, 1, function(x) rowMeans(result$predictions[, x, drop = FALSE]))
+      if (is.vector(jack.n)) {
+        jack.n <- t(as.matrix(jack.n))
+      }
+      jack <- (n - 1) / n * rowSums((jack.n - yhat)^2)
+      bias <- (exp(1) - 1) * n / result$num.trees^2 * rowSums((result$predictions - yhat)^2)
+      jab <- pmax(jack - bias, 0)
+      result$se <- sqrt(jab)
+    } else if (se.method == "infjack") {
+      if (forest$treetype == "Regression") {
+        infjack <- rInfJack(pred = result$predictions, inbag = inbag.counts)
+        result$se <- sqrt(infjack$var.hat)
+      } else if (forest$treetype == "Probability estimation") {
+        infjack <- apply(result$predictions, 2, function(x) {
+          rInfJack(x, inbag.counts)$var.hat
+        })
+        result$se <- sqrt(infjack)
+      } 
+    } else {
+      stop("Error: Unknown standard error method (se.method).")
     }
-    jack <- (n - 1) / n * rowSums((jack.n - yhat)^2)
-    bias <- (exp(1) - 1) * n / result$num.trees^2 * rowSums((result$predictions - yhat)^2)
-    jab <- pmax(jack - bias, 0)
-    result$se <- sqrt(jab)
     
     ## Response as predictions
     result$predictions <- yhat
@@ -394,8 +422,10 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' Prediction with new data and a saved forest from Ranger.
 ##' 
 ##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
-##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
+##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap or infinitesimal jackknife for bagging is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+##' 
+##' If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife-after-bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 ##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
@@ -406,6 +436,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
+##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
 ##' @param seed Random seed used in Ranger.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -431,7 +462,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @export
 predict.ranger <- function(object, data, predict.all = FALSE,
                            num.trees = object$num.trees,
-                           type = "response",
+                           type = "response", se.method = "infjack",
                            seed = NULL, num.threads = NULL,
                            verbose = TRUE, ...) {
   forest <- object$forest
@@ -442,5 +473,5 @@ predict.ranger <- function(object, data, predict.all = FALSE,
     warning("Forest was grown with 'impurity_corrected' variable importance. For prediction it is STRONGLY advised to grow another forest without this importance setting.")
   }
   
-  predict(forest, data, predict.all, num.trees, type, seed, num.threads, verbose, object$inbag.counts, ...)
+  predict(forest, data, predict.all, num.trees, type, se.method, seed, num.threads, verbose, object$inbag.counts, ...)
 }
