@@ -44,7 +44,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{alpha}{For "maxstat" splitrule: Significance threshold to allow splitting.}
 
-\item{minprop}{For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.}
+\item{minprop}{For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.}
 
 \item{split.select.weights}{Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 
@@ -114,7 +114,7 @@ For details see Malley et al. (2012).
 
 Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
 For survival all nodes contain at \code{min.node.size} samples. 
-Variables selected with \code{always.split.variables} are tried additionaly to the mtry variables randomly selected.
+Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
 In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
 Weights do not need to sum up to 1, they will be normalized later. 
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
