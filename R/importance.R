@@ -115,7 +115,7 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     } else {
       dependent.variable.name <- all.vars(formula)[1]
     }
-    vimp <- replicate(num.permutations, {
+    vimp <- sapply(1:num.permutations, function(i) {
       dat <- data
       dat[, dependent.variable.name] <- dat[sample(nrow(dat)), dependent.variable.name]
       ranger(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
