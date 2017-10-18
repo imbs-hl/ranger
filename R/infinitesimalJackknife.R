@@ -15,7 +15,7 @@
 # @param used.trees set of trees to use for variance estimation; uses all tress if NULL
 #
 # @return A two-column matrix is returned, with predictions in the first column and estimates of prediction variance in the second. 
-# @author Carsten F. Dormann, Stefan Wager
+# @author Stefan Wager
 rInfJack = function(pred, inbag, calibrate = TRUE, used.trees = NULL) {
   # original: https://github.com/swager/randomForestCI/blob/master/R/infinitesimalJackknife.R
   
