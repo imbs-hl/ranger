@@ -45,7 +45,7 @@
 ##'
 ##' Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
 ##' For survival all nodes contain at \code{min.node.size} samples. 
-##' Variables selected with \code{always.split.variables} are tried additionaly to the mtry variables randomly selected.
+##' Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
 ##' In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
 ##' Weights do not need to sum up to 1, they will be normalized later. 
 ##' The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
@@ -89,7 +89,7 @@
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
-##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
+##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
