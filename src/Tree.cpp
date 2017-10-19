@@ -123,6 +123,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
 
   // Delete sampleID vector to save memory
   sampleIDs.clear();
+  sampleIDs.shrink_to_fit();
   cleanUpInternal();
 }
 
@@ -411,6 +412,7 @@ void Tree::bootstrap() {
 
   if (!keep_inbag) {
     inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
   }
 }
 
@@ -453,6 +455,7 @@ void Tree::bootstrapWeighted() {
 
   if (!keep_inbag) {
     inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
   }
 }
 
@@ -503,6 +506,7 @@ void Tree::bootstrapWithoutReplacementWeighted() {
 
   if (!keep_inbag) {
     inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
   }
 }
 
