@@ -64,7 +64,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{verbose}{Show computation status and estimated runtime.}
 
-\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}.}
+\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
 
 \item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 
