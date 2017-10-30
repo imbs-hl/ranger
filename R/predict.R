@@ -374,7 +374,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     }
 
     ## Compute Jackknife
-    jack.n <- apply(oob, 1, function(x) rowMeans(result$predictions[, x, drop = FALSE]))
+    jack.n <- sweep(tcrossprod(result$predictions, oob), 
+                    2, rowSums(oob), "/", check.margin = FALSE)
     if (is.vector(jack.n)) {
       jack.n <- t(as.matrix(jack.n))
     }
