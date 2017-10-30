@@ -148,7 +148,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         ## If alternative interface used and same data structure, don't subset data
         data.used <- data
       } else if (ncol(data) == length(forest$independent.variable.names)) {
-        data.selected <- subset(data, select = forest$independent.variable.names)
+        data.selected <- data[, forest$independent.variable.names, drop = FALSE]
         data.used <- cbind(0, 0, data.selected)
         variable.names <- c("time", "status", forest$independent.variable.names)
         forest$dependent.varID <- 0
@@ -158,7 +158,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       }
     } else {
       ## If formula interface used, subset data
-      data.selected <- subset(data, select = forest$independent.variable.names)
+      data.selected <- data[, forest$independent.variable.names, drop = FALSE]
 
       ## Arange data as in original data
       data.used <- cbind(0, 0, data.selected)
@@ -175,7 +175,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       data.used <- data
     } else {
       ## If formula interface used, subset data
-      data.selected <- subset(data, select = forest$independent.variable.names)
+      data.selected <- data[, forest$independent.variable.names, drop = FALSE]
 
       ## Arange data as in original data
       if (forest$dependent.varID == 0) {
