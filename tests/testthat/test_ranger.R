@@ -203,3 +203,10 @@ test_that("Split points are at (A+B)/2 for numeric features, survival maxstat sp
   )
   expect_equal(split_points, rep(0.5, rf$num.trees))
 })
+
+test_that("No error if variable named forest", {
+  dat <- iris
+  dat$forest <- rnorm(150)
+  rf <- ranger(Species ~ ., dat, num.trees = 5)
+  expect_silent(predict(rf, dat))
+})
