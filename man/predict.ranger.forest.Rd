@@ -19,7 +19,7 @@
 
 \item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.}
 
-\item{seed}{Random seed used in Ranger.}
+\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
