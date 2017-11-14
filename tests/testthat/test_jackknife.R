@@ -144,3 +144,27 @@ test_that("Warning for few observations with IJ", {
   expect_warning(predict(rf5, test, type = "se", se.method = "infjack"), 
                  "Sample size <=20, no calibration performed.")
 })
+
+test_that("standard error is working for tree subsets, jack", {
+  idx <- sample(nrow(iris), 25)
+  test <- iris[idx, ]
+  train <- iris[-idx, ]
+  
+  rf <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
+  pred5 <- predict(rf, test, type = "se", se.method = "jack", num.trees = 5)
+  pred50 <- predict(rf, test, type = "se", se.method = "jack")
+  
+  expect_lt(mean(pred50$se), mean(pred5$se))
+})
+
+test_that("standard error is working for tree subsets, infjack", {
+  idx <- sample(nrow(iris), 25)
+  test <- iris[idx, ]
+  train <- iris[-idx, ]
+  
+  rf <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
+  pred5 <- predict(rf, test, type = "se", se.method = "infjack", num.trees = 5)
+  pred50 <- predict(rf, test, type = "se", se.method = "infjack")
+  
+  expect_lt(mean(pred50$se), mean(pred5$se))
+})
