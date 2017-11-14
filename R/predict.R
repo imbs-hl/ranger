@@ -385,7 +385,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     if (num.trees != object$num.trees) {
       oob <- oob[, 1:num.trees]
     }
-    oob.count <- rowSums(oob)
     
     if (all(!oob)) {
       stop("Error: No OOB observations found, consider increasing num.trees or reducing sample.fraction.")
@@ -393,6 +392,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 
     if (se.method == "jack") {
       ## Compute Jackknife
+      oob.count <- rowSums(oob)
       jack.n <- sweep(tcrossprod(result$predictions, oob), 
                       2, oob.count, "/", check.margin = FALSE)
       if (is.vector(jack.n)) {
