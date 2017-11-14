@@ -382,25 +382,33 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     inbag.counts <- inbag.counts[rowSums(inbag.counts == 0) > 0, , drop = FALSE] 
     n <- nrow(inbag.counts)
     oob <- inbag.counts == 0
+    if (num.trees != object$num.trees) {
+      oob <- oob[, 1:num.trees]
+    }
+    oob.count <- rowSums(oob)
     
     if (all(!oob)) {
       stop("Error: No OOB observations found, consider increasing num.trees or reducing sample.fraction.")
     }
-    
+
     if (se.method == "jack") {
       ## Compute Jackknife
       jack.n <- sweep(tcrossprod(result$predictions, oob), 
-                      2, rowSums(oob), "/", check.margin = FALSE)
+                      2, oob.count, "/", check.margin = FALSE)
       if (is.vector(jack.n)) {
         jack.n <- t(as.matrix(jack.n))
       }
+      if (any(oob.count == 0)) {
+        n <- sum(oob.count > 0)
+        jack.n <- jack.n[, oob.count > 0]
+      } 
       jack <- (n - 1) / n * rowSums((jack.n - yhat)^2)
       bias <- (exp(1) - 1) * n / result$num.trees^2 * rowSums((result$predictions - yhat)^2)
       jab <- pmax(jack - bias, 0)
       result$se <- sqrt(jab)
     } else if (se.method == "infjack") {
       if (forest$treetype == "Regression") {
-        infjack <- rInfJack(pred = result$predictions, inbag = inbag.counts)
+        infjack <- rInfJack(pred = result$predictions, inbag = inbag.counts, used.trees = 1:num.trees)
         result$se <- sqrt(infjack$var.hat)
       } else if (forest$treetype == "Probability estimation") {
         infjack <- apply(result$predictions, 2, function(x) {
