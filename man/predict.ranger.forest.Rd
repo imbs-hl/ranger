@@ -5,8 +5,9 @@
 \title{Ranger prediction}
 \usage{
 \method{predict}{ranger.forest}(object, data, predict.all = FALSE,
-  num.trees = object$num.trees, type = "response", seed = NULL,
-  num.threads = NULL, verbose = TRUE, inbag.counts = NULL, ...)
+  num.trees = object$num.trees, type = "response", se.method = "infjack",
+  seed = NULL, num.threads = NULL, verbose = TRUE, inbag.counts = NULL,
+  ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger.forest} object.}
@@ -18,6 +19,8 @@
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
 \item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.}
+
+\item{se.method}{Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
@@ -47,8 +50,10 @@ Prediction with new data and a saved forest from Ranger.
 }
 \details{
 For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
-For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
+For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap or infinitesimal jackknife for bagging is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+
+If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife after bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
 
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.

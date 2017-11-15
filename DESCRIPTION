@@ -3,7 +3,7 @@ Type: Package
 Title: A Fast Implementation of Random Forests
 Version: 0.8.3
 Date: 2017-10-30
-Author: Marvin N. Wright
+Author: Marvin N. Wright [aut, cre], Stefan Wager [ctb]
 Maintainer: Marvin N. Wright <cran@wrig.de>
 Description: A fast implementation of Random Forests, particularly suited for high
           dimensional data. Ensembles of classification, regression, survival and
