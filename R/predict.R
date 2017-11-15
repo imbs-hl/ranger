@@ -44,7 +44,7 @@
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
 ##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
-##' @param seed Random seed used in Ranger.
+##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
 ##' @param inbag.counts Number of times the observations are in-bag in the trees.
@@ -446,7 +446,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
 ##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
-##' @param seed Random seed used in Ranger.
+##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
 ##' @param ... further arguments passed to or from other methods.

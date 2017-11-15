@@ -21,7 +21,7 @@
 
 \item{se.method}{Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.}
 
-\item{seed}{Random seed used in Ranger.}
+\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
