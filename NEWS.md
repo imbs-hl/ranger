@@ -1,5 +1,5 @@
 ##### Version 0.8.3
-* Add standard error estimation with the infinitesimal jackknife
+* Add standard error estimation with the infinitesimal jackknife (now the default)
 
 ##### Version 0.8.2
 * Add bias-corrected impurity importance
