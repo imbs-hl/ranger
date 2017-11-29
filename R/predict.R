@@ -79,7 +79,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if ("gwaa.data" %in% class(data)) {
     snp.names <- snp.names(data)
     snp.data <- data@gtdata@gtps@.Data
-    data <- data@phdata[, -1]
+    data <- data@phdata[, -1, drop = FALSE]
     gwa.mode <- TRUE
     variable.names <- c(names(data), snp.names)
   } else {
