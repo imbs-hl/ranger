@@ -92,7 +92,8 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     vimp <- c(m1, -m1, m2)
     
     ## Compute p-value
-    pval <- 1 - ecdf(vimp)(x$variable.importance)
+    ## Note: ecdf is smaller or equal, problems with 0 importance values
+    pval <- 1 - numSmaller(x$variable.importance, vimp) / length(vimp)
     
     ## TODO: 100 ok? increase? 
     if (length(m1) == 0) {
