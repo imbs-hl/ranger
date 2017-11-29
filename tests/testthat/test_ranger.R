@@ -210,3 +210,10 @@ test_that("No error if variable named forest", {
   rf <- ranger(Species ~ ., dat, num.trees = 5)
   expect_silent(predict(rf, dat))
 })
+
+test_that("GenABEL prediction works if no covariates and formula used", {
+  dat <- dat.gwaa
+  dat@phdata$Age <- NULL
+  rf <- ranger(CHD ~ .-Sex, data = dat, num.trees = 5)
+  expect_silent(predict(rf, dat))
+})
