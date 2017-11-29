@@ -5,3 +5,7 @@ rangerCpp <- function(treetype, dependent_variable_name, input_data, variable_na
     .Call(`_ranger_rangerCpp`, treetype, dependent_variable_name, input_data, variable_names, mtry, num_trees, verbose, seed, num_threads, write_forest, importance_mode_r, min_node_size, split_select_weights, use_split_select_weights, always_split_variable_names, use_always_split_variable_names, status_variable_name, prediction_mode, loaded_forest, snp_data, sample_with_replacement, probability, unordered_variable_names, use_unordered_variable_names, save_memory, splitrule_r, case_weights, use_case_weights, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type_r, num_random_splits, sparse_data, use_sparse_data)
 }
 
+numSmaller <- function(values, reference) {
+    .Call(`_ranger_numSmaller`, values, reference)
+}
+

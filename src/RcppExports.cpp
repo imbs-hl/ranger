@@ -55,9 +55,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// numSmaller
+Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector reference);
+RcppExport SEXP _ranger_numSmaller(SEXP valuesSEXP, SEXP referenceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type values(valuesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type reference(referenceSEXP);
+    rcpp_result_gen = Rcpp::wrap(numSmaller(values, reference));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ranger_rangerCpp", (DL_FUNC) &_ranger_rangerCpp, 38},
+    {"_ranger_numSmaller", (DL_FUNC) &_ranger_numSmaller, 2},
     {NULL, NULL, 0}
 };
 
