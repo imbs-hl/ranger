@@ -99,7 +99,7 @@ double TreeSurvival::computePredictionAccuracyInternal() {
   std::vector<double> sum_chf;
   for (size_t i = 0; i < prediction_terminal_nodeIDs.size(); ++i) {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[i];
-    sum_chf.push_back(std::accumulate(chf[terminal_nodeID].begin(), chf[terminal_nodeID].end(), 0));
+    sum_chf.push_back(std::accumulate(chf[terminal_nodeID].begin(), chf[terminal_nodeID].end(), 0.0));
   }
 
   // Return concordance index
