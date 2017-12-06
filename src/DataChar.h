@@ -27,7 +27,6 @@
 
 // Ignore in coverage report (not used in R package)
 // #nocov start
- 
 #ifndef DATACHAR_H_
 #define DATACHAR_H_
 
@@ -54,7 +53,14 @@ public:
     } else {
       // Get data out of snp storage. -1 because of GenABEL coding.
       size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      return (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      double result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+
+      // Missing value is 3
+      if (result < 0 || result > 2) {
+        return 3;
+      } else {
+        return result;
+      }
     }
   }
 

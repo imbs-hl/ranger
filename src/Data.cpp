@@ -181,8 +181,8 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
     std::sort(all_values.begin(), all_values.end());
     all_values.erase(unique(all_values.begin(), all_values.end()), all_values.end());
   } else {
-    // If GWA data just use 0, 1, 2
-    all_values = std::vector<double>( { 0, 1, 2 });
+    // If GWA data just use 0, 1, 2 and 3 (missing)
+    all_values = std::vector<double>( { 0, 1, 2, 3 });
   }
 }
 

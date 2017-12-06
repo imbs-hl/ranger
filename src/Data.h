@@ -73,9 +73,9 @@ public:
       size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
       size_t result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
 
-      // TODO: Better way to treat missing values?
+      // Missing value is 3
       if (result > 2) {
-        return 0;
+        return 3;
       } else {
         return result;
       }
@@ -105,8 +105,8 @@ public:
     if (varID < num_cols_no_snp) {
       return unique_data_values[varID].size();
     } else {
-      // For GWAS data 0,1,2
-      return (3);
+      // For GWAS data 0,1,2 and 3 (missing)
+      return (4);
     }
   }
 
@@ -123,12 +123,12 @@ public:
   }
 
   size_t getMaxNumUniqueValues() const {
-    if (snp_data == 0 || max_num_unique_values > 3) {
+    if (snp_data == 0 || max_num_unique_values > 4) {
       // If no snp data or one variable with more than 3 unique values, return that value
       return max_num_unique_values;
     } else {
-      // If snp data and no variable with more than 3 unique values, return 3
-      return 3;
+      // If snp data and no variable with more than 4 unique values, return 4
+      return 4;
     }
   }
 
