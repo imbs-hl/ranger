@@ -2,6 +2,7 @@
 
 library(ranger)
 context("ranger_imp")
+set.seed(123)
 
 ## Classification
 rg.imp.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
