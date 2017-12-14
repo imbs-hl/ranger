@@ -246,6 +246,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
          paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
   
+  ## Check response levels
+  if (is.factor(response)) {
+    if (nlevels(response) != nlevels(droplevels(response))) {
+      dropped_levels <- setdiff(levels(response), levels(droplevels(response)))
+      warning("Dropped unused factor level(s) in dependent variable: ",
+              paste0(dropped_levels, collapse = ", "), ".", call. = FALSE)
+    }
+  }
+  
   ## Treetype
   if (is.factor(response)) {
     if (probability) {
