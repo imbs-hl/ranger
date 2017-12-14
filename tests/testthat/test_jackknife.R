@@ -30,7 +30,7 @@ test_that("jackknife standard error prediction not working for other tree types"
 })
 
 test_that("IJ standard error prediction working for regression", {
-  idx <- sample(nrow(iris), 10)
+  idx <- sample(nrow(iris), 21)
   test <- iris[idx, ]
   train <- iris[-idx, ]
   
@@ -84,7 +84,8 @@ test_that("standard error prediction working for single testing observation", {
   pred_jack <- predict(rf, test, type = "se", se.method = "jack")
   expect_equal(length(pred_jack$predictions), nrow(test))
   
-  pred_ij <- predict(rf, test, type = "se", se.method = "infjack")
+  expect_warning(pred_ij <- predict(rf, test, type = "se", se.method = "infjack"),
+                 "Sample size <=20, no calibration performed\\.")
   expect_equal(length(pred_ij$predictions), nrow(test))
 })
 
