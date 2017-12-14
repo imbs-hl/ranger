@@ -7,6 +7,9 @@ r:
   - oldrel
   - release
   - devel
+ 
+r_packages:
+  - devtools
   
 r_github_packages:
   - jimhester/covr
