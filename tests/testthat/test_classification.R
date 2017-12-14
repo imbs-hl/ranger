@@ -187,3 +187,10 @@ test_that("Working with numerically almost exact splitting values", {
                           1.7629414498915689790692340466193854))
   expect_silent(ranger(a ~ ., data = dat, num.threads = 1, num.trees = 1))
 })
+
+test_that("No error if unused factor levels in outcome", {
+  expect_warning(rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5),
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: virginica\\.")
+  pred <- predict(rf, iris)
+  expect_equal(levels(pred$predictions), levels(droplevels(iris[1:100, "Species"])))
+})
