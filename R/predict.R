@@ -492,6 +492,13 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
   
   if (type == "quantiles") {
     ## Quantile prediction
+    if (object$treetype != "Regression") {
+      stop("Error: Quantile prediction implemented only for regression outcomes.")
+    }
+    if (is.null(object$random.node.values)) {
+      stop("Error: Set quantreg=TRUE in ranger(...) for quantile prediction.")
+    }
+    
     if (is.null(data)) {
       ## OOB prediction
       if (is.null(object$random.node.values.oob)) {
