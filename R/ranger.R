@@ -751,7 +751,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           oob.obs <- which(is.oob)
           oob.nodes <- terminal.nodes[oob.obs, tree]
           for (j in 1:num.oob) {
-            random.node.values.oob[oob.obs[j], tree] <- sample(response[terminal.nodes[-oob.obs[j], tree] == oob.nodes[j]], size = 1)
+            idx <- terminal.nodes[, tree] == oob.nodes[j]
+            idx[oob.obs[j]] <- FALSE
+            random.node.values.oob[oob.obs[j], tree] <- save.sample(response[idx], size = 1)
           }
         }
       }
@@ -772,9 +774,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   return(result)
 }
 
-
-
-
 integer.to.factor <- function(x, labels) {
   factor(x, levels = seq_along(labels), labels = labels)
+}
+
+## See help(sample)
+save.sample <- function(x, ...) {
+  x[sample.int(length(x), ...)]
 }
