@@ -133,9 +133,14 @@
 ##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 ##' iris.train <- iris[train.idx, ]
 ##' iris.test <- iris[-train.idx, ]
-##' rg.iris <- ranger(Species ~ ., data = iris.train, write.forest = TRUE)
-##' pred.iris <- predict(rg.iris, dat = iris.test)
+##' rg.iris <- ranger(Species ~ ., data = iris.train)
+##' pred.iris <- predict(rg.iris, data = iris.test)
 ##' table(iris.test$Species, pred.iris$predictions)
+##' 
+##' ## Quantile regression forest
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles")
+##' pred$predictions
 ##'
 ##' ## Variable importance
 ##' rg.iris <- ranger(Species ~ ., data = iris, importance = "impurity")
