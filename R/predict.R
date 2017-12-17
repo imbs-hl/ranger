@@ -365,7 +365,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         result$predictions <- result$predictions[, forest$levels, drop = FALSE]
       }
     }
-  } 
+  } else if (type == "terminalNodes") {
+    if (is.vector(result$predictions)) {
+      result$predictions <- matrix(result$predictions, nrow = 1)
+    }
+  }
 
   ## Compute Jackknife
   if (type == "se") {
@@ -504,14 +508,18 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
     }
     
     ## Prepare results
-    result <- list(num.samples = object$num.samples,
+    result <- list(num.samples = nrow(node.values),
                    treetype = object$treetype,
                    num.independent.variables = object$num.independent.variables,
                    num.trees = num.trees)
     class(result) <- "ranger.prediction"
-    
+
     ## Compute quantiles of distribution
     result$predictions <- t(apply(node.values, 1, quantile, quantiles, na.rm=TRUE))
+    if (nrow(result$predictions) != result$num.samples) {
+      ## Fix result for single quantile
+      result$predictions <- t(result$predictions)
+    }
     colnames(result$predictions) <- paste("quantile=", quantiles)
     result
   } else {
