@@ -510,6 +510,12 @@ void Forest::predict() {
     progress++;
     showProgress("Predicting..", start_time, lap_time);
   }
+
+  // For all samples get tree predictions
+  allocatePredictMemory();
+  for (size_t sample_idx = 0; sample_idx < data->getNumRows(); ++sample_idx) {
+    predictInternal(sample_idx);
+  }
 #else
   progress = 0;
 #ifdef R_BUILD
@@ -517,6 +523,7 @@ void Forest::predict() {
   aborted_threads = 0;
 #endif
 
+  // Predict
   std::vector<std::thread> threads;
   threads.reserve(num_threads);
   for (uint i = 0; i < num_threads; ++i) {
@@ -527,15 +534,24 @@ void Forest::predict() {
     thread.join();
   }
 
+  // Aggregate predictions
+  allocatePredictMemory();
+  threads.clear();
+  threads.reserve(num_threads);
+  for (uint i = 0; i < num_threads; ++i) {
+    threads.push_back(std::thread(&Forest::predictInternalInThread, this, i));
+  }
+  showProgress("Aggregate predictions..");
+  for (auto &thread : threads) {
+    thread.join();
+  }
+
 #ifdef R_BUILD
   if (aborted_threads > 0) {
     throw std::runtime_error("User interrupt.");
   }
 #endif
 #endif
-
-// Call special functions for subclasses
-  predictInternal();
 }
 
 void Forest::computePredictionError() {
@@ -690,6 +706,33 @@ void Forest::predictTreesInThread(uint thread_idx, const Data* prediction_data, 
   if (thread_ranges.size() > thread_idx + 1) {
     for (size_t i = thread_ranges[thread_idx]; i < thread_ranges[thread_idx + 1]; ++i) {
       trees[i]->predict(prediction_data, oob_prediction);
+
+      // Check for user interrupt
+#ifdef R_BUILD
+      if (aborted) {
+        std::unique_lock<std::mutex> lock(mutex);
+        ++aborted_threads;
+        condition_variable.notify_one();
+        return;
+      }
+#endif
+
+      // Increase progress by 1 tree
+      std::unique_lock<std::mutex> lock(mutex);
+      ++progress;
+      condition_variable.notify_one();
+    }
+  }
+}
+
+void Forest::predictInternalInThread(uint thread_idx) {
+  // Create thread ranges
+  std::vector<uint> predict_ranges;
+  equalSplit(predict_ranges, 0, num_samples - 1, num_threads);
+
+  if (predict_ranges.size() > thread_idx + 1) {
+    for (size_t i = predict_ranges[thread_idx]; i < predict_ranges[thread_idx + 1]; ++i) {
+      predictInternal(i);
 
       // Check for user interrupt
 #ifdef R_BUILD

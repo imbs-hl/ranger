@@ -64,7 +64,8 @@ public:
     protected:
       void initInternal(std::string status_variable_name);
       void growInternal();
-      void predictInternal();
+      void allocatePredictMemory();
+      void predictInternal(size_t sample_idx);
       void computePredictionErrorInternal();
       void writeOutputInternal();
       void writeConfusionFile();
