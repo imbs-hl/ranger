@@ -18,7 +18,7 @@
 
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
-\item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.}
+\item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.}
 
 \item{se.method}{Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.}
 

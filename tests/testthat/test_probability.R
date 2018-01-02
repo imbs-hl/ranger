@@ -19,7 +19,8 @@ test_that("probability estimations are a matrix with correct size", {
 })
 
 test_that("growing works for single observations, probability prediction", {
-  rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE)
+  expect_warning(rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE), 
+                 "Dropped unused factor level\\(s\\) in dependent variable\\: versicolor\\, virginica\\.")
   expect_is(rf$predictions, "matrix")
 })
 
