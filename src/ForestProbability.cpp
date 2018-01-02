@@ -42,7 +42,8 @@ ForestProbability::~ForestProbability() {
 void ForestProbability::loadForest(size_t dependent_varID, size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-    std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts, std::vector<bool>& is_ordered_variable) {
+    std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts,
+    std::vector<bool>& is_ordered_variable) {
 
   this->dependent_varID = dependent_varID;
   this->num_trees = num_trees;
@@ -53,7 +54,7 @@ void ForestProbability::loadForest(size_t dependent_varID, size_t num_trees,
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     Tree* tree = new TreeProbability(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
-    &this->class_values, &response_classIDs, forest_terminal_class_counts[i]);
+        &this->class_values, &response_classIDs, forest_terminal_class_counts[i]);
     trees.push_back(tree);
   }
 
@@ -101,48 +102,47 @@ void ForestProbability::growInternal() {
   }
 }
 
-void ForestProbability::predictInternal() {
-
+void ForestProbability::allocatePredictMemory() {
   size_t num_prediction_samples = data->getNumRows();
   if (predict_all) {
-    predictions = std::vector<std::vector<std::vector<double>>>(num_prediction_samples, std::vector<std::vector<double>>(class_values.size(), std::vector<double>(num_trees, 0)));
+    predictions = std::vector<std::vector<std::vector<double>>>(num_prediction_samples,
+        std::vector<std::vector<double>>(class_values.size(), std::vector<double>(num_trees, 0)));
   } else if (prediction_type == TERMINALNODES) {
-    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees, 0)));
+    predictions = std::vector<std::vector<std::vector<double>>>(1,
+        std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees, 0)));
   } else {
-    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(class_values.size(), 0)));
+    predictions = std::vector<std::vector<std::vector<double>>>(1,
+        std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(class_values.size(), 0)));
   }
+}
 
-  // For all samples average proportions of trees
-  for (size_t sample_idx = 0; sample_idx < num_prediction_samples; ++sample_idx) {
+void ForestProbability::predictInternal(size_t sample_idx) {
+  // For each sample compute proportions in each tree
+  for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+    if (predict_all) {
+      std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
 
-    // For each sample compute proportions in each tree
-    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-      if (predict_all) {
-        std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
-
-        for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
-          predictions[sample_idx][class_idx][tree_idx] += counts[class_idx];
-        }
-      } else if (prediction_type == TERMINALNODES) {
-        predictions[0][sample_idx][tree_idx] = ((TreeProbability*) trees[tree_idx])->getPredictionTerminalNodeID(
-            sample_idx);
-      } else {
-        std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
-
-        for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
-          predictions[0][sample_idx][class_idx] += counts[class_idx];
-        }
+      for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
+        predictions[sample_idx][class_idx][tree_idx] += counts[class_idx];
       }
-    }
+    } else if (prediction_type == TERMINALNODES) {
+      predictions[0][sample_idx][tree_idx] = ((TreeProbability*) trees[tree_idx])->getPredictionTerminalNodeID(
+          sample_idx);
+    } else {
+      std::vector<double> counts = ((TreeProbability*) trees[tree_idx])->getPrediction(sample_idx);
 
-    // Average over trees
-    if (!predict_all && prediction_type != TERMINALNODES) {
-      for (size_t class_idx = 0; class_idx < predictions[0][sample_idx].size(); ++class_idx) {
-        predictions[0][sample_idx][class_idx] /= num_trees;
+      for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
+        predictions[0][sample_idx][class_idx] += counts[class_idx];
       }
     }
   }
 
+  // Average over trees
+  if (!predict_all && prediction_type != TERMINALNODES) {
+    for (size_t class_idx = 0; class_idx < predictions[0][sample_idx].size(); ++class_idx) {
+      predictions[0][sample_idx][class_idx] /= num_trees;
+    }
+  }
 }
 
 void ForestProbability::computePredictionErrorInternal() {
@@ -150,7 +150,8 @@ void ForestProbability::computePredictionErrorInternal() {
 // For each sample sum over trees where sample is OOB
   std::vector<size_t> samples_oob_count;
   samples_oob_count.resize(num_samples, 0);
-  predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_samples, std::vector<double>(class_values.size(), 0)));
+  predictions = std::vector<std::vector<std::vector<double>>>(1,
+      std::vector<std::vector<double>>(num_samples, std::vector<double>(class_values.size(), 0)));
 
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {

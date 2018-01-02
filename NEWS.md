@@ -1,3 +1,6 @@
+##### Version 0.8.5
+* Faster aggregation of predictions
+
 ##### Version 0.8.4
 * Add quantile prediction
 
