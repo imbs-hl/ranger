@@ -52,7 +52,7 @@ TreeClassification::~TreeClassification() {
   // Empty on purpose
 }
 
-void TreeClassification::initInternal() {
+void TreeClassification::allocateMemory() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {
     size_t num_classes = class_values->size();

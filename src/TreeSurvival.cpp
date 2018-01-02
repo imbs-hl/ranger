@@ -55,7 +55,7 @@ TreeSurvival::TreeSurvival(std::vector<std::vector<size_t>>& child_nodeIDs, std:
 TreeSurvival::~TreeSurvival() {
 }
 
-void TreeSurvival::initInternal() {
+void TreeSurvival::allocateMemory() {
   // Number of deaths and samples at risk for each timepoint
   num_deaths = new size_t[num_timepoints];
   num_samples_at_risk = new size_t[num_timepoints];

@@ -42,7 +42,7 @@ public:
 
   virtual ~TreeClassification();
 
-  void initInternal();
+  void allocateMemory();
 
   double estimate(size_t nodeID);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);

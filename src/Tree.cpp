@@ -85,11 +85,11 @@ void Tree::init(Data* data, uint mtry, size_t dependent_varID, size_t num_sample
   this->alpha = alpha;
   this->minprop = minprop;
   this->num_random_splits = num_random_splits;
-
-  initInternal();
 }
 
 void Tree::grow(std::vector<double>* variable_importance) {
+  // Allocate memory for tree growing
+  allocateMemory();
 
   this->variable_importance = variable_importance;
 

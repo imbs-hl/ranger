@@ -53,7 +53,7 @@ public:
       std::vector<double>* case_weights, bool keep_inbag, double sample_fraction, double alpha, double minprop,
       bool holdout, uint num_random_splits);
 
-  virtual void initInternal() = 0;
+  virtual void allocateMemory() = 0;
 
   void grow(std::vector<double>* variable_importance);
 
