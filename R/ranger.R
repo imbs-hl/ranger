@@ -96,6 +96,7 @@
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
+##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
@@ -132,9 +133,14 @@
 ##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 ##' iris.train <- iris[train.idx, ]
 ##' iris.test <- iris[-train.idx, ]
-##' rg.iris <- ranger(Species ~ ., data = iris.train, write.forest = TRUE)
-##' pred.iris <- predict(rg.iris, dat = iris.test)
+##' rg.iris <- ranger(Species ~ ., data = iris.train)
+##' pred.iris <- predict(rg.iris, data = iris.test)
 ##' table(iris.test$Species, pred.iris$predictions)
+##' 
+##' ## Quantile regression forest
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles")
+##' pred$predictions
 ##'
 ##' ## Variable importance
 ##' rg.iris <- ranger(Species ~ ., data = iris, importance = "impurity")
@@ -168,7 +174,8 @@
 ##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{http://dx.doi.org/10.1097/JTO.0b013e318233d835}. 
 ##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{http://dx.doi.org/10.3414/ME00-01-0052}.
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}. 
+##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}.
+##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
 ##' @useDynLib ranger, .registration = TRUE
@@ -187,6 +194,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
                    keep.inbag = FALSE, holdout = FALSE,
+                   quantreg = FALSE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
@@ -274,6 +282,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     treetype <- 5
   } else {
     stop("Error: Unsupported type of dependent variable.")
+  }
+  
+  ## Qunatile prediction only for regression
+  if (quantreg && treetype != 3) {
+    stop("Error: Quantile prediction implemented only for regression outcomes.")
   }
   
   ## Dependent and status variable name. For non-survival dummy status variable name.
@@ -715,12 +728,62 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   class(result) <- "ranger"
+  
+  ## Prepare quantile prediction
+  if (quantreg) {
+    terminal.nodes <- predict(result, data, type = "terminalNodes")$predictions
+    n <- result$num.samples
+    result$random.node.values <- matrix(nrow = max(terminal.nodes), ncol = num.trees)
+    
+    ## Select one random obs per node and tree
+    for (tree in 1:num.trees){
+      idx <- sample(1:n, n)
+      result$random.node.values[terminal.nodes[idx, tree], tree] <- response[idx]
+    }
+    
+    ## Prepare out-of-bag quantile regression
+    if(!is.null(result$inbag.counts)) {
+      inbag.counts <- simplify2array(result$inbag.counts)
+      random.node.values.oob <- 0 * terminal.nodes
+      random.node.values.oob[inbag.counts > 0] <- NA
+      
+      ## For each tree and observation select one random obs in the same node (not the same obs)
+      for (tree in 1:num.trees){
+        is.oob <- inbag.counts[, tree] == 0
+        num.oob <- sum(is.oob)
+        
+        if (num.oob != 0) {
+          oob.obs <- which(is.oob)
+          oob.nodes <- terminal.nodes[oob.obs, tree]
+          for (j in 1:num.oob) {
+            idx <- terminal.nodes[, tree] == oob.nodes[j]
+            idx[oob.obs[j]] <- FALSE
+            random.node.values.oob[oob.obs[j], tree] <- save.sample(response[idx], size = 1)
+          }
+        }
+      }
+      
+      ## Check num.trees
+      minoob <- min(rowSums(inbag.counts == 0))
+      if (minoob < 10) {
+        stop("Error: Too few trees for out-of-bag quantile regression.")
+      }
+      
+      ## Use the same number of values for all obs, select randomly
+      result$random.node.values.oob <- t(apply(random.node.values.oob, 1, function(x) {
+        sample(x[!is.na(x)], minoob)
+      }))
+    }
+  }
+  
   return(result)
 }
 
-
-
-
 integer.to.factor <- function(x, labels) {
   factor(x, levels = seq_along(labels), labels = labels)
+}
+
+## See help(sample)
+save.sample <- function(x, ...) {
+  x[sample.int(length(x), ...)]
 }

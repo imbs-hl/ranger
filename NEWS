@@ -1,3 +1,6 @@
+##### Version 0.8.4
+* Add quantile prediction
+
 ##### Version 0.8.3
 * Add standard error estimation with the infinitesimal jackknife (now the default)
 

@@ -11,9 +11,10 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
-  holdout = FALSE, num.threads = NULL, save.memory = FALSE,
-  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  holdout = FALSE, quantreg = FALSE, num.threads = NULL,
+  save.memory = FALSE, verbose = TRUE, seed = NULL,
+  dependent.variable.name = NULL, status.variable.name = NULL,
+  classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -57,6 +58,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{keep.inbag}{Save how often observations are in-bag in each tree.}
 
 \item{holdout}{Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.}
+
+\item{quantreg}{Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
@@ -153,9 +156,14 @@ ranger(Species ~ ., data = iris)
 train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 iris.train <- iris[train.idx, ]
 iris.test <- iris[-train.idx, ]
-rg.iris <- ranger(Species ~ ., data = iris.train, write.forest = TRUE)
-pred.iris <- predict(rg.iris, dat = iris.test)
+rg.iris <- ranger(Species ~ ., data = iris.train)
+pred.iris <- predict(rg.iris, data = iris.test)
 table(iris.test$Species, pred.iris$predictions)
+
+## Quantile regression forest
+rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+pred <- predict(rf, mtcars[27:32, ], type = "quantiles")
+pred$predictions
 
 ## Variable importance
 rg.iris <- ranger(Species ~ ., data = iris, importance = "impurity")
@@ -189,7 +197,8 @@ ranger(trait ~ ., data = dat.gwaa)
   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{http://dx.doi.org/10.1097/JTO.0b013e318233d835}. 
   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{http://dx.doi.org/10.3414/ME00-01-0052}.
   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-  \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}. 
+  \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}.
+  \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
   }
 }
 \seealso{
