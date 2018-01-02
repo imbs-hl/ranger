@@ -45,7 +45,7 @@ TreeProbability::~TreeProbability() {
   // Empty on purpose
 }
 
-void TreeProbability::initInternal() {
+void TreeProbability::allocateMemory() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {
     size_t num_classes = class_values->size();

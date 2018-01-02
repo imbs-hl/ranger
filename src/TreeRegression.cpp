@@ -50,7 +50,7 @@ TreeRegression::~TreeRegression() {
   // Empty on purpose
 }
 
-void TreeRegression::initInternal() {
+void TreeRegression::allocateMemory() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {
     size_t max_num_splits = data->getMaxNumUniqueValues();
