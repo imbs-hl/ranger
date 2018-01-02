@@ -107,38 +107,36 @@ void ForestClassification::growInternal() {
   }
 }
 
-void ForestClassification::predictInternal() {
-
+void ForestClassification::allocatePredictMemory() {
   size_t num_prediction_samples = data->getNumRows();
   if (predict_all || prediction_type == TERMINALNODES) {
-    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees)));
+    predictions = std::vector<std::vector<std::vector<double>>>(1,
+        std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees)));
   } else {
-    predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples)));
+    predictions = std::vector<std::vector<std::vector<double>>>(1,
+        std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples)));
   }
+}
 
-  // For all samples get tree predictions
-  for (size_t sample_idx = 0; sample_idx < num_prediction_samples; ++sample_idx) {
-
-    if (predict_all || prediction_type == TERMINALNODES) {
-      // Get all tree predictions
-      for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-        if (prediction_type == TERMINALNODES) {
-          predictions[0][sample_idx][tree_idx] = ((TreeClassification*) trees[tree_idx])->getPredictionTerminalNodeID(
-              sample_idx);
-        } else {
-          predictions[0][sample_idx][tree_idx] = ((TreeClassification*) trees[tree_idx])->getPrediction(sample_idx);
-        }
+void ForestClassification::predictInternal(size_t sample_idx) {
+  if (predict_all || prediction_type == TERMINALNODES) {
+    // Get all tree predictions
+    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+      if (prediction_type == TERMINALNODES) {
+        predictions[0][sample_idx][tree_idx] = ((TreeClassification*) trees[tree_idx])->getPredictionTerminalNodeID(
+            sample_idx);
+      } else {
+        predictions[0][sample_idx][tree_idx] = ((TreeClassification*) trees[tree_idx])->getPrediction(sample_idx);
       }
-    } else {
-      // Count classes over trees and save class with maximum count
-      std::unordered_map<double, size_t> class_count;
-      for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-        double value = ((TreeClassification*) trees[tree_idx])->getPrediction(sample_idx);
-        ++class_count[value];
-      }
-      predictions[0][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
     }
-
+  } else {
+    // Count classes over trees and save class with maximum count
+    std::unordered_map<double, size_t> class_count;
+    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+      double value = ((TreeClassification*) trees[tree_idx])->getPrediction(sample_idx);
+      ++class_count[value];
+    }
+    predictions[0][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
   }
 }
 
@@ -161,7 +159,8 @@ void ForestClassification::computePredictionErrorInternal() {
   }
 
   // Compute majority vote for each sample
-  predictions = std::vector<std::vector<std::vector<double>>>(1, std::vector<std::vector<double>>(1, std::vector<double>(num_samples)));
+  predictions = std::vector<std::vector<std::vector<double>>>(1,
+      std::vector<std::vector<double>>(1, std::vector<double>(num_samples)));
   for (size_t i = 0; i < num_samples; ++i) {
     if (!class_counts[i].empty()) {
       predictions[0][0][i] = mostFrequentValue(class_counts[i], random_number_generator);
