@@ -1,5 +1,6 @@
 ##### Version 0.8.5
 * Faster aggregation of predictions
+* Fix memory issues on Windows 7
 
 ##### Version 0.8.4
 * Add quantile prediction
