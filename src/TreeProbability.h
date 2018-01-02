@@ -45,7 +45,7 @@ public:
 
   virtual ~TreeProbability();
 
-  void initInternal();
+  void allocateMemory();
 
   void addToTerminalNodes(size_t nodeID);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);

@@ -43,7 +43,7 @@ public:
 
   virtual ~TreeSurvival();
 
-  void initInternal();
+  void allocateMemory();
 
   void appendToFileInternal(std::ofstream& file);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);
