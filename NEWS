@@ -1,6 +1,7 @@
 ##### Version 0.8.5
 * Faster aggregation of predictions
 * Fix memory issues on Windows 7
+* Add treeInfo() function to extract human readable tree structure
 
 ##### Version 0.8.4
 * Add quantile prediction
