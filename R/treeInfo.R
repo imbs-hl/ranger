@@ -35,13 +35,23 @@
 #' If the formula interface is used in the \code{ranger} call, the variable ID's are usually different to the original data used to grow the tree. 
 #' Refer to the variable name instead to be sure.
 #' 
+#' Splitting at unordered factors (nominal variables) depends on the option \code{respect.unordered.factors} in the \code{ranger} call. 
+#' For the "ignore" and "order" approaches, all values smaller or equal the \code{splitval} value go to the left and all values larger go to the right, as usual. 
+#' However, with "order" the values correspond to the order in \code{object$forest$covariate.levels} instead of the original order (usually alphabetical).
+#' In the "partition" mode, the \code{splitval} values for unordered factor are comma separated lists of values, representing the factor levels (in the original order) going to the left.
+#' 
 #' @param object \code{ranger} object.
 #' @param tree Number of the tree of interest.
 #' @return A data.frame with the columns
 #' \tabular{ll}{
-#'       \code{A} \tab A. \cr
-#'       \code{B} \tab B. \cr
-#'       \code{C} \tab C. \cr
+#'       \code{nodeID} \tab The nodeID, 0-indexed. \cr
+#'       \code{leftChild} \tab ID of the left child node, 0-indexed. \cr
+#'       \code{rightChild} \tab ID of the right child node, 0-indexed. \cr
+#'       \code{splitvarID} \tab ID of the splitting variable, 0-indexed. Caution, the variable order changes if the formula interface is used. \cr
+#'       \code{splitvarName} \tab Name of the splitting variable. \cr
+#'       \code{splitval} \tab The splitting value. For numeric or ordinal variables, all values smaller or equal go to the left, larger values to the right. For unordered factor variables see above. \cr
+#'       \code{terminal} \tab Logical, TRUE for terminal nodes. \cr
+#'       \code{prediction} \tab One column with the predicted class (factor) for classification and the predicted numerical value for regression. One probability per class for probability estimation in several columns. Nothing for survival, refer to \code{object$forest$chf} for the CHF node predictions. \cr
 #'   }
 #' @examples
 #' require(ranger)
@@ -76,28 +86,58 @@ treeInfo <- function(object, tree = 1) {
   }
   
   result <- data.frame(nodeID = 0:(length(forest$split.values[[tree]]) - 1),
-                       left = forest$child.nodeIDs[[tree]][[1]], 
-                       right = forest$child.nodeIDs[[tree]][[2]], 
+                       leftChild = forest$child.nodeIDs[[tree]][[1]], 
+                       rightChild = forest$child.nodeIDs[[tree]][[2]], 
                        splitvarID = forest$split.varIDs[[tree]], 
                        splitvarName = "X",
                        splitval = forest$split.values[[tree]], 
-                       prediction = forest$split.values[[tree]], 
                        terminal = FALSE)
   
-  result$left[result$left == 0] <- NA
-  result$right[result$right == 0] <- NA
-  result$terminal[is.na(result$left)] <- TRUE
+  result$leftChild[result$leftChild == 0] <- NA
+  result$rightChild[result$rightChild == 0] <- NA
+  result$terminal[is.na(result$leftChild)] <- TRUE
   result$splitvarID[result$terminal] <- NA
   result$splitvarName[result$terminal] <- NA
   result$splitval[result$terminal] <- NA
-  result$prediction[!result$terminal] <- NA
+
+  ## Get names of splitting variables 
+  # should be -1 for all >= dependent.varID but +1 change for 1-index
+  # for survival another -1 if >= status.varID
+  independent.varID <- result$splitvarID
+  idx <- !is.na(result$splitvarID) & result$splitvarID < forest$dependent.varID
+  independent.varID[idx] <- result$splitvarID[idx] + 1
+  if (forest$treetype == "Survival") {
+    idx <- !is.na(result$splitvarID) & result$splitvarID >= forest$status.varID
+    independent.varID[idx] <- independent.varID[idx] - 1
+  }
+  result$splitvarName <- forest$independent.variable.names[independent.varID]
+
+  ## Unordered splitting
+  idx.unordered <- !result$terminal & !forest$is.ordered[result$splitvarID + 1]
+  if (any(idx.unordered)) {
+    result$splitval[idx.unordered] <- sapply(result$splitval[idx.unordered], function(x) {
+      paste(which(as.logical(intToBits(x))), collapse = ",")
+    })
+  }
+  
+  ## Prediction
+  if (forest$treetype == "Classification") {
+    result$prediction <- forest$split.values[[tree]]
+    result$prediction[!result$terminal] <- NA
+    result$prediction <- factor(result$prediction, levels = forest$class.values, labels = forest$levels)
+  } else if (forest$treetype == "Regression") {
+    result$prediction <- forest$split.values[[tree]]
+    result$prediction[!result$terminal] <- NA
+  } else if (forest$treetype == "Probability estimation") {
+    predictions <- matrix(nrow = nrow(result), ncol = length(forest$levels))
+    predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
+    colnames(predictions) <- paste0("pred.", forest$levels)
+    result <- data.frame(result, predictions)
+  } else if (forest$treetype == "Survival") {
+    # No prediction for survival (CHF too large?)
+  } else {
+    stop("Error: Unknown tree type.")
+  }
   
   result
-  # TODO: Tests
-  # TODO: Variable names
-  # TODO: Prediction for factors
-  # TODO: Probability?
-  # TODO: Survival?
-  # TODO: Differences formula/alternative interface?
-  # TODO: Unordered splitting (different methods)?
 }
