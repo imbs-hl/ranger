@@ -428,6 +428,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     
     ## Response as predictions
     result$predictions <- yhat
+    
+    if (forest$treetype == "Probability estimation") {
+      ## Set colnames and sort by levels
+      colnames(result$predictions) <- forest$levels[forest$class.values]
+      result$predictions <- result$predictions[, forest$levels, drop = FALSE]
+    }
   }
 
   class(result) <- "ranger.prediction"
