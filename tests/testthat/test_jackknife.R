@@ -105,6 +105,29 @@ test_that("standard error response prediction is the same as response prediction
   expect_equal(pred_se$predictions, pred_resp$predictions)
 })
 
+test_that("standard error response prediction is the same as response prediction, probability", {
+  n <- 100
+  p <- 5
+  x <- replicate(p, rbinom(n, 1, .1))
+  y <- as.factor(rbinom(n, 1, .5))
+  dat <- data.frame(y = y, x)
+  
+  idx <- sample(nrow(dat), 25)
+  test <- dat[idx, ]
+  train <- dat[-idx, ]
+  
+  set.seed(100)
+  rf_se <- ranger(y ~ ., train, num.trees = 5, keep.inbag = TRUE, probability = TRUE)
+  pred_se <- predict(rf_se, test, type = "se", se.method = "infjack")
+  colnames(pred_se$predictions) <- levels(train$y)
+  
+  set.seed(100)
+  rf_resp <- ranger(y ~ ., train, num.trees = 5, probability = TRUE)
+  pred_resp <- predict(rf_resp, test, type = "response")
+  
+  expect_equal(pred_se$predictions, pred_resp$predictions)
+})
+
 test_that("standard error is larger for fewer trees, regression", {
   idx <- sample(nrow(iris), 25)
   test <- iris[idx, ]
