@@ -29,6 +29,7 @@
 ##' Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 ##' Classification, regression, and survival forests are supported.
 ##' Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).
+##' Includes implementations of extremely randomized trees (Geurts et al. 2006) and qunatile regression forests (Meinshausen 2006). 
 ##'
 ##' The tree type is determined by the type of the dependent variable.
 ##' For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
@@ -76,7 +77,7 @@
 ##' 
 ##' @title Ranger
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
-##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
+##' @param data Training data of class \code{data.frame}, \code{matrix}, \code{dgCMatrix} (Matrix) or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 

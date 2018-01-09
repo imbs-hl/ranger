@@ -118,7 +118,7 @@ rInfJack = function(pred, inbag, calibrate = TRUE, used.trees = NULL) {
 #
 # @section References:
 # For more details about "g-estimation", see: B Efron. Two modeling strategies for
-# empirical Bayes estimation. Stat. Sci., 29(2): 285–301, 2014.
+# empirical Bayes estimation. Stat. Sci., 29: 285-301, 2014.
 # @author Stefan Wager
 gfit = function(X, sigma, p = 2, nbin = 1000, unif.fraction = 0.1) {
   

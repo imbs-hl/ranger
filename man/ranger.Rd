@@ -19,7 +19,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
 
-\item{data}{Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).}
+\item{data}{Training data of class \code{data.frame}, \code{matrix}, \code{dgCMatrix} (Matrix) or \code{gwaa.data} (GenABEL).}
 
 \item{num.trees}{Number of trees.}
 
@@ -100,6 +100,7 @@ Object of class \code{ranger} with elements
 Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 Classification, regression, and survival forests are supported.
 Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).
+Includes implementations of extremely randomized trees (Geurts et al. 2006) and qunatile regression forests (Meinshausen 2006).
 }
 \details{
 The tree type is determined by the type of the dependent variable.
