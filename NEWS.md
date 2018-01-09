@@ -1,16 +1,19 @@
+##### Version 0.9.0
+* New CRAN version
+
 ##### Version 0.8.5
 * Faster aggregation of predictions
 * Fix memory issues on Windows 7
 * Add treeInfo() function to extract human readable tree structure
 
 ##### Version 0.8.4
-* Add quantile prediction
+* Add quantile prediction as in quantile regression forests
 
 ##### Version 0.8.3
 * Add standard error estimation with the infinitesimal jackknife (now the default)
 
 ##### Version 0.8.2
-* Add bias-corrected impurity importance
+* Add bias-corrected impurity importance (actual impurity reduction, AIR)
 * Add impurity importance for survival forests
 
 ##### Version 0.8.1

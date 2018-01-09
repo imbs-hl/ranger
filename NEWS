@@ -1,19 +1,11 @@
-##### Version 0.8.5
+##### Version 0.9.0
+* Add bias-corrected impurity importance (actual impurity reduction, AIR)
+* Add quantile prediction as in quantile regression forests
+* Add treeInfo() function to extract human readable tree structure
+* Add standard error estimation with the infinitesimal jackknife (now the default)
+* Add impurity importance for survival forests
 * Faster aggregation of predictions
 * Fix memory issues on Windows 7
-* Add treeInfo() function to extract human readable tree structure
-
-##### Version 0.8.4
-* Add quantile prediction
-
-##### Version 0.8.3
-* Add standard error estimation with the infinitesimal jackknife (now the default)
-
-##### Version 0.8.2
-* Add bias-corrected impurity importance
-* Add impurity importance for survival forests
-
-##### Version 0.8.1
 * Bug fixes
 
 ##### Version 0.8.0

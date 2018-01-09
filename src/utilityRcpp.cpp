@@ -33,7 +33,7 @@ http://www.imbs-luebeck.de
 Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector reference) {
   std::sort(reference.begin(), reference.end());
   Rcpp::IntegerVector result(values.size());
-  for (size_t i = 0; i < values.size(); ++i)
+  for (int i = 0; i < values.size(); ++i)
     result[i] = std::lower_bound(reference.begin(), reference.end(), values[i]) - reference.begin();
   return result;
 }
