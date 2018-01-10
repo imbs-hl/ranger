@@ -1,3 +1,6 @@
+##### Version 0.9.1
+* Bug fixes
+
 ##### Version 0.9.0
 * Add bias-corrected impurity importance (actual impurity reduction, AIR)
 * Add quantile prediction as in quantile regression forests

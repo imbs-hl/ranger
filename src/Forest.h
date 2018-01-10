@@ -177,7 +177,7 @@ protected:
 #ifdef OLD_WIN_R_BUILD
   void showProgress(std::string operation, clock_t start_time, clock_t& lap_time);
 #else
-  void showProgress(std::string operation);
+  void showProgress(std::string operation, size_t max_progress);
 #endif
 
   // Verbose output stream, cout if verbose==true, logfile if not
