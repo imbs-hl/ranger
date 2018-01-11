@@ -466,7 +466,7 @@ void Forest::grow() {
     }
     threads.push_back(std::thread(&Forest::growTreesInThread, this, i, &(variable_importance_threads[i])));
   }
-  showProgress("Growing trees..");
+  showProgress("Growing trees..", num_trees);
   for (auto &thread : threads) {
     thread.join();
   }
@@ -529,7 +529,7 @@ void Forest::predict() {
   for (uint i = 0; i < num_threads; ++i) {
     threads.push_back(std::thread(&Forest::predictTreesInThread, this, i, data, false));
   }
-  showProgress("Predicting..");
+  showProgress("Predicting..", num_trees);
   for (auto &thread : threads) {
     thread.join();
   }
@@ -538,10 +538,11 @@ void Forest::predict() {
   allocatePredictMemory();
   threads.clear();
   threads.reserve(num_threads);
+  progress = 0;
   for (uint i = 0; i < num_threads; ++i) {
     threads.push_back(std::thread(&Forest::predictInternalInThread, this, i));
   }
-  showProgress("Aggregate predictions..");
+  showProgress("Aggregating predictions..", num_samples);
   for (auto &thread : threads) {
     thread.join();
   }
@@ -569,10 +570,11 @@ void Forest::computePredictionError() {
 #else
   std::vector<std::thread> threads;
   threads.reserve(num_threads);
+  progress = 0;
   for (uint i = 0; i < num_threads; ++i) {
     threads.push_back(std::thread(&Forest::predictTreesInThread, this, i, data, true));
   }
-  showProgress("Computing prediction error..");
+  showProgress("Computing prediction error..", num_trees);
   for (auto &thread : threads) {
     thread.join();
   }
@@ -633,7 +635,7 @@ void Forest::computePermutationImportance() {
         std::thread(&Forest::computeTreePermutationImportanceInThread, this, i, &(variable_importance_threads[i]),
             &(variance_threads[i])));
   }
-  showProgress("Computing permutation importance..");
+  showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
     thread.join();
   }
@@ -902,7 +904,7 @@ void Forest::showProgress(std::string operation, clock_t start_time, clock_t& la
   }
 }
 #else
-void Forest::showProgress(std::string operation) {
+void Forest::showProgress(std::string operation, size_t max_progress) {
   using std::chrono::steady_clock;
   using std::chrono::duration_cast;
   using std::chrono::seconds;
@@ -912,7 +914,7 @@ void Forest::showProgress(std::string operation) {
   std::unique_lock<std::mutex> lock(mutex);
 
 // Wait for message from threads and show output if enough time elapsed
-  while (progress < num_trees) {
+  while (progress < max_progress) {
     condition_variable.wait(lock);
     seconds elapsed_time = duration_cast<seconds>(steady_clock::now() - last_time);
 
@@ -927,7 +929,7 @@ void Forest::showProgress(std::string operation) {
 #endif
 
     if (progress > 0 && elapsed_time.count() > STATUS_INTERVAL) {
-      double relative_progress = (double) progress / (double) num_trees;
+      double relative_progress = (double) progress / (double) max_progress;
       seconds time_from_start = duration_cast<seconds>(steady_clock::now() - start_time);
       uint remaining_time = (1 / relative_progress - 1) * time_from_start.count();
       *verbose_out << operation << " Progress: " << round(100 * relative_progress) << "%. Estimated remaining time: "
