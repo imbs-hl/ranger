@@ -32,6 +32,7 @@
 #include <vector>
 #include <random>
 #include <iostream>
+#include <stdexcept>
 
 #include "globals.h"
 #include "Data.h"
