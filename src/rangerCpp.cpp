@@ -52,7 +52,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
     std::vector<double>& case_weights, bool use_case_weights, bool predict_all, 
-    bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r, 
+    bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r, 
     uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
 
   Rcpp::List result;
