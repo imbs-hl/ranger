@@ -51,8 +51,8 @@ public:
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
-      std::vector<double>* case_weights, bool keep_inbag, double sample_fraction, double alpha, double minprop,
-      bool holdout, uint num_random_splits);
+      std::vector<double>* case_weights, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
+      double minprop, bool holdout, uint num_random_splits);
 
   virtual void allocateMemory() = 0;
 
@@ -105,6 +105,9 @@ protected:
 
   void bootstrapWeighted();
   void bootstrapWithoutReplacementWeighted();
+
+  void bootstrapClassWise();
+  void bootstrapWithoutReplacementClassWise();
 
   virtual void cleanUpInternal() = 0;
 
@@ -167,7 +170,7 @@ protected:
   std::vector<size_t> prediction_terminal_nodeIDs;
 
   bool sample_with_replacement;
-  double sample_fraction;
+  std::vector<double>* sample_fraction;
 
   bool memory_saving_splitting;
   SplitRule splitrule;
