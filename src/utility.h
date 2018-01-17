@@ -189,8 +189,8 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
  * @param skip Values to skip
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples);
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+    size_t max, std::vector<size_t>& skip, size_t num_samples);
 
 /**
  * Draw random numers without replacement and with weighted probabilites from vector of indices.
@@ -331,6 +331,18 @@ void splitString(std::vector<std::string>& result, std::string input, char split
  */
 void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all, size_t n_first,
     std::mt19937_64 random_number_generator);
+
+/**
+ * Create numbers from 0 to n_all-1, shuffle and split in two parts. Append to existing data.
+ * @param first_part First part
+ * @param second_part Second part
+ * @param n_all Number elements
+ * @param n_first Number of elements of first part
+ * @param mapping Values to use instead of 0...n-1
+ * @param random_number_generator Random number generator
+ */
+void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all,
+    size_t n_first, std::vector<size_t>& mapping, std::mt19937_64 random_number_generator);
 
 /**
  * Check if not too many factor levels and all values in unordered categorical variables are positive integers.

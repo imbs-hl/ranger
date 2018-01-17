@@ -89,6 +89,18 @@ void ForestProbability::initInternal(std::string status_variable_name) {
     }
   }
 
+  // Create sampleIDs_per_class if required
+  if (sample_fraction.size() > 1) {
+    sampleIDs_per_class.resize(sample_fraction.size());
+    for (auto& v : sampleIDs_per_class) {
+      v.reserve(num_samples);
+    }
+    for (size_t i = 0; i < num_samples; ++i) {
+      size_t classID = response_classIDs[i];
+      sampleIDs_per_class[classID].push_back(i);
+    }
+  }
+
   // Sort data if memory saving mode
   if (!memory_saving_splitting) {
     data->sort();
@@ -98,7 +110,7 @@ void ForestProbability::initInternal(std::string status_variable_name) {
 void ForestProbability::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(new TreeProbability(&class_values, &response_classIDs));
+    trees.push_back(new TreeProbability(&class_values, &response_classIDs, &sampleIDs_per_class));
   }
 }
 

@@ -66,6 +66,7 @@ protected:
   // Classes of the dependent variable and classIDs for responses
   std::vector<double> class_values;
   std::vector<uint> response_classIDs;
+  std::vector<std::vector<size_t>> sampleIDs_per_class;
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;

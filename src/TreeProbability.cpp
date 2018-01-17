@@ -30,15 +30,17 @@
 #include "utility.h"
 #include "Data.h"
 
-TreeProbability::TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs) :
-    class_values(class_values), response_classIDs(response_classIDs), counter(0), counter_per_class(0) {
+TreeProbability::TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
+    std::vector<std::vector<size_t>>* sampleIDs_per_class) :
+    class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(sampleIDs_per_class), counter(
+        0), counter_per_class(0) {
 }
 
 TreeProbability::TreeProbability(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<double>>& terminal_class_counts) :
-    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), terminal_class_counts(
-        terminal_class_counts), counter(0), counter_per_class(0) {
+    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(
+        0), terminal_class_counts(terminal_class_counts), counter(0), counter_per_class(0) {
 }
 
 TreeProbability::~TreeProbability() {
@@ -708,7 +710,6 @@ void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double 
   }
 }
 
-// TOOD: Avoid having this twice (classification and probability)?
 void TreeProbability::bootstrapClassWise() {
   // Number of samples is sum of sample fraction * number of samples
   size_t num_samples_inbag = 0;
@@ -725,25 +726,14 @@ void TreeProbability::bootstrapClassWise() {
   // Start with all samples OOB
   inbag_counts.resize(num_samples, 0);
 
-  // TODO: Better way? At least only once per forest...
-  // TODO: Reserve space?
-  // Sample IDs per class
-  std::vector<std::vector<size_t>> sampleIDs_per_class;
-  sampleIDs_per_class.resize(sample_fraction->size());
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t classID = (*response_classIDs)[i];
-    sampleIDs_per_class[classID].push_back(i);
-
-  }
-
   // Draw samples for each class
   for (size_t i = 0; i < sample_fraction->size(); ++i) {
     // Draw samples of class with replacement as inbag and mark as not OOB
-    size_t num_samples_class = sampleIDs_per_class[i].size();
+    size_t num_samples_class = (*sampleIDs_per_class)[i].size();
     size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
     std::uniform_int_distribution<size_t> unif_dist(0, num_samples_class - 1);
     for (size_t s = 0; s < num_samples_inbag_class; ++s) {
-      size_t draw = sampleIDs_per_class[i][unif_dist(random_number_generator)];
+      size_t draw = (*sampleIDs_per_class)[i][unif_dist(random_number_generator)];
       sampleIDs[0].push_back(draw);
       ++inbag_counts[draw];
     }
@@ -763,52 +753,29 @@ void TreeProbability::bootstrapClassWise() {
   }
 }
 
-// TOOD: Avoid having this twice (classification and probability)?
 void TreeProbability::bootstrapWithoutReplacementClassWise() {
   // Number of samples is sum of sample fraction * number of samples
-  size_t num_samples_inbag = 0;
-  double sum_sample_fraction = 0;
-  for (auto& s : *sample_fraction) {
-    num_samples_inbag += (size_t) num_samples * s;
-    sum_sample_fraction += s;
-  }
-
-  // Reserve space, reserve a little more to be save)
-  sampleIDs[0].reserve(num_samples_inbag);
-  oob_sampleIDs.reserve(num_samples * (exp(-sum_sample_fraction) + 0.1));
-
-  // TODO: Better way? At least only once per forest...
-  // TODO: Reserve space?
-  // Sample IDs per class
-  std::vector<std::vector<size_t>> sampleIDs_per_class;
-  sampleIDs_per_class.resize(sample_fraction->size());
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t classID = (*response_classIDs)[i];
-    sampleIDs_per_class[classID].push_back(i);
-  }
-
-  // Draw samples for each class
-  for (size_t i = 0; i < sample_fraction->size(); ++i) {
-    size_t num_samples_class = sampleIDs_per_class[i].size();
-    size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
-
-    // TODO: Better way without copying
-    std::vector<size_t> inbag_samples;
-    std::vector<size_t> oob_samples;
-    shuffleAndSplit(inbag_samples, oob_samples, num_samples_class, num_samples_inbag_class, random_number_generator);
-    for (auto& x : inbag_samples) {
-      sampleIDs[0].push_back(sampleIDs_per_class[i][x]);
+    size_t num_samples_inbag = 0;
+    double sum_sample_fraction = 0;
+    for (auto& s : *sample_fraction) {
+      num_samples_inbag += (size_t) num_samples * s;
+      sum_sample_fraction += s;
     }
-    for (auto& x : oob_samples) {
-      oob_sampleIDs.push_back(sampleIDs_per_class[i][x]);
-    }
-  }
 
-  if (keep_inbag) {
-    // All observation are 0 or 1 times inbag
-    inbag_counts.resize(num_samples, 1);
-    for (size_t i = 0; i < oob_sampleIDs.size(); i++) {
-      inbag_counts[oob_sampleIDs[i]] = 0;
+    // Draw samples for each class
+    for (size_t i = 0; i < sample_fraction->size(); ++i) {
+      size_t num_samples_class = (*sampleIDs_per_class)[i].size();
+      size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
+
+      shuffleAndSplitAppend(sampleIDs[0], oob_sampleIDs, num_samples_class, num_samples_inbag_class,
+          (*sampleIDs_per_class)[i], random_number_generator);
     }
-  }
+
+    if (keep_inbag) {
+      // All observation are 0 or 1 times inbag
+      inbag_counts.resize(num_samples, 1);
+      for (size_t i = 0; i < oob_sampleIDs.size(); i++) {
+        inbag_counts[oob_sampleIDs[i]] = 0;
+      }
+    }
 }
