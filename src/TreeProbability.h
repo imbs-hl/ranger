@@ -87,6 +87,9 @@ private:
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
+  void bootstrapClassWise();
+  void bootstrapWithoutReplacementClassWise();
+
   void cleanUpInternal() {
     if (counter != 0) {
       delete[] counter;

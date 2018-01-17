@@ -50,14 +50,14 @@ test_that("Error if sample fraction is vector of wrong size", {
 
 test_that("Error if element of sample fraction vector is <0 or >1", {
   expect_error(ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.1, 1.1, 0.3)), 
-               "Error: Invalid value for sample\\.fraction. Please give values in [0,1]\\.")
+               "Error: Invalid value for sample\\.fraction. Please give a value in \\(0,1\\] or a vector of values in \\[0,1\\]\\.")
   expect_error(ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(-3, 0.5, 0.3)), 
-               "Error: Invalid value for sample\\.fraction. Please give values in [0,1]\\.")
+               "Error: Invalid value for sample.fraction. Please give a value in \\(0,1] or a vector of values in \\[0,1\\]\\.")
 })
 
 test_that("Error if sum of sample fraction vector is 0", {
   expect_error(ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0, 0, 0)), 
-               "Error: Invalid value for sample\\.fraction. Please give values in [0,1]\\.")
+               "Error: Invalid value for sample\\.fraction. Sum of values must be >0\\.")
 })
 
 test_that("Error if replace=FALSE and not enough samples", {
@@ -74,18 +74,40 @@ test_that("Error if sample.fraction and case.weights", {
                "Error: Combination of case\\.weights and class-wise sampling not supported\\.")
 })
 
-test_that("Inbag counts match sample fraction", {
+test_that("Inbag counts match sample fraction, classification", {
   ## With replacement
   rf <- ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.2, 0.3, 0.4), 
                replace = TRUE, keep.inbag = TRUE)
-  inbag <- rowMeans(do.call(cbind, rg$inbag.counts))
-  expect_equal(inbag, c(30, 45, 60))
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[1:50, ])), 30)
+  expect_equal(unique(colSums(inbag[51:100, ])), 45)
+  expect_equal(unique(colSums(inbag[101:150, ])), 60)
   
   ## Without replacement
   rf <- ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.1, 0.2, 0.3), 
                replace = FALSE, keep.inbag = TRUE)
-  inbag <- rowMeans(do.call(cbind, rg$inbag.counts))
-  expect_equal(inbag, c(15, 30, 45))
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[1:50, ])), 15)
+  expect_equal(unique(colSums(inbag[51:100, ])), 30)
+  expect_equal(unique(colSums(inbag[101:150, ])), 45)
+})
+
+test_that("Inbag counts match sample fraction, probability", {
+  ## With replacement
+  rf <- ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.2, 0.3, 0.4), 
+               replace = TRUE, keep.inbag = TRUE, probability = TRUE)
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[1:50, ])), 30)
+  expect_equal(unique(colSums(inbag[51:100, ])), 45)
+  expect_equal(unique(colSums(inbag[101:150, ])), 60)
+  
+  ## Without replacement
+  rf <- ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.1, 0.2, 0.3), 
+               replace = FALSE, keep.inbag = TRUE, probability = TRUE)
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[1:50, ])), 15)
+  expect_equal(unique(colSums(inbag[51:100, ])), 30)
+  expect_equal(unique(colSums(inbag[101:150, ])), 45)
 })
 
 test_that("as.factor() in formula works", {

@@ -426,12 +426,18 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Sample fraction
-  if (!is.numeric(sample.fraction) || sample.fraction <= 0 || sample.fraction > 1) {
-    stop("Error: Invalid value for sample.fraction. Please give a value in (0,1].")
+  if (!is.numeric(sample.fraction)) {
+    stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
   }
   if (length(sample.fraction) > 1) {
     if (!(treetype %in% c(1, 9))) {
       stop("Error: Invalid value for sample.fraction. Vector values only valid for classification forests.")
+    }
+    if (any(sample.fraction < 0) || any(sample.fraction > 1)) {
+      stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+    }
+    if (sum(sample.fraction) <= 0) {
+      stop("Error: Invalid value for sample.fraction. Sum of values must be >0.")
     }
     if (length(sample.fraction) != nlevels(response)) {
       stop("Error: Invalid value for sample.fraction. Expecting ", nlevels(response), " values, provided ", length(sample.fraction), ".")
@@ -444,6 +450,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
     if (!is.null(case.weights)) {
       stop("Error: Combination of case.weights and class-wise sampling not supported.")
+    }
+  } else {
+    if (sample.fraction <= 0 || sample.fraction > 1) {
+      stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
     }
   }
   
