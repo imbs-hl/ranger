@@ -570,7 +570,6 @@ void ArgumentHandler::displayHelp() {
   std::cout << "See README file for details and examples." << std::endl;
 }
 
-// TODO: Change citation info
 void ArgumentHandler::displayVersion() {
   std::cout << "Ranger version: " << RANGER_VERSION << std::endl;
   std::cout << std::endl;

@@ -88,7 +88,6 @@ void Tree::init(Data* data, uint mtry, size_t dependent_varID, size_t num_sample
   this->num_random_splits = num_random_splits;
 }
 
-// TODO: Class-wise methods only for classification. Better way?
 void Tree::grow(std::vector<double>* variable_importance) {
   // Allocate memory for tree growing
   allocateMemory();

@@ -37,15 +37,17 @@
 #include "utility.h"
 #include "Data.h"
 
-TreeClassification::TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs) :
-    class_values(class_values), response_classIDs(response_classIDs), counter(0), counter_per_class(0) {
+TreeClassification::TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
+    std::vector<std::vector<size_t>>* sampleIDs_per_class) :
+    class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(sampleIDs_per_class), counter(
+        0), counter_per_class(0) {
 }
 
 TreeClassification::TreeClassification(std::vector<std::vector<size_t>>& child_nodeIDs,
     std::vector<size_t>& split_varIDs, std::vector<double>& split_values, std::vector<double>* class_values,
     std::vector<uint>* response_classIDs) :
-    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), counter(
-        0), counter_per_class(0) {
+    Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(
+        0), counter(0), counter_per_class(0) {
 }
 
 TreeClassification::~TreeClassification() {
@@ -723,25 +725,14 @@ void TreeClassification::bootstrapClassWise() {
   // Start with all samples OOB
   inbag_counts.resize(num_samples, 0);
 
-  // TODO: Better way? At least only once per forest...
-  // TODO: Reserve space?
-  // Sample IDs per class
-  std::vector<std::vector<size_t>> sampleIDs_per_class;
-  sampleIDs_per_class.resize(sample_fraction->size());
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t classID = (*response_classIDs)[i];
-    sampleIDs_per_class[classID].push_back(i);
-
-  }
-
   // Draw samples for each class
   for (size_t i = 0; i < sample_fraction->size(); ++i) {
     // Draw samples of class with replacement as inbag and mark as not OOB
-    size_t num_samples_class = sampleIDs_per_class[i].size();
+    size_t num_samples_class = (*sampleIDs_per_class)[i].size();
     size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
     std::uniform_int_distribution<size_t> unif_dist(0, num_samples_class - 1);
     for (size_t s = 0; s < num_samples_inbag_class; ++s) {
-      size_t draw = sampleIDs_per_class[i][unif_dist(random_number_generator)];
+      size_t draw = (*sampleIDs_per_class)[i][unif_dist(random_number_generator)];
       sampleIDs[0].push_back(draw);
       ++inbag_counts[draw];
     }
@@ -770,35 +761,13 @@ void TreeClassification::bootstrapWithoutReplacementClassWise() {
     sum_sample_fraction += s;
   }
 
-  // Reserve space, reserve a little more to be save)
-  sampleIDs[0].reserve(num_samples_inbag);
-  oob_sampleIDs.reserve(num_samples * (exp(-sum_sample_fraction) + 0.1));
-
-  // TODO: Better way? At least only once per forest...
-  // TODO: Reserve space?
-  // Sample IDs per class
-  std::vector<std::vector<size_t>> sampleIDs_per_class;
-  sampleIDs_per_class.resize(sample_fraction->size());
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t classID = (*response_classIDs)[i];
-    sampleIDs_per_class[classID].push_back(i);
-  }
-
   // Draw samples for each class
   for (size_t i = 0; i < sample_fraction->size(); ++i) {
-    size_t num_samples_class = sampleIDs_per_class[i].size();
+    size_t num_samples_class = (*sampleIDs_per_class)[i].size();
     size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
 
-    // TODO: Better way without copying
-    std::vector<size_t> inbag_samples;
-    std::vector<size_t> oob_samples;
-    shuffleAndSplit(inbag_samples, oob_samples, num_samples_class, num_samples_inbag_class, random_number_generator);
-    for (auto& x : inbag_samples) {
-      sampleIDs[0].push_back(sampleIDs_per_class[i][x]);
-    }
-    for (auto& x : oob_samples) {
-      oob_sampleIDs.push_back(sampleIDs_per_class[i][x]);
-    }
+    shuffleAndSplitAppend(sampleIDs[0], oob_sampleIDs, num_samples_class, num_samples_inbag_class,
+        (*sampleIDs_per_class)[i], random_number_generator);
   }
 
   if (keep_inbag) {

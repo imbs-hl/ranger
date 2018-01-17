@@ -34,7 +34,8 @@
 
 class TreeClassification: public Tree {
 public:
-  TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs);
+  TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
+      std::vector<std::vector<size_t>>* sampleIDs_per_class);
 
   // Create from loaded forest
   TreeClassification(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -73,10 +74,10 @@ private:
       size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
 
   bool findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
-      size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
-      size_t* class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
 
   void addGiniImportance(size_t nodeID, size_t varID, double decrease);
 
@@ -95,6 +96,7 @@ private:
   // Classes of the dependent variable and classIDs for responses
   std::vector<double>* class_values;
   std::vector<uint>* response_classIDs;
+  std::vector<std::vector<size_t>>* sampleIDs_per_class;
 
   size_t* counter;
   size_t* counter_per_class;
