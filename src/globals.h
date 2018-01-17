@@ -112,6 +112,8 @@ const double DEFAULT_MINPROP = 0.1;
 const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
 const uint DEFAULT_NUM_RANDOM_SPLITS = 1;
 
+//const std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
+
 // Interval to print progress in seconds
 const double STATUS_INTERVAL = 30.0;
 

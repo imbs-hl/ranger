@@ -45,43 +45,45 @@ public:
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
       std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-      std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts, std::vector<bool>& is_ordered_variable);
+      std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts,
+      std::vector<bool>& is_ordered_variable);
 
-      std::vector<std::vector<std::vector<double>>> getTerminalClassCounts() {
-        std::vector<std::vector<std::vector<double>>> result;
-        result.reserve(num_trees);
-        for (Tree* tree : trees) {
-          TreeProbability* temp = (TreeProbability*) tree;
-          result.push_back(temp->getTerminalClassCounts());
-        }
-        return result;
-      }
+  std::vector<std::vector<std::vector<double>>> getTerminalClassCounts() {
+    std::vector<std::vector<std::vector<double>>> result;
+    result.reserve(num_trees);
+    for (Tree* tree : trees) {
+      TreeProbability* temp = (TreeProbability*) tree;
+      result.push_back(temp->getTerminalClassCounts());
+    }
+    return result;
+  }
 
-      const std::vector<double>& getClassValues() const {
-        return class_values;
-      }
+  const std::vector<double>& getClassValues() const {
+    return class_values;
+  }
 
-    protected:
-      void initInternal(std::string status_variable_name);
-      void growInternal();
-      void allocatePredictMemory();
-      void predictInternal(size_t sample_idx);
-      void computePredictionErrorInternal();
-      void writeOutputInternal();
-      void writeConfusionFile();
-      void writePredictionFile();
-      void saveToFileInternal(std::ofstream& outfile);
-      void loadFromFileInternal(std::ifstream& infile);
+protected:
+  void initInternal(std::string status_variable_name);
+  void growInternal();
+  void allocatePredictMemory();
+  void predictInternal(size_t sample_idx);
+  void computePredictionErrorInternal();
+  void writeOutputInternal();
+  void writeConfusionFile();
+  void writePredictionFile();
+  void saveToFileInternal(std::ofstream& outfile);
+  void loadFromFileInternal(std::ifstream& infile);
 
-      // Classes of the dependent variable and classIDs for responses
-      std::vector<double> class_values;
-      std::vector<uint> response_classIDs;
+  // Classes of the dependent variable and classIDs for responses
+  std::vector<double> class_values;
+  std::vector<uint> response_classIDs;
+  std::vector<std::vector<size_t>> sampleIDs_per_class;
 
-      // Table with classifications and true classes
-      std::map<std::pair<double, double>, size_t> classification_table;
+  // Table with classifications and true classes
+  std::map<std::pair<double, double>, size_t> classification_table;
 
-    private:
-      DISALLOW_COPY_AND_ASSIGN(ForestProbability);
-    };
+private:
+  DISALLOW_COPY_AND_ASSIGN(ForestProbability);
+};
 
 #endif /* FORESTPROBABILITY_H_ */

@@ -85,7 +85,7 @@
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
 ##' @param replace Sample with replacement. 
-##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. 
+##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
@@ -426,8 +426,35 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Sample fraction
-  if (!is.numeric(sample.fraction) || sample.fraction <= 0 || sample.fraction > 1) {
-    stop("Error: Invalid value for sample.fraction. Please give a value in (0,1].")
+  if (!is.numeric(sample.fraction)) {
+    stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+  }
+  if (length(sample.fraction) > 1) {
+    if (!(treetype %in% c(1, 9))) {
+      stop("Error: Invalid value for sample.fraction. Vector values only valid for classification forests.")
+    }
+    if (any(sample.fraction < 0) || any(sample.fraction > 1)) {
+      stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+    }
+    if (sum(sample.fraction) <= 0) {
+      stop("Error: Invalid value for sample.fraction. Sum of values must be >0.")
+    }
+    if (length(sample.fraction) != nlevels(response)) {
+      stop("Error: Invalid value for sample.fraction. Expecting ", nlevels(response), " values, provided ", length(sample.fraction), ".")
+    }
+    if (!replace & any(sample.fraction * length(response) > table(response))) {
+      idx <- which(sample.fraction * length(response) > table(response))[1]
+      stop("Error: Not enough samples in class ", names(idx), 
+           "; available: ", table(response)[idx], 
+           ", requested: ", (sample.fraction * length(response))[idx], ".")
+    }
+    if (!is.null(case.weights)) {
+      stop("Error: Combination of case.weights and class-wise sampling not supported.")
+    }
+  } else {
+    if (sample.fraction <= 0 || sample.fraction > 1) {
+      stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+    }
   }
   
   ## Importance mode
