@@ -35,7 +35,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{replace}{Sample with replacement.}
 
-\item{sample.fraction}{Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement.}
+\item{sample.fraction}{Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values.}
 
 \item{case.weights}{Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.}
 

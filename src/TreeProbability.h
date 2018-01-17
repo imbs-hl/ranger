@@ -36,7 +36,8 @@
 
 class TreeProbability: public Tree {
 public:
-  TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs);
+  TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
+      std::vector<std::vector<size_t>>* sampleIDs_per_class);
 
   // Create from loaded forest
   TreeProbability(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -87,6 +88,9 @@ private:
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
+  void bootstrapClassWise();
+  void bootstrapWithoutReplacementClassWise();
+
   void cleanUpInternal() {
     if (counter != 0) {
       delete[] counter;
@@ -99,6 +103,7 @@ private:
   // Classes of the dependent variable and classIDs for responses
   std::vector<double>* class_values;
   std::vector<uint>* response_classIDs;
+  std::vector<std::vector<size_t>>* sampleIDs_per_class;
 
   // Class counts in terminal nodes. Empty for non-terminal nodes.
   std::vector<std::vector<double>> terminal_class_counts;
