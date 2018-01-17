@@ -106,8 +106,8 @@ protected:
   void bootstrapWeighted();
   void bootstrapWithoutReplacementWeighted();
 
-  void bootstrapClassWise();
-  void bootstrapWithoutReplacementClassWise();
+  virtual void bootstrapClassWise();
+  virtual void bootstrapWithoutReplacementClassWise();
 
   virtual void cleanUpInternal() = 0;
 

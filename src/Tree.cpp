@@ -96,11 +96,11 @@ void Tree::grow(std::vector<double>* variable_importance) {
   this->variable_importance = variable_importance;
 
 // Bootstrap, dependent if weighted or not and with or without replacement
-  if (case_weights->empty()) {
+  if (!case_weights->empty()) {
     if (sample_with_replacement) {
-      bootstrap();
+      bootstrapWeighted();
     } else {
-      bootstrapWithoutReplacement();
+      bootstrapWithoutReplacementWeighted();
     }
   } else if (sample_fraction->size() > 1) {
     if (sample_with_replacement) {
@@ -110,9 +110,9 @@ void Tree::grow(std::vector<double>* variable_importance) {
     }
   } else {
     if (sample_with_replacement) {
-      bootstrapWeighted();
+      bootstrap();
     } else {
-      bootstrapWithoutReplacementWeighted();
+      bootstrapWithoutReplacement();
     }
   }
 
@@ -424,12 +424,6 @@ void Tree::bootstrap() {
   }
 }
 
-// TODO: Add
-// TODO: Only for classification?
-void Tree::bootstrapClassWise() {
-
-}
-
 void Tree::bootstrapWeighted() {
 
 // Use fraction (default 63.21%) of the samples
@@ -489,12 +483,6 @@ void Tree::bootstrapWithoutReplacement() {
   }
 }
 
-// TODO: Add
-// TODO: Only for classification?
-void Tree::bootstrapWeightedClassWise() {
-
-}
-
 void Tree::bootstrapWithoutReplacementWeighted() {
 
 // Use fraction (default 63.21%) of the samples
@@ -530,3 +518,10 @@ void Tree::bootstrapWithoutReplacementWeighted() {
   }
 }
 
+void Tree::bootstrapClassWise() {
+  // Empty on purpose (virtual function only implemented in classification and probability)
+}
+
+void Tree::bootstrapWithoutReplacementClassWise() {
+  // Empty on purpose (virtual function only implemented in classification and probability)
+}
