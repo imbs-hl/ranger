@@ -118,7 +118,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   } else if (type == "quantiles") {
     stop("Error: Apply predict() to the ranger object instead of the $forest object to predict quantiles.")
   } else {
-    stop("Error: Invalid value for 'type'. Use 'response' or 'terminalNodes'.")
+    stop("Error: Invalid value for 'type'. Use 'response', 'se', 'terminalNodes', or 'quantiles'.")
   }
   
   ## Type "se" only for certain tree types
