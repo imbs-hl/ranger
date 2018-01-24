@@ -184,6 +184,8 @@ void ForestSurvival::computePredictionErrorInternal() {
   // Divide sample predictions by number of trees where sample is oob and compute summed chf for samples
   std::vector<double> sum_chf;
   sum_chf.reserve(predictions[0].size());
+  std::vector<size_t> oob_sampleIDs;
+  oob_sampleIDs.reserve(predictions[0].size());
   for (size_t i = 0; i < predictions[0].size(); ++i) {
     if (samples_oob_count[i] > 0) {
       double sum = 0;
@@ -192,12 +194,12 @@ void ForestSurvival::computePredictionErrorInternal() {
         sum += predictions[0][i][j];
       }
       sum_chf.push_back(sum);
+      oob_sampleIDs.push_back(i);
     }
   }
 
-  // Use empty vector to use all samples in computeConcordanceIndex
-  std::vector<size_t> temp;
-  overall_prediction_error = 1 - computeConcordanceIndex(data, sum_chf, dependent_varID, status_varID, temp);
+  // Use all samples which are OOB at least once
+  overall_prediction_error = 1 - computeConcordanceIndex(data, sum_chf, dependent_varID, status_varID, oob_sampleIDs);
 }
 
 // #nocov start
