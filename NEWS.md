@@ -1,3 +1,6 @@
+##### Version 0.9.3
+* Bug fixes
+
 ##### Version 0.9.2
 * Add fixed proportion sampling
 
