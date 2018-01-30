@@ -86,6 +86,12 @@ test_that("Importance p-values Altmann: No zero p-values", {
   expect_false(any(vimp[, "pvalue"] == 0))
 })
 
+test_that("Importance p-values Altmann: working with character formula", {
+  vimp <- importance_pvalues(rf_p0, method = "altmann", formula = "Species ~ .", data = iris)
+  expect_is(vimp, "matrix")
+  expect_equal(dim(vimp), c(4, 2))
+})
+
 ## Hold-out RF
 test_that("HoldoutRF working", {
   expect_is(holdout_p0, "holdoutRF")

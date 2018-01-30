@@ -139,6 +139,9 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     if (is.null(formula) || is.null(data)) {
       stop("Formula and data required for the 'altmann' method.")
     }
+    if (is.character(formula)) {
+      formula <- formula(formula)
+    }
     
     ## Permute and compute importance again
     if (x$treetype == "Survival") {
