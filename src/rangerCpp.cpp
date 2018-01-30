@@ -51,9 +51,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,
     bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
-    std::vector<double>& case_weights, bool use_case_weights, bool predict_all, 
-    bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r, 
-    uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
+    std::vector<double>& case_weights, bool use_case_weights, std::vector<double>& class_weights,
+    bool predict_all, bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, 
+    uint prediction_type_r, uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
 
   Rcpp::List result;
   Forest* forest = 0;
@@ -129,7 +129,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     // Init Ranger
     forest->initR(dependent_variable_name, data, mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
-        prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights, 
+        prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits);
 
     // Load forest object if in prediction mode
@@ -161,8 +161,15 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
         ((ForestProbability*) forest)->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
             class_values, terminal_class_counts, is_ordered);
       }
+    } else {
+      // Set class weights
+      if (treetype == TREE_CLASSIFICATION) {
+        ((ForestClassification*) forest)->setClassWeights(class_weights);
+      } else if (treetype == TREE_PROBABILITY) {
+        ((ForestProbability*) forest)->setClassWeights(class_weights);
+      }
     }
-    
+
     // Run Ranger
     forest->run(false);
     
