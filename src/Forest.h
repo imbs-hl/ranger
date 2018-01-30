@@ -56,8 +56,8 @@ public:
       std::string split_select_weights_file, std::vector<std::string>& always_split_variable_names,
       std::string status_variable_name, bool sample_with_replacement,
       std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-      std::string case_weights_file, bool predict_all, double sample_fraction, double alpha,
-      double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits);
+      std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
+      bool holdout, PredictionType prediction_type, uint num_random_splits);
   void initR(std::string dependent_variable_name, Data* input_data, uint mtry, uint num_trees,
       std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
       std::vector<std::vector<double>>& split_select_weights, std::vector<std::string>& always_split_variable_names,
@@ -87,7 +87,7 @@ public:
   void saveToFile();
   virtual void saveToFileInternal(std::ofstream& outfile) = 0;
 
-  std::vector<std::vector<std::vector<size_t>>>getChildNodeIDs() {
+  std::vector<std::vector<std::vector<size_t>>> getChildNodeIDs() {
     std::vector<std::vector<std::vector<size_t>>> result;
     for (auto& tree : trees) {
       result.push_back(tree->getChildNodeIDs());
@@ -163,7 +163,8 @@ protected:
   void growTreesInThread(uint thread_idx, std::vector<double>* variable_importance);
   void predictTreesInThread(uint thread_idx, const Data* prediction_data, bool oob_prediction);
   void predictInternalInThread(uint thread_idx);
-  void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>* importance, std::vector<double>* variance);
+  void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>* importance,
+      std::vector<double>* variance);
 
   // Load forest from file
   void loadFromFile(std::string filename);

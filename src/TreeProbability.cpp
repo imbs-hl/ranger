@@ -31,16 +31,16 @@
 #include "Data.h"
 
 TreeProbability::TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
-    std::vector<std::vector<size_t>>* sampleIDs_per_class) :
-    class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(sampleIDs_per_class), counter(
-        0), counter_per_class(0) {
+    std::vector<std::vector<size_t>>* sampleIDs_per_class, std::vector<double>* class_weights) :
+    class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(sampleIDs_per_class), class_weights(
+        class_weights), counter(0), counter_per_class(0) {
 }
 
 TreeProbability::TreeProbability(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<double>>& terminal_class_counts) :
     Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(
-        0), terminal_class_counts(terminal_class_counts), counter(0), counter_per_class(0) {
+        0), terminal_class_counts(terminal_class_counts), class_weights(0), counter(0), counter_per_class(0) {
 }
 
 TreeProbability::~TreeProbability() {
@@ -274,8 +274,8 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
       size_t class_count_right = class_counts_right[i * num_classes + j];
       size_t class_count_left = class_counts[j] - class_count_right;
 
-      sum_right += class_count_right * class_count_right;
-      sum_left += class_count_left * class_count_left;
+      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+      sum_left += (*class_weights)[j] * class_count_left * class_count_left;
     }
 
     // Decrease of impurity
@@ -343,8 +343,8 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
       class_counts_left[j] += counter_per_class[i * num_classes + j];
       size_t class_count_right = class_counts[j] - class_counts_left[j];
 
-      sum_left += class_counts_left[j] * class_counts_left[j];
-      sum_right += class_count_right * class_count_right;
+      sum_left += (*class_weights)[j] * class_counts_left[j] * class_counts_left[j];
+      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
     }
 
     // Decrease of impurity
@@ -429,8 +429,8 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
       size_t class_count_right = class_counts_right[j];
       size_t class_count_left = class_counts[j] - class_count_right;
 
-      sum_right += class_count_right * class_count_right;
-      sum_left += class_count_left * class_count_left;
+      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+      sum_left += (*class_weights)[j] * class_count_left * class_count_left;
     }
 
     // Decrease of impurity
@@ -558,8 +558,8 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
       size_t class_count_right = class_counts_right[i * num_classes + j];
       size_t class_count_left = class_counts[j] - class_count_right;
 
-      sum_right += class_count_right * class_count_right;
-      sum_left += class_count_left * class_count_left;
+      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+      sum_left += (*class_weights)[j] * class_count_left * class_count_left;
     }
 
     // Decrease of impurity
@@ -663,8 +663,8 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
       size_t class_count_right = class_counts_right[j];
       size_t class_count_left = class_counts[j] - class_count_right;
 
-      sum_right += class_count_right * class_count_right;
-      sum_left += class_count_left * class_count_left;
+      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+      sum_left += (*class_weights)[j] * class_count_left * class_count_left;
     }
 
     // Decrease of impurity
@@ -755,27 +755,27 @@ void TreeProbability::bootstrapClassWise() {
 
 void TreeProbability::bootstrapWithoutReplacementClassWise() {
   // Number of samples is sum of sample fraction * number of samples
-    size_t num_samples_inbag = 0;
-    double sum_sample_fraction = 0;
-    for (auto& s : *sample_fraction) {
-      num_samples_inbag += (size_t) num_samples * s;
-      sum_sample_fraction += s;
-    }
+  size_t num_samples_inbag = 0;
+  double sum_sample_fraction = 0;
+  for (auto& s : *sample_fraction) {
+    num_samples_inbag += (size_t) num_samples * s;
+    sum_sample_fraction += s;
+  }
 
-    // Draw samples for each class
-    for (size_t i = 0; i < sample_fraction->size(); ++i) {
-      size_t num_samples_class = (*sampleIDs_per_class)[i].size();
-      size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
+  // Draw samples for each class
+  for (size_t i = 0; i < sample_fraction->size(); ++i) {
+    size_t num_samples_class = (*sampleIDs_per_class)[i].size();
+    size_t num_samples_inbag_class = num_samples * (*sample_fraction)[i];
 
-      shuffleAndSplitAppend(sampleIDs[0], oob_sampleIDs, num_samples_class, num_samples_inbag_class,
-          (*sampleIDs_per_class)[i], random_number_generator);
-    }
+    shuffleAndSplitAppend(sampleIDs[0], oob_sampleIDs, num_samples_class, num_samples_inbag_class,
+        (*sampleIDs_per_class)[i], random_number_generator);
+  }
 
-    if (keep_inbag) {
-      // All observation are 0 or 1 times inbag
-      inbag_counts.resize(num_samples, 1);
-      for (size_t i = 0; i < oob_sampleIDs.size(); i++) {
-        inbag_counts[oob_sampleIDs[i]] = 0;
-      }
+  if (keep_inbag) {
+    // All observation are 0 or 1 times inbag
+    inbag_counts.resize(num_samples, 1);
+    for (size_t i = 0; i < oob_sampleIDs.size(); i++) {
+      inbag_counts[oob_sampleIDs[i]] = 0;
     }
+  }
 }

@@ -106,6 +106,9 @@ void ForestClassification::initInternal(std::string status_variable_name) {
     }
   }
 
+  // Set class weights all to 1
+  class_weights = std::vector<double>(class_values.size(), 1.0);
+
   // Sort data if memory saving mode
   if (!memory_saving_splitting) {
     data->sort();
@@ -115,7 +118,7 @@ void ForestClassification::initInternal(std::string status_variable_name) {
 void ForestClassification::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(new TreeClassification(&class_values, &response_classIDs, &sampleIDs_per_class));
+    trees.push_back(new TreeClassification(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
   }
 }
 
