@@ -62,6 +62,10 @@ public:
     return class_values;
   }
 
+  void setClassWeights(std::vector<double>& class_weights) {
+    this->class_weights = class_weights;
+  }
+
 protected:
   void initInternal(std::string status_variable_name);
   void growInternal();
@@ -78,6 +82,9 @@ protected:
   std::vector<double> class_values;
   std::vector<uint> response_classIDs;
   std::vector<std::vector<size_t>> sampleIDs_per_class;
+
+  // Splitting weights
+  std::vector<double> class_weights;
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;

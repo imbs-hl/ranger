@@ -87,6 +87,7 @@
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
+##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
@@ -189,7 +190,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
                    min.node.size = NULL, replace = TRUE, 
                    sample.fraction = ifelse(replace, 1, 0.632), 
-                   case.weights = NULL, splitrule = NULL, 
+                   case.weights = NULL, class.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
@@ -497,6 +498,24 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
+  ## Class weights: NULL for no weights (all 1)
+  if (is.null(class.weights)) {
+    class.weights <- rep(1, nlevels(response))
+  } else {
+    if (!(treetype %in% c(1, 9))) {
+      stop("Error: Argument class.weights only valid for classification forests.")
+    }
+    if (!is.numeric(class.weights) || any(class.weights < 0)) {
+      stop("Error: Invalid value for class.weights. Please give a vector of non-negative values.")
+    }
+    if (length(class.weights) != nlevels(response)) {
+      stop("Error: Number of class weights not equal to number of classes.")
+    }
+
+    ## Reorder (C++ expects order as appearing in the data)
+    class.weights <- class.weights[unique(as.numeric(response))]
+  }
+  
   ## Split select weights: NULL for no weights
   if (is.null(split.select.weights)) {
     split.select.weights <- list(c(0,0))
@@ -675,8 +694,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
-                      save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
+                      save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.data, use.sparse.data)
   
   if (length(result) == 0) {

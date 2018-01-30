@@ -289,6 +289,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   minprop <- 0
   case.weights <- c(0, 0)
   use.case.weights <- FALSE
+  class.weights <- c(0, 0)
   keep.inbag <- FALSE
   sample.fraction <- 1
   holdout <- FALSE
@@ -311,8 +312,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
-                      case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                      alpha, minprop, holdout, prediction.type, num.random.splits, sparse.data, use.sparse.data)
+                      case.weights, use.case.weights, class.weights, 
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
+                      prediction.type, num.random.splits, sparse.data, use.sparse.data)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

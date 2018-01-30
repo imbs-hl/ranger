@@ -7,12 +7,12 @@
 ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   importance = "none", write.forest = TRUE, probability = FALSE,
   min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
-  1, 0.632), case.weights = NULL, splitrule = NULL, num.random.splits = 1,
-  alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
-  always.split.variables = NULL, respect.unordered.factors = NULL,
-  scale.permutation.importance = FALSE, keep.inbag = FALSE,
-  holdout = FALSE, quantreg = FALSE, num.threads = NULL,
-  save.memory = FALSE, verbose = TRUE, seed = NULL,
+  1, 0.632), case.weights = NULL, class.weights = NULL, splitrule = NULL,
+  num.random.splits = 1, alpha = 0.5, minprop = 0.1,
+  split.select.weights = NULL, always.split.variables = NULL,
+  respect.unordered.factors = NULL, scale.permutation.importance = FALSE,
+  keep.inbag = FALSE, holdout = FALSE, quantreg = FALSE,
+  num.threads = NULL, save.memory = FALSE, verbose = TRUE, seed = NULL,
   dependent.variable.name = NULL, status.variable.name = NULL,
   classification = NULL)
 }
@@ -38,6 +38,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{sample.fraction}{Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values.}
 
 \item{case.weights}{Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.}
+
+\item{class.weights}{Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.}
 
 \item{splitrule}{Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
 
