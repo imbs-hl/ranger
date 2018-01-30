@@ -35,7 +35,7 @@
 class TreeClassification: public Tree {
 public:
   TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
-      std::vector<std::vector<size_t>>* sampleIDs_per_class);
+      std::vector<std::vector<size_t>>* sampleIDs_per_class, std::vector<double>* class_weights);
 
   // Create from loaded forest
   TreeClassification(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -97,6 +97,9 @@ private:
   std::vector<double>* class_values;
   std::vector<uint>* response_classIDs;
   std::vector<std::vector<size_t>>* sampleIDs_per_class;
+
+  // Splitting weights
+  std::vector<double>* class_weights;
 
   size_t* counter;
   size_t* counter_per_class;
