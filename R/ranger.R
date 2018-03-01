@@ -468,6 +468,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (!is.null(split.select.weights)) {
       stop("Corrected impurity importance not supported in combination with split.select.weights.")
     }
+    if (respect.unordered.factors == "order") {
+      stop("Corrected impurity importance not supported in combination with ordering unordered factors, consider 'ignore' or 'partition'.")
+    }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {
       importance.mode <- 2

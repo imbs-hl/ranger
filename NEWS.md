@@ -1,3 +1,6 @@
+##### Version 0.9.5
+* Bug fixes
+
 ##### Version 0.9.4
 * Add class-weighted Gini splitting
 
