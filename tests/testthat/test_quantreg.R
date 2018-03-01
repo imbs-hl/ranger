@@ -28,6 +28,12 @@ test_that("Working for single new observation", {
   expect_silent(pred <- predict(rf.quant, mtcars[27, ], type = "quantiles"))
 })
 
+test_that("Working for constant variables", {
+  dat <- data.frame(x1 = 1, x2 = seq(1,10), y = seq(1,10))
+  rf <- ranger(y ~ ., dat, quantreg = TRUE)
+  expect_silent(predict(rf, dat, type = "quantiles"))
+})
+
 test_that("Error message if no regression forest", {
   rf <- ranger(Species ~ ., iris, num.trees = 5)
   expect_error(predict(rf, iris, type = "quantiles"), 

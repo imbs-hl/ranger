@@ -781,7 +781,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Prepare quantile prediction
   if (quantreg) {
-    terminal.nodes <- predict(result, data, type = "terminalNodes")$predictions
+    terminal.nodes <- predict(result, data, type = "terminalNodes")$predictions + 1
     n <- result$num.samples
     result$random.node.values <- matrix(nrow = max(terminal.nodes), ncol = num.trees)
     
