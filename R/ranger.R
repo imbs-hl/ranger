@@ -29,7 +29,7 @@
 ##' Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 ##' Classification, regression, and survival forests are supported.
 ##' Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).
-##' Includes implementations of extremely randomized trees (Geurts et al. 2006) and qunatile regression forests (Meinshausen 2006). 
+##' Includes implementations of extremely randomized trees (Geurts et al. 2006) and quantile regression forests (Meinshausen 2006). 
 ##'
 ##' The tree type is determined by the type of the dependent variable.
 ##' For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
@@ -286,7 +286,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Unsupported type of dependent variable.")
   }
   
-  ## Qunatile prediction only for regression
+  ## Quantile prediction only for regression
   if (quantreg && treetype != 3) {
     stop("Error: Quantile prediction implemented only for regression outcomes.")
   }
