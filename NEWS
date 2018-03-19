@@ -1,3 +1,6 @@
+##### Version 0.9.6
+* Better 'order' mode for unordered factors for multiclass and survival
+
 ##### Version 0.9.5
 * Bug fixes
 

@@ -344,20 +344,35 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       ## Numeric response
       if (is.factor(response)) {
         num.response <- as.numeric(response)
-      } else if (!is.null(dim(response))) {
-        num.response <- response[, 1]
       } else {
         num.response <- response
       }
 
       ## Recode each column
       data.selected[recode.idx] <- lapply(data.selected[recode.idx], function(x) {
-        ## Order factor levels
-        means <- aggregate(num.response~x, FUN=mean)
-        levels.ordered <- means$x[order(means$num.response)]
+        if (!is.factor(x)) {
+          x <- as.factor(x)
+        } 
+        
+        if ("Surv" %in% class(response)) {
+          ## Use median survival if available or largest quantile available in all strata if median not available
+          levels.ordered <- largest.quantile(response ~ x)
+          
+          ## Get all levels not in node
+          levels.missing <- setdiff(levels(x), levels.ordered)
+          levels.ordered <- c(levels.missing, levels.ordered)
+        } else if (is.factor(response) & nlevels(response) > 2) {
+          levels.ordered <- pca.order(y = response, x = x)
+        } else {
+          ## Order factor levels by mean response
+          means <- sapply(levels(x), function(y) {
+            mean(num.response[x == y])
+          })
+          levels.ordered <- as.character(levels(x)[order(means)])
+        }
         
         ## Return reordered factor
-        factor(x, levels = levels.ordered)
+        factor(x, levels = levels.ordered, ordered = TRUE)
       })
       
       ## Save levels
@@ -663,13 +678,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Warning for experimental 'order' splitting 
   if (respect.unordered.factors == "order") {
-    if (treetype == 5) {
-      warning("Warning: The 'order' mode for unordered factor handling for survival outcomes is experimental.")
-    } else if (treetype == 1 || treetype == 9) {
-      if (nlevels(response) > 2) {
-        warning("Warning: The 'order' mode for unordered factor handling for multiclass classification is experimental.")
-      }
-    } else if (treetype == 3 && splitrule == "maxstat") {
+    if (treetype == 3 && splitrule == "maxstat") {
       warning("Warning: The 'order' mode for unordered factor handling with the 'maxstat' splitrule is experimental.")
     }
   }
@@ -834,11 +843,3 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   return(result)
 }
 
-integer.to.factor <- function(x, labels) {
-  factor(x, levels = seq_along(labels), labels = labels)
-}
-
-## See help(sample)
-save.sample <- function(x, ...) {
-  x[sample.int(length(x), ...)]
-}
