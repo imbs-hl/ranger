@@ -56,7 +56,7 @@ pca.order <- function(y, x) {
 # Compute median survival if available or largest quantile available in all strata if median not available.
 largest.quantile <- function(formula) {
   ## Fit survival model
-  fit <- survfit(formula)
+  fit <- survival::survfit(formula)
   smry <- summary(fit)
   
   ## Use median survival if available or largest quantile available in all strata if median not available
