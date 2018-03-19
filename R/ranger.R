@@ -56,8 +56,8 @@
 ##' Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
 ##' For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
 ##' For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
-##' For multiclass classification and survival outcomes, 'order' is experimental and should be used with care.
-##' The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels. 
+##' For multiclass classification the factor levels are ordered by the first principal component of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available).
+##' The use of 'order' is recommended, as it computationally fast and can handle an unlimited number of factor levels. 
 ##' Note that the factors are only reordered once and not again in each split. 
 ##'
 ##' The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
@@ -182,7 +182,8 @@
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
 ##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}.
 ##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
-##'   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{http://doi.org/10.1198/106186008X344522}.
+##'   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{http://dx.doi.org/10.1198/106186008X344522}.
+##'   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{http://dx.doi.org/10.1023/A:1009869804967}.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
 ##' @useDynLib ranger, .registration = TRUE
