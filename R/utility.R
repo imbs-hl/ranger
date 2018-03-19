@@ -40,11 +40,7 @@ save.sample <- function(x, ...) {
 # Order factor levels with PCA approach 
 # Reference: Coppersmith, D., Hong, S.J. & Hosking, J.R. (1999) Partitioning Nominal Attributes in Decision Trees. Data Min Knowl Discov 3:197. \url{https://doi.org/10.1023/A:1009869804967}.
 pca.order <- function(y, x) {
-  if (is.factor(x)) {
-    x <- droplevels(x)
-  } else {
-    x <- as.factor(x)
-  }
+  x <- droplevels(x)
   
   ## Create contingency table of the nominal outcome with the nominal covariate
   N <- table(droplevels(y), x)

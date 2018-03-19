@@ -350,6 +350,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
       ## Recode each column
       data.selected[recode.idx] <- lapply(data.selected[recode.idx], function(x) {
+        if (!is.factor(x)) {
+          x <- as.factor(x)
+        } 
+        
         if ("Surv" %in% class(response)) {
           ## Use median survival if available or largest quantile available in all strata if median not available
           levels.ordered <- largest.quantile(response ~ x)
@@ -361,8 +365,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           levels.ordered <- pca.order(y = response, x = x)
         } else {
           ## Order factor levels by mean response
-          means <- aggregate(num.response~x, FUN=mean)
-          levels.ordered <- means$x[order(means$num.response)]
+          means <- sapply(levels(x), function(y) {
+            mean(num.response[x == y])
+          })
+          levels.ordered <- as.character(levels(x)[order(means)])
         }
         
         ## Return reordered factor
