@@ -56,7 +56,7 @@
 ##' Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
 ##' For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
 ##' For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
-##' For multiclass classification the factor levels are ordered by the first principal component of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available).
+##' For multiclass classification the factor levels are ordered by the first principal component of the weighted covariance matrix of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available).
 ##' The use of 'order' is recommended, as it computationally fast and can handle an unlimited number of factor levels. 
 ##' Note that the factors are only reordered once and not again in each split. 
 ##'
