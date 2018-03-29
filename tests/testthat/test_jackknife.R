@@ -192,3 +192,10 @@ test_that("standard error is working for tree subsets, infjack", {
   
   expect_lt(mean(pred50$se), mean(pred5$se))
 })
+
+test_that("No error for se estimation for many observations", {
+  n <- 60000
+  dat <- data.frame(y = rbinom(n, 1, .5), x = rbinom(n, 1, .5))
+  rf <- ranger(y ~ x, dat, num.trees = 2, keep.inbag = TRUE)
+  expect_silent(predict(rf, dat, type = "se", se.method = "infjack"))
+})
