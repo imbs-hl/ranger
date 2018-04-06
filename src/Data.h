@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef DATA_H_
 #define DATA_H_
@@ -94,6 +94,8 @@ public:
   }
 
   void sort();
+
+  void orderSnpLevels(size_t dependent_varID);
 
   const std::vector<std::string>& getVariableNames() const {
     return variable_names;
@@ -194,6 +196,9 @@ protected:
 
   // Permuted samples for corrected impurity importance
   std::vector<size_t> permuted_sampleIDs;
+
+  // Order of 0/1/2 for ordered splitting
+  std::vector<std::vector<size_t>> snp_order;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(Data);
