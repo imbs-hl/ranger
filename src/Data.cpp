@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <fstream>
 #include <sstream>
@@ -19,8 +19,8 @@ R package "ranger" under GPL3 license.
 #include "utility.h"
 
 Data::Data() :
-    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(
-        0), max_num_unique_values(0) {
+    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
+        0) {
 }
 
 Data::~Data() {
@@ -212,5 +212,34 @@ void Data::sort() {
     if (unique_values.size() > max_num_unique_values) {
       max_num_unique_values = unique_values.size();
     }
+  }
+}
+
+// TODO: Use in splitting (get etc.)
+// TODO: How to save for prediction?
+void Data::orderSnpLevels(size_t dependent_varID) {
+  // Reserve space
+  size_t num_snps = num_cols - num_cols_no_snp;
+  snp_order.resize(num_snps, std::vector<size_t>(3));
+
+  // For each SNP
+  for (size_t col = 0; col < num_snps; ++col) {
+    // TODO: What to do for non-classification?
+    // Order by mean response
+    std::vector<double> means(3, 0);
+    std::vector<double> counts(3, 0);
+    for (size_t row = 0; row < num_rows; ++row) {
+      size_t idx = col * num_rows_rounded + row;
+      size_t value = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      means[value] += get(row, dependent_varID);
+      ++counts[value];
+    }
+
+    for (size_t value = 0; value < 3; ++value) {
+      means[value] /= counts[value];
+    }
+
+    // Save order
+    snp_order[col] = order(means, false);
   }
 }

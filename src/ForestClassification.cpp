@@ -96,6 +96,10 @@ void ForestClassification::initInternal(std::string status_variable_name) {
   if (!memory_saving_splitting) {
     data->sort();
   }
+
+  // TODO: Do only if "order" split and SNP data used
+  // TODO: Also do for other tree types!
+  data->orderSnpLevels(dependent_varID);
 }
 
 void ForestClassification::growInternal() {
