@@ -58,9 +58,14 @@ public:
 
       // TODO: Better way to treat missing values?
       if (result > 2) {
-        return 0;
-      } else {
+        result = 0;
+      }
+
+      // Order SNPs
+      if (snp_order.empty()) {
         return result;
+      } else {
+        return snp_order[col - num_cols_no_snp][result];
       }
     }
   }
@@ -95,7 +100,7 @@ public:
 
   void sort();
 
-  void orderSnpLevels(size_t dependent_varID);
+  void orderSnpLevels(std::string dependent_variable_name);
 
   const std::vector<std::string>& getVariableNames() const {
     return variable_names;
@@ -172,6 +177,14 @@ public:
     }
     return varID;
   }
+
+  const std::vector<std::vector<size_t>>& getSnpOrder() const {
+    return snp_order;
+  }
+
+  void setSnpOrder(std::vector<std::vector<size_t>>& snp_order) {
+      this->snp_order = snp_order;
+    }
 
 protected:
   std::vector<std::string> variable_names;

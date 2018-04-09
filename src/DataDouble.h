@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef DATADOUBLE_H_
 #define DATADOUBLE_H_
@@ -40,8 +40,19 @@ public:
     } else {
       // Get data out of snp storage. -1 because of GenABEL coding.
       size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      double result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
-      return result;
+      size_t result = ((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1;
+
+      // TODO: Better way to treat missing values?
+      if (result > 2) {
+        result = 0;
+      }
+
+      // Order SNPs
+      if (snp_order.empty()) {
+        return result;
+      } else {
+        return snp_order[col - num_cols_no_snp][result];
+      }
     }
   }
 

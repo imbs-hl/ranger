@@ -53,7 +53,8 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
     std::vector<double>& case_weights, bool use_case_weights, std::vector<double>& class_weights,
     bool predict_all, bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, 
-    uint prediction_type_r, uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
+    uint prediction_type_r, uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data, 
+    bool order_snps) {
 
   Rcpp::List result;
   Forest* forest = 0;
@@ -101,6 +102,17 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     // If there is snp data, add it
     if (snp_data.nrow() > 1) {
       data->addSnpData(snp_data.begin(), snp_data.ncol());
+      
+      // Order SNP levels if in "order" splitting
+      if (!prediction_mode & order_snps) {
+        data->orderSnpLevels(dependent_variable_name);
+      }
+      
+      // Load SNP order if available
+      if (prediction_mode && loaded_forest.containsElementNamed("snp.order")) {
+        std::vector<std::vector<size_t>> snp_order = loaded_forest["snp.order"];
+        data->setSnpOrder(snp_order);
+      }
     }
 
     switch (treetype) {
@@ -225,7 +237,11 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       forest_object.push_back(forest->getSplitVarIDs(), "split.varIDs");
       forest_object.push_back(forest->getSplitValues(), "split.values");
       forest_object.push_back(forest->getIsOrderedVariable(), "is.ordered");
-
+      
+      if (snp_data.nrow() > 1 && order_snps) {
+        forest_object.push_back(forest->getSnpOrder(), "snp.order");
+      }
+      
       if (treetype == TREE_CLASSIFICATION) {
         ForestClassification* temp = (ForestClassification*) forest;
         forest_object.push_back(temp->getClassValues(), "class.values");
