@@ -27,6 +27,9 @@ public:
     this->num_cols_no_snp = num_cols;
   }
   virtual ~DataDouble();
+  
+  DataDouble(const DataDouble&)            = delete;
+  DataDouble& operator=(const DataDouble&) = delete;
 
   double get(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
@@ -55,8 +58,6 @@ public:
 
 private:
   double* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataDouble);
 };
 
 #endif /* DATADOUBLE_H_ */

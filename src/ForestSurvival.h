@@ -23,6 +23,9 @@ class ForestSurvival: public Forest {
 public:
   ForestSurvival();
   virtual ~ForestSurvival();
+  
+  ForestSurvival(const ForestSurvival&)            = delete;
+  ForestSurvival& operator=(const ForestSurvival&) = delete;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -61,8 +64,6 @@ private:
   size_t status_varID;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
-
-  DISALLOW_COPY_AND_ASSIGN(ForestSurvival);
 };
 
 #endif /* FORESTSURVIVAL_H_ */

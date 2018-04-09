@@ -29,6 +29,9 @@ public:
       std::vector<double>& split_values);
 
   virtual ~Tree();
+  
+  Tree(const Tree&)            = delete;
+  Tree& operator=(const Tree&) = delete;
 
   void init(Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
@@ -160,9 +163,6 @@ protected:
   double alpha;
   double minprop;
   uint num_random_splits;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(Tree);
 };
 
 #endif /* TREE_H_ */

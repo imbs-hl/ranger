@@ -22,6 +22,9 @@ class ForestRegression: public Forest {
 public:
   ForestRegression();
   virtual ~ForestRegression();
+  
+  ForestRegression(const ForestRegression&)            = delete;
+  ForestRegression& operator=(const ForestRegression&) = delete;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -39,8 +42,6 @@ private:
   void writePredictionFile();
   void saveToFileInternal(std::ofstream& outfile);
   void loadFromFileInternal(std::ifstream& infile);
-
-  DISALLOW_COPY_AND_ASSIGN(ForestRegression);
 };
 
 #endif /* FORESTREGRESSION_H_ */

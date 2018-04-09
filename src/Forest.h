@@ -32,6 +32,9 @@ public:
   Forest();
   virtual ~Forest();
 
+  Forest(const Forest&)            = delete;
+  Forest& operator=(const Forest&) = delete;
+
   // Init from c++ main or Rcpp from R
   void initCpp(std::string dependent_variable_name, MemoryMode memory_mode, std::string input_file, uint mtry,
       std::string output_prefix, uint num_trees, std::ostream* verbose_out, uint seed, uint num_threads,
@@ -229,9 +232,6 @@ protected:
   size_t aborted_threads;
   bool aborted;
 #endif
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(Forest);
 };
 
 #endif /* FOREST_H_ */

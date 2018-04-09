@@ -45,6 +45,9 @@ public:
     this->num_cols_no_snp = num_cols;
   }
   virtual ~DataSparse();
+  
+  DataSparse(const DataSparse&)            = delete;
+  DataSparse& operator=(const DataSparse&) = delete;
 
   double get(size_t row, size_t col) const {
     return data->coeff(row, col);
@@ -60,8 +63,6 @@ public:
 
 private:
   Eigen::SparseMatrix<double>* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataSparse);
 };
 
 #endif /* DATASPARSE_H_ */
