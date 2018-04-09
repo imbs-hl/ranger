@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeSurvival: public Tree {
 public:
   TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID, std::vector<size_t>* response_timepointIDs);
@@ -103,5 +105,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(TreeSurvival);
 };
+
+} // namespace ranger
 
 #endif /* TREESURVIVAL_H_ */

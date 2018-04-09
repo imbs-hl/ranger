@@ -28,6 +28,8 @@ http://www.imbs-luebeck.de
 
 #include <Rcpp.h>
 
+namespace ranger {
+
 // Count number of elements in reference smaller than values
 //[[Rcpp::export]]
 Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector reference) {
@@ -37,3 +39,5 @@ Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector r
     result[i] = std::lower_bound(reference.begin(), reference.end(), values[i]) - reference.begin();
   return result;
 }
+
+} // namespace ranger

@@ -22,6 +22,8 @@ R package "ranger" under GPL3 license.
 #include "TreeClassification.h"
 #include "Data.h"
 
+namespace ranger {
+
 ForestClassification::ForestClassification() {
 }
 
@@ -321,3 +323,5 @@ void ForestClassification::loadFromFileInternal(std::ifstream& infile) {
   }
 }
 // #nocov end
+
+} // namespace ranger

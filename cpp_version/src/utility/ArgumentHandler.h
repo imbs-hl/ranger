@@ -18,6 +18,8 @@ R package "ranger" under GPL3 license.
 
 #include "globals.h"
 
+namespace ranger {
+
 /*
  * Encapsulate getopt.
  * To add an option:
@@ -86,5 +88,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(ArgumentHandler);
 };
+
+} // namespace ranger
 
 #endif /* ARGUMENTHANDLER_H_ */

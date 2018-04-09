@@ -18,6 +18,8 @@ R package "ranger" under GPL3 license.
 #include "TreeRegression.h"
 #include "Data.h"
 
+namespace ranger {
+
 ForestRegression::ForestRegression() {
 }
 
@@ -241,3 +243,5 @@ void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
   }
 }
 // #nocov end
+
+} // namespace ranger

@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "Forest.h"
 #include "TreeProbability.h"
 
+namespace ranger {
+
 class ForestProbability: public Forest {
 public:
   ForestProbability();
@@ -75,5 +77,7 @@ protected:
 private:
   DISALLOW_COPY_AND_ASSIGN(ForestProbability);
 };
+
+} // namespace ranger
 
 #endif /* FORESTPROBABILITY_H_ */

@@ -19,6 +19,8 @@ R package "ranger" under GPL3 license.
 #include "Forest.h"
 #include "TreeSurvival.h"
 
+namespace ranger {
+
 class ForestSurvival: public Forest {
 public:
   ForestSurvival();
@@ -64,5 +66,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(ForestSurvival);
 };
+
+} // namespace ranger
 
 #endif /* FORESTSURVIVAL_H_ */

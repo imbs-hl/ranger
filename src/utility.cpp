@@ -25,6 +25,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts) {
 
   result.reserve(num_parts + 1);
@@ -575,3 +577,5 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector
 
   return num_samples_left;
 }
+
+} // namespace ranger

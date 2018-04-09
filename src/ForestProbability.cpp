@@ -16,6 +16,8 @@ R package "ranger" under GPL3 license.
 #include "TreeProbability.h"
 #include "Data.h"
 
+namespace ranger {
+
 ForestProbability::ForestProbability() {
 }
 
@@ -316,3 +318,5 @@ void ForestProbability::loadFromFileInternal(std::ifstream& infile) {
   }
 }
 // #nocov end
+
+} // namespace ranger
