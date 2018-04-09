@@ -26,6 +26,9 @@ public:
   DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, bool& error);
   virtual ~DataChar();
 
+  DataChar(const DataChar&)            = delete;
+  DataChar& operator=(const DataChar&) = delete;
+
   double get(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
@@ -58,8 +61,6 @@ public:
 
 private:
   char* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataChar);
 };
 
 #endif /* DATACHAR_H_ */

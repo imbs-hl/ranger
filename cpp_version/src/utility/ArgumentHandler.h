@@ -36,6 +36,9 @@ public:
   ArgumentHandler(int argc, char **argv);
   virtual ~ArgumentHandler();
 
+  ArgumentHandler(const ArgumentHandler&)            = delete;
+  ArgumentHandler& operator=(const ArgumentHandler&) = delete;
+
   // Get arguments and catch conversion exceptions
   int processArguments();
 
@@ -83,8 +86,6 @@ private:
 
   int argc;
   char** argv;
-
-  DISALLOW_COPY_AND_ASSIGN(ArgumentHandler);
 };
 
 #endif /* ARGUMENTHANDLER_H_ */

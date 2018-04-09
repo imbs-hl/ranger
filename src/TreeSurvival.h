@@ -26,6 +26,9 @@ public:
 
   virtual ~TreeSurvival();
 
+  TreeSurvival(const TreeSurvival&)            = delete;
+  TreeSurvival& operator=(const TreeSurvival&) = delete;
+
   void allocateMemory();
 
   void appendToFileInternal(std::ofstream& file);
@@ -100,8 +103,6 @@ private:
   // Fields to save to while tree growing
   size_t* num_deaths;
   size_t* num_samples_at_risk;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeSurvival);
 };
 
 #endif /* TREESURVIVAL_H_ */
