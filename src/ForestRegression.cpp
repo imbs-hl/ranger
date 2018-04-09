@@ -140,7 +140,9 @@ void ForestRegression::computePredictionErrorInternal() {
 
 // #nocov start
 void ForestRegression::writeOutputInternal() {
-  *verbose_out << "Tree type:                         " << "Regression" << std::endl;
+  if (verbose_out) {
+    *verbose_out << "Tree type:                         " << "Regression" << std::endl;
+  }
 }
 
 void ForestRegression::writeConfusionFile() {
@@ -157,7 +159,7 @@ void ForestRegression::writeConfusionFile() {
   outfile << "Overall OOB prediction error (MSE): " << overall_prediction_error << std::endl;
 
   outfile.close();
-  *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
+  if (verbose_out) *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
 }
 
 void ForestRegression::writePredictionFile() {
@@ -192,7 +194,7 @@ void ForestRegression::writePredictionFile() {
     }
   }
 
-  *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
+  if (verbose_out) *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
 void ForestRegression::saveToFileInternal(std::ofstream& outfile) {
