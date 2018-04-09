@@ -38,7 +38,19 @@ public:
     } else {
       // Get data out of snp storage. -1 because of GenABEL coding.
       size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      return (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      size_t result = ((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1;
+
+      // TODO: Better way to treat missing values?
+      if (result > 2) {
+        result = 0;
+      }
+
+      // Order SNPs
+      if (snp_order.empty()) {
+        return result;
+      } else {
+        return snp_order[col - num_cols_no_snp][result];
+      }
     }
   }
 

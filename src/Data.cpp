@@ -215,16 +215,16 @@ void Data::sort() {
   }
 }
 
-// TODO: Use in splitting (get etc.)
-// TODO: How to save for prediction?
-void Data::orderSnpLevels(size_t dependent_varID) {
+// TODO: Implement ordering for multiclass and survival
+void Data::orderSnpLevels(std::string dependent_variable_name) {
+  size_t dependent_varID = getVariableID(dependent_variable_name);
+
   // Reserve space
   size_t num_snps = num_cols - num_cols_no_snp;
   snp_order.resize(num_snps, std::vector<size_t>(3));
 
   // For each SNP
   for (size_t col = 0; col < num_snps; ++col) {
-    // TODO: What to do for non-classification?
     // Order by mean response
     std::vector<double> means(3, 0);
     std::vector<double> counts(3, 0);

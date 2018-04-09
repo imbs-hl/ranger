@@ -342,6 +342,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
         names.selected != paste0("Surv(", dependent.variable.name, ", ", status.variable.name, ")")
       recode.idx <- independent.idx & (character.idx | (factor.idx & !ordered.idx))
 
+      if (any(recode.idx) & (importance == "impurity_corrected" || importance == "impurity_unbiased")) {
+        stop("Corrected impurity importance not supported in combination with ordering unordered factors, consider 'ignore' or 'partition'.")
+      }
+      
       ## Numeric response
       if (is.factor(response)) {
         num.response <- as.numeric(response)
@@ -488,9 +492,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 5
     if (!is.null(split.select.weights)) {
       stop("Corrected impurity importance not supported in combination with split.select.weights.")
-    }
-    if (respect.unordered.factors == "order") {
-      stop("Corrected impurity importance not supported in combination with ordering unordered factors, consider 'ignore' or 'partition'.")
     }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {
@@ -682,7 +683,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (treetype == 3 && splitrule == "maxstat") {
       warning("Warning: The 'order' mode for unordered factor handling with the 'maxstat' splitrule is experimental.")
     }
+    if (gwa.mode & ((treetype %in% c(1,9) & nlevels(response) > 2) | treetype == 5)) {
+      stop("Error: Ordering of SNPs currently only implemented for regression and binary outcomes.")
+    }
   }
+  
 
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
@@ -702,6 +707,13 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     use.sparse.data <- FALSE
   }
   
+  if (respect.unordered.factors == "order"){
+    order.snps <- TRUE
+  } else {
+    order.snps <- FALSE
+  }
+  
+  
   ## Clean up
   rm("data.selected")
 
@@ -714,7 +726,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data)
+                      num.random.splits, sparse.data, use.sparse.data, order.snps)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
