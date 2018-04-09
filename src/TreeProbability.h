@@ -27,13 +27,13 @@ public:
       std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
       std::vector<std::vector<double>>& terminal_class_counts);
 
-  virtual ~TreeProbability();
+  virtual ~TreeProbability() override;
 
-  void allocateMemory();
+  void allocateMemory() override;
 
   void addToTerminalNodes(size_t nodeID);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);
-  void appendToFileInternal(std::ofstream& file);
+  void appendToFileInternal(std::ofstream& file) override;
 
   const std::vector<double>& getPrediction(size_t sampleID) const {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[sampleID];
@@ -49,10 +49,10 @@ public:
   }
 
 private:
-  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void createEmptyNodeInternal();
+  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
+  void createEmptyNodeInternal() override;
 
-  double computePredictionAccuracyInternal();
+  double computePredictionAccuracyInternal() override;
 
   // Called by splitNodeInternal(). Sets split_varIDs and split_values.
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
@@ -71,10 +71,10 @@ private:
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
-  void bootstrapClassWise();
-  void bootstrapWithoutReplacementClassWise();
+  void bootstrapClassWise() override;
+  void bootstrapWithoutReplacementClassWise() override;
 
-  void cleanUpInternal() {
+  void cleanUpInternal() override {
     if (counter != 0) {
       delete[] counter;
     }
