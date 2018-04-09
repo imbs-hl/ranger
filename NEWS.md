@@ -1,3 +1,6 @@
+##### Version 0.9.8
+* Add 'order' mode for unordered factors for GenABEL SNP data (binary classification and regression)
+
 ##### Version 0.9.7
 * Change license of C++ core to MIT (R package is still GPL3)
 
