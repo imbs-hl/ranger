@@ -186,7 +186,9 @@ void ForestProbability::computePredictionErrorInternal() {
 
 // #nocov start
 void ForestProbability::writeOutputInternal() {
-  *verbose_out << "Tree type:                         " << "Probability estimation" << std::endl;
+  if (verbose_out) {
+    *verbose_out << "Tree type:                         " << "Probability estimation" << std::endl;
+  }
 }
 
 void ForestProbability::writeConfusionFile() {
@@ -203,7 +205,7 @@ void ForestProbability::writeConfusionFile() {
   outfile << "Overall OOB prediction error (MSE): " << overall_prediction_error << std::endl;
 
   outfile.close();
-  *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
+  if (verbose_out) *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
 }
 
 void ForestProbability::writePredictionFile() {
@@ -245,7 +247,7 @@ void ForestProbability::writePredictionFile() {
     }
   }
 
-  *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
+  if (verbose_out) *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
 void ForestProbability::saveToFileInternal(std::ofstream& outfile) {
