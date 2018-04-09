@@ -6,6 +6,7 @@ context("genabel")
 if (!requireNamespace("GenABEL", quietly = TRUE)) {
   stop("Package GenABEL is required for testing ranger completely. Please install it.", call. = FALSE)
 } else {
+  library(GenABEL)
   dat.gwaa <- readRDS("../test_gwaa.Rds")
   rg.gwaa <- ranger(CHD ~ ., data = dat.gwaa, verbose = FALSE, write.forest = TRUE)
 }
