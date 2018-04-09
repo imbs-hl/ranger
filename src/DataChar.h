@@ -24,9 +24,9 @@ class DataChar: public Data {
 public:
   DataChar();
   DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, bool& error);
-  virtual ~DataChar();
+  virtual ~DataChar() override;
 
-  double get(size_t row, size_t col) const {
+  double get(size_t row, size_t col) const override {
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
@@ -42,11 +42,11 @@ public:
     }
   }
 
-  void reserveMemory() {
+  void reserveMemory() override {
     data = new char[num_cols * num_rows];
   }
 
-  void set(size_t col, size_t row, double value, bool& error) {
+  void set(size_t col, size_t row, double value, bool& error) override {
     if (value > CHAR_MAX || value < CHAR_MIN) {
       error = true;
     }
