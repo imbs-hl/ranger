@@ -19,6 +19,8 @@ R package "ranger" under GPL3 license.
 #include "ForestSurvival.h"
 #include "Data.h"
 
+namespace ranger {
+
 ForestSurvival::ForestSurvival() :
     status_varID(0), response_timepointIDs(0) {
 }
@@ -339,3 +341,4 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
 }
 // #nocov end
 
+} // namespace ranger

@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class Tree {
 public:
   Tree();
@@ -164,5 +166,7 @@ protected:
 private:
   DISALLOW_COPY_AND_ASSIGN(Tree);
 };
+
+} // namespace ranger
 
 #endif /* TREE_H_ */

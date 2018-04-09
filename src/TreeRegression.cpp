@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "TreeRegression.h"
 #include "Data.h"
 
+namespace ranger {
+
 TreeRegression::TreeRegression() :
     counter(0), sums(0) {
 }
@@ -695,3 +697,4 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
   }
 }
 
+} // namespace ranger
