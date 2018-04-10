@@ -22,10 +22,12 @@ namespace ranger {
 
 class ForestRegression: public Forest {
 public:
-  ForestRegression();
+  ForestRegression() = default;
+  
   ForestRegression(const ForestRegression&)            = delete;
   ForestRegression& operator=(const ForestRegression&) = delete;
-  virtual ~ForestRegression() override;
+  
+  virtual ~ForestRegression() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,

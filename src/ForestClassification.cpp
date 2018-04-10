@@ -24,12 +24,6 @@ R package "ranger" under GPL3 license.
 
 namespace ranger {
 
-ForestClassification::ForestClassification() {
-}
-
-ForestClassification::~ForestClassification() {
-}
-
 void ForestClassification::loadForest(size_t dependent_varID, size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,

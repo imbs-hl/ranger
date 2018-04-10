@@ -24,10 +24,12 @@ namespace ranger {
 
 class ForestProbability: public Forest {
 public:
-  ForestProbability();
+  ForestProbability() = default;
+  
   ForestProbability(const ForestProbability&)            = delete;
   ForestProbability& operator=(const ForestProbability&) = delete;
-  virtual ~ForestProbability() override;
+  
+  virtual ~ForestProbability() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
