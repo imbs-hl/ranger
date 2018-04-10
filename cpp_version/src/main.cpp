@@ -13,6 +13,7 @@ R package "ranger" under GPL3 license.
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <memory>
 
 #include "globals.h"
 #include "ArgumentHandler.h"
@@ -20,13 +21,14 @@ R package "ranger" under GPL3 license.
 #include "ForestRegression.h"
 #include "ForestSurvival.h"
 #include "ForestProbability.h"
+#include "utility.h"
 
 using namespace ranger;
 
 int main(int argc, char **argv) {
 
   ArgumentHandler arg_handler(argc, argv);
-  Forest* forest = 0;
+  std::unique_ptr<Forest> forest {};
   try {
 
     // Handle command line arguments
@@ -39,19 +41,19 @@ int main(int argc, char **argv) {
     switch (arg_handler.treetype) {
     case TREE_CLASSIFICATION:
       if (arg_handler.probability) {
-        forest = new ForestProbability;
+        forest = make_unique<ForestProbability>();
       } else {
-        forest = new ForestClassification;
+        forest = make_unique<ForestClassification>();
       }
       break;
     case TREE_REGRESSION:
-      forest = new ForestRegression;
+      forest = make_unique<ForestRegression>();
       break;
     case TREE_SURVIVAL:
-      forest = new ForestSurvival;
+      forest = make_unique<ForestSurvival>();
       break;
     case TREE_PROBABILITY:
-      forest = new ForestProbability;
+      forest = make_unique<ForestProbability>();
       break;
     }
 
@@ -84,11 +86,8 @@ int main(int argc, char **argv) {
     }
     forest->writeOutput();
     *verbose_out << "Finished Ranger." << std::endl;
-
-    delete forest;
   } catch (std::exception& e) {
     std::cerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
-    delete forest;
     return -1;
   }
 
