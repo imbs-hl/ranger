@@ -60,10 +60,11 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     uint prediction_type_r, uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
 
   Rcpp::List result;
-  std::unique_ptr<Forest> forest {};
-  std::unique_ptr<Data> data {};
+  
   try {
-
+    std::unique_ptr<Forest> forest {};
+    std::unique_ptr<Data> data {};
+    
     // Empty split select weights and always split variables if not used
     if (!use_split_select_weights) {
       split_select_weights.clear();
@@ -95,9 +96,11 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       num_cols = input_data.ncol();
     }
     
+    std::shared_ptr<Eigen::SparseMatrix<double>> sparse_data_ptr {};
     // Initialize data 
     if (use_sparse_data) {
-      data = make_unique<DataSparse>(&sparse_data, variable_names, num_rows, num_cols);
+      sparse_data_ptr.reset(&spare_data);
+      data = make_unique<DataSparse>(sparse_data_ptr, variable_names, num_rows, num_cols);
     } else {
       std::vector<double> input_data_copy {input_data.begin(), input_data.end()};
       input_data = Rcpp::NumericMatrix {}; // Clear original input data
