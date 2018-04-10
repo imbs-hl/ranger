@@ -14,11 +14,6 @@ R package "ranger" under GPL3 license.
 
 namespace ranger {
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-    TypeName(const TypeName&);             \
-    void operator=(const TypeName&)
-
-// Pi
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif

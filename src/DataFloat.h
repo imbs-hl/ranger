@@ -26,6 +26,9 @@ public:
   DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
   virtual ~DataFloat();
 
+  DataFloat(const DataFloat&)            = delete;
+  DataFloat& operator=(const DataFloat&) = delete;
+
   double get(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
@@ -52,8 +55,6 @@ public:
 
 private:
   float* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataFloat);
 };
 
 } // namespace ranger
