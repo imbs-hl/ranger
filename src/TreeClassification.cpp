@@ -35,10 +35,6 @@ TreeClassification::TreeClassification(std::vector<std::vector<size_t>>& child_n
         0), class_weights(0), counter(0), counter_per_class(0) {
 }
 
-TreeClassification::~TreeClassification() {
-  // Empty on purpose
-}
-
 void TreeClassification::allocateMemory() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {

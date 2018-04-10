@@ -29,7 +29,7 @@ public:
   TreeSurvival(const TreeSurvival&)            = delete;
   TreeSurvival& operator=(const TreeSurvival&) = delete;
   
-  virtual ~TreeSurvival() override;
+  virtual ~TreeSurvival() override = default;
 
   void allocateMemory() override;
 

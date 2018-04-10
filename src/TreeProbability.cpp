@@ -28,10 +28,6 @@ TreeProbability::TreeProbability(std::vector<std::vector<size_t>>& child_nodeIDs
         0), terminal_class_counts(terminal_class_counts), class_weights(0), counter(0), counter_per_class(0) {
 }
 
-TreeProbability::~TreeProbability() {
-  // Empty on purpose
-}
-
 void TreeProbability::allocateMemory() {
   // Init counters if not in memory efficient mode
   if (!memory_saving_splitting) {

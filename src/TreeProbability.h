@@ -32,7 +32,7 @@ public:
   TreeProbability(const TreeProbability&)            = delete;
   TreeProbability& operator=(const TreeProbability&) = delete;
   
-  virtual ~TreeProbability() override;
+  virtual ~TreeProbability() override = default;
 
   void allocateMemory() override;
 
