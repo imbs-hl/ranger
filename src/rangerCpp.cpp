@@ -99,7 +99,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     std::shared_ptr<Eigen::SparseMatrix<double>> sparse_data_ptr {};
     // Initialize data 
     if (use_sparse_data) {
-      sparse_data_ptr.reset(&spare_data);
+      sparse_data_ptr.reset(&sparse_data);
       data = make_unique<DataSparse>(sparse_data_ptr, variable_names, num_rows, num_cols);
     } else {
       std::vector<double> input_data_copy {input_data.begin(), input_data.end()};
@@ -152,30 +152,35 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
 
       if (treetype == TREE_CLASSIFICATION) {
         std::vector<double> class_values = loaded_forest["class.values"];
-        ((ForestClassification*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs,
-            split_values, class_values, is_ordered);
+        auto& temp = dynamic_cast<ForestClassification&>(*forest);
+        temp.loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs,
+                        split_values, class_values, is_ordered);
       } else if (treetype == TREE_REGRESSION) {
-        ((ForestRegression*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
-            is_ordered);
+        auto& temp = dynamic_cast<ForestRegression&>(*forest);
+        temp.loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values, is_ordered);
       } else if (treetype == TREE_SURVIVAL) {
         size_t status_varID = loaded_forest["status.varID"];
         std::vector<std::vector<std::vector<double>> > chf = loaded_forest["chf"];
         std::vector<double> unique_timepoints = loaded_forest["unique.death.times"];
-        ((ForestSurvival*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
-            status_varID, chf, unique_timepoints, is_ordered);
+        auto& temp = dynamic_cast<ForestSurvival&>(*forest);
+        temp.loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
+                        status_varID, chf, unique_timepoints, is_ordered);
       } else if (treetype == TREE_PROBABILITY) {
         std::vector<double> class_values = loaded_forest["class.values"];
         std::vector<std::vector<std::vector<double>>>terminal_class_counts =
         loaded_forest["terminal.class.counts"];
-        ((ForestProbability*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
-            class_values, terminal_class_counts, is_ordered);
+        auto& temp = dynamic_cast<ForestProbability&>(*forest);
+        temp.loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
+                        class_values, terminal_class_counts, is_ordered);
       }
     } else {
       // Set class weights
       if (treetype == TREE_CLASSIFICATION) {
-        ((ForestClassification*) forest.get())->setClassWeights(class_weights);
+        auto& temp = dynamic_cast<ForestClassification&>(*forest);
+        temp.setClassWeights(class_weights);
       } else if (treetype == TREE_PROBABILITY) {
-        ((ForestProbability*) forest.get())->setClassWeights(class_weights);
+        auto& temp = dynamic_cast<ForestProbability&>(*forest);
+        temp.setClassWeights(class_weights);
       }
     }
 
@@ -204,8 +209,8 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     result.push_back(forest->getNumTrees(), "num.trees");
     result.push_back(forest->getNumIndependentVariables(), "num.independent.variables");
     if (treetype == TREE_SURVIVAL) {
-      ForestSurvival* temp = (ForestSurvival*) forest.get();
-      result.push_back(temp->getUniqueTimepoints(), "unique.death.times");
+      auto& temp = dynamic_cast<ForestSurvival&>(*forest);
+      result.push_back(temp.getUniqueTimepoints(), "unique.death.times");
     }
     if (!verbose) {
       std::stringstream temp;
@@ -236,17 +241,17 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       forest_object.push_back(forest->getIsOrderedVariable(), "is.ordered");
 
       if (treetype == TREE_CLASSIFICATION) {
-        ForestClassification* temp = (ForestClassification*) forest;
-        forest_object.push_back(temp->getClassValues(), "class.values");
+        auto& temp = dynamic_cast<ForestClassification&>(*forest);
+        forest_object.push_back(temp.getClassValues(), "class.values");
       } else if (treetype == TREE_PROBABILITY) {
-        ForestProbability* temp = (ForestProbability*) forest;
-        forest_object.push_back(temp->getClassValues(), "class.values");
-        forest_object.push_back(temp->getTerminalClassCounts(), "terminal.class.counts");
+        auto& temp = dynamic_cast<ForestProbability&>(*forest);
+        forest_object.push_back(temp.getClassValues(), "class.values");
+        forest_object.push_back(temp.getTerminalClassCounts(), "terminal.class.counts");
       } else if (treetype == TREE_SURVIVAL) {
-        ForestSurvival* temp = (ForestSurvival*) forest;
-        forest_object.push_back(temp->getStatusVarId(), "status.varID");
-        forest_object.push_back(temp->getChf(), "chf");
-        forest_object.push_back(temp->getUniqueTimepoints(), "unique.death.times");
+        auto& temp = dynamic_cast<ForestSurvival&>(*forest);
+        forest_object.push_back(temp.getStatusVarId(), "status.varID");
+        forest_object.push_back(temp.getChf(), "chf");
+        forest_object.push_back(temp.getUniqueTimepoints(), "unique.death.times");
       }
       result.push_back(forest_object, "forest");
     }
