@@ -33,10 +33,11 @@ namespace ranger {
 class Forest {
 public:
   Forest();
-  virtual ~Forest();
 
   Forest(const Forest&)            = delete;
   Forest& operator=(const Forest&) = delete;
+
+  virtual ~Forest() = default;
 
   // Init from c++ main or Rcpp from R
   void initCpp(std::string dependent_variable_name, MemoryMode memory_mode, std::string input_file, uint mtry,
@@ -205,7 +206,7 @@ protected:
   std::condition_variable condition_variable;
 #endif
 
-  std::vector<Tree*> trees;
+  std::vector<std::unique_ptr<Tree>> trees;
   std::unique_ptr<Data> data;
 
   std::vector<std::vector<std::vector<double>>> predictions;

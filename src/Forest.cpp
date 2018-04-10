@@ -37,12 +37,6 @@ Forest::Forest() :
         0), importance_mode(DEFAULT_IMPORTANCE_MODE), progress(0) {
 }
 
-Forest::~Forest() {
-  for (auto& tree : trees) {
-    delete tree;
-  }
-}
-
 std::unique_ptr<Data>
 load_data_from_file(const std::string& data_path, const MemoryMode memory_mode,
                     std::ostream* verbose_out = nullptr)

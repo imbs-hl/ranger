@@ -64,6 +64,10 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
+  
+private:
+  double getTreePrediction(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
 
 } // namespace ranger

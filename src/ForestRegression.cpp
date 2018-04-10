@@ -38,8 +38,7 @@ void ForestRegression::loadForest(size_t dependent_varID, size_t num_trees,
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    Tree* tree = new TreeRegression(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]);
-    trees.push_back(tree);
+    trees.push_back(make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
   }
 
   // Create thread ranges
@@ -68,7 +67,7 @@ void ForestRegression::initInternal(std::string status_variable_name) {
 void ForestRegression::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(new TreeRegression());
+    trees.push_back(make_unique<TreeRegression>());
   }
 }
 
@@ -88,17 +87,16 @@ void ForestRegression::predictInternal(size_t sample_idx) {
     // Get all tree predictions
     for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
       if (prediction_type == TERMINALNODES) {
-        predictions[0][sample_idx][tree_idx] = ((TreeRegression*) trees[tree_idx])->getPredictionTerminalNodeID(
-            sample_idx);
+        predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
       } else {
-        predictions[0][sample_idx][tree_idx] = ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
+        predictions[0][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
       }
     }
   } else {
     // Mean over trees
     double prediction_sum = 0;
     for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-      prediction_sum += ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
+      prediction_sum += getTreePrediction(tree_idx, sample_idx);
     }
     predictions[0][0][sample_idx] = prediction_sum / num_trees;
   }
@@ -114,7 +112,7 @@ void ForestRegression::computePredictionErrorInternal() {
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-      double value = ((TreeRegression*) trees[tree_idx])->getPrediction(sample_idx);
+      double value = getTreePrediction(tree_idx, sample_idx);
 
       predictions[0][0][sampleID] += value;
       ++samples_oob_count[sampleID];
@@ -240,10 +238,20 @@ void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    Tree* tree = new TreeRegression(child_nodeIDs, split_varIDs, split_values);
-    trees.push_back(tree);
+    trees.push_back(make_unique<TreeRegression>(child_nodeIDs, split_varIDs, split_values));
   }
 }
+
+double ForestRegression::getTreePrediction(size_t tree_idx, size_t sample_idx) const {
+  const auto& tree = dynamic_cast<const TreeRegression&>(*trees[tree_idx]);
+  return tree.getPrediction(sample_idx);
+}
+
+size_t ForestRegression::getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const {
+  const auto& tree = dynamic_cast<const TreeRegression&>(*trees[tree_idx]);
+  return tree.getPredictionTerminalNodeID(sample_idx);
+}
+
 // #nocov end
 
 } // namespace ranger
