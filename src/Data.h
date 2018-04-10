@@ -25,10 +25,11 @@ namespace ranger {
 class Data {
 public:
   Data();
-  virtual ~Data();
   
   Data(const Data&)            = delete;
   Data& operator=(const Data&) = delete;
+
+  virtual ~Data() = default;
 
   virtual double get(size_t row, size_t col) const = 0;
 
@@ -187,7 +188,7 @@ protected:
 
   bool externalData;
 
-  size_t* index_data;
+  std::vector<size_t> index_data;
   std::vector<std::vector<double>> unique_data_values;
   size_t max_num_unique_values;
 
