@@ -25,67 +25,63 @@ R package "ranger" under GPL3 license.
 
 using namespace ranger;
 
-int main(int argc, char **argv) {
-
-  ArgumentHandler arg_handler(argc, argv);
+void run_ranger(const ArgumentHandler& arg_handler, std::ostream& verbose_out) {
+  verbose_out << "Starting Ranger." << std::endl;
+  
   std::unique_ptr<Forest> forest {};
-  try {
+  // Create forest object
+  switch (arg_handler.treetype) {
+  case TREE_CLASSIFICATION:
+    if (arg_handler.probability) {
+      forest = make_unique<ForestProbability>();
+    } else {
+      forest = make_unique<ForestClassification>();
+    }
+    break;
+  case TREE_REGRESSION:
+    forest = make_unique<ForestRegression>();
+    break;
+  case TREE_SURVIVAL:
+    forest = make_unique<ForestSurvival>();
+    break;
+  case TREE_PROBABILITY:
+    forest = make_unique<ForestProbability>();
+    break;
+  }
+  
+  forest->initCpp(arg_handler.depvarname, arg_handler.memmode, arg_handler.file, arg_handler.mtry,
+      arg_handler.outprefix, arg_handler.ntree, &verbose_out, arg_handler.seed, arg_handler.nthreads,
+      arg_handler.predict, arg_handler.impmeasure, arg_handler.targetpartitionsize, arg_handler.splitweights,
+      arg_handler.alwayssplitvars, arg_handler.statusvarname, arg_handler.replace, arg_handler.catvars,
+      arg_handler.savemem, arg_handler.splitrule, arg_handler.caseweights, arg_handler.predall, arg_handler.fraction,
+      arg_handler.alpha, arg_handler.minprop, arg_handler.holdout, arg_handler.predictiontype,
+      arg_handler.randomsplits);
 
-    // Handle command line arguments
+  forest->run(true);
+  if (arg_handler.write) {
+    forest->saveToFile();
+  }
+  forest->writeOutput();
+  verbose_out << "Finished Ranger." << std::endl;
+}
+
+int main(int argc, char **argv) {
+  try {
+    ArgumentHandler arg_handler(argc, argv);
     if (arg_handler.processArguments() != 0) {
       return 0;
     }
     arg_handler.checkArguments();
-
-    // Create forest object
-    switch (arg_handler.treetype) {
-    case TREE_CLASSIFICATION:
-      if (arg_handler.probability) {
-        forest = make_unique<ForestProbability>();
-      } else {
-        forest = make_unique<ForestClassification>();
-      }
-      break;
-    case TREE_REGRESSION:
-      forest = make_unique<ForestRegression>();
-      break;
-    case TREE_SURVIVAL:
-      forest = make_unique<ForestSurvival>();
-      break;
-    case TREE_PROBABILITY:
-      forest = make_unique<ForestProbability>();
-      break;
-    }
-
-    // Verbose output to logfile if non-verbose mode
-    std::ostream* verbose_out;
+    
     if (arg_handler.verbose) {
-      verbose_out = &std::cout;
+      run_ranger(arg_handler, std::cout);
     } else {
-      std::ofstream* logfile = new std::ofstream();
-      logfile->open(arg_handler.outprefix + ".log");
-      if (!logfile->good()) {
+      std::ofstream logfile {arg_handler.outprefix + ".log"};
+      if (!logfile.good()) {
         throw std::runtime_error("Could not write to logfile.");
       }
-      verbose_out = logfile;
+      run_ranger(arg_handler, logfile);
     }
-    
-    // Call Ranger
-    *verbose_out << "Starting Ranger." << std::endl;
-    forest->initCpp(arg_handler.depvarname, arg_handler.memmode, arg_handler.file, arg_handler.mtry,
-        arg_handler.outprefix, arg_handler.ntree, verbose_out, arg_handler.seed, arg_handler.nthreads,
-        arg_handler.predict, arg_handler.impmeasure, arg_handler.targetpartitionsize, arg_handler.splitweights,
-        arg_handler.alwayssplitvars, arg_handler.statusvarname, arg_handler.replace, arg_handler.catvars,
-        arg_handler.savemem, arg_handler.splitrule, arg_handler.caseweights, arg_handler.predall, arg_handler.fraction,
-        arg_handler.alpha, arg_handler.minprop, arg_handler.holdout, arg_handler.predictiontype,
-        arg_handler.randomsplits);
-
-    forest->run(true);
-    if (arg_handler.write) {
-      forest->saveToFile();
-    }
-    forest->writeOutput();
-    *verbose_out << "Finished Ranger." << std::endl;
   } catch (std::exception& e) {
     std::cerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
     return -1;
