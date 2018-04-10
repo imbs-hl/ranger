@@ -13,14 +13,5 @@ R package "ranger" under GPL3 license.
 
 namespace ranger {
 
-DataDouble::DataDouble() :
-    data(0) {
-}
-
-DataDouble::~DataDouble() {
-  if (!externalData) {
-    delete[] data;
-  }
-}
 
 } // namespace ranger
