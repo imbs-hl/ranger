@@ -133,7 +133,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     PredictionType prediction_type = (PredictionType) prediction_type_r;
 
     // Init Ranger
-    forest->initR(dependent_variable_name, data.get(), mtry, num_trees, verbose_out, seed, num_threads,
+    forest->initR(dependent_variable_name, std::move(data), mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits);

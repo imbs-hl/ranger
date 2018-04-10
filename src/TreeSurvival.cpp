@@ -88,7 +88,7 @@ double TreeSurvival::computePredictionAccuracyInternal() {
   }
 
   // Return concordance index
-  return computeConcordanceIndex(data, sum_chf, dependent_varID, status_varID, oob_sampleIDs);
+  return computeConcordanceIndex(*data, sum_chf, dependent_varID, status_varID, oob_sampleIDs);
 }
 
 bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
