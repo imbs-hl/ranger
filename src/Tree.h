@@ -48,12 +48,12 @@ public:
 
   void predict(const Data* prediction_data, bool oob_prediction);
 
-  void computePermutationImportance(std::vector<double>* forest_importance, std::vector<double>* forest_variance);
+  void computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance);
 
   void appendToFile(std::ofstream& file);
   virtual void appendToFileInternal(std::ofstream& file) = 0;
 
-  const std::vector<std::vector<size_t> >& getChildNodeIDs() const {
+  const std::vector<std::vector<size_t>>& getChildNodeIDs() const {
     return child_nodeIDs;
   }
   const std::vector<double>& getSplitValues() const {
@@ -113,12 +113,12 @@ protected:
 
   // Weight vector for selecting possible split variables, one weight between 0 (never select) and 1 (always select) for each variable
   // Deterministic variables are always selected
-  std::vector<size_t>* deterministic_varIDs;
-  std::vector<size_t>* split_select_varIDs;
-  std::vector<double>* split_select_weights;
+  const std::vector<size_t>* deterministic_varIDs;
+  const std::vector<size_t>* split_select_varIDs;
+  const std::vector<double>* split_select_weights;
 
   // Bootstrap weights
-  std::vector<double>* case_weights;
+  const std::vector<double>* case_weights;
 
   // Splitting variable for each node
   std::vector<size_t> split_varIDs;
@@ -158,7 +158,7 @@ protected:
   std::vector<size_t> prediction_terminal_nodeIDs;
 
   bool sample_with_replacement;
-  std::vector<double>* sample_fraction;
+  const std::vector<double>* sample_fraction;
 
   bool memory_saving_splitting;
   SplitRule splitrule;

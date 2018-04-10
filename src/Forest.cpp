@@ -14,7 +14,7 @@ R package "ranger" under GPL3 license.
 #include <stdexcept>
 #include <string>
 #include <ctime>
-#include <math.h>
+#include <functional>
 #ifndef OLD_WIN_R_BUILD
 #include <thread>
 #include <chrono>
@@ -599,7 +599,7 @@ void Forest::computePermutationImportance() {
 
 // Compute importance
   for (size_t i = 0; i < num_trees; ++i) {
-    trees[i]->computePermutationImportance(&variable_importance, &variance);
+    trees[i]->computePermutationImportance(variable_importance, variance);
     progress++;
     showProgress("Computing permutation importance..", start_time, lap_time);
   }
@@ -624,8 +624,9 @@ void Forest::computePermutationImportance() {
       variance_threads[i].resize(num_independent_variables, 0);
     }
     threads.push_back(
-        std::thread(&Forest::computeTreePermutationImportanceInThread, this, i, &(variable_importance_threads[i]),
-            &(variance_threads[i])));
+        std::thread(&Forest::computeTreePermutationImportanceInThread, this, i,
+                    std::ref(variable_importance_threads[i]),
+                    std::ref(variance_threads[i])));
   }
   showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
@@ -746,8 +747,7 @@ void Forest::predictInternalInThread(uint thread_idx) {
   }
 }
 
-void Forest::computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>* importance,
-    std::vector<double>* variance) {
+void Forest::computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>& importance, std::vector<double>& variance) {
   if (thread_ranges.size() > thread_idx + 1) {
     for (size_t i = thread_ranges[thread_idx]; i < thread_ranges[thread_idx + 1]; ++i) {
       trees[i]->computePermutationImportance(importance, variance);

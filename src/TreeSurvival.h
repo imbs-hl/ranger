@@ -38,7 +38,7 @@ public:
   void appendToFileInternal(std::ofstream& file) override;
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);
 
-  const std::vector<std::vector<double> >& getChf() const {
+  const std::vector<std::vector<double>>& getChf() const {
     return chf;
   }
 
@@ -99,9 +99,9 @@ private:
   size_t status_varID;
 
   // Unique time points for all individuals (not only this bootstrap), sorted
-  std::vector<double>* unique_timepoints;
+  const std::vector<double>* unique_timepoints;
   size_t num_timepoints;
-  std::vector<size_t>* response_timepointIDs;
+  const std::vector<size_t>* response_timepointIDs;
 
   // For all terminal nodes CHF for all unique timepoints. For other nodes empty vector.
   std::vector<std::vector<double>> chf;

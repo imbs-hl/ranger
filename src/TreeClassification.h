@@ -88,12 +88,12 @@ private:
   }
 
   // Classes of the dependent variable and classIDs for responses
-  std::vector<double>* class_values;
-  std::vector<uint>* response_classIDs;
-  std::vector<std::vector<size_t>>* sampleIDs_per_class;
+  const std::vector<double>* class_values;
+  const std::vector<uint>* response_classIDs;
+  const std::vector<std::vector<size_t>>* sampleIDs_per_class;
 
   // Splitting weights
-  std::vector<double>* class_weights;
+  const std::vector<double>* class_weights;
 
   std::vector<size_t> counter, counter_per_class;
 };
