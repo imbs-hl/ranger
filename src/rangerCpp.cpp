@@ -28,7 +28,8 @@
 #include <RcppEigen.h>
 #include <vector>
 #include <sstream>
- 
+#include <memory>
+
 #include "globals.h"
 #include "Forest.h"
 #include "ForestClassification.h"
@@ -40,6 +41,7 @@
 #include "DataDouble.h"
 #include "DataFloat.h"
 #include "DataSparse.h"
+#include "utility.h"
 
 using namespace ranger;
  
@@ -58,8 +60,8 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     uint prediction_type_r, uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
 
   Rcpp::List result;
-  Forest* forest = 0;
-  Data* data = 0;
+  std::unique_ptr<Forest> forest {};
+  std::unique_ptr<Data> data {};
   try {
 
     // Empty split select weights and always split variables if not used
@@ -95,9 +97,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     
     // Initialize data 
     if (use_sparse_data) {
-      data = new DataSparse(&sparse_data, variable_names, num_rows, num_cols);
+      data = make_unique<DataSparse>(&sparse_data, variable_names, num_rows, num_cols);
     } else {
-      data = new DataDouble(input_data.begin(), variable_names, num_rows, num_cols);
+      data = make_unique<DataDouble>(input_data.begin(), variable_names, num_rows, num_cols);
     }
 
     // If there is snp data, add it
@@ -108,19 +110,19 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     switch (treetype) {
     case TREE_CLASSIFICATION:
       if (probability) {
-        forest = new ForestProbability;
+        forest = make_unique<ForestProbability>();
       } else {
-        forest = new ForestClassification;
+        forest = make_unique<ForestClassification>();
       }
       break;
     case TREE_REGRESSION:
-      forest = new ForestRegression;
+      forest = make_unique<ForestRegression>();
       break;
     case TREE_SURVIVAL:
-      forest = new ForestSurvival;
+      forest = make_unique<ForestSurvival>();
       break;
     case TREE_PROBABILITY:
-      forest = new ForestProbability;
+      forest = make_unique<ForestProbability>();
       break;
     }
 
@@ -129,7 +131,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     PredictionType prediction_type = (PredictionType) prediction_type_r;
 
     // Init Ranger
-    forest->initR(dependent_variable_name, data, mtry, num_trees, verbose_out, seed, num_threads,
+    forest->initR(dependent_variable_name, data.get(), mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits);
@@ -145,30 +147,30 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
 
       if (treetype == TREE_CLASSIFICATION) {
         std::vector<double> class_values = loaded_forest["class.values"];
-        ((ForestClassification*) forest)->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs,
+        ((ForestClassification*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs,
             split_values, class_values, is_ordered);
       } else if (treetype == TREE_REGRESSION) {
-        ((ForestRegression*) forest)->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
+        ((ForestRegression*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
             is_ordered);
       } else if (treetype == TREE_SURVIVAL) {
         size_t status_varID = loaded_forest["status.varID"];
         std::vector<std::vector<std::vector<double>> > chf = loaded_forest["chf"];
         std::vector<double> unique_timepoints = loaded_forest["unique.death.times"];
-        ((ForestSurvival*) forest)->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
+        ((ForestSurvival*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
             status_varID, chf, unique_timepoints, is_ordered);
       } else if (treetype == TREE_PROBABILITY) {
         std::vector<double> class_values = loaded_forest["class.values"];
         std::vector<std::vector<std::vector<double>>>terminal_class_counts =
         loaded_forest["terminal.class.counts"];
-        ((ForestProbability*) forest)->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
+        ((ForestProbability*) forest.get())->loadForest(dependent_varID, num_trees, child_nodeIDs, split_varIDs, split_values,
             class_values, terminal_class_counts, is_ordered);
       }
     } else {
       // Set class weights
       if (treetype == TREE_CLASSIFICATION) {
-        ((ForestClassification*) forest)->setClassWeights(class_weights);
+        ((ForestClassification*) forest.get())->setClassWeights(class_weights);
       } else if (treetype == TREE_PROBABILITY) {
-        ((ForestProbability*) forest)->setClassWeights(class_weights);
+        ((ForestProbability*) forest.get())->setClassWeights(class_weights);
       }
     }
 
@@ -197,7 +199,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     result.push_back(forest->getNumTrees(), "num.trees");
     result.push_back(forest->getNumIndependentVariables(), "num.independent.variables");
     if (treetype == TREE_SURVIVAL) {
-      ForestSurvival* temp = (ForestSurvival*) forest;
+      ForestSurvival* temp = (ForestSurvival*) forest.get();
       result.push_back(temp->getUniqueTimepoints(), "unique.death.times");
     }
     if (!verbose) {
@@ -243,15 +245,10 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       }
       result.push_back(forest_object, "forest");
     }
-
-    delete forest;
-    delete data;
   } catch (std::exception& e) {
     if (strcmp(e.what(), "User interrupt.") != 0) {
       Rcpp::Rcerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
     }
-    delete forest;
-    delete data;
     return result;
   }
 
