@@ -13,15 +13,10 @@ R package "ranger" under GPL3 license.
 // #nocov start
  
 #include <iostream>
-#include <vector>
 
 #include "DataFloat.h"
 
 namespace ranger {
-
-DataFloat::DataFloat() :
-    data(0) {
-}
 
 DataFloat::DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
   this->variable_names = variable_names;
@@ -34,12 +29,6 @@ DataFloat::DataFloat(double* data_double, std::vector<std::string> variable_name
     for (size_t j = 0; j < num_rows; ++j) {
       data[i * num_rows + j] = (float) data_double[i * num_rows + j];
     }
-  }
-}
-
-DataFloat::~DataFloat() {
-  if (!externalData) {
-    delete[] data;
   }
 }
 

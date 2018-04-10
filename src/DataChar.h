@@ -15,6 +15,7 @@ R package "ranger" under GPL3 license.
 #ifndef DATACHAR_H_
 #define DATACHAR_H_
 
+#include <vector>
 #include <limits.h>
 
 #include "globals.h"
@@ -24,12 +25,13 @@ namespace ranger {
 
 class DataChar: public Data {
 public:
-  DataChar();
+  DataChar() = default;
   DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, bool& error);
   
   DataChar(const DataChar&)            = delete;
   DataChar& operator=(const DataChar&) = delete;
-  virtual ~DataChar() override;
+  
+  virtual ~DataChar() override = default;
 
   double get(size_t row, size_t col) const override {
 
@@ -49,7 +51,7 @@ public:
   }
 
   void reserveMemory() override {
-    data = new char[num_cols * num_rows];
+    data.resize(num_cols * num_rows);
   }
 
   void set(size_t col, size_t row, double value, bool& error) override {
@@ -59,11 +61,11 @@ public:
     if (floor(value) != ceil(value)) {
       error = true;
     }
-    data[col * num_rows + row] = (char) value;
+    data[col * num_rows + row] = value;
   }
 
 private:
-  char* data;
+  std::vector<char> data;
 };
 
 } // namespace ranger
