@@ -270,15 +270,15 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count, 
 
 /**
  * Compute concordance index for given data and summed cumulative hazard function/estimate
- * @param data Pointer to Data object
+ * @param data const reference to Data object
  * @param sum_chf Summed chf over timepoints for each sample
  * @param dependent_varID ID of dependent variable
  * @param status_varID ID of status variable
  * @param sample_IDs IDs of samples, for example OOB samples
  * @return concordance index
  */
-double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
-    std::vector<size_t>& sample_IDs);
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
+    const std::vector<size_t>& sample_IDs);
 
 /**
  * Convert a unsigned integer to string
@@ -335,18 +335,18 @@ void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>&
 
 /**
  * Check if not too many factor levels and all values in unordered categorical variables are positive integers.
- * @param data Pointer to data object
+ * @param data const reference to data object
  * @param unordered_variable_names Names of unordered variables
  * @return Error message, empty if no problem occured
  */
-std::string checkUnorderedVariables(Data* data, std::vector<std::string> unordered_variable_names);
+std::string checkUnorderedVariables(const Data& data, const std::vector<std::string>& unordered_variable_names);
 
 /**
  * Check if all values in double vector are positive integers.
  * @param all_values Double vector to check
  * @return True if all values are positive integers
  */
-bool checkPositiveIntegers(std::vector<double>& all_values);
+bool checkPositiveIntegers(const std::vector<double>& all_values);
 
 /**
  * Compute p-value for maximally selected rank statistics using Lau92 approximation

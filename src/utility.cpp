@@ -202,8 +202,8 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count, 
   }
 }
 
-double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
-    std::vector<size_t>& sample_IDs) {
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
+    const std::vector<size_t>& sample_IDs) {
 
   // Compute concordance index
   double concordance = 0;
@@ -213,16 +213,16 @@ double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t 
     if (!sample_IDs.empty()) {
       sample_i = sample_IDs[i];
     }
-    double time_i = data->get(sample_i, dependent_varID);
-    double status_i = data->get(sample_i, status_varID);
+    double time_i = data.get(sample_i, dependent_varID);
+    double status_i = data.get(sample_i, status_varID);
 
     for (size_t j = i + 1; j < sum_chf.size(); ++j) {
       size_t sample_j = j;
       if (!sample_IDs.empty()) {
         sample_j = sample_IDs[j];
       }
-      double time_j = data->get(sample_j, dependent_varID);
-      double status_j = data->get(sample_j, status_varID);
+      double time_j = data.get(sample_j, dependent_varID);
+      double status_j = data.get(sample_j, status_varID);
 
       if (time_i < time_j && status_i == 0) {
         continue;
@@ -364,16 +364,16 @@ void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>&
   first_part.resize(first_old_size + n_first);
 }
 
-std::string checkUnorderedVariables(Data* data, std::vector<std::string> unordered_variable_names) { // #nocov start
-  size_t num_rows = data->getNumRows();
+std::string checkUnorderedVariables(const Data& data, const std::vector<std::string>& unordered_variable_names) { // #nocov start
+  size_t num_rows = data.getNumRows();
   std::vector<size_t> sampleIDs(num_rows);
   std::iota(sampleIDs.begin(), sampleIDs.end(), 0);
 
   // Check for all unordered variables
   for (auto& variable_name : unordered_variable_names) {
-    size_t varID = data->getVariableID(variable_name);
+    size_t varID = data.getVariableID(variable_name);
     std::vector<double> all_values;
-    data->getAllValues(all_values, sampleIDs, varID);
+    data.getAllValues(all_values, sampleIDs, varID);
 
     // Check level count
     size_t max_level_count = 8 * sizeof(size_t) - 1;
