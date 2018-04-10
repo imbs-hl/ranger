@@ -42,13 +42,7 @@ class DataSparse: public Data {
 public:
   DataSparse() = default;
   
-  DataSparse(std::make_shared<Eigen::SparseMatrix<double>> data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols)
-  : data {data} {
-    this->variable_names = variable_names;
-    this->num_rows = num_rows;
-    this->num_cols = num_cols;
-    this->num_cols_no_snp = num_cols;
-  }
+  DataSparse(std::shared_ptr<Eigen::SparseMatrix<double>> data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
 
   DataSparse(const DataSparse&)            = delete;
   DataSparse& operator=(const DataSparse&) = delete;
