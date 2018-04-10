@@ -177,7 +177,7 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
   }
 }
 
-void Tree::computePermutationImportance(std::vector<double>* forest_importance, std::vector<double>* forest_variance) {
+void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance) {
 
   size_t num_independent_variables = data->getNumCols() - data->getNoSplitVariables().size();
 
@@ -205,13 +205,13 @@ void Tree::computePermutationImportance(std::vector<double>* forest_importance, 
     permuteAndPredictOobSamples(varID, permutations);
     double accuracy_permuted = computePredictionAccuracyInternal();
     double accuracy_difference = accuracy_normal - accuracy_permuted;
-    (*forest_importance)[i] += accuracy_difference;
+    forest_importance[i] += accuracy_difference;
 
     // Compute variance
     if (importance_mode == IMP_PERM_BREIMAN) {
-      (*forest_variance)[i] += accuracy_difference * accuracy_difference;
+      forest_variance[i] += accuracy_difference * accuracy_difference;
     } else if (importance_mode == IMP_PERM_LIAW) {
-      (*forest_variance)[i] += accuracy_difference * accuracy_difference * num_samples_oob;
+      forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
     }
   }
 }

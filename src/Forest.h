@@ -104,7 +104,7 @@ public:
   double getOverallPredictionError() const {
     return overall_prediction_error;
   }
-  const std::vector<std::vector<std::vector<double>> >& getPredictions() const {
+  const std::vector<std::vector<std::vector<double>>>& getPredictions() const {
     return predictions;
   }
   size_t getDependentVarId() const {
@@ -153,8 +153,8 @@ protected:
   void growTreesInThread(uint thread_idx, std::vector<double>* variable_importance);
   void predictTreesInThread(uint thread_idx, const Data* prediction_data, bool oob_prediction);
   void predictInternalInThread(uint thread_idx);
-  void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>* importance,
-      std::vector<double>* variance);
+  void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>& importance,
+      std::vector<double>& variance);
 
   // Load forest from file
   void loadFromFile(std::string filename);
