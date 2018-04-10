@@ -51,6 +51,14 @@ test_that("Prediction for classification is factor with correct levels", {
   expect_equal(levels(ti.class.formula$prediction), levels(iris$Species))
 })
 
+test_that("Prediction for matrix classification is integer with correct values", {
+  rf <- ranger(dependent.variable.name = "Species", data = data.matrix(iris), 
+               num.trees = 5, classification = TRUE)
+  ti <- treeInfo(rf, 1)
+  expect_is(ti$prediction, "numeric")
+  expect_equal(sort(unique(ti$prediction)), 1:3)
+})
+
 ## Regression
 n <- 20
 dat <- data.frame(y = rnorm(n), 
