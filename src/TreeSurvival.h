@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeSurvival: public Tree {
 public:
   TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID, std::vector<size_t>* response_timepointIDs);
@@ -24,6 +26,9 @@ public:
       std::vector<double>& split_values, std::vector<std::vector<double>> chf, std::vector<double>* unique_timepoints,
       std::vector<size_t>* response_timepointIDs);
 
+  TreeSurvival(const TreeSurvival&)            = delete;
+  TreeSurvival& operator=(const TreeSurvival&) = delete;
+  
   virtual ~TreeSurvival() override;
 
   void allocateMemory() override;
@@ -100,8 +105,8 @@ private:
   // Fields to save to while tree growing
   size_t* num_deaths;
   size_t* num_samples_at_risk;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeSurvival);
 };
+
+} // namespace ranger
 
 #endif /* TREESURVIVAL_H_ */

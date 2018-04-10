@@ -20,13 +20,19 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataChar: public Data {
 public:
   DataChar();
   DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, bool& error);
+  
+  DataChar(const DataChar&)            = delete;
+  DataChar& operator=(const DataChar&) = delete;
   virtual ~DataChar() override;
 
   double get(size_t row, size_t col) const override {
+
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
@@ -58,9 +64,9 @@ public:
 
 private:
   char* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataChar);
 };
+
+} // namespace ranger
 
 #endif /* DATACHAR_H_ */
 // #nocov end

@@ -18,9 +18,13 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Forest.h"
 
+namespace ranger {
+
 class ForestRegression: public Forest {
 public:
   ForestRegression();
+  ForestRegression(const ForestRegression&)            = delete;
+  ForestRegression& operator=(const ForestRegression&) = delete;
   virtual ~ForestRegression() override;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
@@ -39,8 +43,8 @@ private:
   void writePredictionFile() override;
   void saveToFileInternal(std::ofstream& outfile) override;
   void loadFromFileInternal(std::ifstream& infile) override;
-
-  DISALLOW_COPY_AND_ASSIGN(ForestRegression);
 };
+
+} // namespace ranger
 
 #endif /* FORESTREGRESSION_H_ */

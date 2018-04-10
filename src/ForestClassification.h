@@ -20,9 +20,13 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Forest.h"
 
+namespace ranger {
+
 class ForestClassification: public Forest {
 public:
   ForestClassification();
+  ForestClassification(const ForestClassification&)            = delete;
+  ForestClassification& operator=(const ForestClassification&) = delete;
   virtual ~ForestClassification() override;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
@@ -60,9 +64,8 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(ForestClassification);
 };
+
+} // namespace ranger
 
 #endif /* FORESTCLASSIFICATION_H_ */

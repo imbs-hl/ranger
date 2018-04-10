@@ -17,6 +17,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeProbability: public Tree {
 public:
   TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
@@ -27,6 +29,9 @@ public:
       std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
       std::vector<std::vector<double>>& terminal_class_counts);
 
+  TreeProbability(const TreeProbability&)            = delete;
+  TreeProbability& operator=(const TreeProbability&) = delete;
+  
   virtual ~TreeProbability() override;
 
   void allocateMemory() override;
@@ -96,8 +101,8 @@ private:
 
   size_t* counter;
   size_t* counter_per_class;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeProbability);
 };
+
+} // namespace ranger
 
 #endif /* TREEPROBABILITY_H_ */

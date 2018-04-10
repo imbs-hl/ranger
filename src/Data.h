@@ -20,10 +20,15 @@ R package "ranger" under GPL3 license.
 
 #include "globals.h"
 
+namespace ranger {
+
 class Data {
 public:
   Data();
   virtual ~Data();
+  
+  Data(const Data&)            = delete;
+  Data& operator=(const Data&) = delete;
 
   virtual double get(size_t row, size_t col) const = 0;
 
@@ -194,9 +199,8 @@ protected:
 
   // Permuted samples for corrected impurity importance
   std::vector<size_t> permuted_sampleIDs;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(Data);
 };
+
+} // namespace ranger
 
 #endif /* DATA_H_ */

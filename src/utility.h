@@ -27,6 +27,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 /**
  * Split sequence start..end in num_parts parts with sizes as equal as possible.
  * @param result Result vector of size num_parts+1. Ranges for the parts are then result[0]..result[1]-1, result[1]..result[2]-1, ..
@@ -483,5 +485,7 @@ inline bool checkInterrupt() {
   return (R_ToplevelExec(chkIntFn, NULL) == FALSE);
 }
 #endif
+
+} // namespace ranger
 
 #endif /* UTILITY_H_ */

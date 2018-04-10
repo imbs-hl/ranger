@@ -19,6 +19,8 @@ R package "ranger" under GPL3 license.
 
 #include "DataChar.h"
 
+namespace ranger {
+
 DataChar::DataChar() :
     data(0) {
 }
@@ -52,5 +54,7 @@ DataChar::~DataChar() {
     delete[] data;
   }
 }
+
+} // namespace ranger
 
 // #nocov end

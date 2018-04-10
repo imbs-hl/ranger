@@ -18,6 +18,8 @@ R package "ranger" under GPL3 license.
 #include "Data.h"
 #include "utility.h"
 
+namespace ranger {
+
 Data::Data() :
     num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(
         0), max_num_unique_values(0) {
@@ -214,3 +216,5 @@ void Data::sort() {
     }
   }
 }
+
+} // namespace ranger

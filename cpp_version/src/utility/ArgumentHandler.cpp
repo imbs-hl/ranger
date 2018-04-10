@@ -17,6 +17,8 @@ R package "ranger" under GPL3 license.
 #include "version.h"
 #include "utility.h"
 
+namespace ranger {
+
 ArgumentHandler::ArgumentHandler(int argc, char **argv) :
     caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), predict(""), predictiontype(
         DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
@@ -570,3 +572,5 @@ void ArgumentHandler::displayVersion() {
   std::cout << "    doi = {10.18637/jss.v077.i01}," << std::endl;
   std::cout << "}" << std::endl;
 }
+
+} // namespace ranger
