@@ -25,12 +25,6 @@ Data::Data() :
         0), max_num_unique_values(0) {
 }
 
-Data::~Data() {
-  if (index_data != 0) {
-    delete[] index_data;
-  }
-}
-
 size_t Data::getVariableID(std::string variable_name) {
   std::vector<std::string>::iterator it = std::find(variable_names.begin(), variable_names.end(), variable_name);
   if (it == variable_names.end()) {
@@ -190,7 +184,7 @@ void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleI
 void Data::sort() {
 
   // Reserve memory
-  index_data = new size_t[num_cols_no_snp * num_rows];
+  index_data.resize(num_cols_no_snp * num_rows);
 
   // For all columns, get unique values and save index for each observation
   for (size_t col = 0; col < num_cols_no_snp; ++col) {
