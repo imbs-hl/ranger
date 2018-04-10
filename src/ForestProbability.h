@@ -20,9 +20,13 @@ R package "ranger" under GPL3 license.
 #include "Forest.h"
 #include "TreeProbability.h"
 
+namespace ranger {
+
 class ForestProbability: public Forest {
 public:
   ForestProbability();
+  ForestProbability(const ForestProbability&)            = delete;
+  ForestProbability& operator=(const ForestProbability&) = delete;
   virtual ~ForestProbability() override;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
@@ -71,9 +75,8 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(ForestProbability);
 };
+
+} // namespace ranger
 
 #endif /* FORESTPROBABILITY_H_ */

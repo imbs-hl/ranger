@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeRegression: public Tree {
 public:
   TreeRegression();
@@ -22,6 +24,9 @@ public:
   // Create from loaded forest
   TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
       std::vector<double>& split_values);
+
+  TreeRegression(const TreeRegression&)            = delete;
+  TreeRegression& operator=(const TreeRegression&) = delete;
 
   virtual ~TreeRegression() override;
 
@@ -78,8 +83,8 @@ private:
 
   size_t* counter;
   double* sums;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeRegression);
 };
+
+} // namespace ranger
 
 #endif /* TREEREGRESSION_H_ */

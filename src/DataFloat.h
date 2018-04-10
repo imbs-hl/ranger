@@ -18,13 +18,19 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataFloat: public Data {
 public:
   DataFloat();
   DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
+  
+  DataFloat(const DataFloat&)            = delete;
+  DataFloat& operator=(const DataFloat&) = delete;
   virtual ~DataFloat() override;
 
   double get(size_t row, size_t col) const override {
+
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
@@ -50,9 +56,9 @@ public:
 
 private:
   float* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataFloat);
 };
+
+} // namespace ranger
 
 #endif /* DATAFLOAT_H_ */
 // #nocov end

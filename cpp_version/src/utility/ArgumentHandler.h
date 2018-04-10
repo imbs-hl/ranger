@@ -18,6 +18,8 @@ R package "ranger" under GPL3 license.
 
 #include "globals.h"
 
+namespace ranger {
+
 /*
  * Encapsulate getopt.
  * To add an option:
@@ -35,6 +37,9 @@ class ArgumentHandler {
 public:
   ArgumentHandler(int argc, char **argv);
   virtual ~ArgumentHandler();
+
+  ArgumentHandler(const ArgumentHandler&)            = delete;
+  ArgumentHandler& operator=(const ArgumentHandler&) = delete;
 
   // Get arguments and catch conversion exceptions
   int processArguments();
@@ -83,8 +88,8 @@ private:
 
   int argc;
   char** argv;
-
-  DISALLOW_COPY_AND_ASSIGN(ArgumentHandler);
 };
+
+} // namespace ranger
 
 #endif /* ARGUMENTHANDLER_H_ */

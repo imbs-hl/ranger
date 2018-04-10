@@ -14,6 +14,8 @@ R package "ranger" under GPL3 license.
 #include "Tree.h"
 #include "utility.h"
 
+namespace ranger {
+
 Tree::Tree() :
     dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
         0), split_select_weights(0), case_weights(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(
@@ -507,3 +509,5 @@ void Tree::bootstrapClassWise() {
 void Tree::bootstrapWithoutReplacementClassWise() {
   // Empty on purpose (virtual function only implemented in classification and probability)
 }
+
+} // namespace ranger

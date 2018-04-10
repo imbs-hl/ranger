@@ -19,9 +19,13 @@ R package "ranger" under GPL3 license.
 #include "Forest.h"
 #include "TreeSurvival.h"
 
+namespace ranger {
+
 class ForestSurvival: public Forest {
 public:
   ForestSurvival();
+  ForestSurvival(const ForestSurvival&)            = delete;
+  ForestSurvival& operator=(const ForestSurvival&) = delete;
   virtual ~ForestSurvival() override;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
@@ -61,8 +65,8 @@ private:
   size_t status_varID;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
-
-  DISALLOW_COPY_AND_ASSIGN(ForestSurvival);
 };
+
+} // namespace ranger
 
 #endif /* FORESTSURVIVAL_H_ */

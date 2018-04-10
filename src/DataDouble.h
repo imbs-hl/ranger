@@ -16,6 +16,8 @@ R package "ranger" under GPL3 license.
 #include "utility.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataDouble: public Data {
 public:
   DataDouble();
@@ -26,6 +28,9 @@ public:
     this->num_cols = num_cols;
     this->num_cols_no_snp = num_cols;
   }
+
+  DataDouble(const DataDouble&)            = delete;
+  DataDouble& operator=(const DataDouble&) = delete;
   virtual ~DataDouble() override;
 
   double get(size_t row, size_t col) const override {
@@ -55,8 +60,8 @@ public:
 
 private:
   double* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataDouble);
 };
+
+} // namespace ranger
 
 #endif /* DATADOUBLE_H_ */
