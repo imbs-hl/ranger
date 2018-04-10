@@ -33,7 +33,7 @@ public:
 
   virtual double get(size_t row, size_t col) const = 0;
 
-  size_t getVariableID(std::string variable_name);
+  size_t getVariableID(const std::string& variable_name) const;
 
   virtual void reserveMemory() = 0;
   virtual void set(size_t col, size_t row, double value, bool& error) = 0;
@@ -44,7 +44,7 @@ public:
   bool loadFromFileWhitespace(std::ifstream& input_file, std::string header_line);
   bool loadFromFileOther(std::ifstream& input_file, std::string header_line, char seperator);
 
-  void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID);
+  void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) const;
 
   void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
 
