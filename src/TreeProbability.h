@@ -30,6 +30,9 @@ public:
       std::vector<std::vector<double>>& terminal_class_counts);
 
   virtual ~TreeProbability();
+  
+  TreeProbability(const TreeProbability&)            = delete;
+  TreeProbability& operator=(const TreeProbability&) = delete;
 
   void allocateMemory();
 
@@ -98,8 +101,6 @@ private:
 
   size_t* counter;
   size_t* counter_per_class;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeProbability);
 };
 
 } // namespace ranger

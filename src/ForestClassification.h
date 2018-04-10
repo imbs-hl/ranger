@@ -27,6 +27,9 @@ public:
   ForestClassification();
   virtual ~ForestClassification();
 
+  ForestClassification(const ForestClassification&)            = delete;
+  ForestClassification& operator=(const ForestClassification&) = delete;
+
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
       std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
@@ -62,9 +65,6 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(ForestClassification);
 };
 
 } // namespace ranger
