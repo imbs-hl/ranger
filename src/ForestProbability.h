@@ -35,15 +35,7 @@ public:
       std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts,
       std::vector<bool>& is_ordered_variable);
 
-  std::vector<std::vector<std::vector<double>>> getTerminalClassCounts() {
-    std::vector<std::vector<std::vector<double>>> result;
-    result.reserve(num_trees);
-    for (Tree* tree : trees) {
-      TreeProbability* temp = (TreeProbability*) tree;
-      result.push_back(temp->getTerminalClassCounts());
-    }
-    return result;
-  }
+  std::vector<std::vector<std::vector<double>>> getTerminalClassCounts() const;
 
   const std::vector<double>& getClassValues() const {
     return class_values;
@@ -75,6 +67,10 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
+  
+private:
+  const std::vector<double>& getTreePrediciton(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
 
 } // namespace ranger
