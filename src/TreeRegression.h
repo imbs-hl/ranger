@@ -26,6 +26,9 @@ public:
       std::vector<double>& split_values);
 
   virtual ~TreeRegression();
+  
+  TreeRegression(const TreeRegression&)            = delete;
+  TreeRegression& operator=(const TreeRegression&) = delete;
 
   void allocateMemory();
 
@@ -80,8 +83,6 @@ private:
 
   size_t* counter;
   double* sums;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeRegression);
 };
 
 } // namespace ranger
