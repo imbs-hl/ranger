@@ -46,7 +46,7 @@ public:
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) const;
 
-  void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID);
+  void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID) const;
 
   size_t getIndex(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
@@ -121,7 +121,7 @@ public:
     }
   }
 
-  std::vector<size_t>& getNoSplitVariables() {
+  const std::vector<size_t>& getNoSplitVariables() const noexcept {
     return no_split_variables;
   }
 
@@ -130,7 +130,11 @@ public:
     std::sort(no_split_variables.begin(), no_split_variables.end());
   }
 
-  std::vector<bool>& getIsOrderedVariable() {
+  const std::vector<bool>& getIsOrderedVariable() const noexcept {
+    return is_ordered_variable;
+  }
+  
+  std::vector<bool>& getIsOrderedVariable() noexcept {
     return is_ordered_variable;
   }
 
