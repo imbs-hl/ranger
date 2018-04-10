@@ -28,6 +28,9 @@ public:
 
   virtual ~TreeClassification();
 
+  TreeClassification(const TreeClassification&)            = delete;
+  TreeClassification& operator=(const TreeClassification&) = delete;
+
   void allocateMemory();
 
   double estimate(size_t nodeID);
@@ -88,8 +91,6 @@ private:
 
   size_t* counter;
   size_t* counter_per_class;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeClassification);
 };
 
 } // namespace ranger
