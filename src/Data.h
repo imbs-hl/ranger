@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 
 #include "globals.h"
 
+namespace ranger {
+
 class Data {
 public:
   Data();
@@ -198,5 +200,7 @@ protected:
 private:
   DISALLOW_COPY_AND_ASSIGN(Data);
 };
+
+} // namespace ranger
 
 #endif /* DATA_H_ */

@@ -40,6 +40,8 @@
 #include "DataDouble.h"
 #include "DataFloat.h"
 #include "DataSparse.h"
+
+namespace ranger {
  
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
@@ -174,9 +176,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     forest->run(false);
     
     if (use_split_select_weights && importance_mode != IMP_NONE) {
-      *verbose_out
-          << "Warning: Split select weights used. Variable importance measures are only comparable for variables with equal weights."
-          << std::endl;
+      if (verbose_out) {
+        *verbose_out << "Warning: Split select weights used. Variable importance measures are only comparable for variables with equal weights." << std::endl;
+      }
     }
     
     // Use first non-empty dimension of predictions
@@ -255,3 +257,5 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
 
   return result;
 }
+
+} // namespace ranger

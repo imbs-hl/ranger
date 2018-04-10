@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeClassification: public Tree {
 public:
   TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
@@ -89,5 +91,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(TreeClassification);
 };
+
+} // namespace ranger
 
 #endif /* TREECLASSIFICATION_H_ */

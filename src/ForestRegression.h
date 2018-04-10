@@ -18,6 +18,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Forest.h"
 
+namespace ranger {
+
 class ForestRegression: public Forest {
 public:
   ForestRegression();
@@ -42,5 +44,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(ForestRegression);
 };
+
+} // namespace ranger
 
 #endif /* FORESTREGRESSION_H_ */

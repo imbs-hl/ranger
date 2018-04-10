@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Forest.h"
 
+namespace ranger {
+
 class ForestClassification: public Forest {
 public:
   ForestClassification();
@@ -64,5 +66,7 @@ protected:
 private:
   DISALLOW_COPY_AND_ASSIGN(ForestClassification);
 };
+
+} // namespace ranger
 
 #endif /* FORESTCLASSIFICATION_H_ */

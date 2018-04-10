@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeRegression: public Tree {
 public:
   TreeRegression();
@@ -81,5 +83,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(TreeRegression);
 };
+
+} // namespace ranger
 
 #endif /* TREEREGRESSION_H_ */

@@ -16,6 +16,8 @@ R package "ranger" under GPL3 license.
 #include "utility.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataDouble: public Data {
 public:
   DataDouble();
@@ -58,5 +60,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(DataDouble);
 };
+
+} // namespace ranger
 
 #endif /* DATADOUBLE_H_ */
