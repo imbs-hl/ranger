@@ -138,7 +138,7 @@ public:
     return is_ordered_variable;
   }
 
-  void setIsOrderedVariable(std::vector<std::string>& unordered_variable_names) {
+  void setIsOrderedVariable(const std::vector<std::string>& unordered_variable_names) {
     is_ordered_variable.resize(num_cols, true);
     for (auto& variable_name : unordered_variable_names) {
       size_t varID = getVariableID(variable_name);
