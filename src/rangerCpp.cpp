@@ -41,7 +41,7 @@
 #include "DataFloat.h"
 #include "DataSparse.h"
 
-namespace ranger {
+using namespace ranger;
  
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
@@ -258,4 +258,3 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
   return result;
 }
 
-} // namespace ranger
