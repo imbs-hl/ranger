@@ -12,6 +12,8 @@ R package "ranger" under GPL3 license.
 #ifndef TREECLASSIFICATION_H_
 #define TREECLASSIFICATION_H_
 
+#include <vector>
+
 #include "globals.h"
 #include "Tree.h"
 
@@ -54,17 +56,23 @@ private:
 
   // Called by splitNodeInternal(). Sets split_varIDs and split_values.
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
       size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
+      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
+      const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right);
+  void findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
       size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+  void findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
       size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
 
   bool findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
       size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes, size_t* class_counts,
+  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
+      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
+      const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right);
+  void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
       size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
 
   void addGiniImportance(size_t nodeID, size_t varID, double decrease);
@@ -73,12 +81,10 @@ private:
   void bootstrapWithoutReplacementClassWise() override;
 
   void cleanUpInternal() override {
-    if (counter != 0) {
-      delete[] counter;
-    }
-    if (counter_per_class != 0) {
-      delete[] counter_per_class;
-    }
+    counter.clear();
+    counter.shrink_to_fit();
+    counter_per_class.clear();
+    counter_per_class.shrink_to_fit();
   }
 
   // Classes of the dependent variable and classIDs for responses
@@ -89,8 +95,7 @@ private:
   // Splitting weights
   std::vector<double>* class_weights;
 
-  size_t* counter;
-  size_t* counter_per_class;
+  std::vector<size_t> counter, counter_per_class;
 };
 
 } // namespace ranger

@@ -12,6 +12,8 @@ R package "ranger" under GPL3 license.
 #ifndef TREESURVIVAL_H_
 #define TREESURVIVAL_H_
 
+#include <vector>
+
 #include "globals.h"
 #include "Tree.h"
 
@@ -68,11 +70,11 @@ private:
 
   void computeDeathCounts(size_t nodeID);
   void computeChildDeathCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
-      size_t* num_samples_right_child, size_t* num_samples_at_risk_right_child, size_t* num_deaths_right_child,
-      size_t num_splits);
+      std::vector<size_t>& num_samples_right_child, std::vector<size_t>& num_samples_at_risk_right_child,
+      std::vector<size_t>& num_deaths_right_child, size_t num_splits);
 
   void computeAucSplit(double time_k, double time_l, double status_k, double status_l, double value_k, double value_l,
-      size_t num_splits, std::vector<double>& possible_split_values, double* num_count, double* num_total);
+      size_t num_splits, std::vector<double>& possible_split_values, std::vector<double>& num_count, std::vector<double>& num_total);
 
   void findBestSplitValueLogRank(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
       double& best_logrank);
@@ -88,8 +90,10 @@ private:
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
   void cleanUpInternal() override {
-    delete[] num_deaths;
-    delete[] num_samples_at_risk;
+    num_deaths.clear();
+    num_deaths.shrink_to_fit();
+    num_samples_at_risk.clear();
+    num_samples_at_risk.shrink_to_fit();
   }
 
   size_t status_varID;
@@ -103,8 +107,7 @@ private:
   std::vector<std::vector<double>> chf;
 
   // Fields to save to while tree growing
-  size_t* num_deaths;
-  size_t* num_samples_at_risk;
+  std::vector<size_t> num_deaths, num_samples_at_risk;
 };
 
 } // namespace ranger
