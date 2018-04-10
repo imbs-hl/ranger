@@ -25,12 +25,12 @@ Data::Data() :
         0), max_num_unique_values(0) {
 }
 
-size_t Data::getVariableID(std::string variable_name) {
-  std::vector<std::string>::iterator it = std::find(variable_names.begin(), variable_names.end(), variable_name);
-  if (it == variable_names.end()) {
+size_t Data::getVariableID(const std::string& variable_name) const {
+  auto it = std::find(variable_names.cbegin(), variable_names.cend(), variable_name);
+  if (it == variable_names.cend()) {
     throw std::runtime_error("Variable " + variable_name + " not found.");
   }
-  return (std::distance(variable_names.begin(), it));
+  return (std::distance(variable_names.cbegin(), it));
 }
 
 void Data::addSnpData(unsigned char* snp_data, size_t num_cols_snp) {
@@ -148,7 +148,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
 }
 // #nocov end
 
-void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
+void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) const {
 
   // All values for varID (no duplicates) for given sampleIDs
   if (getUnpermutedVarID(varID) < num_cols_no_snp) {
@@ -158,7 +158,7 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
       all_values.push_back(get(sampleIDs[i], varID));
     }
     std::sort(all_values.begin(), all_values.end());
-    all_values.erase(unique(all_values.begin(), all_values.end()), all_values.end());
+    all_values.erase(std::unique(all_values.begin(), all_values.end()), all_values.end());
   } else {
     // If GWA data just use 0, 1, 2
     all_values = std::vector<double>( { 0, 1, 2 });
