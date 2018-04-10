@@ -28,6 +28,8 @@
 
 #include "DataSparse.h"
 
+namespace ranger {
+
 DataSparse::DataSparse() :
     data(0) {
 }
@@ -38,4 +40,4 @@ DataSparse::~DataSparse() {
   }
 }
 
-
+} // namespace ranger

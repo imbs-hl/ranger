@@ -34,6 +34,8 @@
 #include "utility.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataSparse: public Data {
 public:
   DataSparse();
@@ -63,5 +65,7 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(DataSparse);
 };
+
+} // namespace ranger
 
 #endif /* DATASPARSE_H_ */

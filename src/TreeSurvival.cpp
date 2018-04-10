@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "TreeSurvival.h"
 #include "Data.h"
 
+namespace ranger {
+
 TreeSurvival::TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID,
     std::vector<size_t>* response_timepointIDs) :
     status_varID(status_varID), unique_timepoints(unique_timepoints), response_timepointIDs(response_timepointIDs), num_deaths(
@@ -900,3 +902,5 @@ void TreeSurvival::addImpurityImportance(size_t nodeID, size_t varID, double dec
     (*variable_importance)[tempvarID] += decrease;
   }
 }
+
+} // namespace ranger

@@ -11,6 +11,8 @@ R package "ranger" under GPL3 license.
 
 #include "DataDouble.h"
 
+namespace ranger {
+
 DataDouble::DataDouble() :
     data(0) {
 }
@@ -21,3 +23,4 @@ DataDouble::~DataDouble() {
   }
 }
 
+} // namespace ranger

@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataChar: public Data {
 public:
   DataChar();
@@ -61,6 +63,8 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(DataChar);
 };
+
+} // namespace ranger
 
 #endif /* DATACHAR_H_ */
 // #nocov end

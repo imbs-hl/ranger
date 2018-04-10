@@ -18,6 +18,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataFloat: public Data {
 public:
   DataFloat();
@@ -53,6 +55,8 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(DataFloat);
 };
+
+} // namespace ranger
 
 #endif /* DATAFLOAT_H_ */
 // #nocov end

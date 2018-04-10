@@ -17,6 +17,8 @@ R package "ranger" under GPL3 license.
 
 #include "DataFloat.h"
 
+namespace ranger {
+
 DataFloat::DataFloat() :
     data(0) {
 }
@@ -43,3 +45,4 @@ DataFloat::~DataFloat() {
 
 // #nocov end
 
+} // namespace ranger

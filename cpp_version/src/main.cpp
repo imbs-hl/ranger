@@ -21,6 +21,8 @@ R package "ranger" under GPL3 license.
 #include "ForestSurvival.h"
 #include "ForestProbability.h"
 
+using namespace ranger;
+
 int main(int argc, char **argv) {
 
   ArgumentHandler arg_handler(argc, argv);
@@ -65,7 +67,7 @@ int main(int argc, char **argv) {
       }
       verbose_out = logfile;
     }
-
+    
     // Call Ranger
     *verbose_out << "Starting Ranger." << std::endl;
     forest->initCpp(arg_handler.depvarname, arg_handler.memmode, arg_handler.file, arg_handler.mtry,
