@@ -24,10 +24,12 @@ namespace ranger {
 
 class ForestClassification: public Forest {
 public:
-  ForestClassification();
+  ForestClassification() = default;
+  
   ForestClassification(const ForestClassification&)            = delete;
   ForestClassification& operator=(const ForestClassification&) = delete;
-  virtual ~ForestClassification() override;
+  
+  virtual ~ForestClassification() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,

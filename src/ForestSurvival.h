@@ -23,10 +23,12 @@ namespace ranger {
 
 class ForestSurvival: public Forest {
 public:
-  ForestSurvival();
+  ForestSurvival() = default;
+  
   ForestSurvival(const ForestSurvival&)            = delete;
   ForestSurvival& operator=(const ForestSurvival&) = delete;
-  virtual ~ForestSurvival() override;
+  
+  virtual ~ForestSurvival() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
