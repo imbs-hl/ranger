@@ -28,12 +28,12 @@ public:
     this->num_cols = num_cols;
     this->num_cols_no_snp = num_cols;
   }
-  virtual ~DataDouble();
-  
+
   DataDouble(const DataDouble&)            = delete;
   DataDouble& operator=(const DataDouble&) = delete;
+  virtual ~DataDouble() override;
 
-  double get(size_t row, size_t col) const {
+  double get(size_t row, size_t col) const override {
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
@@ -50,11 +50,11 @@ public:
     }
   }
 
-  void reserveMemory() {
+  void reserveMemory() override {
     data = new double[num_cols * num_rows];
   }
 
-  void set(size_t col, size_t row, double value, bool& error) {
+  void set(size_t col, size_t row, double value, bool& error) override {
     data[col * num_rows + row] = value;
   }
 
