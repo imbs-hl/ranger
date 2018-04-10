@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #ifndef DATAFLOAT_H_
 #define DATAFLOAT_H_
 
+#include <vector>
+
 #include "globals.h"
 #include "Data.h"
 
@@ -22,12 +24,13 @@ namespace ranger {
 
 class DataFloat: public Data {
 public:
-  DataFloat();
+  DataFloat() = default;
   DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
   
   DataFloat(const DataFloat&)            = delete;
   DataFloat& operator=(const DataFloat&) = delete;
-  virtual ~DataFloat() override;
+  
+  virtual ~DataFloat() override = default;
 
   double get(size_t row, size_t col) const override {
 
@@ -47,15 +50,15 @@ public:
   }
 
   void reserveMemory() override {
-    data = new float[num_cols * num_rows];
+    data.resize(num_cols * num_rows);
   }
 
   void set(size_t col, size_t row, double value, bool& error) override {
-    data[col * num_rows + row] = (float) value;
+    data[col * num_rows + row] = value;
   }
 
 private:
-  float* data;
+  std::vector<float> data;
 };
 
 } // namespace ranger

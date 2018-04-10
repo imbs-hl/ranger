@@ -15,15 +15,10 @@ R package "ranger" under GPL3 license.
 #include <limits.h>
 #include <math.h>
 #include <iostream>
-#include <vector>
 
 #include "DataChar.h"
 
 namespace ranger {
-
-DataChar::DataChar() :
-    data(0) {
-}
 
 DataChar::DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols,
     bool& error) {
@@ -44,14 +39,8 @@ DataChar::DataChar(double* data_double, std::vector<std::string> variable_names,
       if (floor(value) != ceil(value)) {
         error = true;
       }
-      data[i * num_rows + j] = (char) value;
+      data[i * num_rows + j] = value;
     }
-  }
-}
-
-DataChar::~DataChar() {
-  if (!externalData) {
-    delete[] data;
   }
 }
 
