@@ -165,7 +165,7 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
   }
 }
 
-void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID) {
+void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID) const {
   if (sampleIDs.size() > 0) {
     min = get(sampleIDs[0], varID);
     max = min;
