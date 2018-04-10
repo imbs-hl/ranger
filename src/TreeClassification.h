@@ -29,7 +29,7 @@ public:
   TreeClassification(const TreeClassification&)            = delete;
   TreeClassification& operator=(const TreeClassification&) = delete;
   
-  virtual ~TreeClassification() override;
+  virtual ~TreeClassification() override = default;
   
   void allocateMemory() override;
 

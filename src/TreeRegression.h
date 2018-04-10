@@ -19,7 +19,7 @@ namespace ranger {
 
 class TreeRegression: public Tree {
 public:
-  TreeRegression();
+  TreeRegression() = default;
 
   // Create from loaded forest
   TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -28,7 +28,7 @@ public:
   TreeRegression(const TreeRegression&)            = delete;
   TreeRegression& operator=(const TreeRegression&) = delete;
 
-  virtual ~TreeRegression() override;
+  virtual ~TreeRegression() override = default;
 
   void allocateMemory() override;
 
