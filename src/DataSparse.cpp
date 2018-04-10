@@ -30,14 +30,4 @@
 
 namespace ranger {
 
-DataSparse::DataSparse() :
-    data(0) {
-}
-
-DataSparse::~DataSparse() {
-  if (!externalData) {
-    delete[] data;
-  }
-}
-
 } // namespace ranger

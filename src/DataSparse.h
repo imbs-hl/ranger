@@ -28,6 +28,8 @@
 #ifndef DATASPARSE_H_
 #define DATASPARSE_H_
 
+#include <memory>
+
 #include <RcppEigen.h>
 
 #include "globals.h"
@@ -38,9 +40,10 @@ namespace ranger {
 
 class DataSparse: public Data {
 public:
-  DataSparse();
-  DataSparse(Eigen::SparseMatrix<double>* data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) :
-      data(data) {
+  DataSparse() = default;
+  
+  DataSparse(std::make_shared<Eigen::SparseMatrix<double>> data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols)
+  : data {data} {
     this->variable_names = variable_names;
     this->num_rows = num_rows;
     this->num_cols = num_cols;
@@ -49,14 +52,15 @@ public:
 
   DataSparse(const DataSparse&)            = delete;
   DataSparse& operator=(const DataSparse&) = delete;
-  virtual ~DataSparse() override;
+  
+  virtual ~DataSparse() override = default;
 
   double get(size_t row, size_t col) const override {
     return data->coeff(row, col);
   }
 
   void reserveMemory() override {
-    data = new Eigen::SparseMatrix<double>(num_rows, num_cols);
+    data = std::make_shared<Eigen::SparseMatrix<double>>(num_rows, num_cols);
   }
 
   void set(size_t col, size_t row, double value, bool& error) override {
@@ -64,7 +68,7 @@ public:
   }
 
 private:
-  Eigen::SparseMatrix<double>* data;
+  std::shared_ptr<Eigen::SparseMatrix<double>> data;
 };
 
 } // namespace ranger
