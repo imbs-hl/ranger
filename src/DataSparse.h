@@ -48,7 +48,7 @@ public:
   virtual ~DataSparse() override = default;
 
   double get(size_t row, size_t col) const override {
-    return data->coeff(row, col);
+    return data.coeff(row, col);
   }
 
   void reserveMemory() override {
@@ -56,7 +56,7 @@ public:
   }
 
   void set(size_t col, size_t row, double value, bool& error) override {
-    data->coeffRef(row, col) = value;
+    data.coeffRef(row, col) = value;
   }
 
 private:
