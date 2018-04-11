@@ -29,6 +29,7 @@
 #include <vector>
 #include <sstream>
 #include <memory>
+#include <utility>
 
 #include "globals.h"
 #include "Forest.h"
@@ -96,11 +97,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       num_cols = input_data.ncol();
     }
     
-    std::shared_ptr<Eigen::SparseMatrix<double>> sparse_data_ptr {};
     // Initialize data 
     if (use_sparse_data) {
-      sparse_data_ptr.reset(&sparse_data);
-      data = make_unique<DataSparse>(sparse_data_ptr, variable_names, num_rows, num_cols);
+      data = make_unique<DataSparse>(std::move(sparse_data), variable_names, num_rows, num_cols);
     } else {
       std::vector<double> input_data_copy {input_data.begin(), input_data.end()};
       input_data = Rcpp::NumericMatrix {}; // Clear original input data
