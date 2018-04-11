@@ -40,7 +40,7 @@ class DataSparse: public Data {
 public:
   DataSparse() = default;
   
-  DataSparse(Eigen::SparseMatrix<double> data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
+  DataSparse(Eigen::SparseMatrix<double>& data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
 
   DataSparse(const DataSparse&)            = delete;
   DataSparse& operator=(const DataSparse&) = delete;

@@ -99,7 +99,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     
     // Initialize data 
     if (use_sparse_data) {
-      data = make_unique<DataSparse>(std::move(sparse_data), variable_names, num_rows, num_cols);
+      data = make_unique<DataSparse>(sparse_data, variable_names, num_rows, num_cols);
     } else {
       std::vector<double> input_data_copy {input_data.begin(), input_data.end()};
       input_data = Rcpp::NumericMatrix {}; // Clear original input data
