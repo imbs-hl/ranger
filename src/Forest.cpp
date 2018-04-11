@@ -456,7 +456,7 @@ void Forest::grow() {
     if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
       variable_importance_threads[i].resize(num_independent_variables, 0);
     }
-    threads.push_back(std::thread(&Forest::growTreesInThread, this, i, &(variable_importance_threads[i])));
+    threads.emplace_back(&Forest::growTreesInThread, this, i, &(variable_importance_threads[i]));
   }
   showProgress("Growing trees..", num_trees);
   for (auto &thread : threads) {
@@ -519,7 +519,7 @@ void Forest::predict() {
   std::vector<std::thread> threads;
   threads.reserve(num_threads);
   for (uint i = 0; i < num_threads; ++i) {
-    threads.push_back(std::thread(&Forest::predictTreesInThread, this, i, data.get(), false));
+    threads.emplace_back(&Forest::predictTreesInThread, this, i, data.get(), false);
   }
   showProgress("Predicting..", num_trees);
   for (auto &thread : threads) {
@@ -532,7 +532,7 @@ void Forest::predict() {
   threads.reserve(num_threads);
   progress = 0;
   for (uint i = 0; i < num_threads; ++i) {
-    threads.push_back(std::thread(&Forest::predictInternalInThread, this, i));
+    threads.emplace_back(&Forest::predictInternalInThread, this, i);
   }
   showProgress("Aggregating predictions..", num_samples);
   for (auto &thread : threads) {
@@ -564,7 +564,7 @@ void Forest::computePredictionError() {
   threads.reserve(num_threads);
   progress = 0;
   for (uint i = 0; i < num_threads; ++i) {
-    threads.push_back(std::thread(&Forest::predictTreesInThread, this, i, data.get(), true));
+    threads.emplace_back(&Forest::predictTreesInThread, this, i, data.get(), true);
   }
   showProgress("Computing prediction error..", num_trees);
   for (auto &thread : threads) {
@@ -623,10 +623,8 @@ void Forest::computePermutationImportance() {
     if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
       variance_threads[i].resize(num_independent_variables, 0);
     }
-    threads.push_back(
-        std::thread(&Forest::computeTreePermutationImportanceInThread, this, i,
-                    std::ref(variable_importance_threads[i]),
-                    std::ref(variance_threads[i])));
+    threads.emplace_back(&Forest::computeTreePermutationImportanceInThread, this, i,
+                         std::ref(variable_importance_threads[i]), std::ref(variance_threads[i]));
   }
   showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
