@@ -71,7 +71,7 @@ protected:
   std::map<std::pair<double, double>, size_t> classification_table;
   
 private:
-  const std::vector<double>& getTreePrediciton(size_t tree_idx, size_t sample_idx) const;
+  const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;
   size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
 
