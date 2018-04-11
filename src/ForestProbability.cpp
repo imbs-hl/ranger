@@ -123,7 +123,7 @@ void ForestProbability::predictInternal(size_t sample_idx) {
   // For each sample compute proportions in each tree
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     if (predict_all) {
-      std::vector<double> counts = getTreePrediciton(tree_idx, sample_idx);
+      std::vector<double> counts = getTreePrediction(tree_idx, sample_idx);
 
       for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
         predictions[sample_idx][class_idx][tree_idx] += counts[class_idx];
@@ -131,7 +131,7 @@ void ForestProbability::predictInternal(size_t sample_idx) {
     } else if (prediction_type == TERMINALNODES) {
       predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
     } else {
-      std::vector<double> counts = getTreePrediciton(tree_idx, sample_idx);
+      std::vector<double> counts = getTreePrediction(tree_idx, sample_idx);
 
       for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
         predictions[0][sample_idx][class_idx] += counts[class_idx];
@@ -158,7 +158,7 @@ void ForestProbability::computePredictionErrorInternal() {
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-      std::vector<double> counts = getTreePrediciton(tree_idx, sample_idx);
+      std::vector<double> counts = getTreePrediction(tree_idx, sample_idx);
 
       for (size_t class_idx = 0; class_idx < counts.size(); ++class_idx) {
         predictions[0][sampleID][class_idx] += counts[class_idx];
@@ -321,7 +321,7 @@ void ForestProbability::loadFromFileInternal(std::ifstream& infile) {
   }
 }
 
-const std::vector<double>& ForestProbability::getTreePrediciton(size_t tree_idx, size_t sample_idx) const {
+const std::vector<double>& ForestProbability::getTreePrediction(size_t tree_idx, size_t sample_idx) const {
   const auto& tree = dynamic_cast<const TreeProbability&>(*trees[tree_idx]);
   return tree.getPrediction(sample_idx);
 }
