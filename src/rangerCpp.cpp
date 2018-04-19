@@ -104,12 +104,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     // If there is snp data, add it
     if (snp_data.nrow() > 1) {
       data->addSnpData(snp_data.begin(), snp_data.ncol());
-      
-      // Order SNP levels if in "order" splitting
-      if (!prediction_mode & order_snps) {
-        data->orderSnpLevels(dependent_variable_name);
-      }
-      
+
       // Load SNP order if available
       if (prediction_mode && loaded_forest.containsElementNamed("snp.order")) {
         std::vector<std::vector<size_t>> snp_order = loaded_forest["snp.order"];
@@ -144,7 +139,8 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     forest->initR(dependent_variable_name, data, mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
-        predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits);
+        predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
+        order_snps);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {
@@ -241,7 +237,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
       forest_object.push_back(forest->getIsOrderedVariable(), "is.ordered");
       
       if (snp_data.nrow() > 1 && order_snps) {
-        forest_object.push_back(forest->getSnpOrder(), "snp.order");
+        // Exclude permuted SNPs (if any)
+        std::vector<std::vector<size_t>> snp_order = forest->getSnpOrder();
+        forest_object.push_back(std::vector<std::vector<size_t>>(snp_order.begin(), snp_order.begin() + snp_data.ncol()), "snp.order");
       }
       
       if (treetype == TREE_CLASSIFICATION) {

@@ -49,6 +49,7 @@ public:
 
   size_t getIndex(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
+    size_t col_permuted = col;
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
@@ -70,7 +71,11 @@ public:
       if (snp_order.empty()) {
         return result;
       } else {
-        return snp_order[col - num_cols_no_snp][result];
+        if (col_permuted >= num_cols) {
+          return snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
+        } else {
+          return snp_order[col - num_cols_no_snp][result];
+        }
       }
     }
   }
@@ -105,7 +110,7 @@ public:
 
   void sort();
 
-  void orderSnpLevels(std::string dependent_variable_name);
+  void orderSnpLevels(std::string dependent_variable_name, bool corrected_importance);
 
   const std::vector<std::string>& getVariableNames() const {
     return variable_names;

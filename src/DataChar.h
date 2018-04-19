@@ -1,17 +1,16 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 // Ignore in coverage report (not used in R package)
 // #nocov start
- 
 #ifndef DATACHAR_H_
 #define DATACHAR_H_
 
@@ -26,14 +25,14 @@ class DataChar: public Data {
 public:
   DataChar();
   DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, bool& error);
-  
-  DataChar(const DataChar&)            = delete;
+
+  DataChar(const DataChar&) = delete;
   DataChar& operator=(const DataChar&) = delete;
   virtual ~DataChar() override;
 
   double get(size_t row, size_t col) const override {
-
     // Use permuted data for corrected impurity importance
+    size_t col_permuted = col;
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
@@ -55,7 +54,11 @@ public:
       if (snp_order.empty()) {
         return result;
       } else {
-        return snp_order[col - num_cols_no_snp][result];
+        if (col_permuted >= num_cols) {
+          return snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
+        } else {
+          return snp_order[col - num_cols_no_snp][result];
+        }
       }
     }
   }
