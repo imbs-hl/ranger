@@ -15,6 +15,8 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Tree.h"
 
+namespace ranger {
+
 class TreeRegression: public Tree {
 public:
   TreeRegression();
@@ -23,13 +25,16 @@ public:
   TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
       std::vector<double>& split_values);
 
-  virtual ~TreeRegression();
+  TreeRegression(const TreeRegression&)            = delete;
+  TreeRegression& operator=(const TreeRegression&) = delete;
 
-  void allocateMemory();
+  virtual ~TreeRegression() override;
+
+  void allocateMemory() override;
 
   double estimate(size_t nodeID);
   void computePermutationImportanceInternal(std::vector<std::vector<size_t>>* permutations);
-  void appendToFileInternal(std::ofstream& file);
+  void appendToFileInternal(std::ofstream& file) override;
 
   double getPrediction(size_t sampleID) const {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[sampleID];
@@ -41,10 +46,10 @@ public:
   }
 
 private:
-  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void createEmptyNodeInternal();
+  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
+  void createEmptyNodeInternal() override;
 
-  double computePredictionAccuracyInternal();
+  double computePredictionAccuracyInternal() override;
 
   // Called by splitNodeInternal(). Sets split_varIDs and split_values.
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
@@ -67,7 +72,7 @@ private:
 
   double computePredictionMSE();
 
-  void cleanUpInternal() {
+  void cleanUpInternal() override {
     if (counter != 0) {
       delete[] counter;
     }
@@ -78,8 +83,8 @@ private:
 
   size_t* counter;
   double* sums;
-
-  DISALLOW_COPY_AND_ASSIGN(TreeRegression);
 };
+
+} // namespace ranger
 
 #endif /* TREEREGRESSION_H_ */

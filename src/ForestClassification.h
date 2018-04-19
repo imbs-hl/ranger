@@ -20,10 +20,14 @@ R package "ranger" under GPL3 license.
 #include "globals.h"
 #include "Forest.h"
 
+namespace ranger {
+
 class ForestClassification: public Forest {
 public:
   ForestClassification();
-  virtual ~ForestClassification();
+  ForestClassification(const ForestClassification&)            = delete;
+  ForestClassification& operator=(const ForestClassification&) = delete;
+  virtual ~ForestClassification() override;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -39,16 +43,16 @@ public:
   }
 
 protected:
-  void initInternal(std::string status_variable_name);
-  void growInternal();
-  void allocatePredictMemory();
-  void predictInternal(size_t sample_idx);
-  void computePredictionErrorInternal();
-  void writeOutputInternal();
-  void writeConfusionFile();
-  void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  void initInternal(std::string status_variable_name) override;
+  void growInternal() override;
+  void allocatePredictMemory() override;
+  void predictInternal(size_t sample_idx) override;
+  void computePredictionErrorInternal() override;
+  void writeOutputInternal() override;
+  void writeConfusionFile() override;
+  void writePredictionFile() override;
+  void saveToFileInternal(std::ofstream& outfile) override;
+  void loadFromFileInternal(std::ifstream& infile) override;
 
   // Classes of the dependent variable and classIDs for responses
   std::vector<double> class_values;
@@ -60,9 +64,8 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(ForestClassification);
 };
+
+} // namespace ranger
 
 #endif /* FORESTCLASSIFICATION_H_ */

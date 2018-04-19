@@ -19,10 +19,14 @@ R package "ranger" under GPL3 license.
 #include "Forest.h"
 #include "TreeSurvival.h"
 
+namespace ranger {
+
 class ForestSurvival: public Forest {
 public:
   ForestSurvival();
-  virtual ~ForestSurvival();
+  ForestSurvival(const ForestSurvival&)            = delete;
+  ForestSurvival& operator=(const ForestSurvival&) = delete;
+  virtual ~ForestSurvival() override;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -47,22 +51,22 @@ public:
   }
 
 private:
-  void initInternal(std::string status_variable_name);
-  void growInternal();
-  void allocatePredictMemory();
-  void predictInternal(size_t sample_idx);
-  void computePredictionErrorInternal();
-  void writeOutputInternal();
-  void writeConfusionFile();
-  void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  void initInternal(std::string status_variable_name) override;
+  void growInternal() override;
+  void allocatePredictMemory() override;
+  void predictInternal(size_t sample_idx) override;
+  void computePredictionErrorInternal() override;
+  void writeOutputInternal() override;
+  void writeConfusionFile() override;
+  void writePredictionFile() override;
+  void saveToFileInternal(std::ofstream& outfile) override;
+  void loadFromFileInternal(std::ifstream& infile) override;
 
   size_t status_varID;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
-
-  DISALLOW_COPY_AND_ASSIGN(ForestSurvival);
 };
+
+} // namespace ranger
 
 #endif /* FORESTSURVIVAL_H_ */

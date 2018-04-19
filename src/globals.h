@@ -12,11 +12,8 @@ R package "ranger" under GPL3 license.
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-    TypeName(const TypeName&);             \
-    void operator=(const TypeName&)
+namespace ranger {
 
-// Pi
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -102,5 +99,7 @@ const double STATUS_INTERVAL = 30.0;
 
 // Threshold for q value split method switch
 const double Q_THRESHOLD = 0.02;
+
+} // namespace ranger
 
 #endif /* GLOBALS_H_ */

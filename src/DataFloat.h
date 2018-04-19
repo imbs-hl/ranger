@@ -17,13 +17,19 @@
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataFloat: public Data {
 public:
   DataFloat();
   DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
-  virtual ~DataFloat();
+  
+  DataFloat(const DataFloat&)            = delete;
+  DataFloat& operator=(const DataFloat&) = delete;
+  virtual ~DataFloat() override;
 
-  double get(size_t row, size_t col) const {
+  double get(size_t row, size_t col) const override {
+
     // Use permuted data for corrected impurity importance
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
@@ -51,19 +57,19 @@ public:
     }
   }
 
-  void reserveMemory() {
+  void reserveMemory() override {
     data = new float[num_cols * num_rows];
   }
 
-  void set(size_t col, size_t row, double value, bool& error) {
+  void set(size_t col, size_t row, double value, bool& error) override {
     data[col * num_rows + row] = (float) value;
   }
 
 private:
   float* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataFloat);
 };
+
+} // namespace ranger
 
 #endif /* DATAFLOAT_H_ */
 // #nocov end

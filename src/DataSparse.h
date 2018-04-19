@@ -34,6 +34,8 @@
 #include "utility.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataSparse: public Data {
 public:
   DataSparse();
@@ -44,24 +46,27 @@ public:
     this->num_cols = num_cols;
     this->num_cols_no_snp = num_cols;
   }
-  virtual ~DataSparse();
 
-  double get(size_t row, size_t col) const {
+  DataSparse(const DataSparse&)            = delete;
+  DataSparse& operator=(const DataSparse&) = delete;
+  virtual ~DataSparse() override;
+
+  double get(size_t row, size_t col) const override {
     return data->coeff(row, col);
   }
 
-  void reserveMemory() {
+  void reserveMemory() override {
     data = new Eigen::SparseMatrix<double>(num_rows, num_cols);
   }
 
-  void set(size_t col, size_t row, double value, bool& error) {
+  void set(size_t col, size_t row, double value, bool& error) override {
     data->coeffRef(row, col) = value;
   }
 
 private:
   Eigen::SparseMatrix<double>* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataSparse);
 };
+
+} // namespace ranger
 
 #endif /* DATASPARSE_H_ */

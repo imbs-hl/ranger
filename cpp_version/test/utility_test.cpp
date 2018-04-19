@@ -5,6 +5,8 @@
 #include "gtest/gtest.h"
 #include "utility.h"
 
+using namespace ranger;
+
 // Split 0..9 in 1 part
 TEST(equalSplit, onePart) {
   std::vector<uint> test;

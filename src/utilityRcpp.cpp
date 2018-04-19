@@ -37,3 +37,5 @@ Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector r
     result[i] = std::lower_bound(reference.begin(), reference.end(), values[i]) - reference.begin();
   return result;
 }
+
+

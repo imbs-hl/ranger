@@ -20,10 +20,15 @@
 
 #include "globals.h"
 
+namespace ranger {
+
 class Data {
 public:
   Data();
   virtual ~Data();
+
+  Data(const Data&) = delete;
+  Data& operator=(const Data&) = delete;
 
   virtual double get(size_t row, size_t col) const = 0;
 
@@ -183,8 +188,8 @@ public:
   }
 
   void setSnpOrder(std::vector<std::vector<size_t>>& snp_order) {
-      this->snp_order = snp_order;
-    }
+    this->snp_order = snp_order;
+  }
 
 protected:
   std::vector<std::string> variable_names;
@@ -212,9 +217,8 @@ protected:
 
   // Order of 0/1/2 for ordered splitting
   std::vector<std::vector<size_t>> snp_order;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(Data);
 };
+
+} // namespace ranger
 
 #endif /* DATA_H_ */
