@@ -20,6 +20,8 @@ R package "ranger" under GPL3 license.
 #include "utility.h"
 #include "Data.h"
 
+namespace ranger {
+
 TreeClassification::TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<size_t>>* sampleIDs_per_class, std::vector<double>* class_weights) :
     class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(sampleIDs_per_class), class_weights(
@@ -763,3 +765,5 @@ void TreeClassification::bootstrapWithoutReplacementClassWise() {
     }
   }
 }
+
+} // namespace ranger
