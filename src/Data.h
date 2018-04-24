@@ -145,7 +145,7 @@ public:
     this->is_ordered_variable = is_ordered_variable;
   }
 
-  const bool isOrderedVariable(size_t varID) const {
+  bool isOrderedVariable(size_t varID) const {
     // Use permuted data for corrected impurity importance
     if (varID >= num_cols) {
       varID = getUnpermutedVarID(varID);
@@ -159,11 +159,11 @@ public:
     std::shuffle(permuted_sampleIDs.begin(), permuted_sampleIDs.end(), random_number_generator);
   }
 
-  const size_t getPermutedSampleID(size_t sampleID) const {
+  size_t getPermutedSampleID(size_t sampleID) const {
     return permuted_sampleIDs[sampleID];
   }
 
-  const size_t getUnpermutedVarID(size_t varID) const {
+  size_t getUnpermutedVarID(size_t varID) const {
     if (varID >= num_cols) {
       varID -= num_cols;
 
