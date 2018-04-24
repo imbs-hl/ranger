@@ -1,3 +1,6 @@
+##### Version 0.9.8
+* Bug fixes
+
 ##### Version 0.9.7
 * Change license of C++ core to MIT (R package is still GPL3)
 
