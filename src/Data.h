@@ -58,26 +58,32 @@ public:
     if (col < num_cols_no_snp) {
       return index_data[col * num_rows + row];
     } else {
-      // Get data out of snp storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      size_t result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      return getSnp(row, col, col_permuted);
+    }
+  }
 
-      // TODO: Better way to treat missing values?
-      if (result > 2) {
-        result = 0;
-      }
+  size_t getSnp(size_t row, size_t col, size_t col_permuted) const {
+    // Get data out of snp storage. -1 because of GenABEL coding.
+    size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
+    size_t result = ((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1;
 
-      // Order SNPs
-      if (snp_order.empty()) {
-        return result;
+    // TODO: Better way to treat missing values?
+    if (result > 2) {
+      result = 0;
+    }
+
+    // Order SNPs
+    if (snp_order.empty()) {
+      return result;
+    } else {
+      if (col_permuted >= num_cols) {
+        return snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
       } else {
-        if (col_permuted >= num_cols) {
-          return snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
-        } else {
-          return snp_order[col - num_cols_no_snp][result];
-        }
+        return snp_order[col - num_cols_no_snp][result];
       }
     }
+
+    return result;
   }
 
   double getUniqueDataValue(size_t varID, size_t index) const {
