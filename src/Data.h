@@ -73,16 +73,13 @@ public:
     }
 
     // Order SNPs
-    if (snp_order.empty()) {
-      return result;
-    } else {
+    if (order_snps) {
       if (col_permuted >= num_cols) {
-        return snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
+        result = snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
       } else {
-        return snp_order[col - num_cols_no_snp][result];
+        result = snp_order[col - num_cols_no_snp][result];
       }
     }
-
     return result;
   }
 
@@ -200,6 +197,7 @@ public:
 
   void setSnpOrder(std::vector<std::vector<size_t>>& snp_order) {
     this->snp_order = snp_order;
+    order_snps = true;
   }
 
 protected:
@@ -228,6 +226,7 @@ protected:
 
   // Order of 0/1/2 for ordered splitting
   std::vector<std::vector<size_t>> snp_order;
+  bool order_snps;
 };
 
 } // namespace ranger

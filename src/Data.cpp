@@ -22,7 +22,7 @@ namespace ranger {
 
 Data::Data() :
     num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
-        0) {
+        0), order_snps(false) {
 }
 
 Data::~Data() {
@@ -264,6 +264,8 @@ void Data::orderSnpLevels(std::string dependent_variable_name, bool corrected_im
     // Save order
     snp_order[i] = order(means, false);
   }
+
+  order_snps = true;
 }
 
 } // namespace ranger
