@@ -39,25 +39,7 @@ public:
     if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
-      // Get data out of snp storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      size_t result = ((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1;
-
-      // TODO: Better way to treat missing values?
-      if (result > 2) {
-        result = 0;
-      }
-
-      // Order SNPs
-      if (snp_order.empty()) {
-        return result;
-      } else {
-        if (col_permuted >= num_cols) {
-          return snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
-        } else {
-          return snp_order[col - num_cols_no_snp][result];
-        }
-      }
+      return getSnp(row, col, col_permuted);
     }
   }
 
