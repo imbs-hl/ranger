@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef FOREST_H_
 #define FOREST_H_
@@ -34,7 +34,7 @@ public:
   Forest();
   virtual ~Forest();
 
-  Forest(const Forest&)            = delete;
+  Forest(const Forest&) = delete;
   Forest& operator=(const Forest&) = delete;
 
   // Init from c++ main or Rcpp from R
@@ -52,13 +52,14 @@ public:
       std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
       std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>& case_weights, bool predict_all, bool keep_inbag, std::vector<double>& sample_fraction,
-      double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits);
+      double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits,
+      bool order_snps);
   void init(std::string dependent_variable_name, MemoryMode memory_mode, Data* input_data, uint mtry,
       std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
       uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
       std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-      PredictionType prediction_type, uint num_random_splits);
+      PredictionType prediction_type, uint num_random_splits, bool order_snps);
   virtual void initInternal(std::string status_variable_name) = 0;
 
   // Grow or predict
@@ -131,6 +132,10 @@ public:
       result.push_back(tree->getInbagCounts());
     }
     return result;
+  }
+
+  const std::vector<std::vector<size_t>>& getSnpOrder() const {
+    return data->getSnpOrder();
   }
 
 protected:

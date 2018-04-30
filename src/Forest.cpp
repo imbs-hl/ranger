@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <math.h>
 #include <algorithm>
@@ -69,10 +69,12 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   }
 
   // Load data
-  if (verbose_out) *verbose_out << "Loading input file: " << input_file << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Loading input file: " << input_file << "." << std::endl;
   bool rounding_error = data->loadFromFile(input_file);
   if (rounding_error && verbose_out) {
-    *verbose_out << "Warning: Rounding or Integer overflow occurred. Use FLOAT or DOUBLE precision to avoid this." << std::endl;
+    *verbose_out << "Warning: Rounding or Integer overflow occurred. Use FLOAT or DOUBLE precision to avoid this."
+        << std::endl;
   }
 
   // Set prediction mode
@@ -88,7 +90,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   init(dependent_variable_name, memory_mode, data, mtry, output_prefix, num_trees, seed, num_threads, importance_mode,
       min_node_size, status_variable_name, prediction_mode, sample_with_replacement, unordered_variable_names,
       memory_saving_splitting, splitrule, predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type,
-      num_random_splits);
+      num_random_splits, false);
 
   if (prediction_mode) {
     loadFromFile(load_forest_filename);
@@ -145,7 +147,8 @@ void Forest::initR(std::string dependent_variable_name, Data* input_data, uint m
     std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
     std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     std::vector<double>& case_weights, bool predict_all, bool keep_inbag, std::vector<double>& sample_fraction,
-    double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits) {
+    double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits,
+    bool order_snps) {
 
   this->verbose_out = verbose_out;
 
@@ -153,7 +156,7 @@ void Forest::initR(std::string dependent_variable_name, Data* input_data, uint m
   init(dependent_variable_name, MEM_DOUBLE, input_data, mtry, "", num_trees, seed, num_threads, importance_mode,
       min_node_size, status_variable_name, prediction_mode, sample_with_replacement, unordered_variable_names,
       memory_saving_splitting, splitrule, predict_all, sample_fraction, alpha, minprop, holdout, prediction_type,
-      num_random_splits);
+      num_random_splits, order_snps);
 
   // Set variables to be always considered for splitting
   if (!always_split_variable_names.empty()) {
@@ -182,7 +185,7 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, D
     uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
     std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits) {
+    PredictionType prediction_type, uint num_random_splits, bool order_snps) {
 
   // Initialize data with memmode
   this->data = input_data;
@@ -264,6 +267,10 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, D
     data->permuteSampleIDs(random_number_generator);
   }
 
+  // Order SNP levels if in "order" splitting
+  if (!prediction_mode && order_snps) {
+    data->orderSnpLevels(dependent_variable_name, (importance_mode == IMP_GINI_CORRECTED));
+  }
 }
 
 void Forest::run(bool verbose) {
@@ -297,7 +304,8 @@ void Forest::run(bool verbose) {
 // #nocov start
 void Forest::writeOutput() {
 
-  if (verbose_out) *verbose_out << std::endl;
+  if (verbose_out)
+    *verbose_out << std::endl;
   writeOutputInternal();
   if (verbose_out) {
     *verbose_out << "Dependent variable name:           " << data->getVariableNames()[dependent_varID] << std::endl;
@@ -361,7 +369,8 @@ void Forest::writeImportanceFile() {
   }
 
   importance_file.close();
-  if (verbose_out) *verbose_out << "Saved variable importance to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved variable importance to file " << filename << "." << std::endl;
 }
 
 void Forest::saveToFile() {
@@ -392,7 +401,8 @@ void Forest::saveToFile() {
 
   // Close file
   outfile.close();
-  if (verbose_out) *verbose_out << "Saved forest to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved forest to file " << filename << "." << std::endl;
 }
 // #nocov end
 
@@ -774,7 +784,8 @@ void Forest::computeTreePermutationImportanceInThread(uint thread_idx, std::vect
 
 // #nocov start
 void Forest::loadFromFile(std::string filename) {
-  if (verbose_out) *verbose_out << "Loading forest from file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Loading forest from file " << filename << "." << std::endl;
 
 // Open file for reading
   std::ifstream infile;
@@ -893,7 +904,7 @@ void Forest::showProgress(std::string operation, clock_t start_time, clock_t& la
     uint remaining_time = (1 / relative_progress - 1) * time_from_start;
     if (verbose_out) {
       *verbose_out << operation << " Progress: " << round(100 * relative_progress)
-                   << "%. Estimated remaining time: " << beautifyTime(remaining_time) << "." << std::endl;
+      << "%. Estimated remaining time: " << beautifyTime(remaining_time) << "." << std::endl;
     }
     lap_time = clock();
   }
@@ -928,8 +939,8 @@ void Forest::showProgress(std::string operation, size_t max_progress) {
       seconds time_from_start = duration_cast<seconds>(steady_clock::now() - start_time);
       uint remaining_time = (1 / relative_progress - 1) * time_from_start.count();
       if (verbose_out) {
-        *verbose_out << operation << " Progress: " << round(100 * relative_progress)
-                     << "%. Estimated remaining time: " << beautifyTime(remaining_time) << "." << std::endl;
+        *verbose_out << operation << " Progress: " << round(100 * relative_progress) << "%. Estimated remaining time: "
+            << beautifyTime(remaining_time) << "." << std::endl;
       }
       last_time = steady_clock::now();
     }

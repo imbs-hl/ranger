@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <fstream>
 #include <sstream>
@@ -21,8 +21,8 @@ R package "ranger" under GPL3 license.
 namespace ranger {
 
 Data::Data() :
-    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(
-        0), max_num_unique_values(0) {
+    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
+        0), order_snps(false) {
 }
 
 Data::~Data() {
@@ -217,4 +217,62 @@ void Data::sort() {
   }
 }
 
+// TODO: Implement ordering for multiclass and survival
+void Data::orderSnpLevels(std::string dependent_variable_name, bool corrected_importance) {
+  // Stop if now SNP data
+  if (snp_data == 0) {
+    return;
+  }
+
+  size_t dependent_varID = getVariableID(dependent_variable_name);
+  size_t num_snps;
+  if (corrected_importance) {
+    num_snps = 2 * (num_cols - num_cols_no_snp);
+  } else {
+    num_snps = num_cols - num_cols_no_snp;
+  }
+
+  // Reserve space
+  snp_order.resize(num_snps, std::vector<size_t>(3));
+
+  // For each SNP
+  for (size_t i = 0; i < num_snps; ++i) {
+    size_t col = i;
+    if (i >= (num_cols - num_cols_no_snp)) {
+      // Get unpermuted SNP ID
+      col = i - num_cols + num_cols_no_snp;
+    }
+
+    // Order by mean response
+    std::vector<double> means(3, 0);
+    std::vector<double> counts(3, 0);
+    for (size_t row = 0; row < num_rows; ++row) {
+      size_t row_permuted = row;
+      if (i >= (num_cols - num_cols_no_snp)) {
+        row_permuted = getPermutedSampleID(row);
+      }
+      size_t idx = col * num_rows_rounded + row_permuted;
+      size_t value = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+
+      // TODO: Better way to treat missing values?
+      if (value > 2) {
+        value = 0;
+      }
+
+      means[value] += get(row, dependent_varID);
+      ++counts[value];
+    }
+
+    for (size_t value = 0; value < 3; ++value) {
+      means[value] /= counts[value];
+    }
+
+    // Save order
+    snp_order[i] = order(means, false);
+  }
+
+  order_snps = true;
+}
+
 } // namespace ranger
+
