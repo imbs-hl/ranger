@@ -253,6 +253,12 @@ void Data::orderSnpLevels(std::string dependent_variable_name, bool corrected_im
       }
       size_t idx = col * num_rows_rounded + row_permuted;
       size_t value = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+
+      // TODO: Better way to treat missing values?
+      if (value > 2) {
+        value = 0;
+      }
+
       means[value] += get(row, dependent_varID);
       ++counts[value];
     }
