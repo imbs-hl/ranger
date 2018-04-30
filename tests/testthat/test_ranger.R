@@ -2,19 +2,6 @@ library(ranger)
 library(survival)
 context("ranger")
 
-## GenABEL
-if (!requireNamespace("GenABEL", quietly = TRUE)) {
-  stop("Package GenABEL is required for testing ranger completely. Please install it.", call. = FALSE)
-} else {
-  dat.gwaa <- readRDS("../test_gwaa.Rds")
-  rg.gwaa <- ranger(CHD ~ ., data = dat.gwaa, verbose = FALSE, write.forest = TRUE)
-}
-
-test_that("classification gwaa rf is of class ranger with 15 elements", {
-  expect_is(rg.gwaa, "ranger")
-  expect_equal(length(rg.gwaa), 15)
-})
-
 test_that("Matrix interface works for Probability estimation", {
   rf <- ranger(dependent.variable.name = "Species", data = data.matrix(iris), write.forest = TRUE, probability = TRUE)
   expect_equal(rf$treetype, "Probability estimation")
@@ -279,9 +266,4 @@ test_that("No error if variable named forest", {
   expect_silent(predict(rf, dat))
 })
 
-test_that("GenABEL prediction works if no covariates and formula used", {
-  dat <- dat.gwaa
-  dat@phdata$Age <- NULL
-  rf <- ranger(CHD ~ .-Sex, data = dat, num.trees = 5)
-  expect_silent(predict(rf, dat))
-})
+
