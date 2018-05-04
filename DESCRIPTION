@@ -2,7 +2,7 @@ Package: ranger
 Type: Package
 Title: A Fast Implementation of Random Forests
 Version: 0.9.9
-Date: 2018-04-07
+Date: 2018-05-04
 Author: Marvin N. Wright [aut, cre], Stefan Wager [ctb], Philipp Probst [ctb]
 Maintainer: Marvin N. Wright <cran@wrig.de>
 Description: A fast implementation of Random Forests, particularly suited for high
