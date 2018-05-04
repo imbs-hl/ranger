@@ -279,7 +279,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       treetype <- 1
     }
   } else if (is.numeric(response) && is.vector(response)) {
-    if (!is.null(classification) && classification) {
+    if (!is.null(classification) && classification && !probability) {
       treetype <- 1
     } else if (probability) {
       treetype <- 9
@@ -765,7 +765,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     
     ## Set colnames and sort by levels
     colnames(result$predictions) <- unique(response)
-    result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
+    if (is.factor(response)) {
+      result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
+    }
   }
   
   ## Splitrule
