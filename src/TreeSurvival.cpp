@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <algorithm>
 #include <cmath>
@@ -179,6 +179,8 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
   values.reserve(possible_split_varIDs.size());
   std::vector<double> candidate_varIDs;
   candidate_varIDs.reserve(possible_split_varIDs.size());
+  std::vector<double> test_statistics;
+  test_statistics.reserve(possible_split_varIDs.size());
 
   // Compute p-values
   for (auto& varID : possible_split_varIDs) {
@@ -226,12 +228,14 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
       pvalues.push_back(pvalue);
       values.push_back(best_split_value);
       candidate_varIDs.push_back(varID);
+      test_statistics.push_back(best_maxstat);
     }
   }
 
   double adjusted_best_pvalue = std::numeric_limits<double>::max();
   size_t best_varID = 0;
   double best_value = 0;
+  double best_maxstat = 0;
 
   if (pvalues.size() > 0) {
     // Adjust p-values with Benjamini/Hochberg
@@ -244,6 +248,7 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
         best_varID = candidate_varIDs[i];
         best_value = values[i];
         adjusted_best_pvalue = adjusted_pvalues[i];
+        best_maxstat = test_statistics[i];
       }
     }
   }
@@ -257,6 +262,12 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+
+    // Compute decrease of impurity for this node and add to variable importance if needed
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+      addImpurityImportance(nodeID, best_varID, best_maxstat);
+    }
+
     return false;
   }
 }
