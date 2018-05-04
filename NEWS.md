@@ -1,3 +1,7 @@
+##### Version 0.9.10
+* Add impurity importance for the maxstat splitting rule
+* Bug fixes
+
 ##### Version 0.9.9
 * Add 'order' mode for unordered factors for GenABEL SNP data (binary classification and regression)
 
