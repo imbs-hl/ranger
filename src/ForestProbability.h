@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef FORESTPROBABILITY_H_
 #define FORESTPROBABILITY_H_
@@ -25,10 +25,10 @@ namespace ranger {
 class ForestProbability: public Forest {
 public:
   ForestProbability() = default;
-  
-  ForestProbability(const ForestProbability&)            = delete;
+
+  ForestProbability(const ForestProbability&) = delete;
   ForestProbability& operator=(const ForestProbability&) = delete;
-  
+
   virtual ~ForestProbability() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
@@ -69,7 +69,7 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
-  
+
 private:
   const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;
   size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;

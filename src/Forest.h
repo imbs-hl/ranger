@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef FOREST_H_
 #define FOREST_H_
@@ -34,7 +34,7 @@ class Forest {
 public:
   Forest();
 
-  Forest(const Forest&)            = delete;
+  Forest(const Forest&) = delete;
   Forest& operator=(const Forest&) = delete;
 
   virtual ~Forest() = default;
@@ -50,11 +50,12 @@ public:
       bool holdout, PredictionType prediction_type, uint num_random_splits);
   void initR(std::string dependent_variable_name, std::unique_ptr<Data> input_data, uint mtry, uint num_trees,
       std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
-      std::vector<std::vector<double>>& split_select_weights, const std::vector<std::string>& always_split_variable_names,
-      std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
-      const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-      std::vector<double>& case_weights, bool predict_all, bool keep_inbag, std::vector<double>& sample_fraction,
-      double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits);
+      std::vector<std::vector<double>>& split_select_weights,
+      const std::vector<std::string>& always_split_variable_names, std::string status_variable_name,
+      bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
+      bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights, bool predict_all,
+      bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
+      PredictionType prediction_type, uint num_random_splits);
   void init(std::string dependent_variable_name, MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry,
       std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
       uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,

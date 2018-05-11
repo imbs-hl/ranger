@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <stdexcept>
 
@@ -32,8 +32,9 @@ void ForestProbability::loadForest(size_t dependent_varID, size_t num_trees,
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeProbability>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
-        &this->class_values, &response_classIDs, forest_terminal_class_counts[i]));
+    trees.push_back(
+        make_unique<TreeProbability>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
+            &this->class_values, &response_classIDs, forest_terminal_class_counts[i]));
   }
 
   // Create thread ranges
@@ -101,7 +102,8 @@ void ForestProbability::initInternal(std::string status_variable_name) {
 void ForestProbability::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeProbability>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
+    trees.push_back(
+        make_unique<TreeProbability>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
   }
 }
 
@@ -209,7 +211,8 @@ void ForestProbability::writeConfusionFile() {
   outfile << "Overall OOB prediction error (MSE): " << overall_prediction_error << std::endl;
 
   outfile.close();
-  if (verbose_out) *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
 }
 
 void ForestProbability::writePredictionFile() {
@@ -251,7 +254,8 @@ void ForestProbability::writePredictionFile() {
     }
   }
 
-  if (verbose_out) *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
 void ForestProbability::saveToFileInternal(std::ofstream& outfile) {
@@ -316,8 +320,9 @@ void ForestProbability::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    trees.push_back(make_unique<TreeProbability>(child_nodeIDs, split_varIDs, split_values, &class_values, &response_classIDs,
-        terminal_class_counts));
+    trees.push_back(
+        make_unique<TreeProbability>(child_nodeIDs, split_varIDs, split_values, &class_values, &response_classIDs,
+            terminal_class_counts));
   }
 }
 
@@ -333,4 +338,4 @@ size_t ForestProbability::getTreePredictionTerminalNodeID(size_t tree_idx, size_
 
 // #nocov end
 
-} // namespace ranger
+}// namespace ranger
