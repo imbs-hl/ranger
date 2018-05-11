@@ -49,6 +49,7 @@ void run_ranger(const ArgumentHandler& arg_handler, std::ostream& verbose_out) {
     break;
   }
 
+  // Call Ranger
   forest->initCpp(arg_handler.depvarname, arg_handler.memmode, arg_handler.file, arg_handler.mtry,
       arg_handler.outprefix, arg_handler.ntree, &verbose_out, arg_handler.seed, arg_handler.nthreads,
       arg_handler.predict, arg_handler.impmeasure, arg_handler.targetpartitionsize, arg_handler.splitweights,

@@ -263,6 +263,10 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, s
     data->permuteSampleIDs(random_number_generator);
   }
 
+  // Order SNP levels if in "order" splitting
+  if (!prediction_mode && order_snps) {
+    data->orderSnpLevels(dependent_variable_name, (importance_mode == IMP_GINI_CORRECTED));
+  }
 }
 
 void Forest::run(bool verbose) {
