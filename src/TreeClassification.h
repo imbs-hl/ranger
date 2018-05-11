@@ -102,7 +102,8 @@ private:
   // Splitting weights
   const std::vector<double>* class_weights;
 
-  std::vector<size_t> counter, counter_per_class;
+  std::vector<size_t> counter;
+  std::vector<size_t> counter_per_class;
 };
 
 } // namespace ranger

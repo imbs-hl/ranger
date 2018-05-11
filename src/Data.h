@@ -50,6 +50,7 @@ public:
 
   size_t getIndex(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
+    size_t col_permuted = col;
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
@@ -58,17 +59,29 @@ public:
     if (col < num_cols_no_snp) {
       return index_data[col * num_rows + row];
     } else {
-      // Get data out of snp storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      size_t result = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      return getSnp(row, col, col_permuted);
+    }
+  }
 
-      // TODO: Better way to treat missing values?
-      if (result > 2) {
-        return 0;
+  size_t getSnp(size_t row, size_t col, size_t col_permuted) const {
+    // Get data out of snp storage. -1 because of GenABEL coding.
+    size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
+    size_t result = ((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1;
+
+    // TODO: Better way to treat missing values?
+    if (result > 2) {
+      result = 0;
+    }
+
+    // Order SNPs
+    if (order_snps) {
+      if (col_permuted >= num_cols) {
+        result = snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
       } else {
-        return result;
+        result = snp_order[col - num_cols_no_snp][result];
       }
     }
+    return result;
   }
 
   double getUniqueDataValue(size_t varID, size_t index) const {
@@ -101,6 +114,8 @@ public:
 
   void sort();
 
+  void orderSnpLevels(std::string dependent_variable_name, bool corrected_importance);
+
   const std::vector<std::string>& getVariableNames() const {
     return variable_names;
   }
@@ -128,10 +143,6 @@ public:
   void addNoSplitVariable(size_t varID) {
     no_split_variables.push_back(varID);
     std::sort(no_split_variables.begin(), no_split_variables.end());
-  }
-
-  const std::vector<bool>& getIsOrderedVariable() const noexcept {
-    return is_ordered_variable;
   }
 
   std::vector<bool>& getIsOrderedVariable() noexcept {
@@ -181,6 +192,15 @@ public:
     return varID;
   }
 
+  const std::vector<std::vector<size_t>>& getSnpOrder() const {
+    return snp_order;
+  }
+
+  void setSnpOrder(std::vector<std::vector<size_t>>& snp_order) {
+    this->snp_order = snp_order;
+    order_snps = true;
+  }
+
 protected:
   std::vector<std::string> variable_names;
   size_t num_rows;
@@ -204,6 +224,10 @@ protected:
 
   // Permuted samples for corrected impurity importance
   std::vector<size_t> permuted_sampleIDs;
+
+  // Order of 0/1/2 for ordered splitting
+  std::vector<std::vector<size_t>> snp_order;
+  bool order_snps;
 };
 
 } // namespace ranger

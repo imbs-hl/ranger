@@ -32,8 +32,8 @@ public:
   virtual ~DataFloat() override = default;
 
   double get(size_t row, size_t col) const override {
-
     // Use permuted data for corrected impurity importance
+    size_t col_permuted = col;
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
@@ -42,9 +42,7 @@ public:
     if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
-      // Get data out of snp storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      return (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      return getSnp(row, col, col_permuted);
     }
   }
 

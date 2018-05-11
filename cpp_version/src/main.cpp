@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <iostream>
 #include <fstream>
@@ -27,9 +27,9 @@ using namespace ranger;
 
 void run_ranger(const ArgumentHandler& arg_handler, std::ostream& verbose_out) {
   verbose_out << "Starting Ranger." << std::endl;
-  
-  std::unique_ptr<Forest> forest {};
+
   // Create forest object
+  std::unique_ptr<Forest> forest { };
   switch (arg_handler.treetype) {
   case TREE_CLASSIFICATION:
     if (arg_handler.probability) {
@@ -48,7 +48,7 @@ void run_ranger(const ArgumentHandler& arg_handler, std::ostream& verbose_out) {
     forest = make_unique<ForestProbability>();
     break;
   }
-  
+
   forest->initCpp(arg_handler.depvarname, arg_handler.memmode, arg_handler.file, arg_handler.mtry,
       arg_handler.outprefix, arg_handler.ntree, &verbose_out, arg_handler.seed, arg_handler.nthreads,
       arg_handler.predict, arg_handler.impmeasure, arg_handler.targetpartitionsize, arg_handler.splitweights,
@@ -66,17 +66,19 @@ void run_ranger(const ArgumentHandler& arg_handler, std::ostream& verbose_out) {
 }
 
 int main(int argc, char **argv) {
+
   try {
+    // Handle command line arguments
     ArgumentHandler arg_handler(argc, argv);
     if (arg_handler.processArguments() != 0) {
       return 0;
     }
     arg_handler.checkArguments();
-    
+
     if (arg_handler.verbose) {
       run_ranger(arg_handler, std::cout);
     } else {
-      std::ofstream logfile {arg_handler.outprefix + ".log"};
+      std::ofstream logfile { arg_handler.outprefix + ".log" };
       if (!logfile.good()) {
         throw std::runtime_error("Could not write to logfile.");
       }

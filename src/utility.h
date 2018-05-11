@@ -271,7 +271,7 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
 
 /**
  * Compute concordance index for given data and summed cumulative hazard function/estimate
- * @param data const reference to Data object
+ * @param data Reference to Data object
  * @param sum_chf Summed chf over timepoints for each sample
  * @param dependent_varID ID of dependent variable
  * @param status_varID ID of status variable
@@ -480,6 +480,18 @@ void maxstat(const std::vector<double>& scores, const std::vector<double>& x, co
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::vector<size_t>& indices);
 
+// User interrupt from R
+#ifdef R_BUILD
+static void chkIntFn(void *dummy) {
+  R_CheckUserInterrupt();
+}
+
+inline bool checkInterrupt() {
+  return (R_ToplevelExec(chkIntFn, NULL) == FALSE);
+}
+#endif
+
+// Provide make_unique (not available in C++11)
 namespace detail {
 
 template<class T> struct _Unique_if {
@@ -509,17 +521,6 @@ typename detail::_Unique_if<T>::_Unknown_bound make_unique(size_t n) {
 
 template<class T, class ... Args>
 typename detail::_Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
-
-// User interrupt from R
-#ifdef R_BUILD
-static void chkIntFn(void *dummy) {
-  R_CheckUserInterrupt();
-}
-
-inline bool checkInterrupt() {
-  return (R_ToplevelExec(chkIntFn, NULL) == FALSE);
-}
-#endif
 
 }
  // namespace ranger

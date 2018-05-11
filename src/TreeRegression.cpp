@@ -385,6 +385,8 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
   values.reserve(possible_split_varIDs.size());
   std::vector<double> candidate_varIDs;
   candidate_varIDs.reserve(possible_split_varIDs.size());
+  std::vector<double> test_statistics;
+  test_statistics.reserve(possible_split_varIDs.size());
 
   // Compute p-values
   for (auto& varID : possible_split_varIDs) {
@@ -422,12 +424,14 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
       pvalues.push_back(pvalue);
       values.push_back(best_split_value);
       candidate_varIDs.push_back(varID);
+      test_statistics.push_back(best_maxstat);
     }
   }
 
   double adjusted_best_pvalue = std::numeric_limits<double>::max();
   size_t best_varID = 0;
   double best_value = 0;
+  double best_maxstat = 0;
 
   if (pvalues.size() > 0) {
     // Adjust p-values with Benjamini/Hochberg
@@ -441,6 +445,7 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
         best_varID = candidate_varIDs[i];
         best_value = values[i];
         adjusted_best_pvalue = adjusted_pvalues[i];
+        best_maxstat = test_statistics[i];
       }
     }
   }
@@ -452,6 +457,12 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+
+    // Compute decrease of impurity for this node and add to variable importance if needed
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+      addImpurityImportance(nodeID, best_varID, best_maxstat);
+    }
+
     return false;
   }
 }
@@ -667,11 +678,14 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
 
 void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double decrease) {
 
-  double sum_node = 0;
-  for (auto& sampleID : sampleIDs[nodeID]) {
-    sum_node += data->get(sampleID, dependent_varID);
+  double best_decrease = decrease;
+  if (splitrule != MAXSTAT) {
+    double sum_node = 0;
+    for (auto& sampleID : sampleIDs[nodeID]) {
+      sum_node += data->get(sampleID, dependent_varID);
+    }
+    best_decrease = decrease - sum_node * sum_node / (double) sampleIDs[nodeID].size();
   }
-  double best_decrease = decrease - sum_node * sum_node / (double) sampleIDs[nodeID].size();
 
   // No variable importance for no split variables
   size_t tempvarID = data->getUnpermutedVarID(varID);

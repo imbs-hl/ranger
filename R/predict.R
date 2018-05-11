@@ -294,6 +294,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   sample.fraction <- 1
   holdout <- FALSE
   num.random.splits <- 1
+  order.snps <- FALSE
   
   ## Use sparse matrix
   if ("dgCMatrix" %in% class(data.final)) {
@@ -314,7 +315,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
-                      prediction.type, num.random.splits, sparse.data, use.sparse.data)
+                      prediction.type, num.random.splits, sparse.data, use.sparse.data,
+                      order.snps)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -363,7 +365,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         }
         
         ## Set colnames and sort by levels
-        colnames(result$predictions) <- forest$levels[forest$class.values]
+        leveldiff <- max(forest$class.values) - length(forest$levels)
+        colnames(result$predictions) <- forest$levels[forest$class.values - leveldiff]
         result$predictions <- result$predictions[, forest$levels, drop = FALSE]
       }
     }
