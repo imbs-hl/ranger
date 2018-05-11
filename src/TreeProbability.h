@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef TREEPROBABILITY_H_
 #define TREEPROBABILITY_H_
@@ -30,9 +30,9 @@ public:
       std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
       std::vector<std::vector<double>>& terminal_class_counts);
 
-  TreeProbability(const TreeProbability&)            = delete;
+  TreeProbability(const TreeProbability&) = delete;
   TreeProbability& operator=(const TreeProbability&) = delete;
-  
+
   virtual ~TreeProbability() override = default;
 
   void allocateMemory() override;
@@ -62,24 +62,31 @@ private:
 
   // Called by splitNodeInternal(). Sets split_varIDs and split_values.
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
-      const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right);
-  void findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease);
+  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
+      std::vector<size_t>& n_right);
+  void findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease);
+  void findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease);
 
   bool findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
-  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
-      const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right);
-  void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-      size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease);
+  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
+      std::vector<size_t>& n_right);
+  void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+      double& best_decrease);
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 

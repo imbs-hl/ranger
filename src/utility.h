@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef UTILITY_H_
 #define UTILITY_H_
@@ -266,7 +266,8 @@ size_t mostFrequentClass(const std::vector<T>& class_count, std::mt19937_64 rand
  * @param random_number_generator Random number generator
  * @return Most frequent value
  */
-double mostFrequentValue(const std::unordered_map<double, size_t>& class_count, std::mt19937_64 random_number_generator);
+double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
+    std::mt19937_64 random_number_generator);
 
 /**
  * Compute concordance index for given data and summed cumulative hazard function/estimate
@@ -277,8 +278,8 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count, 
  * @param sample_IDs IDs of samples, for example OOB samples
  * @return concordance index
  */
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
-    const std::vector<size_t>& sample_IDs);
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
+    size_t status_varID, const std::vector<size_t>& sample_IDs);
 
 /**
  * Convert a unsigned integer to string
@@ -468,8 +469,8 @@ std::vector<double> logrankScores(const std::vector<double>& time, const std::ve
  * @param minprop Minimal proportion of observations left of cutpoint
  * @param maxprop Maximal proportion of observations left of cutpoint
  */
-void maxstat(const std::vector<double>& scores, const std::vector<double>& x, const std::vector<size_t>& indices, double& best_maxstat,
-    double& best_split_value, double minprop, double maxprop);
+void maxstat(const std::vector<double>& scores, const std::vector<double>& x, const std::vector<size_t>& indices,
+    double& best_maxstat, double& best_split_value, double minprop, double maxprop);
 
 /**
  * Compute number of samples smaller or equal than each unique value in x
@@ -479,38 +480,35 @@ void maxstat(const std::vector<double>& scores, const std::vector<double>& x, co
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::vector<size_t>& indices);
 
-namespace detail { 
- 
-template<class T> struct _Unique_if { 
-    typedef std::unique_ptr<T> _Single_object; 
-}; 
- 
-template<class T> struct _Unique_if<T[]> { 
-    typedef std::unique_ptr<T[]> _Unknown_bound; 
-}; 
- 
-template<class T, size_t N> struct _Unique_if<T[N]> { 
-    typedef void _Known_bound; 
-}; 
- 
+namespace detail {
+
+template<class T> struct _Unique_if {
+  typedef std::unique_ptr<T> _Single_object;
+};
+
+template<class T> struct _Unique_if<T[]> {
+  typedef std::unique_ptr<T[]> _Unknown_bound;
+};
+
+template<class T, size_t N> struct _Unique_if<T[N]> {
+  typedef void _Known_bound;
+};
+
 } // namespace detail 
- 
-template<class T, class... Args> 
-typename detail::_Unique_if<T>::_Single_object 
-make_unique(Args&&... args) { 
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...)); 
-} 
- 
-template<class T> 
-typename detail::_Unique_if<T>::_Unknown_bound 
-make_unique(size_t n) { 
-    typedef typename std::remove_extent<T>::type U; 
-    return std::unique_ptr<T>(new U[n]()); 
-} 
- 
-template<class T, class... Args> 
-typename detail::_Unique_if<T>::_Known_bound 
-make_unique(Args&&...) = delete;
+
+template<class T, class ... Args>
+typename detail::_Unique_if<T>::_Single_object make_unique(Args&&... args) {
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+template<class T>
+typename detail::_Unique_if<T>::_Unknown_bound make_unique(size_t n) {
+  typedef typename std::remove_extent<T>::type U;
+  return std::unique_ptr<T>(new U[n]());
+}
+
+template<class T, class ... Args>
+typename detail::_Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
 // User interrupt from R
 #ifdef R_BUILD
@@ -523,6 +521,7 @@ inline bool checkInterrupt() {
 }
 #endif
 
-} // namespace ranger
+}
+ // namespace ranger
 
 #endif /* UTILITY_H_ */

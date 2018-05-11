@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <math.h>
 #include <iostream>
@@ -178,7 +178,8 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
   }
 }
 
-double mostFrequentValue(const std::unordered_map<double, size_t>& class_count, std::mt19937_64 random_number_generator) {
+double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
+    std::mt19937_64 random_number_generator) {
   std::vector<double> major_classes;
 
   // Find maximum count
@@ -202,8 +203,8 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count, 
   }
 }
 
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
-    const std::vector<size_t>& sample_IDs) {
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
+    size_t status_varID, const std::vector<size_t>& sample_IDs) {
 
   // Compute concordance index
   double concordance = 0;
@@ -495,8 +496,8 @@ std::vector<double> logrankScores(const std::vector<double>& time, const std::ve
   return scores;
 }
 
-void maxstat(const std::vector<double>& scores, const std::vector<double>& x, const std::vector<size_t>& indices, double& best_maxstat,
-    double& best_split_value, double minprop, double maxprop) {
+void maxstat(const std::vector<double>& scores, const std::vector<double>& x, const std::vector<size_t>& indices,
+    double& best_maxstat, double& best_split_value, double minprop, double maxprop) {
   size_t n = x.size();
 
   double sum_all_scores = 0;

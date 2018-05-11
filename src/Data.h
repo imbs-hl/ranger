@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef DATA_H_
 #define DATA_H_
@@ -25,8 +25,8 @@ namespace ranger {
 class Data {
 public:
   Data();
-  
-  Data(const Data&)            = delete;
+
+  Data(const Data&) = delete;
   Data& operator=(const Data&) = delete;
 
   virtual ~Data() = default;
@@ -133,7 +133,7 @@ public:
   const std::vector<bool>& getIsOrderedVariable() const noexcept {
     return is_ordered_variable;
   }
-  
+
   std::vector<bool>& getIsOrderedVariable() noexcept {
     return is_ordered_variable;
   }

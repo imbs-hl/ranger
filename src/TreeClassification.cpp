@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <unordered_map>
 #include <random>
@@ -31,7 +31,7 @@ TreeClassification::TreeClassification(std::vector<std::vector<size_t>>& child_n
     std::vector<size_t>& split_varIDs, std::vector<double>& split_values, std::vector<double>* class_values,
     std::vector<uint>* response_classIDs) :
     Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(
-        0), class_weights(0), counter {}, counter_per_class {} {
+        0), class_weights(0), counter { }, counter_per_class { } {
 }
 
 void TreeClassification::allocateMemory() {
@@ -190,8 +190,9 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   return false;
 }
 
-void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
 // Create possible split values
   std::vector<double> possible_split_values;
@@ -206,21 +207,22 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
   const size_t num_splits = possible_split_values.size() - 1;
   if (memory_saving_splitting) {
     std::vector<size_t> class_counts_right(num_splits * num_classes), n_right(num_splits);
-    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID, best_decrease,
-                             possible_split_values, class_counts_right, n_right);
+    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+        best_decrease, possible_split_values, class_counts_right, n_right);
   } else {
     std::fill_n(counter_per_class.begin(), num_splits * num_classes, 0);
     std::fill_n(counter.begin(), num_splits, 0);
-    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID, best_decrease,
-                             possible_split_values, counter_per_class, counter);
+    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+        best_decrease, possible_split_values, counter_per_class, counter);
   }
 }
 
-void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
-    const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right) {
+void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
+    std::vector<size_t>& n_right) {
   const size_t num_splits = possible_split_values.size() - 1;
-  
+
   // Count samples in right child per class and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);
@@ -274,8 +276,9 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
   }
 }
 
-void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Set counters to 0
   size_t num_unique = data->getNumUniqueDataValues(varID);
@@ -346,7 +349,8 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
 }
 
 void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Create possible split values
   std::vector<double> factor_levels;
@@ -462,7 +466,8 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
 }
 
 void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Get min/max values of covariate in node
   double min;
@@ -486,20 +491,21 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
   if (memory_saving_splitting) {
     std::vector<size_t> class_counts_right(num_splits * num_classes), n_right(num_splits);
     findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                                 best_decrease, possible_split_values, class_counts_right, n_right);
+        best_decrease, possible_split_values, class_counts_right, n_right);
   } else {
     std::fill_n(counter_per_class.begin(), num_splits * num_classes, 0);
     std::fill_n(counter.begin(), num_splits, 0);
     findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                                 best_decrease, possible_split_values, counter_per_class, counter);
+        best_decrease, possible_split_values, counter_per_class, counter);
   }
 }
 
 void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
-    const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
+    std::vector<size_t>& n_right) {
   const size_t num_splits = possible_split_values.size();
-  
+
   // Count samples in right child per class and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);
@@ -549,7 +555,8 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
 }
 
 void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   size_t num_unique_values = data->getNumUniqueDataValues(varID);
 

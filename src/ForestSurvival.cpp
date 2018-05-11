@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <set>
 #include <algorithm>
@@ -36,8 +36,9 @@ void ForestSurvival::loadForest(size_t dependent_varID, size_t num_trees,
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeSurvival>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
-        forest_chf[i], &this->unique_timepoints, &response_timepointIDs));
+    trees.push_back(
+        make_unique<TreeSurvival>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
+            forest_chf[i], &this->unique_timepoints, &response_timepointIDs));
   }
 
   // Create thread ranges
@@ -212,7 +213,8 @@ void ForestSurvival::writeConfusionFile() {
   outfile << "Overall OOB prediction error (1 - C): " << overall_prediction_error << std::endl;
 
   outfile.close();
-  if (verbose_out) *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
 
 }
 
@@ -256,7 +258,8 @@ void ForestSurvival::writePredictionFile() {
     }
   }
 
-  if (verbose_out) *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
 void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
@@ -338,8 +341,9 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    trees.push_back(make_unique<TreeSurvival>(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
-        &response_timepointIDs));
+    trees.push_back(
+        make_unique<TreeSurvival>(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
+            &response_timepointIDs));
   }
 }
 
@@ -355,4 +359,4 @@ size_t ForestSurvival::getTreePredictionTerminalNodeID(size_t tree_idx, size_t s
 
 // #nocov end
 
-} // namespace ranger
+}// namespace ranger

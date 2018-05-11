@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <algorithm>
 #include <iostream>
@@ -187,21 +187,21 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-                             possible_split_values, sums_right, n_right);
+        possible_split_values, sums_right, n_right);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-                             possible_split_values, sums, counter);
+        possible_split_values, sums, counter);
   }
 }
 
 void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-    double& best_value, size_t& best_varID, double& best_decrease,
-    std::vector<double> possible_split_values, std::vector<double>& sums_right, std::vector<size_t>& n_right) {
+    double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+    std::vector<double>& sums_right, std::vector<size_t>& n_right) {
   // -1 because no split possible at largest value
   const size_t num_splits = possible_split_values.size() - 1;
-  
+
   // Sum in right child and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);
@@ -242,7 +242,7 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
         best_value = possible_split_values[i];
       }
     }
-  } 
+  }
 }
 
 void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
@@ -522,21 +522,21 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
   if (memory_saving_splitting) {
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
-    findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease, 
-                                 possible_split_values, sums_right, n_right);
+    findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
+        possible_split_values, sums_right, n_right);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
-    findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease, 
-                                 possible_split_values, sums, counter);
+    findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
+        possible_split_values, sums, counter);
   }
 }
 
 void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-    double& best_value, size_t& best_varID, double& best_decrease,
-    std::vector<double> possible_split_values, std::vector<double>& sums_right, std::vector<size_t>& n_right) {
+    double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+    std::vector<double>& sums_right, std::vector<size_t>& n_right) {
   const size_t num_splits = possible_split_values.size();
-  
+
   // Sum in right child and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);

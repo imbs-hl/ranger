@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef TREESURVIVAL_H_
 #define TREESURVIVAL_H_
@@ -28,9 +28,9 @@ public:
       std::vector<double>& split_values, std::vector<std::vector<double>> chf, std::vector<double>* unique_timepoints,
       std::vector<size_t>* response_timepointIDs);
 
-  TreeSurvival(const TreeSurvival&)            = delete;
+  TreeSurvival(const TreeSurvival&) = delete;
   TreeSurvival& operator=(const TreeSurvival&) = delete;
-  
+
   virtual ~TreeSurvival() override = default;
 
   void allocateMemory() override;
@@ -74,7 +74,8 @@ private:
       std::vector<size_t>& num_deaths_right_child, size_t num_splits);
 
   void computeAucSplit(double time_k, double time_l, double status_k, double status_l, double value_k, double value_l,
-      size_t num_splits, std::vector<double>& possible_split_values, std::vector<double>& num_count, std::vector<double>& num_total);
+      size_t num_splits, std::vector<double>& possible_split_values, std::vector<double>& num_count,
+      std::vector<double>& num_total);
 
   void findBestSplitValueLogRank(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
       double& best_logrank);

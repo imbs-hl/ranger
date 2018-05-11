@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <unordered_map>
 #include <algorithm>
@@ -37,8 +37,9 @@ void ForestClassification::loadForest(size_t dependent_varID, size_t num_trees,
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeClassification>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
-        &this->class_values, &response_classIDs));
+    trees.push_back(
+        make_unique<TreeClassification>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
+            &this->class_values, &response_classIDs));
   }
 
   // Create thread ranges
@@ -96,7 +97,8 @@ void ForestClassification::initInternal(std::string status_variable_name) {
 void ForestClassification::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeClassification>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
+    trees.push_back(
+        make_unique<TreeClassification>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
   }
 }
 
@@ -223,7 +225,8 @@ void ForestClassification::writeConfusionFile() {
   }
 
   outfile.close();
-  if (verbose_out) *verbose_out << "Saved confusion matrix to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved confusion matrix to file " << filename << "." << std::endl;
 }
 
 void ForestClassification::writePredictionFile() {
@@ -258,7 +261,8 @@ void ForestClassification::writePredictionFile() {
     }
   }
 
-  if (verbose_out) *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
 void ForestClassification::saveToFileInternal(std::ofstream& outfile) {
@@ -310,7 +314,8 @@ void ForestClassification::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    trees.push_back(make_unique<TreeClassification>(child_nodeIDs, split_varIDs, split_values, &class_values, &response_classIDs));
+    trees.push_back(
+        make_unique<TreeClassification>(child_nodeIDs, split_varIDs, split_values, &class_values, &response_classIDs));
   }
 }
 
@@ -326,4 +331,4 @@ size_t ForestClassification::getTreePredictionTerminalNodeID(size_t tree_idx, si
 
 // #nocov end
 
-} // namespace ranger
+}// namespace ranger

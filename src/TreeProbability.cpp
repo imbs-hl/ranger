@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include "TreeProbability.h"
 #include "utility.h"
@@ -194,8 +194,9 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   return false;
 }
 
-void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Create possible split values
   std::vector<double> possible_split_values;
@@ -210,22 +211,23 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
   const size_t num_splits = possible_split_values.size() - 1;
   if (memory_saving_splitting) {
     std::vector<size_t> class_counts_right(num_splits * num_classes), n_right(num_splits);
-    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID, best_decrease,
-                             possible_split_values, class_counts_right, n_right);
+    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+        best_decrease, possible_split_values, class_counts_right, n_right);
   } else {
     std::fill_n(counter_per_class.begin(), num_splits * num_classes, 0);
     std::fill_n(counter.begin(), num_splits, 0);
-    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID, best_decrease,
-                             possible_split_values, counter_per_class, counter);
+    findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+        best_decrease, possible_split_values, counter_per_class, counter);
   }
 }
 
-void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
-    const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right) {
+void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
+    std::vector<size_t>& n_right) {
   // -1 because no split possible at largest value
   const size_t num_splits = possible_split_values.size() - 1;
-  
+
   // Count samples in right child per class and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);
@@ -279,8 +281,9 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
   }
 }
 
-void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Set counters to 0
   size_t num_unique = data->getNumUniqueDataValues(varID);
@@ -350,8 +353,9 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
   }
 }
 
-void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes, const std::vector<size_t>& class_counts,
-    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes,
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Create possible split values
   std::vector<double> factor_levels;
@@ -449,7 +453,7 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
           best_varID, best_decrease);
     }
   }
-  
+
   // Stop if no good split found
   if (best_decrease < 0) {
     return true;
@@ -467,7 +471,8 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
 }
 
 void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   // Get min/max values of covariate in node
   double min;
@@ -486,25 +491,26 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
   for (size_t i = 0; i < num_random_splits; ++i) {
     possible_split_values.push_back(udist(random_number_generator));
   }
-  
+
   const size_t num_splits = possible_split_values.size();
   if (memory_saving_splitting) {
     std::vector<size_t> class_counts_right(num_splits * num_classes), n_right(num_splits);
-    findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID, best_decrease, 
-                                 possible_split_values, class_counts_right, n_right);
+    findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+        best_decrease, possible_split_values, class_counts_right, n_right);
   } else {
     std::fill_n(counter_per_class.begin(), num_splits * num_classes, 0);
     std::fill_n(counter.begin(), num_splits, 0);
-    findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID, best_decrease, 
-                                 possible_split_values, counter_per_class, counter);
+    findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+        best_decrease, possible_split_values, counter_per_class, counter);
   }
 }
 
 void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease,
-    const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right, std::vector<size_t>& n_right) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
+    std::vector<size_t>& n_right) {
   const size_t num_splits = possible_split_values.size();
-  
+
   // Count samples in right child per class and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);
@@ -554,7 +560,8 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
 }
 
 void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
-    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
+    const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+    double& best_decrease) {
 
   size_t num_unique_values = data->getNumUniqueDataValues(varID);
 
@@ -612,7 +619,7 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
     }
 
     // Initialize
-    std::vector<size_t> class_counts_right (num_classes);
+    std::vector<size_t> class_counts_right(num_classes);
     size_t n_right = 0;
 
     // Count classes in left and right child
