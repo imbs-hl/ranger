@@ -39,7 +39,7 @@
 #include "ForestProbability.h"
 #include "Data.h"
 #include "DataChar.h"
-#include "DataDouble.h"
+#include "DataRcpp.h"
 #include "DataFloat.h"
 #include "DataSparse.h"
 #include "utility.h"
@@ -101,7 +101,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     if (use_sparse_data) {
       data = make_unique<DataSparse>(sparse_data, variable_names, num_rows, num_cols);
     } else {
-      data = make_unique<DataDouble>(std::move(Rcpp::as<std::vector<double>>(input_data)), variable_names, num_rows,
+      data = make_unique<DataRcpp>(input_data, variable_names, num_rows,
           num_cols);
     }
 
