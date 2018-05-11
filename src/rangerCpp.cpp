@@ -143,7 +143,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     forest->initR(dependent_variable_name, std::move(data), mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
-        predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits,
+        predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
         order_snps);
 
     // Load forest object if in prediction mode
@@ -249,10 +249,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       if (snp_data.nrow() > 1 && order_snps) {
         // Exclude permuted SNPs (if any)
         std::vector<std::vector<size_t>> snp_order = forest->getSnpOrder();
-        forest_object.push_back(
-            std::vector<std::vector<size_t>>(snp_order.begin(), snp_order.begin() + snp_data.ncol()), "snp.order");
+        forest_object.push_back(std::vector<std::vector<size_t>>(snp_order.begin(), snp_order.begin() + snp_data.ncol()), "snp.order");
       }
-
+      
       if (treetype == TREE_CLASSIFICATION) {
         auto& temp = dynamic_cast<ForestClassification&>(*forest);
         forest_object.push_back(temp.getClassValues(), "class.values");
