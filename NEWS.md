@@ -1,3 +1,16 @@
+##### Version 0.9.11
+* Improve memory management (internal changes)
+
+##### Version 0.9.10
+* Add impurity importance for the maxstat splitting rule
+* Bug fixes
+
+##### Version 0.9.9
+* Add 'order' mode for unordered factors for GenABEL SNP data (binary classification and regression)
+
+##### Version 0.9.8
+* Bug fixes
+
 ##### Version 0.9.7
 * Change license of C++ core to MIT (R package is still GPL3)
 

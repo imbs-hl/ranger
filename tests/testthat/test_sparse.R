@@ -71,6 +71,20 @@ test_that("Same result with sparse data for 0/1 regression", {
   expect_equal(pred1, pred2)
 })
 
+test_that("Same result with sparse data for 0/1 probability prediction", {
+  set.seed(56)
+  rf1 <- ranger(data = dat_sparse, dependent.variable.name = "y", probability = TRUE, num.trees = 5)
+  
+  set.seed(56)
+  rf2 <- ranger(data = dat, dependent.variable.name = "y", probability = TRUE, num.trees = 5)
+  
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+  
+  pred1 <- rf1$predictions[!is.na(rf1$predictions)]
+  pred2 <- rf2$predictions[!is.na(rf2$predictions)]
+  expect_equal(pred1, pred2)
+})
+
 test_that("Prediction is the same if training or testing data is sparse", {
   idx <- sample(nrow(iris), 2/3*nrow(iris))
   train <- iris[idx, ]
@@ -91,6 +105,12 @@ test_that("Prediction is the same if training or testing data is sparse", {
   expect_equal(pred1$predictions, pred1_sparse$predictions)
   expect_equal(as.character(pred1$predictions), levels(iris$Species)[pred2$predictions])
   expect_equal(pred2$predictions, pred2_sparse$predictions)
+})
+
+test_that("Sparse probability prediction works correctly", {
+  rf <- ranger(data = dat_sparse, dependent.variable.name = "y", classification = TRUE, probability = TRUE, num.trees = 5)
+  pred <- predict(rf, dat_sparse)
+  expect_equal(dim(pred$predictions), c(nrow(dat_sparse), 2))
 })
 
 

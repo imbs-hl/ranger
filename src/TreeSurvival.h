@@ -108,7 +108,8 @@ private:
   std::vector<std::vector<double>> chf;
 
   // Fields to save to while tree growing
-  std::vector<size_t> num_deaths, num_samples_at_risk;
+  std::vector<size_t> num_deaths;
+  std::vector<size_t> num_samples_at_risk;
 };
 
 } // namespace ranger
