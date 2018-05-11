@@ -336,7 +336,7 @@ void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>&
 
 /**
  * Check if not too many factor levels and all values in unordered categorical variables are positive integers.
- * @param data const reference to data object
+ * @param data Reference to data object
  * @param unordered_variable_names Names of unordered variables
  * @return Error message, empty if no problem occured
  */
