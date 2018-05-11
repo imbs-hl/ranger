@@ -52,6 +52,7 @@ std::unique_ptr<Data> load_data_from_file(const std::string& data_path, const Me
     result = make_unique<DataChar>();
     break;
   }
+
   if (verbose_out)
     *verbose_out << "Loading input file: " << data_path << "." << std::endl;
   bool found_rounding_error = result->loadFromFile(data_path);

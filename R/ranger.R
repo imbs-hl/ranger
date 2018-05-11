@@ -687,6 +687,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Ordering of SNPs currently only implemented for regression and binary outcomes.")
     }
   }
+  
 
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
