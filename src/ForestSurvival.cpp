@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <set>
 #include <algorithm>
@@ -20,13 +20,6 @@ R package "ranger" under GPL3 license.
 #include "Data.h"
 
 namespace ranger {
-
-ForestSurvival::ForestSurvival() :
-    status_varID(0), response_timepointIDs(0) {
-}
-
-ForestSurvival::~ForestSurvival() {
-}
 
 void ForestSurvival::loadForest(size_t dependent_varID, size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -43,13 +36,23 @@ void ForestSurvival::loadForest(size_t dependent_varID, size_t num_trees,
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    Tree* tree = new TreeSurvival(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
-        forest_chf[i], &this->unique_timepoints, &response_timepointIDs);
-    trees.push_back(tree);
+    trees.push_back(
+        make_unique<TreeSurvival>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
+            forest_chf[i], &this->unique_timepoints, &response_timepointIDs));
   }
 
   // Create thread ranges
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
+}
+
+std::vector<std::vector<std::vector<double>>> ForestSurvival::getChf() const {
+  std::vector<std::vector<std::vector<double>>> result;
+  result.reserve(num_trees);
+  for (const auto& tree : trees) {
+    const auto& temp = dynamic_cast<const TreeSurvival&>(*tree);
+    result.push_back(temp.getChf());
+  }
+  return result;
 }
 
 void ForestSurvival::initInternal(std::string status_variable_name) {
@@ -102,7 +105,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
 void ForestSurvival::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(new TreeSurvival(&unique_timepoints, status_varID, &response_timepointIDs));
+    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, status_varID, &response_timepointIDs));
   }
 }
 
@@ -126,18 +129,18 @@ void ForestSurvival::predictInternal(size_t sample_idx) {
   if (predict_all) {
     for (size_t j = 0; j < unique_timepoints.size(); ++j) {
       for (size_t k = 0; k < num_trees; ++k) {
-        predictions[sample_idx][j][k] = ((TreeSurvival*) trees[k])->getPrediction(sample_idx)[j];
+        predictions[sample_idx][j][k] = getTreePrediction(k, sample_idx)[j];
       }
     }
   } else if (prediction_type == TERMINALNODES) {
     for (size_t k = 0; k < num_trees; ++k) {
-      predictions[0][sample_idx][k] = ((TreeSurvival*) trees[k])->getPredictionTerminalNodeID(sample_idx);
+      predictions[0][sample_idx][k] = getTreePredictionTerminalNodeID(k, sample_idx);
     }
   } else {
     for (size_t j = 0; j < unique_timepoints.size(); ++j) {
       double sample_time_prediction = 0;
       for (size_t k = 0; k < num_trees; ++k) {
-        sample_time_prediction += ((TreeSurvival*) trees[k])->getPrediction(sample_idx)[j];
+        sample_time_prediction += getTreePrediction(k, sample_idx)[j];
       }
       predictions[0][sample_idx][j] = sample_time_prediction / num_trees;
     }
@@ -157,7 +160,7 @@ void ForestSurvival::computePredictionErrorInternal() {
   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-      std::vector<double> tree_sample_chf = ((TreeSurvival*) trees[tree_idx])->getPrediction(sample_idx);
+      std::vector<double> tree_sample_chf = getTreePrediction(tree_idx, sample_idx);
 
       for (size_t time_idx = 0; time_idx < tree_sample_chf.size(); ++time_idx) {
         predictions[0][sampleID][time_idx] += tree_sample_chf[time_idx];
@@ -184,7 +187,7 @@ void ForestSurvival::computePredictionErrorInternal() {
   }
 
   // Use all samples which are OOB at least once
-  overall_prediction_error = 1 - computeConcordanceIndex(data, sum_chf, dependent_varID, status_varID, oob_sampleIDs);
+  overall_prediction_error = 1 - computeConcordanceIndex(*data, sum_chf, dependent_varID, status_varID, oob_sampleIDs);
 }
 
 // #nocov start
@@ -210,7 +213,8 @@ void ForestSurvival::writeConfusionFile() {
   outfile << "Overall OOB prediction error (1 - C): " << overall_prediction_error << std::endl;
 
   outfile.close();
-  if (verbose_out) *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
 
 }
 
@@ -254,7 +258,8 @@ void ForestSurvival::writePredictionFile() {
     }
   }
 
-  if (verbose_out) *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
+  if (verbose_out)
+    *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
 void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
@@ -336,11 +341,22 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    Tree* tree = new TreeSurvival(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
-        &response_timepointIDs);
-    trees.push_back(tree);
+    trees.push_back(
+        make_unique<TreeSurvival>(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
+            &response_timepointIDs));
   }
 }
+
+const std::vector<double>& ForestSurvival::getTreePrediction(size_t tree_idx, size_t sample_idx) const {
+  const auto& tree = dynamic_cast<const TreeSurvival&>(*trees[tree_idx]);
+  return tree.getPrediction(sample_idx);
+}
+
+size_t ForestSurvival::getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const {
+  const auto& tree = dynamic_cast<const TreeSurvival&>(*trees[tree_idx]);
+  return tree.getPredictionTerminalNodeID(sample_idx);
+}
+
 // #nocov end
 
-} // namespace ranger
+}// namespace ranger

@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef FORESTSURVIVAL_H_
 #define FORESTSURVIVAL_H_
@@ -23,10 +23,12 @@ namespace ranger {
 
 class ForestSurvival: public Forest {
 public:
-  ForestSurvival();
-  ForestSurvival(const ForestSurvival&)            = delete;
+  ForestSurvival() = default;
+
+  ForestSurvival(const ForestSurvival&) = delete;
   ForestSurvival& operator=(const ForestSurvival&) = delete;
-  virtual ~ForestSurvival() override;
+
+  virtual ~ForestSurvival() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -34,15 +36,8 @@ public:
       size_t status_varID, std::vector<std::vector<std::vector<double>> >& forest_chf,
       std::vector<double>& unique_timepoints, std::vector<bool>& is_ordered_variable);
 
-  std::vector<std::vector<std::vector<double>>>getChf() {
-    std::vector<std::vector<std::vector<double>>> result;
-    result.reserve(num_trees);
-    for (Tree* tree : trees) {
-      TreeSurvival* temp = (TreeSurvival*) tree;
-      result.push_back(temp->getChf());
-    }
-    return result;
-  }
+  std::vector<std::vector<std::vector<double>>> getChf() const;
+
   size_t getStatusVarId() const {
     return status_varID;
   }
@@ -65,6 +60,10 @@ private:
   size_t status_varID;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
+
+private:
+  const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
 
 } // namespace ranger

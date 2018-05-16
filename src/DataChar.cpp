@@ -1,29 +1,23 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 // Ignore in coverage report (not used in R package)
 // #nocov start
-
 #include <limits.h>
 #include <math.h>
 #include <iostream>
-#include <vector>
 
 #include "DataChar.h"
 
 namespace ranger {
-
-DataChar::DataChar() :
-    data(0) {
-}
 
 DataChar::DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols,
     bool& error) {
@@ -44,14 +38,8 @@ DataChar::DataChar(double* data_double, std::vector<std::string> variable_names,
       if (floor(value) != ceil(value)) {
         error = true;
       }
-      data[i * num_rows + j] = (char) value;
+      data[i * num_rows + j] = value;
     }
-  }
-}
-
-DataChar::~DataChar() {
-  if (!externalData) {
-    delete[] data;
   }
 }
 

@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef TREE_H_
 #define TREE_H_
@@ -31,11 +31,11 @@ public:
       std::vector<double>& split_values);
 
   virtual ~Tree();
-  
-  Tree(const Tree&)            = delete;
+
+  Tree(const Tree&) = delete;
   Tree& operator=(const Tree&) = delete;
 
-  void init(Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
+  void init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
@@ -48,12 +48,12 @@ public:
 
   void predict(const Data* prediction_data, bool oob_prediction);
 
-  void computePermutationImportance(std::vector<double>* forest_importance, std::vector<double>* forest_variance);
+  void computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance);
 
   void appendToFile(std::ofstream& file);
   virtual void appendToFileInternal(std::ofstream& file) = 0;
 
-  const std::vector<std::vector<size_t> >& getChildNodeIDs() const {
+  const std::vector<std::vector<size_t>>& getChildNodeIDs() const {
     return child_nodeIDs;
   }
   const std::vector<double>& getSplitValues() const {
@@ -113,12 +113,12 @@ protected:
 
   // Weight vector for selecting possible split variables, one weight between 0 (never select) and 1 (always select) for each variable
   // Deterministic variables are always selected
-  std::vector<size_t>* deterministic_varIDs;
-  std::vector<size_t>* split_select_varIDs;
-  std::vector<double>* split_select_weights;
+  const std::vector<size_t>* deterministic_varIDs;
+  const std::vector<size_t>* split_select_varIDs;
+  const std::vector<double>* split_select_weights;
 
   // Bootstrap weights
-  std::vector<double>* case_weights;
+  const std::vector<double>* case_weights;
 
   // Splitting variable for each node
   std::vector<size_t> split_varIDs;
@@ -147,7 +147,7 @@ protected:
   std::mt19937_64 random_number_generator;
 
   // Pointer to original data
-  Data* data;
+  const Data* data;
 
   // Variable importance for all variables
   std::vector<double>* variable_importance;
@@ -158,7 +158,7 @@ protected:
   std::vector<size_t> prediction_terminal_nodeIDs;
 
   bool sample_with_replacement;
-  std::vector<double>* sample_fraction;
+  const std::vector<double>* sample_fraction;
 
   bool memory_saving_splitting;
   SplitRule splitrule;
