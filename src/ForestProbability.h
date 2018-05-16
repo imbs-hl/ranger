@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef FORESTPROBABILITY_H_
 #define FORESTPROBABILITY_H_
@@ -24,10 +24,12 @@ namespace ranger {
 
 class ForestProbability: public Forest {
 public:
-  ForestProbability();
-  ForestProbability(const ForestProbability&)            = delete;
+  ForestProbability() = default;
+
+  ForestProbability(const ForestProbability&) = delete;
   ForestProbability& operator=(const ForestProbability&) = delete;
-  virtual ~ForestProbability() override;
+
+  virtual ~ForestProbability() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -35,15 +37,7 @@ public:
       std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts,
       std::vector<bool>& is_ordered_variable);
 
-  std::vector<std::vector<std::vector<double>>> getTerminalClassCounts() {
-    std::vector<std::vector<std::vector<double>>> result;
-    result.reserve(num_trees);
-    for (Tree* tree : trees) {
-      TreeProbability* temp = (TreeProbability*) tree;
-      result.push_back(temp->getTerminalClassCounts());
-    }
-    return result;
-  }
+  std::vector<std::vector<std::vector<double>>> getTerminalClassCounts() const;
 
   const std::vector<double>& getClassValues() const {
     return class_values;
@@ -75,6 +69,10 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
+
+private:
+  const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
 
 } // namespace ranger

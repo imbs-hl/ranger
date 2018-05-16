@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef FORESTCLASSIFICATION_H_
 #define FORESTCLASSIFICATION_H_
@@ -24,10 +24,12 @@ namespace ranger {
 
 class ForestClassification: public Forest {
 public:
-  ForestClassification();
-  ForestClassification(const ForestClassification&)            = delete;
+  ForestClassification() = default;
+
+  ForestClassification(const ForestClassification&) = delete;
   ForestClassification& operator=(const ForestClassification&) = delete;
-  virtual ~ForestClassification() override;
+
+  virtual ~ForestClassification() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -64,6 +66,10 @@ protected:
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
+
+private:
+  double getTreePrediction(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
 
 } // namespace ranger

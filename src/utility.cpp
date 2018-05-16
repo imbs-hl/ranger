@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #include <math.h>
 #include <iostream>
@@ -82,7 +82,7 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
 } // #nocov end
 
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples) {
+    const std::vector<size_t>& skip, size_t num_samples) {
   if (num_samples < max / 10) {
     drawWithoutReplacementSimple(result, random_number_generator, max, skip, num_samples);
   } else {
@@ -92,7 +92,7 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
 }
 
 void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples) {
+    const std::vector<size_t>& skip, size_t num_samples) {
 
   result.reserve(num_samples);
 
@@ -117,7 +117,7 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
 }
 
 void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t max, std::vector<size_t>& skip, size_t num_samples) {
+    size_t max, const std::vector<size_t>& skip, size_t num_samples) {
 
   // Create indices
   result.resize(max);
@@ -139,7 +139,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
 }
 
 void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    std::vector<size_t>& indices, size_t num_samples, std::vector<double>& weights) {
+    const std::vector<size_t>& indices, size_t num_samples, const std::vector<double>& weights) {
 
   result.reserve(num_samples);
 
@@ -159,7 +159,7 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
 }
 
 void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t max_index, size_t num_samples, std::vector<double>& weights) {
+    size_t max_index, size_t num_samples, const std::vector<double>& weights) {
 
   result.reserve(num_samples);
 
@@ -178,7 +178,8 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
   }
 }
 
-double mostFrequentValue(std::unordered_map<double, size_t>& class_count, std::mt19937_64 random_number_generator) {
+double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
+    std::mt19937_64 random_number_generator) {
   std::vector<double> major_classes;
 
   // Find maximum count
@@ -202,8 +203,8 @@ double mostFrequentValue(std::unordered_map<double, size_t>& class_count, std::m
   }
 }
 
-double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
-    std::vector<size_t>& sample_IDs) {
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
+    size_t status_varID, const std::vector<size_t>& sample_IDs) {
 
   // Compute concordance index
   double concordance = 0;
@@ -213,16 +214,16 @@ double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t 
     if (!sample_IDs.empty()) {
       sample_i = sample_IDs[i];
     }
-    double time_i = data->get(sample_i, dependent_varID);
-    double status_i = data->get(sample_i, status_varID);
+    double time_i = data.get(sample_i, dependent_varID);
+    double status_i = data.get(sample_i, status_varID);
 
     for (size_t j = i + 1; j < sum_chf.size(); ++j) {
       size_t sample_j = j;
       if (!sample_IDs.empty()) {
         sample_j = sample_IDs[j];
       }
-      double time_j = data->get(sample_j, dependent_varID);
-      double status_j = data->get(sample_j, status_varID);
+      double time_j = data.get(sample_j, dependent_varID);
+      double status_j = data.get(sample_j, status_varID);
 
       if (time_i < time_j && status_i == 0) {
         continue;
@@ -308,7 +309,7 @@ size_t roundToNextMultiple(size_t value, uint multiple) {
   return value + multiple - remainder;
 }
 
-void splitString(std::vector<std::string>& result, std::string input, char split_char) { // #nocov start
+void splitString(std::vector<std::string>& result, const std::string& input, char split_char) { // #nocov start
 
   std::istringstream ss(input);
   std::string token;
@@ -337,7 +338,7 @@ void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& secon
 }
 
 void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all,
-    size_t n_first, std::vector<size_t>& mapping, std::mt19937_64 random_number_generator) {
+    size_t n_first, const std::vector<size_t>& mapping, std::mt19937_64 random_number_generator) {
   // Old end is start position for new data
   size_t first_old_size = first_part.size();
   size_t second_old_size = second_part.size();
@@ -364,16 +365,16 @@ void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>&
   first_part.resize(first_old_size + n_first);
 }
 
-std::string checkUnorderedVariables(Data* data, std::vector<std::string> unordered_variable_names) { // #nocov start
-  size_t num_rows = data->getNumRows();
+std::string checkUnorderedVariables(const Data& data, const std::vector<std::string>& unordered_variable_names) { // #nocov start
+  size_t num_rows = data.getNumRows();
   std::vector<size_t> sampleIDs(num_rows);
   std::iota(sampleIDs.begin(), sampleIDs.end(), 0);
 
   // Check for all unordered variables
   for (auto& variable_name : unordered_variable_names) {
-    size_t varID = data->getVariableID(variable_name);
+    size_t varID = data.getVariableID(variable_name);
     std::vector<double> all_values;
-    data->getAllValues(all_values, sampleIDs, varID);
+    data.getAllValues(all_values, sampleIDs, varID);
 
     // Check level count
     size_t max_level_count = 8 * sizeof(size_t) - 1;
@@ -390,7 +391,7 @@ std::string checkUnorderedVariables(Data* data, std::vector<std::string> unorder
   return "";
 } // #nocov end
 
-bool checkPositiveIntegers(std::vector<double>& all_values) { // #nocov start
+bool checkPositiveIntegers(const std::vector<double>& all_values) { // #nocov start
   for (auto& value : all_values) {
     if (value < 1 || !(floor(value) == value)) {
       return false;
@@ -418,7 +419,7 @@ double maxstatPValueLau92(double b, double minprop, double maxprop) {
   }
 }
 
-double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, std::vector<size_t>& m) {
+double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, const std::vector<size_t>& m) {
 
   double D = 0;
   for (size_t i = 0; i < m.size() - 1; ++i) {
@@ -463,7 +464,7 @@ std::vector<double> adjustPvalues(std::vector<double>& unadjusted_pvalues) {
   return adjusted_pvalues;
 }
 
-std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>& status) {
+std::vector<double> logrankScores(const std::vector<double>& time, const std::vector<double>& status) {
   size_t n = time.size();
   std::vector<double> scores(n);
 
@@ -495,8 +496,8 @@ std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>
   return scores;
 }
 
-void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<size_t>& indices, double& best_maxstat,
-    double& best_split_value, double minprop, double maxprop) {
+void maxstat(const std::vector<double>& scores, const std::vector<double>& x, const std::vector<size_t>& indices,
+    double& best_maxstat, double& best_split_value, double minprop, double maxprop) {
   size_t n = x.size();
 
   double sum_all_scores = 0;
@@ -561,7 +562,7 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
   }
 }
 
-std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector<size_t>& indices) {
+std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::vector<size_t>& indices) {
   std::vector<size_t> num_samples_left;
   num_samples_left.reserve(x.size());
 

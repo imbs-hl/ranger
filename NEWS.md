@@ -1,3 +1,6 @@
+##### Version 0.9.11
+* Improve memory management (internal changes)
+
 ##### Version 0.9.10
 * Add impurity importance for the maxstat splitting rule
 * Bug fixes

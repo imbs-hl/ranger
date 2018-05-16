@@ -67,6 +67,6 @@ test_that("SNP ordering not working with corrected importance for survival", {
   dat@phdata$time <- runif(nids(dat), 1, 100)
   dat@phdata$status <- rbinom(nids(dat), 1, 0.5)
   expect_error(ranger(Surv(time, status) ~ 0, data = dat, num.trees = 5, respect.unordered.factors = "order", 
-               importance = "impurity_corrected"), 
+                      importance = "impurity_corrected"), 
                "Error: Ordering of SNPs currently only implemented for regression and binary outcomes.")
 })

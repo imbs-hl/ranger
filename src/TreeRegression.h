@@ -1,16 +1,18 @@
 /*-------------------------------------------------------------------------------
-This file is part of ranger.
+ This file is part of ranger.
 
-Copyright (c) [2014-2018] [Marvin N. Wright]
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-This software may be modified and distributed under the terms of the MIT license.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Please note that the C++ core of ranger is distributed under MIT license and the
-R package "ranger" under GPL3 license.
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 #ifndef TREEREGRESSION_H_
 #define TREEREGRESSION_H_
+
+#include <vector>
 
 #include "globals.h"
 #include "Tree.h"
@@ -19,16 +21,16 @@ namespace ranger {
 
 class TreeRegression: public Tree {
 public:
-  TreeRegression();
+  TreeRegression() = default;
 
   // Create from loaded forest
   TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
       std::vector<double>& split_values);
 
-  TreeRegression(const TreeRegression&)            = delete;
+  TreeRegression(const TreeRegression&) = delete;
   TreeRegression& operator=(const TreeRegression&) = delete;
 
-  virtual ~TreeRegression() override;
+  virtual ~TreeRegression() override = default;
 
   void allocateMemory() override;
 
@@ -55,6 +57,9 @@ private:
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+      double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+      std::vector<double>& sums_right, std::vector<size_t>& n_right);
   void findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
   void findBestSplitValueUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
@@ -65,6 +70,9 @@ private:
   bool findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+      double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+      std::vector<double>& sums_right, std::vector<size_t>& n_right);
   void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
 
@@ -73,16 +81,14 @@ private:
   double computePredictionMSE();
 
   void cleanUpInternal() override {
-    if (counter != 0) {
-      delete[] counter;
-    }
-    if (sums != 0) {
-      delete[] sums;
-    }
+    counter.clear();
+    counter.shrink_to_fit();
+    sums.clear();
+    sums.shrink_to_fit();
   }
 
-  size_t* counter;
-  double* sums;
+  std::vector<size_t> counter;
+  std::vector<double> sums;
 };
 
 } // namespace ranger
