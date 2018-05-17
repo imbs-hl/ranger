@@ -1,21 +1,16 @@
 language: r
-sudo: required
-dist: trusty
+cache: packages
 warnings_are_errors: true
- 
 r:
   - oldrel
   - release
   - devel
- 
-r_packages:
-  - devtools
   
 r_github_packages:
-  - jimhester/covr
+  - r-lib/covr
 
 after_success:
-  - Rscript -e 'covr::coveralls(quiet = FALSE)'
+  - Rscript -e 'covr::coveralls()'
 
 notifications:
   email:
