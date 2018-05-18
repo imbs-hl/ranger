@@ -33,9 +33,6 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS) {
 }
 
-Tree::~Tree() {
-}
-
 void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
     std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
     std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
