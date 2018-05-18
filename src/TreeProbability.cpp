@@ -735,14 +735,6 @@ void TreeProbability::bootstrapClassWise() {
 }
 
 void TreeProbability::bootstrapWithoutReplacementClassWise() {
-  // Number of samples is sum of sample fraction * number of samples
-  size_t num_samples_inbag = 0;
-  double sum_sample_fraction = 0;
-  for (auto& s : *sample_fraction) {
-    num_samples_inbag += (size_t) num_samples * s;
-    sum_sample_fraction += s;
-  }
-
   // Draw samples for each class
   for (size_t i = 0; i < sample_fraction->size(); ++i) {
     size_t num_samples_class = (*sampleIDs_per_class)[i].size();

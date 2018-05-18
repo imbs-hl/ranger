@@ -30,9 +30,6 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
   this->argv = argv;
 }
 
-ArgumentHandler::~ArgumentHandler() {
-}
-
 int ArgumentHandler::processArguments() {
 
   // short options
