@@ -36,7 +36,7 @@ namespace ranger {
 class ArgumentHandler {
 public:
   ArgumentHandler(int argc, char **argv);
-  virtual ~ArgumentHandler();
+  virtual ~ArgumentHandler() = default;
 
   ArgumentHandler(const ArgumentHandler&)            = delete;
   ArgumentHandler& operator=(const ArgumentHandler&) = delete;
