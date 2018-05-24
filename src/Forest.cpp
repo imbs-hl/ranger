@@ -112,7 +112,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   // Load case weights from file
   if (!case_weights_file.empty()) {
     loadDoubleVectorFromFile(case_weights, case_weights_file);
-    if (case_weights.size() != num_samples - 1) {
+    if (case_weights.size() != num_samples) {
       throw std::runtime_error("Number of case weights is not equal to number of samples.");
     }
   }
