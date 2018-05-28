@@ -136,6 +136,7 @@ Note that the factors are only reordered once and not again in each split.
 
 The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
 It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
+See Nembrini et al. (2018) for details.
 This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
@@ -197,10 +198,11 @@ ranger(trait ~ ., data = dat.gwaa)
 }
 \references{
 \itemize{
-  \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
+  \item Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
-  \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med. \url{http://dx.doi.org/10.1002/sim.7212}.
-  \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{http://dx.doi.org/10.1023/A:1010933404324}. 
+  \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. \url{http://dx.doi.org/10.1002/sim.7212}.
+  \item Nembrini, S., König, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \url{http://dx.doi.org/10.1093/bioinformatics/bty373}.
+  \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \url{http://dx.doi.org/10.1023/A:1010933404324}. 
   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{http://dx.doi.org/10.1097/JTO.0b013e318233d835}. 
   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{http://dx.doi.org/10.3414/ME00-01-0052}.
   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
