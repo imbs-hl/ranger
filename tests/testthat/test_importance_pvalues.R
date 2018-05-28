@@ -4,7 +4,9 @@ library(survival)
 context("importance")
 
 ## GenABEL data
-dat_gwaa <- readRDS("../test_gwaa.Rds")
+if (requireNamespace("GenABEL", quietly = TRUE)) {
+  dat_gwaa <- readRDS("../test_gwaa.Rds")
+}
 
 ## 0 noise variables
 rf_p0 <- ranger(Species ~., iris, num.trees = 100, 
@@ -98,6 +100,7 @@ test_that("HoldoutRF working", {
 })
 
 test_that("HoldoutRF working with GenABEL data", {
+  skip_if_not_installed("GenABEL")
   holdout_gwaa <- holdoutRF(CHD ~., dat_gwaa, num.trees = 10)
   expect_is(holdout_p0, "holdoutRF")
 })
