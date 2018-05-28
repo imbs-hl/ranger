@@ -1,3 +1,6 @@
+##### Version 0.9.12
+* Remove GenABEL from suggested packages (removed from CRAN). GenABEL data is still supported.
+
 ##### Version 0.9.11
 * Improve memory management (internal changes)
 
