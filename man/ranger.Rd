@@ -83,7 +83,7 @@ Object of class \code{ranger} with elements
   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
   \item{\code{variable.importance}}{Variable importance for each independent variable.}
-  \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation and regression the mean squared error and for survival one minus Harrell's C-index.}
+  \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
   \item{\code{unique.death.times}}{Unique death times (survival only).}
@@ -202,7 +202,7 @@ ranger(trait ~ ., data = dat.gwaa)
   \item Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. \url{http://dx.doi.org/10.1002/sim.7212}.
-  \item Nembrini, S., König, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \url{http://dx.doi.org/10.1093/bioinformatics/bty373}.
+  \item Nembrini, S., Koenig, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \url{http://dx.doi.org/10.1093/bioinformatics/bty373}.
   \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \url{http://dx.doi.org/10.1023/A:1010933404324}. 
   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{http://dx.doi.org/10.1097/JTO.0b013e318233d835}. 
   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{http://dx.doi.org/10.3414/ME00-01-0052}.
