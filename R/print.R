@@ -45,20 +45,20 @@ print.ranger <- function(x, ...) {
   cat("Mtry:                            ", x$mtry, "\n")
   cat("Target node size:                ", x$min.node.size, "\n")
   cat("Variable importance mode:        ", x$importance.mode, "\n")
+  cat("Splitrule:                       ", x$splitrule, "\n")
   if (x$treetype == "Survival") {
-    cat("Splitrule:                       ", x$splitrule, "\n")
     cat("Number of unique death times:    ", length(x$unique.death.times), "\n")
   }
   if (x$treetype == "Classification") {
-    cat("OOB prediction error:              ", sprintf("%1.2f %%", 100*x$prediction.error), "\n")
+    cat("OOB prediction error:            ", sprintf("%1.2f %%", 100*x$prediction.error), "\n")
   } else if (x$treetype == "Regression") {
-    cat("OOB prediction error (MSE):        ", x$prediction.error, "\n")
+    cat("OOB prediction error (MSE):      ", x$prediction.error, "\n")
   } else if (x$treetype == "Survival") {
-    cat("OOB prediction error (1-C):        ", x$prediction.error, "\n")
+    cat("OOB prediction error (1-C):      ", x$prediction.error, "\n")
   } else if (x$treetype == "Probability estimation") {
-    cat("OOB prediction error (Brier score):", x$prediction.error, "\n")
+    cat("OOB prediction error (Brier s.): ", x$prediction.error, "\n")
   } else {
-    cat("OOB prediction error:              ", x$prediction.error, "\n")
+    cat("OOB prediction error:            ", x$prediction.error, "\n")
   }
   if (x$treetype == "Regression") {
     cat("R squared (OOB):                 ", x$r.squared, "\n")
