@@ -58,7 +58,7 @@ void run_ranger(const ArgumentHandler& arg_handler, std::ostream& verbose_out) {
       arg_handler.alpha, arg_handler.minprop, arg_handler.holdout, arg_handler.predictiontype,
       arg_handler.randomsplits);
 
-  forest->run(true);
+  forest->run(true, !arg_handler.skipoob);
   if (arg_handler.write) {
     forest->saveToFile();
   }
