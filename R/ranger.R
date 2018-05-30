@@ -104,6 +104,7 @@
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
 ##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
+##' @param oob.error Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
@@ -205,7 +206,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
                    keep.inbag = FALSE, holdout = FALSE,
-                   quantreg = FALSE,
+                   quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
@@ -729,7 +730,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data, order.snps)
+                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -741,14 +742,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   ## Set predictions
-  if (treetype == 1 && is.factor(response)) {
+  if (treetype == 1 && is.factor(response) && oob.error) {
     result$predictions <- integer.to.factor(result$predictions,
                                             levels(response))
     true.values <- integer.to.factor(unlist(data.final[, dependent.variable.name]),
                                      levels(response))
     result$confusion.matrix <- table(true.values, result$predictions, 
                                      dnn = c("true", "predicted"), useNA = "ifany")
-  } else if (treetype == 5) {
+  } else if (treetype == 5 && oob.error) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
     } 
@@ -758,7 +759,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$chf <- result$predictions
     result$predictions <- NULL
     result$survival <- exp(-result$chf)
-  } else if (treetype == 9 && !is.matrix(data)) {
+  } else if (treetype == 9 && !is.matrix(data) && oob.error) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
     } 

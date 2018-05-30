@@ -34,7 +34,7 @@ Forest::Forest() :
         true), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction(
         { 1 }), holdout(false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), alpha(
         DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data { }, overall_prediction_error(
-        0), importance_mode(DEFAULT_IMPORTANCE_MODE), progress(0) {
+        NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), progress(0) {
 }
 
 // #nocov start
@@ -270,7 +270,7 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, s
   }
 }
 
-void Forest::run(bool verbose) {
+void Forest::run(bool verbose, bool compute_oob_error) {
 
   if (prediction_mode) {
     if (verbose && verbose_out) {
@@ -287,7 +287,10 @@ void Forest::run(bool verbose) {
     if (verbose && verbose_out) {
       *verbose_out << "Computing prediction error .." << std::endl;
     }
-    computePredictionError();
+
+    if (compute_oob_error) {
+      computePredictionError();
+    }
 
     if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW || importance_mode == IMP_PERM_RAW) {
       if (verbose && verbose_out) {

@@ -13,9 +13,9 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   split.select.weights = NULL, always.split.variables = NULL,
   respect.unordered.factors = NULL, scale.permutation.importance = FALSE,
   keep.inbag = FALSE, holdout = FALSE, quantreg = FALSE,
-  num.threads = NULL, save.memory = FALSE, verbose = TRUE, seed = NULL,
-  dependent.variable.name = NULL, status.variable.name = NULL,
-  classification = NULL)
+  oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
+  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
+  status.variable.name = NULL, classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -63,6 +63,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{holdout}{Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.}
 
 \item{quantreg}{Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.}
+
+\item{oob.error}{Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 

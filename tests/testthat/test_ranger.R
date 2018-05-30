@@ -266,4 +266,20 @@ test_that("No error if variable named forest", {
   expect_silent(predict(rf, dat))
 })
 
+test_that("Prediction error not NA if oob.error=TRUE", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5)
+  expect_false(is.na(rf$prediction.error))
+  
+  rf <- ranger(Surv(time,status) ~ ., veteran, num.trees = 5)
+  expect_false(is.na(rf$prediction.error))
+})
+
+test_that("Prediction error is NA if oob.error=FALSE", {
+  rf <- ranger(Species ~ ., iris, num.trees = 5, oob.error = FALSE)
+  expect_true(is.na(rf$prediction.error))
+  
+  rf <- ranger(Surv(time,status) ~ ., veteran, num.trees = 5, oob.error = FALSE)
+  expect_true(is.na(rf$prediction.error))
+})
+
 
