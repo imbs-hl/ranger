@@ -171,6 +171,7 @@ void ForestProbability::computePredictionErrorInternal() {
 
 // MSE with predicted probability and true data
   size_t num_predictions = 0;
+  overall_prediction_error = 0;
   for (size_t i = 0; i < predictions[0].size(); ++i) {
     if (samples_oob_count[i] > 0) {
       ++num_predictions;
