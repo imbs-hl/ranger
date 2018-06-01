@@ -1,3 +1,6 @@
+##### Version 0.10.1
+* Bug fixes
+
 ##### Version 0.10.0
 * Change license of C++ core to MIT (R package is still GPL3)
 * Better 'order' mode for unordered factors for multiclass and survival

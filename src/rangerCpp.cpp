@@ -267,6 +267,10 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       }
       result.push_back(forest_object, "forest");
     }
+    
+    if (!verbose) {
+      delete verbose_out;
+    }
   } catch (std::exception& e) {
     if (strcmp(e.what(), "User interrupt.") != 0) {
       Rcpp::Rcerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
