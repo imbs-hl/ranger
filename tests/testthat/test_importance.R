@@ -5,33 +5,33 @@ context("ranger_imp")
 set.seed(123)
 
 ## Classification
-rg.imp.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.imp.class <- ranger(Species ~ ., data = iris,
                        num.trees = 5, importance = "impurity")
-rg.perm.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.perm.class <- ranger(Species ~ ., data = iris,
                         num.trees = 5, importance = "permutation")
-rg.scale.perm.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.scale.perm.class <- ranger(Species ~ ., data = iris, 
                               num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE)
 
 ## Probability estimation
-rg.imp.prob <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.imp.prob <- ranger(Species ~ ., data = iris, 
                       num.trees = 5, importance = "impurity", probability = TRUE)
-rg.perm.prob <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.perm.prob <- ranger(Species ~ ., data = iris, 
                       num.trees = 5, importance = "permutation", probability = TRUE)
-rg.scale.perm.prob <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.scale.perm.prob <- ranger(Species ~ ., data = iris, 
                              num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE, probability = TRUE)
 
 ## Regression
-rg.imp.regr <- ranger(Sepal.Length ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.imp.regr <- ranger(Sepal.Length ~ ., data = iris, 
                       num.trees = 5, importance = "impurity")
-rg.perm.regr <- ranger(Sepal.Length ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.perm.regr <- ranger(Sepal.Length ~ ., data = iris, 
                        num.trees = 5, importance = "permutation")
-rg.scale.perm.regr <- ranger(Sepal.Length ~ ., data = iris, verbose = FALSE, write.forest = TRUE,
+rg.scale.perm.regr <- ranger(Sepal.Length ~ ., data = iris, 
                              num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE)
 
 ## Survival
-rg.perm.surv <- ranger(Surv(time, status) ~ ., data = veteran, verbose = FALSE, write.forest = TRUE,
+rg.perm.surv <- ranger(Surv(time, status) ~ ., data = veteran, 
                        num.trees = 5, importance = "permutation")
-rg.scale.perm.surv <- ranger(Surv(time, status) ~ ., data = veteran, verbose = FALSE, write.forest = TRUE,
+rg.scale.perm.surv <- ranger(Surv(time, status) ~ ., data = veteran, 
                              num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE)
 
 
