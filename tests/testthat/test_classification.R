@@ -6,13 +6,13 @@ context("ranger_class")
 ## Initialize the random forest for classification
 dat <- data.matrix(iris)
 
-rg.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE)
-rg.mat   <- ranger(dependent.variable.name = "Species", data = dat, write.forest = TRUE, classification = TRUE)
+rg.class <- ranger(Species ~ ., data = iris)
+rg.mat   <- ranger(dependent.variable.name = "Species", data = dat, classification = TRUE)
 
 ## Basic tests (for all random forests equal)
-test_that("classification result is of class ranger with 15 elements", {
+test_that("classification result is of class ranger with 14 elements", {
   expect_is(rg.class, "ranger")
-  expect_equal(length(rg.class), 15)
+  expect_equal(length(rg.class), 14)
 })
 
 test_that("classification prediction returns factor", {
