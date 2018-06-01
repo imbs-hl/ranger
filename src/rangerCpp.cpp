@@ -179,10 +179,10 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       }
     } else {
       // Set class weights
-      if (treetype == TREE_CLASSIFICATION) {
+      if (treetype == TREE_CLASSIFICATION && !class_weights.empty()) {
         auto& temp = dynamic_cast<ForestClassification&>(*forest);
         temp.setClassWeights(class_weights);
-      } else if (treetype == TREE_PROBABILITY) {
+      } else if (treetype == TREE_PROBABILITY && !class_weights.empty()) {
         auto& temp = dynamic_cast<ForestProbability&>(*forest);
         temp.setClassWeights(class_weights);
       }
@@ -217,11 +217,6 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     if (treetype == TREE_SURVIVAL) {
       auto& temp = dynamic_cast<ForestSurvival&>(*forest);
       result.push_back(temp.getUniqueTimepoints(), "unique.death.times");
-    }
-    if (!verbose) {
-      std::stringstream temp;
-      temp << verbose_out->rdbuf();
-      result.push_back(temp.str(), "log");
     }
     if (!prediction_mode) {
       result.push_back(forest->getMtry(), "mtry");
