@@ -17,7 +17,7 @@ test_that("Matrix interface prediction works for Probability estimation", {
 test_that("no warning if data.frame has two classes", {
   dat <- iris
   class(dat) <- c("data.frame", "data.table")
-  expect_silent(ranger(Species ~ ., data = dat, verbose = FALSE))
+  expect_silent(ranger(Species ~ ., data = dat))
 })
 
 test_that("Error if sample fraction is 0 or >1", {

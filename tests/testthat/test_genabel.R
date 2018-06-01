@@ -6,13 +6,13 @@ context("genabel")
 if (requireNamespace("GenABEL", quietly = TRUE)) {
   library(GenABEL)
   dat.gwaa <- readRDS("../test_gwaa.Rds")
-  rg.gwaa <- ranger(CHD ~ ., data = dat.gwaa, verbose = FALSE, write.forest = TRUE)
+  rg.gwaa <- ranger(CHD ~ ., data = dat.gwaa)
 }
 
-test_that("classification gwaa rf is of class ranger with 15 elements", {
+test_that("classification gwaa rf is of class ranger with 14 elements", {
   skip_if_not_installed("GenABEL")
   expect_is(rg.gwaa, "ranger")
-  expect_equal(length(rg.gwaa), 15)
+  expect_equal(length(rg.gwaa), 14)
 })
 
 test_that("GenABEL prediction works if no covariates and formula used", {
