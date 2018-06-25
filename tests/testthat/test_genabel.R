@@ -5,7 +5,7 @@ context("genabel")
 ## GenABEL
 if (requireNamespace("GenABEL", quietly = TRUE)) {
   library(GenABEL)
-  dat.gwaa <- readRDS("../test_gwaa.Rds")
+  dat.gwaa <- readRDS("../test_gwaa.rds")
   rg.gwaa <- ranger(CHD ~ ., data = dat.gwaa)
 }
 
