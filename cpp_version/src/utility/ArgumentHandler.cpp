@@ -20,8 +20,8 @@ R package "ranger" under GPL3 license.
 namespace ranger {
 
 ArgumentHandler::ArgumentHandler(int argc, char **argv) :
-    caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), predict(""), predictiontype(
-        DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
+    caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), skipoob(false), predict(
+        ""), predictiontype(DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
         DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), file(""), impmeasure(
         DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix("ranger_out"), probability(false), splitrule(
         DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(true), verbose(false), write(false), treetype(
@@ -33,7 +33,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NP:Q:R:S:U:XZa:b:c:f:hil::m:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:f:hil::m:o:pr:s:t:uvwy:z:";
 
   // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -45,6 +45,7 @@ int ArgumentHandler::processArguments() {
       { "holdout",              no_argument,        0, 'H'},
       { "memmode",              required_argument,  0, 'M'},
       { "savemem",              no_argument,        0, 'N'},
+      { "skipoob",              no_argument,        0, 'O'},
       { "predict",              required_argument,  0, 'P'},
       { "predictiontype",       required_argument,  0, 'Q'},
       { "randomsplits",         required_argument,  0, 'R'},
@@ -129,6 +130,10 @@ int ArgumentHandler::processArguments() {
 
     case 'N':
       savemem = true;
+      break;
+
+    case 'O':
+      skipoob = true;
       break;
 
     case 'P':
@@ -536,6 +541,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              importance and prediction error." << std::endl;
   std::cout << "    " << "--splitweights FILE           Filename of split select weights file." << std::endl;
   std::cout << "    " << "--alwayssplitvars V1,V2,..    Comma separated list of variable names to be always considered for splitting." << std::endl;
+  std::cout << "    " << "--skipoob                     Skip computation of OOB error." << std::endl;
   std::cout << "    " << "--nthreads N                  Set number of parallel threads to N." << std::endl;
   std::cout << "    " << "                              (Default: Number of CPUs available)" << std::endl;
   std::cout << "    " << "--seed SEED                   Set random seed to SEED." << std::endl;
