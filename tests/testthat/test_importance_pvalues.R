@@ -5,7 +5,7 @@ context("importance")
 
 ## GenABEL data
 if (requireNamespace("GenABEL", quietly = TRUE)) {
-  dat_gwaa <- readRDS("../test_gwaa.Rds")
+  dat_gwaa <- readRDS("../test_gwaa.rds")
 }
 
 ## 0 noise variables
