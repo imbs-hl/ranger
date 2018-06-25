@@ -58,7 +58,8 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, std::vector<double>& case_weights,
     bool use_case_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
-    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_data, bool use_sparse_data, bool order_snps) {
+    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_data, bool use_sparse_data, bool order_snps, 
+    bool oob_error) {
 
   Rcpp::List result;
 
@@ -189,7 +190,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     }
 
     // Run Ranger
-    forest->run(false);
+    forest->run(false, oob_error);
 
     if (use_split_select_weights && importance_mode != IMP_NONE) {
       if (verbose_out) {

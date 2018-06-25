@@ -65,7 +65,7 @@ public:
   virtual void initInternal(std::string status_variable_name) = 0;
 
   // Grow or predict
-  void run(bool verbose);
+  void run(bool verbose, bool compute_oob_error);
 
   // Write results to output files
   void writeOutput();

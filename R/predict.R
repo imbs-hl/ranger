@@ -295,6 +295,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   holdout <- FALSE
   num.random.splits <- 1
   order.snps <- FALSE
+  oob.error <- FALSE
   
   ## Use sparse matrix
   if ("dgCMatrix" %in% class(data.final)) {
@@ -316,7 +317,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
                       prediction.type, num.random.splits, sparse.data, use.sparse.data,
-                      order.snps)
+                      order.snps, oob.error)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

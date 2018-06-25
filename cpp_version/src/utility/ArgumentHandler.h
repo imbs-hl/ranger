@@ -55,6 +55,7 @@ public:
   bool holdout;
   MemoryMode memmode;
   bool savemem;
+  bool skipoob;
   std::string predict;
   PredictionType predictiontype;
   uint randomsplits;
