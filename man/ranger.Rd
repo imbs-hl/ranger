@@ -7,15 +7,16 @@
 \usage{
 ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   importance = "none", write.forest = TRUE, probability = FALSE,
-  min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
-  1, 0.632), case.weights = NULL, class.weights = NULL, splitrule = NULL,
-  num.random.splits = 1, alpha = 0.5, minprop = 0.1,
-  split.select.weights = NULL, always.split.variables = NULL,
-  respect.unordered.factors = NULL, scale.permutation.importance = FALSE,
-  keep.inbag = FALSE, holdout = FALSE, quantreg = FALSE,
-  oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
-  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  min.node.size = NULL, max.depth = NULL, replace = TRUE,
+  sample.fraction = ifelse(replace, 1, 0.632), case.weights = NULL,
+  class.weights = NULL, splitrule = NULL, num.random.splits = 1,
+  alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
+  always.split.variables = NULL, respect.unordered.factors = NULL,
+  scale.permutation.importance = FALSE, keep.inbag = FALSE,
+  holdout = FALSE, quantreg = FALSE, oob.error = TRUE,
+  num.threads = NULL, save.memory = FALSE, verbose = TRUE, seed = NULL,
+  dependent.variable.name = NULL, status.variable.name = NULL,
+  classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -33,6 +34,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{probability}{Grow a probability forest as in Malley et al. (2012).}
 
 \item{min.node.size}{Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.}
+
+\item{max.depth}{Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).}
 
 \item{replace}{Sample with replacement.}
 

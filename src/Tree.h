@@ -40,7 +40,7 @@ public:
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
-      double minprop, bool holdout, uint num_random_splits);
+      double minprop, bool holdout, uint num_random_splits, uint max_depth);
 
   virtual void allocateMemory() = 0;
 
@@ -165,6 +165,7 @@ protected:
   double alpha;
   double minprop;
   uint num_random_splits;
+  uint max_depth;
 };
 
 } // namespace ranger

@@ -67,6 +67,7 @@ public:
   double alpha;
   double minprop;
   std::vector<std::string> catvars;
+  uint maxdepth;
   std::string file;
   ImportanceMode impmeasure;
   uint targetpartitionsize;

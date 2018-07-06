@@ -89,6 +89,7 @@
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
+##' @param max.depth Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
@@ -198,7 +199,7 @@
 ##' @export
 ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
-                   min.node.size = NULL, replace = TRUE, 
+                   min.node.size = NULL, max.depth = NULL, replace = TRUE, 
                    sample.fraction = ifelse(replace, 1, 0.632), 
                    case.weights = NULL, class.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
@@ -453,6 +454,13 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     min.node.size <- 0
   } else if (!is.numeric(min.node.size) || min.node.size < 0) {
     stop("Error: Invalid value for min.node.size")
+  }
+  
+  ## Tree depth
+  if (is.null(max.depth)) {
+    max.depth <- 0
+  } else if (!is.numeric(max.depth) || max.depth < 0) {
+    stop("Error: Invalid value for max.depth. Please give a positive integer.")
   }
   
   ## Sample fraction
@@ -730,7 +738,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error)
+                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
