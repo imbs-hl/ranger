@@ -89,6 +89,7 @@ const SplitRule DEFAULT_SPLITRULE = LOGRANK;
 const double DEFAULT_ALPHA = 0.5;
 const double DEFAULT_MINPROP = 0.1;
 
+const uint DEFAULT_MAXDEPTH = 0;
 const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
 const uint DEFAULT_NUM_RANDOM_SPLITS = 1;
 

@@ -22,10 +22,10 @@ namespace ranger {
 ArgumentHandler::ArgumentHandler(int argc, char **argv) :
     caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), skipoob(false), predict(
         ""), predictiontype(DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
-        DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), file(""), impmeasure(
-        DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix("ranger_out"), probability(false), splitrule(
-        DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(true), verbose(false), write(false), treetype(
-        TREE_CLASSIFICATION), seed(0) {
+        DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), maxdepth(
+        DEFAULT_MAXDEPTH), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix(
+        "ranger_out"), probability(false), splitrule(DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(
+        true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0) {
   this->argc = argc;
   this->argv = argv;
 }
@@ -33,7 +33,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:f:hil::m:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hil::m:o:pr:s:t:uvwy:z:";
 
   // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -57,6 +57,7 @@ int ArgumentHandler::processArguments() {
       { "alpha",                required_argument,  0, 'a'},
       { "minprop",              required_argument,  0, 'b'},
       { "catvars",              required_argument,  0, 'c'},
+      { "maxdepth",             required_argument,  0, 'd'},
       { "file",                 required_argument,  0, 'f'},
       { "help",                 no_argument,        0, 'h'},
       { "impmeasure",           required_argument,  0, 'i'},
@@ -230,6 +231,20 @@ int ArgumentHandler::processArguments() {
 
     case 'c':
       splitString(catvars, optarg, ',');
+      break;
+
+    case 'd':
+      try {
+        int temp = std::stoi(optarg);
+        if (temp < 0) {
+          throw std::runtime_error("");
+        } else {
+          maxdepth = temp;
+        }
+      } catch (...) {
+        throw std::runtime_error(
+            "Illegal argument for option 'maxdepth'. Please give a positive integer. See '--help' for details.");
+      }
       break;
 
     case 'f':
@@ -505,6 +520,8 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              For Survival growing is stopped if one child would reach a size smaller than N." << std::endl;
   std::cout << "    " << "                              This means nodes with size smaller N can occur for Classification and Regression." << std::endl;
   std::cout << "    " << "                              (Default: 1 for Classification, 5 for Regression, and 3 for Survival)" << std::endl;
+  std::cout << "    " << "--maxdepth N                  Set maximal tree depth to N." << std::endl;
+  std::cout << "    " << "                              Set to 0 for unlimited depth. A value of 1 corresponds to tree stumps (1 split)." << std::endl;
   std::cout << "    " << "--catvars V1,V2,..            Comma separated list of names of (unordered) categorical variables. " << std::endl;
   std::cout << "    " << "                              Categorical variables must contain only positive integer values." << std::endl;
   std::cout << "    " << "--write                       Save forest to file <outprefix>.forest." << std::endl;
