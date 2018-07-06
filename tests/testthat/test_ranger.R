@@ -282,4 +282,44 @@ test_that("Prediction error is NA if oob.error=FALSE", {
   expect_true(is.na(rf$prediction.error))
 })
 
+test_that("Tree depth creates trees of correct size", {
+  # Recursive function to get tree depth
+  depth <- function(rf, tree, i) {
+    left <- rf$forest$child.nodeIDs[[tree]][[1]][i] + 1
+    right <- rf$forest$child.nodeIDs[[tree]][[2]][i] + 1
+    if (left <= 1) {
+      0
+    } else {
+      1 + max(c(depth(rf, tree, left), depth(rf, tree, right)))
+    }
+  }
+  forest_depth <- function(rf) {
+    sapply(1:rf$num.trees, depth, rf = rf, i = 1)
+  }
+  
+  # Depth 1
+  rf <- ranger(Species ~ ., iris, num.trees = 5, max.depth = 1)
+  expect_true(all(forest_depth(rf) <= 1))
+  
+  # Depth 4
+  rf <- ranger(Species ~ ., iris, num.trees = 5, max.depth = 4)
+  expect_true(all(forest_depth(rf) <= 4))
+  
+  # Random depth (deeper trees)
+  max.depth <- round(runif(1, 1, 20))
+  dat <- data.frame(y = runif(100, 0, 1), x = runif(100, 0, 1))
+  rf <- ranger(y ~ ., dat, num.trees = 5, min.node.size = 1, max.depth = max.depth)
+  expect_true(all(forest_depth(rf) <= max.depth))
+})
+
+test_that("Tree depth 0 equivalent to unlimited", {
+  set.seed(200)
+  rf1 <- ranger(Species ~ ., iris, num.trees = 5, max.depth = 0)
+  
+  set.seed(200)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5)
+  
+  expect_equal(sapply(rf1$forest$split.varIDs, length), 
+               sapply(rf2$forest$split.varIDs, length))
+})
 
