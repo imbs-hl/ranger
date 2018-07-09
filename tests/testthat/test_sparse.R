@@ -113,4 +113,11 @@ test_that("Sparse probability prediction works correctly", {
   expect_equal(dim(pred$predictions), c(nrow(dat_sparse), 2))
 })
 
+test_that("Corrected importance working for sparse data", {
+  rf <- ranger(data = dat_sparse, dependent.variable.name = "y", classification = TRUE, 
+               num.trees = 5, importance = "impurity_corrected")
+  expect_equal(names(rf$variable.importance), colnames(dat_sparse)[-1])
+})
+
+
 
