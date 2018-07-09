@@ -348,7 +348,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       recode.idx <- independent.idx & (character.idx | (factor.idx & !ordered.idx))
 
       if (any(recode.idx) & (importance == "impurity_corrected" || importance == "impurity_unbiased")) {
-        stop("Corrected impurity importance not supported in combination with ordering unordered factors, consider 'ignore' or 'partition'.")
+        warning("Corrected impurity importance may not be unbiased for re-ordered factor levels. Consider setting respect.unordered.factors to 'ignore' or 'partition' or manually compute corrected importance.")
       }
       
       ## Numeric response
