@@ -1,3 +1,6 @@
+##### Version 0.10.3
+* Bug fixes
+
 ##### Version 0.10.2
 * Add max.depth parameter to limit tree depth
 
