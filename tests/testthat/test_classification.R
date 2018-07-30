@@ -192,5 +192,12 @@ test_that("No error if unused factor levels in outcome", {
   expect_warning(rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5),
                  "^Dropped unused factor level\\(s\\) in dependent variable\\: virginica\\.")
   pred <- predict(rf, iris)
-  expect_equal(levels(pred$predictions), levels(droplevels(iris[1:100, "Species"])))
+  expect_equal(levels(pred$predictions), levels(iris$Species))
+})
+
+test_that("Predictions with unused factor levels are not NA", {
+  expect_warning(rf <- ranger(Species ~ ., iris[51:150, ], num.trees = 5),
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: setosa\\.")
+  pred <- predict(rf, iris)
+  expect_equal(sum(is.na(pred$predictions)), 0)
 })
