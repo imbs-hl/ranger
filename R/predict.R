@@ -367,9 +367,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         }
         
         ## Set colnames and sort by levels
-        leveldiff <- max(forest$class.values) - length(forest$levels)
-        colnames(result$predictions) <- forest$levels[forest$class.values - leveldiff]
-        result$predictions <- result$predictions[, forest$levels, drop = FALSE]
+        colnames(result$predictions) <- forest$levels[forest$class.values]
+        result$predictions <- result$predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
       }
     }
   } else if (type == "terminalNodes") {
