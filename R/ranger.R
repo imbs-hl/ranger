@@ -806,7 +806,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Write forest object
   if (write.forest) {
     if (is.factor(response)) {
-      result$forest$levels <- levels(droplevels(response))
+      result$forest$levels <- levels(response)
     }
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
