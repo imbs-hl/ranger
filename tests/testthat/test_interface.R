@@ -59,7 +59,8 @@ test_that("Error if interaction of factor variable included", {
 
 # Tibbles
 if (requireNamespace("tibble", quietly = TRUE)) {
-  tb <- tibble::as_tibble(iris)
+  attachNamespace("tibble")
+  tb <- as_tibble(iris)
 }
 test_that("Training works with tibbles, formula interface", {
   skip_if_not_installed("tibble")
