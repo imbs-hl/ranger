@@ -246,7 +246,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
     if (is.null(status.variable.name)) {
       status.variable.name <- "none"
-      response <- data[, dependent.variable.name]
+      response <- data[, dependent.variable.name, drop = TRUE]
     } else {
       response <- data[, c(dependent.variable.name, status.variable.name)]
     }
