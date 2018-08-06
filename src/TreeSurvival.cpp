@@ -107,6 +107,12 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
 
   computeDeathCounts(nodeID);
 
+  // Stop if maximum node size or depth reached (will check again for each child node)
+  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+    computeSurvival(nodeID);
+    return true;
+  }
+
   // Stop early if no split posssible
   if (num_samples_node >= 2 * min_node_size) {
 
@@ -149,8 +155,8 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
 
   size_t num_samples_node = sampleIDs[nodeID].size();
 
-  // Check node size, stop if maximum reached
-  if (num_samples_node <= min_node_size) {
+  // Stop if maximum node size or depth reached
+  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     computeDeathCounts(nodeID);
     computeSurvival(nodeID);
     return true;
@@ -630,6 +636,12 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
   double best_value = 0;
 
   computeDeathCounts(nodeID);
+
+  // Stop if maximum node size or depth reached (will check again for each child node)
+  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+    computeSurvival(nodeID);
+    return true;
+  }
 
   // Stop early if no split posssible
   if (num_samples_node >= 2 * min_node_size) {
