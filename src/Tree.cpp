@@ -21,7 +21,7 @@ Tree::Tree() :
         0), split_select_weights(0), case_weights(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(
         0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(0), memory_saving_splitting(
         false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(
-        DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH) {
+        DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0) {
 }
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -31,7 +31,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         child_nodeIDs), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(0), importance_mode(
         DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(0), memory_saving_splitting(false), splitrule(
         DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(
-        DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH) {
+        DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0) {
 }
 
 void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
@@ -102,23 +102,18 @@ void Tree::grow(std::vector<double>* variable_importance) {
   // While not all nodes terminal, split next node
   size_t num_open_nodes = 1;
   size_t i = 0;
-  size_t left_node = 0;
-  uint depth = 0;
+  depth = 0;
   while (num_open_nodes > 0) {
-    if (i >= left_node && max_depth > 0 && depth >= max_depth) {
-      // Stop if max_depth reached
-      break;
-    }
-
+    // Split node
     bool is_terminal_node = splitNode(i);
     if (is_terminal_node) {
       --num_open_nodes;
     } else {
       ++num_open_nodes;
-      if (i >= left_node) {
+      if (i >= last_left_nodeID) {
         // If new level, increase depth
         // (left_node saves left-most node in current level, new level reached if that node is splitted)
-        left_node = sampleIDs.size() - 2;
+        last_left_nodeID = sampleIDs.size() - 2;
         ++depth;
       }
     }

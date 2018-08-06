@@ -166,6 +166,8 @@ protected:
   double minprop;
   uint num_random_splits;
   uint max_depth;
+  uint depth;
+  size_t last_left_nodeID;
 };
 
 } // namespace ranger

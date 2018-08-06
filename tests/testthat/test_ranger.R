@@ -323,3 +323,11 @@ test_that("Tree depth 0 equivalent to unlimited", {
                sapply(rf2$forest$split.varIDs, length))
 })
 
+test_that("Meaningful predictions with max.depth = 1", {
+  rf <- ranger(Sepal.Length ~ ., iris, max.depth = 1, num.trees = 5)
+  pred <- predict(rf, iris)$predictions
+  expect_gte(min(pred), min(iris$Sepal.Length))
+  expect_lte(max(pred), max(iris$Sepal.Length))
+})
+
+
