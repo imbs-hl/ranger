@@ -58,9 +58,12 @@ test_that("Error if interaction of factor variable included", {
 })
 
 # Tibbles
+if (requireNamespace("tibble", quietly = TRUE)) {
+  library(tibble)
+}
+
 test_that("Training works with tibbles, formula interface", {
   skip_if_not_installed("tibble")
-  library(tibble)
   tb <- as_tibble(iris)
   set.seed(1000)
   rf1 <- ranger(Species ~ ., tb, num.trees = 5)
@@ -77,7 +80,6 @@ test_that("Training works with tibbles, formula interface", {
 
 test_that("Training works with tibbles, alternative interface", {
   skip_if_not_installed("tibble")
-  library(tibble)
   tb <- as_tibble(iris)
   set.seed(1000)
   rf1 <- ranger(dependent.variable.name = "Species", data = tb, num.trees = 5)
@@ -94,7 +96,6 @@ test_that("Training works with tibbles, alternative interface", {
 
 test_that("Prediction works with tibbles, formula interface", {
   skip_if_not_installed("tibble")
-  library(tibble)
   tb <- as_tibble(iris)
   set.seed(1000)
   rf1 <- ranger(Species ~ ., tb, num.trees = 5)
@@ -118,7 +119,6 @@ test_that("Prediction works with tibbles, formula interface", {
 
 test_that("Prediction works with tibbles, alternative interface", {
   skip_if_not_installed("tibble")
-  library(tibble)
   tb <- as_tibble(iris)
   set.seed(1000)
   rf1 <- ranger(dependent.variable.name = "Species", data = tb, num.trees = 5)
