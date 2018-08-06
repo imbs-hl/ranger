@@ -56,3 +56,82 @@ test_that("Error if interaction of factor variable included", {
   expect_error(ranger(Surv(time, status) ~ celltype*prior, veteran, num.trees = 5), 
                "Error: Only numeric columns allowed in interaction terms.")
 })
+
+# Tibbles
+test_that("Training works with tibbles, formula interface", {
+  skip_if_not_installed("tibble")
+  tb <- tibble::as_tibble(iris)
+  set.seed(1000)
+  rf1 <- ranger(Species ~ ., tb, num.trees = 5)
+  
+  set.seed(1000)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5)
+  
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+  
+  pred1 <- levels(iris$Species)[rf1$predictions[!is.na(rf1$predictions)]]
+  pred2 <- as.character(rf2$predictions[!is.na(rf2$predictions)])
+  expect_equal(pred1, pred2)
+})
+
+test_that("Training works with tibbles, alternative interface", {
+  skip_if_not_installed("tibble")
+  tb <- tibble::as_tibble(iris)
+  set.seed(1000)
+  rf1 <- ranger(dependent.variable.name = "Species", data = tb, num.trees = 5)
+  
+  set.seed(1000)
+  rf2 <- ranger(dependent.variable.name = "Species", data = iris, num.trees = 5)
+  
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+  
+  pred1 <- levels(iris$Species)[rf1$predictions[!is.na(rf1$predictions)]]
+  pred2 <- as.character(rf2$predictions[!is.na(rf2$predictions)])
+  expect_equal(pred1, pred2)
+})
+
+test_that("Prediction works with tibbles, formula interface", {
+  skip_if_not_installed("tibble")
+  tb <- tibble::as_tibble(iris)
+  set.seed(1000)
+  rf1 <- ranger(Species ~ ., tb, num.trees = 5)
+  
+  set.seed(1000)
+  rf2 <- ranger(Species ~ ., iris, num.trees = 5)
+  
+  set.seed(1000)
+  pred1 <- predict(rf1, tb)
+  set.seed(1000)
+  pred2 <- predict(rf1, iris)
+  set.seed(1000)
+  pred3 <- predict(rf2, tb)
+  set.seed(1000)
+  pred4 <- predict(rf2, iris)
+  
+  expect_equal(pred1$predictions, pred2$predictions)
+  expect_equal(pred2$predictions, pred3$predictions)
+  expect_equal(pred3$predictions, pred4$predictions)
+})
+
+test_that("Prediction works with tibbles, alternative interface", {
+  skip_if_not_installed("tibble")
+  tb <- tibble::as_tibble(iris)
+  set.seed(1000)
+  rf1 <- ranger(dependent.variable.name = "Species", data = tb, num.trees = 5)
+  
+  set.seed(1000)
+  rf2 <- ranger(dependent.variable.name = "Species", data = iris, num.trees = 5)
+  
+  set.seed(1000)
+  pred1 <- predict(rf1, tb)
+  set.seed(1000)
+  pred2 <- predict(rf1, iris)
+  set.seed(1000)
+  pred3 <- predict(rf2, tb)
+  set.seed(1000)
+  pred4 <- predict(rf2, iris)
+  
+  expect_equal(pred1$predictions, pred2$predictions)
+  expect_equal(pred2$predictions, pred3$predictions)
+  expect_equal(pred3$predictions, pred4$predictions)
+})
