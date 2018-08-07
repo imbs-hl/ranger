@@ -322,6 +322,9 @@ int ArgumentHandler::processArguments() {
         case 5:
           splitrule = EXTRATREES;
           break;
+        case 6:
+          splitrule = HELLINGER;
+          break;
         default:
           throw std::runtime_error("");
           break;
@@ -466,7 +469,8 @@ void ArgumentHandler::checkArguments() {
 
   // Check splitrule
   if (((splitrule == AUC || splitrule == AUC_IGNORE_TIES) && treetype != TREE_SURVIVAL)
-      || (splitrule == MAXSTAT && (treetype != TREE_SURVIVAL && treetype != TREE_REGRESSION))) {
+      || (splitrule == MAXSTAT && (treetype != TREE_SURVIVAL && treetype != TREE_REGRESSION))
+      || (splitrule == HELLINGER && treetype != TREE_CLASSIFICATION && treetype != TREE_PROBABILITY)) {
     throw std::runtime_error("Illegal splitrule selected. See '--help' for details.");
   }
 
@@ -549,6 +553,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              RULE = 3: AUC (ignore ties) for Survival, not available for Classification and Regression." << std::endl;
   std::cout << "    " << "                              RULE = 4: MAXSTAT for Survival and Regression, not available for Classification." << std::endl;
   std::cout << "    " << "                              RULE = 5: ExtraTrees for all tree types." << std::endl;
+  std::cout << "    " << "                              RULE = 6: Hellinger for Classification, not available for Regression and Survival." << std::endl;
   std::cout << "    " << "                              (Default: 1)" << std::endl;
   std::cout << "    " << "--randomsplits N              Number of random splits to consider for each splitting variable (ExtraTrees splitrule only)." << std::endl;
   std::cout << "    " << "--alpha VAL                   Significance threshold to allow splitting (MAXSTAT splitrule only)." << std::endl;

@@ -14,9 +14,9 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
   holdout = FALSE, quantreg = FALSE, oob.error = TRUE,
-  num.threads = NULL, save.memory = FALSE, verbose = TRUE, seed = NULL,
-  dependent.variable.name = NULL, status.variable.name = NULL,
-  classification = NULL)
+  num.threads = NULL, save.memory = FALSE, verbose = TRUE,
+  seed = NULL, dependent.variable.name = NULL,
+  status.variable.name = NULL, classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -45,7 +45,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{class.weights}{Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.}
 
-\item{splitrule}{Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
+\item{splitrule}{Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
 
 \item{num.random.splits}{For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.}
 

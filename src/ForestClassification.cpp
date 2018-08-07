@@ -71,6 +71,10 @@ void ForestClassification::initInternal(std::string status_variable_name) {
       }
       response_classIDs.push_back(classID);
     }
+
+    if (splitrule == HELLINGER && class_values.size() != 2) {
+      throw std::runtime_error("Hellinger splitrule only implemented for binary classification.");
+    }
   }
 
   // Create sampleIDs_per_class if required

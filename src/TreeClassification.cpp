@@ -76,7 +76,8 @@ void TreeClassification::appendToFileInternal(std::ofstream& file) { // #nocov s
 bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
   // Stop if maximum node size or depth reached
-  if (sampleIDs[nodeID].size() <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  if (sampleIDs[nodeID].size() <= min_node_size
+      || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     split_values[nodeID] = estimate(nodeID);
     return true;
   }
@@ -248,19 +249,32 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       continue;
     }
 
-    // Sum of squares
-    double sum_left = 0;
-    double sum_right = 0;
-    for (size_t j = 0; j < num_classes; ++j) {
-      size_t class_count_right = class_counts_right[i * num_classes + j];
-      size_t class_count_left = class_counts[j] - class_count_right;
+    double decrease;
+    if (splitrule == HELLINGER) {
+      // TPR is number of outcome 1s in one node / total number of 1s
+      // FPR is number of outcome 1s in one node / total number of 0s
+      double tpr = class_counts_right[i * num_classes + 1] / class_counts[1];
+      double fpr = class_counts_right[i * num_classes + 1] / class_counts[0];
 
-      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
-      sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+      // Decrease of impurity
+      double a1 = sqrt(tpr) - sqrt(fpr);
+      double a2 = sqrt(1 - tpr) - sqrt(1 - fpr);
+      decrease = sqrt(a1 * a1 + a2 * a2);
+    } else {
+      // Sum of squares
+      double sum_left = 0;
+      double sum_right = 0;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_right = class_counts_right[i * num_classes + j];
+        size_t class_count_left = class_counts[j] - class_count_right;
+
+        sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+        sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+      }
+
+      // Decrease of impurity
+      decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
     }
-
-    // Decrease of impurity
-    double decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -313,19 +327,36 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       break;
     }
 
-    // Sum of squares
-    double sum_left = 0;
-    double sum_right = 0;
-    for (size_t j = 0; j < num_classes; ++j) {
-      class_counts_left[j] += counter_per_class[i * num_classes + j];
-      size_t class_count_right = class_counts[j] - class_counts_left[j];
+    double decrease;
+    if (splitrule == HELLINGER) {
+      for (size_t j = 0; j < num_classes; ++j) {
+        class_counts_left[j] += counter_per_class[i * num_classes + j];
+      }
 
-      sum_left += (*class_weights)[j] * class_counts_left[j] * class_counts_left[j];
-      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+      // TPR is number of outcome 1s in one node / total number of 1s
+      // FPR is number of outcome 1s in one node / total number of 0s
+      double tpr = (class_counts[1] - class_counts_left[1]) / class_counts[1];
+      double fpr = (class_counts[1] - class_counts_left[1]) / class_counts[0];
+
+      // Decrease of impurity
+      double a1 = sqrt(tpr) - sqrt(fpr);
+      double a2 = sqrt(1 - tpr) - sqrt(1 - fpr);
+      decrease = sqrt(a1 * a1 + a2 * a2);
+    } else {
+      // Sum of squares
+      double sum_left = 0;
+      double sum_right = 0;
+      for (size_t j = 0; j < num_classes; ++j) {
+        class_counts_left[j] += counter_per_class[i * num_classes + j];
+        size_t class_count_right = class_counts[j] - class_counts_left[j];
+
+        sum_left += (*class_weights)[j] * class_counts_left[j] * class_counts_left[j];
+        sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+      }
+
+      // Decrease of impurity
+      decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     }
-
-    // Decrease of impurity
-    double decrease = sum_right / (double) n_right + sum_left / (double) n_left;
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -398,19 +429,32 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
     }
     size_t n_left = num_samples_node - n_right;
 
-    // Sum of squares
-    double sum_left = 0;
-    double sum_right = 0;
-    for (size_t j = 0; j < num_classes; ++j) {
-      size_t class_count_right = class_counts_right[j];
-      size_t class_count_left = class_counts[j] - class_count_right;
+    double decrease;
+    if (splitrule == HELLINGER) {
+      // TPR is number of outcome 1s in one node / total number of 1s
+      // FPR is number of outcome 1s in one node / total number of 0s
+      double tpr = class_counts_right[1] / class_counts[1];
+      double fpr = class_counts_right[1] / class_counts[0];
 
-      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
-      sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+      // Decrease of impurity
+      double a1 = sqrt(tpr) - sqrt(fpr);
+      double a2 = sqrt(1 - tpr) - sqrt(1 - fpr);
+      decrease = sqrt(a1 * a1 + a2 * a2);
+    } else {
+      // Sum of squares
+      double sum_left = 0;
+      double sum_right = 0;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_right = class_counts_right[j];
+        size_t class_count_left = class_counts[j] - class_count_right;
+
+        sum_right += (*class_weights)[j] * class_count_right * class_count_right;
+        sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+      }
+
+      // Decrease of impurity
+      decrease = sum_left / (double) n_left + sum_right / (double) n_right;
     }
-
-    // Decrease of impurity
-    double decrease = sum_left / (double) n_left + sum_right / (double) n_right;
 
     // If better than before, use this
     if (decrease > best_decrease) {
