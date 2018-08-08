@@ -257,9 +257,9 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
     double decrease;
     if (splitrule == HELLINGER) {
       // TPR is number of outcome 1s in one node / total number of 1s
-      // FPR is number of outcome 1s in one node / total number of 0s
-      double tpr = class_counts_right[i * num_classes + 1] / class_counts[1];
-      double fpr = class_counts_right[i * num_classes + 1] / class_counts[0];
+      // FPR is number of outcome 0s in one node / total number of 0s
+      double tpr = (double) class_counts_right[i * num_classes + 1] / (double) class_counts[1];
+      double fpr = (double) class_counts_right[i * num_classes + 0] / (double) class_counts[0];
 
       // Decrease of impurity
       double a1 = sqrt(tpr) - sqrt(fpr);
@@ -339,9 +339,9 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
       }
 
       // TPR is number of outcome 1s in one node / total number of 1s
-      // FPR is number of outcome 1s in one node / total number of 0s
-      double tpr = (class_counts[1] - class_counts_left[1]) / class_counts[1];
-      double fpr = (class_counts[1] - class_counts_left[1]) / class_counts[0];
+      // FPR is number of outcome 0s in one node / total number of 0s
+      double tpr = (double) (class_counts[1] - class_counts_left[1]) / (double) class_counts[1];
+      double fpr = (double) (class_counts[0] - class_counts_left[0]) / (double) class_counts[0];
 
       // Decrease of impurity
       double a1 = sqrt(tpr) - sqrt(fpr);
@@ -437,9 +437,9 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
     double decrease;
     if (splitrule == HELLINGER) {
       // TPR is number of outcome 1s in one node / total number of 1s
-      // FPR is number of outcome 1s in one node / total number of 0s
-      double tpr = class_counts_right[1] / class_counts[1];
-      double fpr = class_counts_right[1] / class_counts[0];
+      // FPR is number of outcome 0s in one node / total number of 0s
+      double tpr = (double) class_counts_right[1] / (double) class_counts[1];
+      double fpr = (double) class_counts_right[0] / (double) class_counts[0];
 
       // Decrease of impurity
       double a1 = sqrt(tpr) - sqrt(fpr);
