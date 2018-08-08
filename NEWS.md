@@ -1,3 +1,6 @@
+##### Version 0.10.3-85
+* Add "hellinger" splitrule
+
 ##### Version 0.10.3
 * Bug fixes
 
