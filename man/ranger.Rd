@@ -13,9 +13,9 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
-  holdout = FALSE, quantreg = FALSE, oob.error = TRUE,
-  num.threads = NULL, save.memory = FALSE, verbose = TRUE,
-  seed = NULL, dependent.variable.name = NULL,
+  inbag = NULL, holdout = FALSE, quantreg = FALSE,
+  oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
+  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
   status.variable.name = NULL, classification = NULL)
 }
 \arguments{
@@ -62,6 +62,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{scale.permutation.importance}{Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
 
 \item{keep.inbag}{Save how often observations are in-bag in each tree.}
+
+\item{inbag}{Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.}
 
 \item{holdout}{Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.}
 
