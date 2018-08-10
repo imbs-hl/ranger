@@ -39,8 +39,9 @@ public:
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
-      std::vector<double>* case_weights, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
-      double minprop, bool holdout, uint num_random_splits, uint max_depth);
+      std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
+      std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
+      uint max_depth);
 
   virtual void allocateMemory() = 0;
 
@@ -97,6 +98,8 @@ protected:
   virtual void bootstrapClassWise();
   virtual void bootstrapWithoutReplacementClassWise();
 
+  void setManualInbag();
+
   virtual void cleanUpInternal() = 0;
 
   size_t dependent_varID;
@@ -119,6 +122,9 @@ protected:
 
   // Bootstrap weights
   const std::vector<double>* case_weights;
+
+  // Pre-selected bootstrap samples
+  const std::vector<size_t>* manual_inbag;
 
   // Splitting variable for each node
   std::vector<size_t> split_varIDs;

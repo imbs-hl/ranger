@@ -1,3 +1,6 @@
+##### Version 0.10.4
+* Add inbag argument for manual selection of observations in trees
+
 ##### Version 0.10.3
 * Bug fixes
 
