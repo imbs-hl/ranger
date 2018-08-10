@@ -144,9 +144,9 @@ void Forest::initR(std::string dependent_variable_name, std::unique_ptr<Data> in
     std::vector<std::vector<double>>& split_select_weights, const std::vector<std::string>& always_split_variable_names,
     std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-    std::vector<double>& case_weights, bool predict_all, bool keep_inbag, std::vector<double>& sample_fraction,
-    double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
-    uint max_depth) {
+    std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
+    bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
+    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth) {
 
   this->verbose_out = verbose_out;
 
@@ -172,6 +172,11 @@ void Forest::initR(std::string dependent_variable_name, std::unique_ptr<Data> in
       throw std::runtime_error("Number of case weights not equal to number of samples.");
     }
     this->case_weights = case_weights;
+  }
+
+  // Set manual inbag
+  if (!manual_inbag.empty()) {
+    this->manual_inbag = manual_inbag;
   }
 
   // Keep inbag counts
@@ -250,6 +255,9 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, s
 
   // Init split select weights
   split_select_weights.push_back(std::vector<double>());
+
+  // Init manual inbag
+  manual_inbag.push_back(std::vector<size_t>());
 
   // Check if mtry is in valid range
   if (this->mtry > num_variables - 1) {
@@ -434,10 +442,18 @@ void Forest::grow() {
       tree_split_select_weights = &split_select_weights[0];
     }
 
+    // Get inbag counts for tree
+    std::vector<size_t>* tree_manual_inbag;
+    if (manual_inbag.size() > 1) {
+      tree_manual_inbag = &manual_inbag[i];
+    } else {
+      tree_manual_inbag = &manual_inbag[0];
+    }
+
     trees[i]->init(data.get(), mtry, dependent_varID, num_samples, tree_seed, &deterministic_varIDs,
         &split_select_varIDs, tree_split_select_weights, importance_mode, min_node_size, sample_with_replacement,
-        memory_saving_splitting, splitrule, &case_weights, keep_inbag, &sample_fraction, alpha, minprop, holdout,
-        num_random_splits, max_depth);
+        memory_saving_splitting, splitrule, &case_weights, tree_manual_inbag, keep_inbag, &sample_fraction, alpha,
+        minprop, holdout, num_random_splits, max_depth);
   }
 
 // Init variable importance

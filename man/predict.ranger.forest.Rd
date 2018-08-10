@@ -5,9 +5,9 @@
 \title{Ranger prediction}
 \usage{
 \method{predict}{ranger.forest}(object, data, predict.all = FALSE,
-  num.trees = object$num.trees, type = "response", se.method = "infjack",
-  seed = NULL, num.threads = NULL, verbose = TRUE, inbag.counts = NULL,
-  ...)
+  num.trees = object$num.trees, type = "response",
+  se.method = "infjack", seed = NULL, num.threads = NULL,
+  verbose = TRUE, inbag.counts = NULL, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger.forest} object.}

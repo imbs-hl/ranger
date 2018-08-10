@@ -103,6 +103,7 @@
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
+##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
 ##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
 ##' @param oob.error Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.
@@ -206,7 +207,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
-                   keep.inbag = FALSE, holdout = FALSE,
+                   keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
@@ -535,6 +536,25 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
+  ## Manual inbag selection
+  if (is.null(inbag)) {
+    inbag <- list(c(0,0))
+    use.inbag <- FALSE
+  } else if (is.list(inbag)) {
+    use.inbag <- TRUE
+    if (use.case.weights) {
+      stop("Error: Combination of case.weights and inbag not supported.")
+    }
+    if (length(sample.fraction) > 1) {
+      stop("Error: Combination of class-wise sampling and inbag not supported.")
+    }
+    if (length(inbag) != num.trees) {
+      stop("Error: Size of inbag list not equal to number of trees.")
+    }
+  } else {
+    stop("Error: Invalid inbag, expects list of vectors of size num.trees.")
+  }
+  
   ## Class weights: NULL for no weights (all 1)
   if (is.null(class.weights)) {
     class.weights <- rep(1, nlevels(response))
@@ -738,7 +758,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth)
+                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth, 
+                      inbag, use.inbag)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
