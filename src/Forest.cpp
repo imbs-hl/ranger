@@ -837,14 +837,18 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
   }
 
 // Reserve space
+  size_t num_weights = num_independent_variables;
+  if (importance_mode == IMP_GINI_CORRECTED) {
+    num_weights = 2 * num_independent_variables;
+  }
   if (split_select_weights.size() == 1) {
-    this->split_select_weights[0].resize(num_independent_variables);
+    this->split_select_weights[0].resize(num_weights);
   } else {
     this->split_select_weights.clear();
-    this->split_select_weights.resize(num_trees, std::vector<double>(num_independent_variables));
+    this->split_select_weights.resize(num_trees, std::vector<double>(num_weights));
   }
-  this->split_select_varIDs.resize(num_independent_variables);
-  deterministic_varIDs.reserve(num_independent_variables);
+  this->split_select_varIDs.resize(num_weights);
+  deterministic_varIDs.reserve(num_weights);
 
 // Split up in deterministic and weighted variables, ignore zero weights
   for (size_t i = 0; i < split_select_weights.size(); ++i) {
@@ -880,6 +884,16 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
         } else if (weight < 0 || weight > 1) {
           throw std::runtime_error("One or more split select weights not in range [0,1].");
         }
+      }
+    }
+
+    // Copy weights for corrected impurity importance
+    if (importance_mode == IMP_GINI_CORRECTED) {
+      std::vector<double>* sw = &(this->split_select_weights[i]);
+      std::copy_n(sw->begin(), num_independent_variables, sw->begin() + num_independent_variables);
+
+      for (size_t k = 0; k < num_independent_variables; ++k) {
+        split_select_varIDs[num_independent_variables + k] = num_variables + k;
       }
     }
   }
