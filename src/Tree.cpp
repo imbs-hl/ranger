@@ -247,15 +247,22 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
     num_vars += data->getNumCols() - data->getNoSplitVariables().size();
   }
 
-  // Always use deterministic variables
-  std::copy(deterministic_varIDs->begin(), deterministic_varIDs->end(), std::inserter(result, result.end()));
-
   // Randomly add non-deterministic variables (according to weights if needed)
   if (split_select_weights->empty()) {
-    drawWithoutReplacementSkip(result, random_number_generator, num_vars, data->getNoSplitVariables(), mtry);
+    if (deterministic_varIDs->empty()) {
+      drawWithoutReplacementSkip(result, random_number_generator, num_vars, data->getNoSplitVariables(), mtry);
+    } else {
+      std::vector<size_t> skip;
+      std::copy(data->getNoSplitVariables().begin(), data->getNoSplitVariables().end(), std::inserter(skip, skip.end()));
+      std::copy(deterministic_varIDs->begin(), deterministic_varIDs->end(), std::inserter(skip, skip.end()));
+      drawWithoutReplacementSkip(result, random_number_generator, num_vars, skip, mtry);
+    }
   } else {
     drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, mtry, *split_select_weights);
   }
+
+  // Always use deterministic variables
+  std::copy(deterministic_varIDs->begin(), deterministic_varIDs->end(), std::inserter(result, result.end()));
 }
 
 bool Tree::splitNode(size_t nodeID) {
