@@ -503,9 +503,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 1
   } else if (importance == "impurity_corrected" || importance == "impurity_unbiased") {
     importance.mode <- 5
-    if (!is.null(split.select.weights)) {
-      stop("Corrected impurity importance not supported in combination with split.select.weights.")
-    }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {
       importance.mode <- 2
