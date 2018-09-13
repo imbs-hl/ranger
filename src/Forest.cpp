@@ -930,6 +930,20 @@ void Forest::setAlwaysSplitVariables(const std::vector<std::string>& always_spli
     throw std::runtime_error(
         "Number of variables to be always considered for splitting plus mtry cannot be larger than number of independent variables.");
   }
+
+  // Also add variables for corrected impurity importance
+  if (importance_mode == IMP_GINI_CORRECTED) {
+    size_t num_deterministic_varIDs = deterministic_varIDs.size();
+    for (size_t k = 0; k < num_deterministic_varIDs; ++k) {
+      size_t varID = deterministic_varIDs[k];
+      for (auto& skip : data->getNoSplitVariables()) {
+        if (varID >= skip) {
+          --varID;
+        }
+      }
+      deterministic_varIDs.push_back(varID + num_variables);
+    }
+  }
 }
 
 #ifdef OLD_WIN_R_BUILD
