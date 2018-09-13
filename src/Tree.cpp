@@ -254,10 +254,7 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
   if (split_select_weights->empty()) {
     drawWithoutReplacementSkip(result, random_number_generator, num_vars, data->getNoSplitVariables(), mtry);
   } else {
-    // No corrected Gini importance supported for weighted splitting
-    size_t num_draws = mtry - result.size();
-    drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, num_draws,
-        *split_select_weights);
+    drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, mtry, *split_select_weights);
   }
 }
 
