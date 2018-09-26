@@ -57,6 +57,18 @@ test_that("Error if interaction of factor variable included", {
                "Error: Only numeric columns allowed in interaction terms.")
 })
 
+test_that("Working if dependent variable has attributes other than names", {
+  iris2 <- iris
+  attr(iris2$Sepal.Width, "aaa") <- "bbb"
+  expect_silent(ranger(data = iris2, dependent.variable = "Sepal.Width"))
+})
+
+test_that("Working if dependent variable is matrix with one column", {
+  iris2 <- iris
+  iris2$Sepal.Width = scale(iris$Sepal.Width)
+  expect_silent(ranger(data = iris2, dependent.variable = "Sepal.Width"))
+})
+
 # Tibbles
 # This is failing on Rdevel. Possible without suggesting tibble package?
 # if (requireNamespace("tibble", quietly = TRUE)) {
