@@ -284,7 +284,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       treetype <- 1
     }
-  } else if (is.numeric(response) && is.vector(response)) {
+  } else if (is.numeric(response) && (is.null(ncol(response)) || ncol(response) == 1)) {
     if (!is.null(classification) && classification && !probability) {
       treetype <- 1
     } else if (probability) {
