@@ -480,6 +480,15 @@ void maxstat(const std::vector<double>& scores, const std::vector<double>& x, co
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::vector<size_t>& indices);
 
+/**
+ * Read from stringstream and ignore failbit for subnormal numbers
+ * See: https://bugs.llvm.org/show_bug.cgi?id=39012
+ * @param in Input string stream
+ * @param token Output token
+ * @return Input string stream with removed failbit if subnormal number
+ */
+std::stringstream& readFromStream(std::stringstream& in, double& token);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {
@@ -506,7 +515,7 @@ template<class T, size_t N> struct _Unique_if<T[N]> {
   typedef void _Known_bound;
 };
 
-} // namespace detail 
+} // namespace detail
 
 template<class T, class ... Args>
 typename detail::_Unique_if<T>::_Single_object make_unique(Args&&... args) {
@@ -523,6 +532,6 @@ template<class T, class ... Args>
 typename detail::_Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
 }
- // namespace ranger
+// namespace ranger
 
 #endif /* UTILITY_H_ */
