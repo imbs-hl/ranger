@@ -99,14 +99,17 @@ bool Data::loadFromFileWhitespace(std::ifstream& input_file, std::string header_
     double token;
     std::stringstream line_stream(line);
     size_t column = 0;
-    while (line_stream >> token) {
+    while (readFromStream(line_stream, token)) {
       set(column, row, token, error);
       ++column;
     }
     if (column > num_cols) {
-      throw std::runtime_error("Could not open input file. Too many columns in a row.");
+      throw std::runtime_error(
+          std::string("Could not open input file. Too many columns in row ") + std::to_string(row) + std::string("."));
     } else if (column < num_cols) {
-      throw std::runtime_error("Could not open input file. Too few columns in a row. Are all values numeric?");
+      throw std::runtime_error(
+          std::string("Could not open input file. Too few columns in row ") + std::to_string(row)
+              + std::string(". Are all values numeric?"));
     }
     ++row;
   }
@@ -137,7 +140,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
     size_t column = 0;
     while (getline(line_stream, token_string, seperator)) {
       std::stringstream token_stream(token_string);
-      token_stream >> token;
+      readFromStream(token_stream, token);
       set(column, row, token, error);
       ++column;
     }
