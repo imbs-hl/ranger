@@ -171,7 +171,7 @@
 ##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}. 
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
-##' @useDynLib ranger
+##' @useDynLib ranger, .registration = TRUE
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
 ##' @import utils
