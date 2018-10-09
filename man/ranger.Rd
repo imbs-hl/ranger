@@ -6,9 +6,10 @@
 \usage{
 ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   importance = "none", write.forest = TRUE, probability = FALSE,
-  min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
-  1, 0.632), case.weights = NULL, splitrule = NULL, num.random.splits = 1,
-  alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
+  min.node.size = NULL, replace = TRUE,
+  sample.fraction = ifelse(replace, 1, 0.632), case.weights = NULL,
+  splitrule = NULL, num.random.splits = 1, alpha = 0.5,
+  minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
   holdout = FALSE, num.threads = NULL, save.memory = FALSE,

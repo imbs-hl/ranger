@@ -4,7 +4,8 @@
 \alias{csrf}
 \title{Case-specific random forests.}
 \usage{
-csrf(formula, training_data, test_data, params1 = list(), params2 = list())
+csrf(formula, training_data, test_data, params1 = list(),
+  params2 = list())
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}

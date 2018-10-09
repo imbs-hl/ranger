@@ -800,7 +800,7 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     var_left /= (double) n_left - 1;
 
     // Stop if zero variance
-    if (var_right == 0 || var_left == 0) {
+    if (var_right < std::numeric_limits<double>::epsilon() || var_left < std::numeric_limits<double>::epsilon()) {
       continue;
     }
 
