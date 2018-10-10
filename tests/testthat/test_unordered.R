@@ -110,6 +110,19 @@ test_that("Order splitting working for multiclass probability", {
   expect_true(all(rf$forest$is.ordered))
 })
 
+test_that("Order splitting working with alternative interface", {
+  n <- 20
+  dt <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
+                   y = factor(sample(c("A", "B", "C", "D"), n, replace = TRUE)),
+                   stringsAsFactors = FALSE)
+  
+  rf <- ranger(dependent.variable.name = "y", data = dt, num.trees = 5, respect.unordered.factors = 'order')
+  expect_true(all(rf$forest$is.ordered))
+  
+  rf <- ranger(dependent.variable.name = "y", data = dt, num.trees = 5, respect.unordered.factors = 'order', probability = TRUE)
+  expect_true(all(rf$forest$is.ordered))
+})
+
 test_that("Unordered splitting working for survival", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, min.node.size = 50, respect.unordered.factors = 'partition')
   expect_true(any(!rf$forest$is.ordered))
@@ -117,6 +130,11 @@ test_that("Unordered splitting working for survival", {
 
 test_that("Order splitting working for survival", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, min.node.size = 50, respect.unordered.factors = 'order')
+  expect_true(all(rf$forest$is.ordered))
+})
+
+test_that("Order splitting working for survival with alternative interface", {
+  rf <- ranger(dependent.variable.name = "time", status.variable.name = "status", data = veteran, num.trees = 5, min.node.size = 50, respect.unordered.factors = 'order')
   expect_true(all(rf$forest$is.ordered))
 })
 
