@@ -743,7 +743,7 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Stop if no good split found
-  if (isinf(-best_decrease)) {
+  if (std::isinf(-best_decrease)) {
     return true;
   }
 
@@ -865,7 +865,7 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     double decrease = beta_loglik_right + beta_loglik_left;
 
     // Stop if no result
-    if (isnan(decrease)) {
+    if (std::isnan(decrease)) {
       continue;
     }
 
