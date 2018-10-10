@@ -249,7 +249,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       status.variable.name <- "none"
       response <- data[, dependent.variable.name, drop = TRUE]
     } else {
-      response <- data[, c(dependent.variable.name, status.variable.name)]
+      response <- survival::Surv(data[, dependent.variable.name], data[, status.variable.name]) #data[, c(dependent.variable.name, status.variable.name)]
     }
     data.selected <- data
   } else {
