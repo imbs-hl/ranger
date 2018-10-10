@@ -581,7 +581,6 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::
 
 std::stringstream& readFromStream(std::stringstream& in, double& token) {
   if (!(in >> token) && (std::fpclassify(token) == FP_SUBNORMAL)) {
-    std::cout << "Cleared: " << token << std::endl;
     in.clear();
   }
   return in;
