@@ -21,4 +21,6 @@ test_that("Tree-wise split select weights work", {
 test_that("always split variables work", {
   expect_silent(ranger(Species ~ ., iris, num.trees = 10, 
                        always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
+  expect_silent(ranger(dependent.variable.name = "Species", data = iris, num.trees = 10, 
+                       always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
 })
