@@ -255,6 +255,7 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
       std::vector<size_t> skip;
       std::copy(data->getNoSplitVariables().begin(), data->getNoSplitVariables().end(), std::inserter(skip, skip.end()));
       std::copy(deterministic_varIDs->begin(), deterministic_varIDs->end(), std::inserter(skip, skip.end()));
+      std::sort(skip.begin(), skip.end());
       drawWithoutReplacementSkip(result, random_number_generator, num_vars, skip, mtry);
     }
   } else {
