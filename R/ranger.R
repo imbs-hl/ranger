@@ -161,6 +161,11 @@
 ##' rg.veteran <- ranger(Surv(time, status) ~ ., data = veteran)
 ##' plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 ##'
+##' ## Competing risk forest
+##' require(survival)
+##' data(pbc,package="survival")
+##' rg.pbc <- ranger(Surv(time, status) ~ ., data = pbc)
+##'
 ##' ## Alternative interface
 ##' ranger(dependent.variable.name = "Species", data = iris)
 ##' 
