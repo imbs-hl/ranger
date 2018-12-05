@@ -374,7 +374,7 @@ std::string checkUnorderedVariables(const Data& data, const std::vector<std::str
   for (auto& variable_name : unordered_variable_names) {
     size_t varID = data.getVariableID(variable_name);
     std::vector<double> all_values;
-    data.getAllValues(all_values, sampleIDs, varID);
+    data.getAllValues(all_values, sampleIDs, varID, 0, sampleIDs.size());
 
     // Check level count
     size_t max_level_count = 8 * sizeof(size_t) - 1;
