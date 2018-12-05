@@ -1,3 +1,6 @@
+##### Version 0.10.6
+* Internal changes (slightly improved computation speed)
+
 ##### Version 0.10.5
 * Add support of splitting weights for corrected impurity importance 
 * Bug fixes

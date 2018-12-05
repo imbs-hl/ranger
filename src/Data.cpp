@@ -151,14 +151,14 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
 }
 // #nocov end
 
-void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) const {
+void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const {
 
   // All values for varID (no duplicates) for given sampleIDs
   if (getUnpermutedVarID(varID) < num_cols_no_snp) {
 
-    all_values.reserve(sampleIDs.size());
-    for (size_t i = 0; i < sampleIDs.size(); ++i) {
-      all_values.push_back(get(sampleIDs[i], varID));
+    all_values.reserve(end-start);
+    for (size_t pos = start; pos < end; ++pos) {
+      all_values.push_back(get(sampleIDs[pos], varID));
     }
     std::sort(all_values.begin(), all_values.end());
     all_values.erase(std::unique(all_values.begin(), all_values.end()), all_values.end());
@@ -168,13 +168,14 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
   }
 }
 
-void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID) const {
+// TODO: Better way without two versions?
+void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const {
   if (sampleIDs.size() > 0) {
     min = get(sampleIDs[0], varID);
     max = min;
   }
-  for (size_t i = 1; i < sampleIDs.size(); ++i) {
-    double value = get(sampleIDs[i], varID);
+  for (size_t pos = start; pos < end; ++pos) {
+    double value = get(sampleIDs[pos], varID);
     if (value < min) {
       min = value;
     }
