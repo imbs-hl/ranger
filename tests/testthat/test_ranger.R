@@ -330,4 +330,11 @@ test_that("Meaningful predictions with max.depth = 1", {
   expect_lte(max(pred), max(iris$Sepal.Length))
 })
 
-
+test_that("Does not crash when variable named 'none'", {
+  dat <- data.frame(y = rbinom(100, 1, .5), 
+                    x = rbinom(100, 1, .5), 
+                    none = rbinom(100, 1, .5))
+  rf <- ranger(data = dat, dependent.variable.name = "y")
+  expect_equal(rf$forest$independent.variable.names, c("x", "none"))
+  expect_silent(predict(rf, dat))
+})

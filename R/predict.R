@@ -268,7 +268,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Defaults for variables not needed
-  dependent.variable.name <- "none"
+  dependent.variable.name <- ""
   mtry <- 0
   importance <- 0
   min.node.size <- 0
