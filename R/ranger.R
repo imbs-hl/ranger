@@ -257,7 +257,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (class(formula) != "formula") {
       stop("Error: Invalid formula.")
     }
-    data.selected <- parse.formula(formula, data)
+    data.selected <- parse.formula(formula, data, env = parent.frame())
     response <- data.selected[, 1]
   }
   
