@@ -168,7 +168,6 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
   }
 }
 
-// TODO: Better way without two versions?
 void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const {
   if (sampleIDs.size() > 0) {
     min = get(sampleIDs[0], varID);
