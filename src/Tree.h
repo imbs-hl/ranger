@@ -136,8 +136,12 @@ protected:
   // Vector of left and right child node IDs, 0 for no child
   std::vector<std::vector<size_t>> child_nodeIDs;
 
-  // For each node a vector with IDs of samples in node
-  std::vector<std::vector<size_t>> sampleIDs;
+  // All sampleIDs in the tree, will be re-ordered while splitting
+  std::vector<size_t> sampleIDs;
+
+  // For each node a vector with start and end positions
+  std::vector<size_t> start_pos;
+  std::vector<size_t> end_pos;
 
   // IDs of OOB individuals, sorted
   std::vector<size_t> oob_sampleIDs;
