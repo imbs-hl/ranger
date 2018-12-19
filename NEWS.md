@@ -1,4 +1,6 @@
 ##### Version 0.10.6
+* Internal changes (slightly improved computation speed)
+* Warning: Possible seed differences compared to older versions
 * Bug fixes
 
 ##### Version 0.10.5
