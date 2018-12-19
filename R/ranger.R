@@ -246,7 +246,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Please give formula or dependent variable name.")
     }
     if (is.null(status.variable.name)) {
-      status.variable.name <- "none"
+      status.variable.name <- ""
       response <- data[, dependent.variable.name, drop = TRUE]
     } else {
       response <- survival::Surv(data[, dependent.variable.name], data[, status.variable.name]) #data[, c(dependent.variable.name, status.variable.name)]
@@ -310,7 +310,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       status.variable.name <- dimnames(response)[[2]][2]
     } else {
       dependent.variable.name <- names(data.selected)[1]
-      status.variable.name <- "none"
+      status.variable.name <- ""
     }
     independent.variable.names <- names(data.selected)[-1]
   } else {
