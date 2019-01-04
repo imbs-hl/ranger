@@ -383,7 +383,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
         }
         
         ## Return reordered factor
-        factor(x, levels = levels.ordered, ordered = TRUE)
+        factor(x, levels = levels.ordered, ordered = TRUE, exclude = NULL)
       })
       
       ## Save levels
