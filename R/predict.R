@@ -213,7 +213,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         x
       } else {
         new.levels <- setdiff(levels(x), y)
-        factor(x, levels = c(y, new.levels))
+        factor(x, levels = c(y, new.levels), exclude = NULL)
       }
     }, data.used[, idx.norecode], forest$covariate.levels, SIMPLIFY = !is.data.frame(data.used[, idx.norecode]))
   }
