@@ -228,3 +228,10 @@ test_that("No error if new levels in predict, 2 columns", {
   rf.order <- ranger(y ~ ., data = train, num.trees = 5, respect.unordered.factors = 'order')
   expect_silent(predict(rf.order, test))
 })
+
+test_that("No error if NA factor levels and order", {
+  df <- data.frame(x = addNA(factor(c("a", "a", NA, NA, "b", "b"))),
+                   y = c(1, 2, 3, 4, 5, 6))
+  expect_silent(ranger(dependent.variable.name = "y", data = df, 
+                respect.unordered.factors = "order"))
+})
