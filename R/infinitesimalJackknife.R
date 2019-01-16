@@ -189,7 +189,7 @@ calibrateEB = function(vars, sigma2) {
   
   if (length(vars >= 200)) {
     # If there are many test points, use interpolation to speed up computations
-    calib.x = quantile(vars, q = seq(0, 1, by = 0.02))
+    calib.x = unique(quantile(vars, q = seq(0, 1, by = 0.02)))
     calib.y = sapply(calib.x, function(xx) gbayes(xx, eb.prior, sigma))
     calib.all = approx(x=calib.x, y=calib.y, xout=vars)$y
   } else {
