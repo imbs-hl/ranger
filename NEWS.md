@@ -1,3 +1,6 @@
+##### Version 0.11.0
+* New CRAN version
+
 ##### Version 0.10.6
 * Internal changes (slightly improved computation speed)
 * Warning: Possible seed differences compared to older versions

@@ -1,22 +1,9 @@
-##### Version 0.10.6
+##### Version 0.11.0
+* Add max.depth parameter to limit tree depth
+* Add inbag argument for manual selection of observations in trees
+* Add support of splitting weights for corrected impurity importance 
 * Internal changes (slightly improved computation speed)
 * Warning: Possible seed differences compared to older versions
-* Bug fixes
-
-##### Version 0.10.5
-* Add support of splitting weights for corrected impurity importance 
-* Bug fixes
-
-##### Version 0.10.4
-* Add inbag argument for manual selection of observations in trees
-
-##### Version 0.10.3
-* Bug fixes
-
-##### Version 0.10.2
-* Add max.depth parameter to limit tree depth
-
-##### Version 0.10.1
 * Bug fixes
 
 ##### Version 0.10.0
