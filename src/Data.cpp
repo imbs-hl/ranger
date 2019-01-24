@@ -170,7 +170,7 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
 
 void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const {
   if (sampleIDs.size() > 0) {
-    min = get(sampleIDs[0], varID);
+    min = get(sampleIDs[start], varID);
     max = min;
   }
   for (size_t pos = start; pos < end; ++pos) {

@@ -1,6 +1,7 @@
 library(ranger)
 library(survival)
 library(Matrix)
+library(methods)
 context("ranger_sparse")
 
 ## Iris sparse data
