@@ -2,6 +2,7 @@
 
 library(ranger)
 library(survival)
+library(methods)
 context("ranger_jackknife")
 
 test_that("jackknife standard error prediction working for regression", {
