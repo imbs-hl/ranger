@@ -129,37 +129,6 @@ test_that("standard error response prediction is the same as response prediction
   expect_equal(pred_se$predictions, pred_resp$predictions)
 })
 
-test_that("standard error is larger for fewer trees, regression", {
-  idx <- sample(nrow(iris), 25)
-  test <- iris[idx, ]
-  train <- iris[-idx, ]
-  
-  rf5 <- ranger(Petal.Length ~ ., train, num.trees = 5, keep.inbag = TRUE)
-  pred5_jack <- predict(rf5, test, type = "se", se.method = "jack")
-  pred5_ij <- predict(rf5, test, type = "se", se.method = "infjack")
-  
-  rf50 <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
-  pred50_jack <- predict(rf50, test, type = "se", se.method = "jack")
-  pred50_ij <- predict(rf50, test, type = "se", se.method = "infjack")
-  
-  expect_lt(mean(pred50_jack$se), mean(pred5_jack$se))
-  expect_lt(mean(pred50_ij$se), mean(pred5_ij$se))
-})
-
-test_that("standard error is larger for fewer trees, probability", {
-  idx <- sample(nrow(iris), 25)
-  test <- iris[idx, ]
-  train <- iris[-idx, ]
-  
-  rf5 <- ranger(Species ~ ., train, num.trees = 5, keep.inbag = TRUE, probability = TRUE)
-  pred5 <- predict(rf5, test, type = "se", se.method = "infjack")
-  
-  rf50 <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
-  pred50 <- predict(rf50, test, type = "se", se.method = "infjack")
-  
-  expect_lt(mean(pred50$se), mean(pred5$se))
-})
-
 test_that("Warning for few observations with IJ", {
   idx <- sample(nrow(iris), 10)
   test <- iris[idx, ]
