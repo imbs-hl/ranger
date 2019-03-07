@@ -1,3 +1,6 @@
+##### Version 0.11.2
+* Bug fixes
+
 ##### Version 0.11.1
 * Bug fixes
 
