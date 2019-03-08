@@ -338,7 +338,10 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         result$predictions <- array(result$predictions, dim = c(1, length(result$predictions)))
       }
     } else {
-      ## TODO: Better solution for this?
+      if (is.list(result$predictions) & length(result$predictions) >= 1 & is.numeric(result$predictions[[1]])) {
+        # Fix for single test observation
+        result$predictions <- list(result$predictions)
+      }
       result$predictions <- aperm(array(unlist(result$predictions), 
                                         dim = rev(c(length(result$predictions), 
                                                     length(result$predictions[[1]]), 
@@ -441,6 +444,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       ## Set colnames and sort by levels
       colnames(result$predictions) <- forest$levels[forest$class.values]
       result$predictions <- result$predictions[, forest$levels, drop = FALSE]
+      
+      if (!is.matrix(result$se)) {
+        result$se <- matrix(result$se, ncol = length(forest$levels))
+      }
+      colnames(result$se) <- forest$levels[forest$class.values]
+      result$se <- result$se[, forest$levels, drop = FALSE]
     }
   }
 
