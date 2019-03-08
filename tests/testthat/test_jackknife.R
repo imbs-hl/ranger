@@ -169,3 +169,29 @@ test_that("No error for se estimation for many observations", {
   rf <- ranger(y ~ x, dat, num.trees = 2, keep.inbag = TRUE)
   expect_silent(predict(rf, dat, type = "se", se.method = "infjack"))
 })
+
+test_that("Standard error prediction working for single observation, regression", {
+  test <- iris[1, , drop = FALSE]
+  train <- iris[-1, ]
+  
+  rf <- ranger(Petal.Length ~ ., train, num.trees = 5, keep.inbag = TRUE)
+  
+  # Jackknife
+  pred <- predict(rf, test, type = "se", se.method = "jack")
+  expect_length(pred$se, 1)
+  
+  # IJ
+  pred <- expect_warning(predict(rf, test, type = "se", se.method = "infjack"))
+  expect_length(pred$se, 1)
+})
+
+test_that("Standard error prediction working for single observation, probability", {
+  test <- iris[134, , drop = FALSE]
+  train <- iris[-134, ]
+  
+  rf <- ranger(Species ~ ., train, num.trees = 5, keep.inbag = TRUE, probability = TRUE)
+  
+  # IJ
+  pred <- expect_warning(predict(rf, test, type = "se", se.method = "infjack"))
+  expect_equal(dim(pred$se), c(1, 3))
+})

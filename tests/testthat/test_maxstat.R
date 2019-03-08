@@ -36,7 +36,7 @@ test_that("maxstat impurity importance is positive", {
 })
 
 test_that("maxstat corrected impurity importance is positive (on average)", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, 
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 50, 
                splitrule = "maxstat", importance = "impurity_corrected")
   expect_gt(mean(rf$variable.importance), 0)
   
