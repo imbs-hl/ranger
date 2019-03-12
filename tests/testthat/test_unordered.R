@@ -123,6 +123,43 @@ test_that("Order splitting working with alternative interface", {
   expect_true(all(rf$forest$is.ordered))
 })
 
+test_that("Order splitting working with single level factor", {
+  n <- 20
+  
+  # Binary classification
+  dt_class <- data.frame(x = sample(c("A"), n, replace = TRUE), 
+                         y = factor(sample(c("A", "B"), n, replace = TRUE)),
+                         stringsAsFactors = FALSE)
+  expect_silent(ranger(y ~ ., data = dt_class, num.trees = 5, 
+                       respect.unordered.factors = 'order', probability = FALSE))
+  expect_silent(ranger(y ~ ., data = dt_class, num.trees = 5, 
+                       respect.unordered.factors = 'order', probability = TRUE))
+  
+  # Multiclass classification
+  dt_mult <- data.frame(x = sample(c("A"), n, replace = TRUE), 
+                        y = factor(sample(c("A", "B", "C", "D"), n, replace = TRUE)),
+                        stringsAsFactors = FALSE)
+  expect_silent(ranger(y ~ ., data = dt_class, num.trees = 5, 
+                       respect.unordered.factors = 'order', probability = FALSE))
+  expect_silent(ranger(y ~ ., data = dt_class, num.trees = 5, 
+                       respect.unordered.factors = 'order', probability = TRUE))
+  
+  # Regression
+  dt_cont <- data.frame(x = sample(c("A"), n, replace = TRUE), 
+                        y = rnorm(n),
+                        stringsAsFactors = FALSE)
+  expect_silent(ranger(y ~ ., data = dt_cont, num.trees = 5, 
+                       respect.unordered.factors = 'order'))
+  
+  # Survival
+  dt_surv <- data.frame(x = sample(c("A"), n, replace = TRUE), 
+                        time = rnorm(n),
+                        status = rbinom(n, 1, .5),
+                        stringsAsFactors = FALSE)
+  expect_silent(ranger(Surv(time, status) ~ ., data = dt_surv, num.trees = 5, 
+                       respect.unordered.factors = 'order'))
+})
+
 test_that("Unordered splitting working for survival", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, min.node.size = 50, respect.unordered.factors = 'partition')
   expect_true(any(!rf$forest$is.ordered))
