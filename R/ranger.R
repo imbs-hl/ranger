@@ -365,7 +365,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           x <- as.factor(x)
         } 
         
-        if ("Surv" %in% class(response)) {
+        if (length(levels(x)) == 1) {
+          ## Don't order if only one level
+          levels.ordered <- levels(x)
+        } else if ("Surv" %in% class(response)) {
           ## Use median survival if available or largest quantile available in all strata if median not available
           levels.ordered <- largest.quantile(response ~ x)
           
