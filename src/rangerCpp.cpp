@@ -59,7 +59,8 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     bool use_case_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_data, bool use_sparse_data, bool order_snps, 
-    bool oob_error, uint max_depth, std::vector<std::vector<size_t>>& inbag, bool use_inbag) {
+		     bool oob_error, uint max_depth, std::vector<std::vector<size_t>>& inbag, bool use_inbag,uint cause,
+		     double time_interest) {
 
   Rcpp::List result;
 
@@ -148,7 +149,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
-        order_snps, max_depth);
+		  order_snps, max_depth);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {
@@ -189,6 +190,11 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       } else if (treetype == TREE_PROBABILITY && !class_weights.empty()) {
         auto& temp = dynamic_cast<ForestProbability&>(*forest);
         temp.setClassWeights(class_weights);
+      }
+      if (treetype == TREE_SURVIVAL) {
+        auto& temp = dynamic_cast<ForestSurvival&>(*forest);
+        temp.setTimeInterest(time_interest);
+        temp.setCause(cause);
       }
     }
 

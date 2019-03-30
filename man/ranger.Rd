@@ -16,7 +16,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   inbag = NULL, holdout = FALSE, quantreg = FALSE,
   oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
   verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  status.variable.name = NULL, cause = 1, time.interest = "random",
+  classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -82,6 +83,10 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
+
+\item{cause}{Numeric. Default is \code{1}. The cause of interest. Competing risk case only.}
+
+\item{time.interest}{For \code{splitrule="brier"} the prediction horizon.}
 
 \item{classification}{Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.}
 }
@@ -192,8 +197,9 @@ plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 
 ## Competing risk forest
 require(survival)
+require(prodlim)
 data(pbc,package="survival")
-rg.pbc <- ranger(Surv(time, status) ~ ., data = pbc)
+rg.pbc <- ranger(Hist(time, status) ~ ., data = pbc)
 
 ## Alternative interface
 ranger(dependent.variable.name = "Species", data = iris)

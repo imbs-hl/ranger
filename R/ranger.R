@@ -113,6 +113,8 @@
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
+##' @param cause Numeric. Default is \code{1}. The cause of interest. Competing risk case only.
+##' @param time.interest For \code{splitrule="brier"} the prediction horizon.
 ##' @param classification Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
@@ -163,8 +165,9 @@
 ##'
 ##' ## Competing risk forest
 ##' require(survival)
+##' require(prodlim)
 ##' data(pbc,package="survival")
-##' rg.pbc <- ranger(Surv(time, status) ~ ., data = pbc)
+##' rg.pbc <- ranger(Hist(time, status) ~ ., data = pbc)
 ##'
 ##' ## Alternative interface
 ##' ranger(dependent.variable.name = "Species", data = iris)
@@ -216,7 +219,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
-                   dependent.variable.name = NULL, status.variable.name = NULL, 
+                   dependent.variable.name = NULL, status.variable.name = NULL,
+                   cause=1, time.interest="random",
                    classification = NULL) {
   
   ## GenABEL GWA data
@@ -245,26 +249,39 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
     
-  ## Formula interface. Use whole data frame is no formula provided and depvarname given
-  if (is.null(formula)) {
-    if (is.null(dependent.variable.name)) {
-      stop("Error: Please give formula or dependent variable name.")
-    }
-    if (is.null(status.variable.name)) {
-      status.variable.name <- "none"
-      response <- data[, dependent.variable.name, drop = TRUE]
+    ## Formula interface. Use whole data frame if no formula provided and depvarname given
+    if (is.null(formula)) {
+        if (is.null(dependent.variable.name)) {
+            stop("Error: Please provide a formula or specify the name of the dependent variable.")
+        }
+        if (is.null(status.variable.name)) {
+            status.variable.name <- "none"
+            comp.risk <- FALSE
+            response <- data[[dependent.variable.name]]
+        } else {
+            states <- unique(data[[status.variable.name]])
+            nstates <- length(states)
+            censored <- 0 %in% states
+            if ((nstates<=2 && censored) || (nstates<=1 && !censored)){ ## two-state survival
+                comp.risk <- FALSE
+            }else{ ## (nstates==2 && !censored) || nstates>2
+                ## competing risks
+                ## assume that 0 is cens.code
+                message("Competing risks: assume that 0 is cens.code and 1 is cause of interest.")
+                comp.risk <- TRUE
+            }
+            response <- cbind(data[[dependent.variable.name]], data[[status.variable.name]])
+            names(response) <- c(dependent.variable.name,status.variable.name)
+        }
+        data.selected <- data
     } else {
-      response <- survival::Surv(data[, dependent.variable.name], data[, status.variable.name]) #data[, c(dependent.variable.name, status.variable.name)]
+        formula <- formula(formula)
+        if (class(formula) != "formula") {
+            stop("Error: Invalid formula.")
+        }
+        data.selected <- parse.formula(formula, data)
+        response <- data.selected[, 1]
     }
-    data.selected <- data
-  } else {
-    formula <- formula(formula)
-    if (class(formula) != "formula") {
-      stop("Error: Invalid formula.")
-    }
-    data.selected <- parse.formula(formula, data)
-    response <- data.selected[, 1]
-  }
   
   ## Check missing values
   if (any(is.na(data.selected))) {
@@ -606,57 +623,64 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Please use only one option of split.select.weights and always.split.variables.")
   }
   
-  ## Splitting rule
-  if (is.null(splitrule)) {
-    if (treetype == 5) {
-      splitrule <- "logrank"
-    } else if (treetype == 3) {
-      splitrule <- "variance"
-    } else if (treetype %in% c(1, 9)) {
-      splitrule <- "gini"
-    }
-    splitrule.num <- 1
-  } else if (splitrule == "logrank") {
-    if (treetype == 5) {
-      splitrule.num <- 1
+    ## Splitting rule
+    if (is.null(splitrule)) {
+        if (treetype == 5) {
+            splitrule <- "logrank"
+        } else if (treetype == 3) {
+            splitrule <- "variance"
+        } else if (treetype %in% c(1, 9)) {
+            splitrule <- "gini"
+        }
+        splitrule.num <- 1
+    } else if (splitrule == "logrank") {
+        if (treetype == 5) {
+            splitrule.num <- 1
+        } else {
+            stop("Error: logrank splitrule applicable to survival data only.")
+        }
+    } else if (splitrule == "gini") {
+        if (treetype %in% c(1, 9)) {
+            splitrule.num <- 1
+        } else {
+            stop("Error: Gini splitrule applicable to classification data only.")
+        }
+    } else if (splitrule == "variance") {
+        if (treetype == 3) {
+            splitrule.num <- 1
+        } else {
+            stop("Error: variance splitrule applicable to regression data only.")
+        }
+    } else if (splitrule == "brier") {
+        if (time.interest=="random") time.interest <- -1
+        if (treetype == 5) {
+            splitrule.num <- 6
+        } else {
+            stop("Error: Brier score splitrule applicable to survival data only.")
+        }
+    } else if (splitrule == "auc" || splitrule == "C") {
+        if (treetype == 5) {
+            splitrule.num <- 2
+        } else {
+            stop("Error: C index splitrule applicable to survival data only.")
+        }
+    } else if (splitrule == "auc_ignore_ties" || splitrule == "C_ignore_ties") {
+        if (treetype == 5) {
+            splitrule.num <- 3
+        } else {
+            stop("Error: C index splitrule applicable to survival data only.")
+        }
+    } else if (splitrule == "maxstat") {
+        if (treetype == 5 || treetype == 3) {
+            splitrule.num <- 4
+        } else {
+            stop("Error: maxstat splitrule applicable to regression or survival data only.")
+        }
+    } else if (splitrule == "extratrees") {
+        splitrule.num <- 5
     } else {
-      stop("Error: logrank splitrule applicable to survival data only.")
+        stop("Error: Unknown splitrule.")
     }
-  } else if (splitrule == "gini") {
-    if (treetype %in% c(1, 9)) {
-      splitrule.num <- 1
-    } else {
-      stop("Error: Gini splitrule applicable to classification data only.")
-    }
-  } else if (splitrule == "variance") {
-    if (treetype == 3) {
-      splitrule.num <- 1
-    } else {
-      stop("Error: variance splitrule applicable to regression data only.")
-    }
-  } else if (splitrule == "auc" || splitrule == "C") {
-    if (treetype == 5) {
-      splitrule.num <- 2
-    } else {
-      stop("Error: C index splitrule applicable to survival data only.")
-    }
-  } else if (splitrule == "auc_ignore_ties" || splitrule == "C_ignore_ties") {
-    if (treetype == 5) {
-      splitrule.num <- 3
-    } else {
-      stop("Error: C index splitrule applicable to survival data only.")
-    }
-  } else if (splitrule == "maxstat") {
-    if (treetype == 5 || treetype == 3) {
-      splitrule.num <- 4
-    } else {
-      stop("Error: maxstat splitrule applicable to regression or survival data only.")
-    }
-  } else if (splitrule == "extratrees") {
-    splitrule.num <- 5
-  } else {
-    stop("Error: Unknown splitrule.")
-  }
   
   ## Maxstat splitting
   if (alpha < 0 || alpha > 1) {
@@ -751,7 +775,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Clean up
   rm("data.selected")
 
-  ## Call Ranger
+    ## Call Ranger
   result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
                       min.node.size, split.select.weights, use.split.select.weights,
@@ -761,7 +785,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag)
+                      inbag, use.inbag,cause,time.interest)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

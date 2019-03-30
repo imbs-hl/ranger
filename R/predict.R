@@ -320,7 +320,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
                       prediction.type, num.random.splits, sparse.data, use.sparse.data,
-                      order.snps, oob.error, max.depth, inbag, use.inbag)
+                      order.snps, oob.error, max.depth, inbag, use.inbag,0,0)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

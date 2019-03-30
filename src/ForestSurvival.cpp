@@ -84,7 +84,6 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
   for (auto& t : unique_timepoint_set) {
     unique_timepoints.push_back(t);
   }
-
   // Create response_timepointIDs
   if (!prediction_mode) {
     for (size_t i = 0; i < num_samples; ++i) {
@@ -105,7 +104,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
 void ForestSurvival::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, status_varID, &response_timepointIDs));
+    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, status_varID, &response_timepointIDs, cause, time_interest_index));
   }
 }
 

@@ -21,7 +21,7 @@ namespace ranger {
 
 class TreeSurvival: public Tree {
 public:
-  TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID, std::vector<size_t>* response_timepointIDs);
+  TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID, std::vector<size_t>* response_timepointIDs,uint cause,size_t time_interest_index);
 
   // Create from loaded forest
   TreeSurvival(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -73,6 +73,20 @@ private:
       std::vector<size_t>& num_samples_right_child, std::vector<size_t>& num_samples_at_risk_right_child,
       std::vector<size_t>& num_deaths_right_child, size_t num_splits);
 
+  void computeAllChildrenEventCounts(size_t nodeID,
+				     size_t varID,
+				     std::vector<double>& possible_split_values,
+				     std::vector<size_t>& num_samples_right_child,
+				     std::vector<size_t>& delta_samples_at_risk_right_child,
+				     std::vector<size_t>& delta_samples_at_risk_left_child,
+				     std::vector<size_t>& num_events_right_child,
+				     std::vector<size_t>& num_events_left_child,
+				     size_t num_splits);
+  void findBestSplitValueBrier(size_t nodeID,
+			       size_t varID,
+			       double& best_value,
+			       size_t& best_varID,
+			       double& best_brier);
   void computeAucSplit(double time_k, double time_l, double status_k, double status_l, double value_k, double value_l,
       size_t num_splits, std::vector<double>& possible_split_values, std::vector<double>& num_count,
       std::vector<double>& num_total);
@@ -110,6 +124,9 @@ private:
   // Fields to save to while tree growing
   std::vector<size_t> num_deaths;
   std::vector<size_t> num_samples_at_risk;
+
+  uint cause;
+  size_t time_interest_index;
 };
 
 } // namespace ranger

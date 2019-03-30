@@ -44,7 +44,23 @@ public:
   const std::vector<double>& getUniqueTimepoints() const {
     return unique_timepoints;
   }
+  void setCause(uint cause){
+      this->cause=cause;
+  }
+  void setTimeInterest(double time_interest){
+    if (time_interest>=0){
+      for (size_t t = 0; t < unique_timepoints.size(); ++t) {
+	if (unique_timepoints[t]>time_interest){
+	  time_interest_index=t;
+	  break;
+	}
+      }
+    }else{
+      time_interest_index=0;
+    }
+  }
 
+  
 private:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;
@@ -60,6 +76,8 @@ private:
   size_t status_varID;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
+  uint cause;
+  size_t time_interest_index;
 
 private:
   const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;

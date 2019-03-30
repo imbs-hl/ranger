@@ -11,7 +11,6 @@
 parse.formula <- function(formula, data) {
   f <- as.formula(formula)
   t <- terms(f, data = data)
-  
   ## Get dependent var(s)
   response <- data.frame(eval(f[[2]], envir = data))
   colnames(response) <- deparse(f[[2]])
