@@ -619,10 +619,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     use.always.split.variables <- TRUE
   }
   
-  if (use.split.select.weights && use.always.split.variables) {
-    stop("Error: Please use only one option of split.select.weights and always.split.variables.")
-  }
-  
+    if (use.split.select.weights && use.always.split.variables) {
+        stop("Error: Please use only one option of split.select.weights and always.split.variables.")
+    }
+    if (time.interest=="random") time.interest <- -1
     ## Splitting rule
     if (is.null(splitrule)) {
         if (treetype == 5) {
@@ -681,7 +681,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
         stop("Error: Unknown splitrule.")
     }
-  
+    
   ## Maxstat splitting
   if (alpha < 0 || alpha > 1) {
     stop("Error: Invalid value for alpha, please give a value between 0 and 1.")
