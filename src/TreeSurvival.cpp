@@ -302,35 +302,6 @@ void TreeSurvival::computeDeathCounts(size_t nodeID) {
   }
 }
 
-void TreeSurvival::computeAllChildrenEventCounts(size_t nodeID, size_t varID,
-    std::vector<double>& possible_split_values, std::vector<size_t>& num_samples_right_child,
-    std::vector<size_t>& delta_samples_at_risk_right_child, std::vector<size_t>& delta_samples_at_risk_left_child,
-    std::vector<size_t>& num_events_right_child, std::vector<size_t>& num_events_left_child, size_t num_splits) {
-
-  // Count events in right child per timepoint and possbile split
-  for (auto& sampleID : sampleIDs[nodeID]) {
-    double value = data->get(sampleID, varID);
-    size_t survival_timeID = (*response_timepointIDs)[sampleID];
-
-    // Count events until split_value reached
-    for (size_t i = 0; i < num_splits; ++i) {
-
-      if (value > possible_split_values[i]) {
-        ++num_samples_right_child[i];
-        ++delta_samples_at_risk_right_child[i * num_timepoints + survival_timeID];
-        if (data->get(sampleID, status_varID) == 1) {
-          ++num_events_right_child[i * num_timepoints + survival_timeID];
-        }
-      } else {
-        ++delta_samples_at_risk_left_child[i * num_timepoints + survival_timeID];
-        if (data->get(sampleID, status_varID) == 1) {
-          ++num_events_left_child[i * num_timepoints + survival_timeID];
-        }
-      }
-    }
-  }
-}
-
 void TreeSurvival::computeChildDeathCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
     std::vector<size_t>& num_samples_right_child, std::vector<size_t>& delta_samples_at_risk_right_child,
     std::vector<size_t>& num_deaths_right_child, size_t num_splits) {
@@ -356,165 +327,30 @@ void TreeSurvival::computeChildDeathCounts(size_t nodeID, size_t varID, std::vec
   }
 }
 
-void TreeSurvival::findBestSplitValueLogRankCR(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
-    double& best_logrank) {
-
-  // Create possible split values
-  std::vector<double> possible_split_values;
-  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
-
-  // Try next variable if all equal for this
-  if (possible_split_values.size() < 2) {
-    return;
-  }
-
-  // -1 because no split possible at largest value
-  size_t num_splits = possible_split_values.size() - 1;
-
-  // Initialize
-  std::vector<size_t> num_deaths_right_child(num_splits * num_timepoints);
-  std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
-  std::vector<size_t> num_samples_right_child(num_splits);
-
-  computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
-      delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
-
-  // Compute logrank test for all splits and use best
-  for (size_t i = 0; i < num_splits; ++i) {
-    double numerator = 0;
-    double denominator_squared = 0;
-
-    // Stop if minimal node size reached
-    size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
-    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
-      continue;
-    }
-
-    // Compute logrank test statistic for this split
-    size_t num_samples_at_risk_right_child = num_samples_right_child[i];
-    for (size_t t = 0; t < num_timepoints; ++t) {
-      // MARVIN: Wo kommt num_samples_at_risk her? Büffelherde. Wir müssen die subjects mit competing risks wieder reintun
-      // (also für immer unter risiko halten, siehe Ishwaran et al. (Biostatistics, 15(4):757--773, 2014. seite 6 mitte)
-      if (num_samples_at_risk[t] < 2 || num_samples_at_risk_right_child < 1) {
-        break;
-      }
-
-      if (num_deaths[t] > 0) {
-        // Numerator and demoninator for log-rank test, notation from Ishwaran et al.
-        double di = (double) num_deaths[t];
-        double di1 = (double) num_deaths_right_child[i * num_timepoints + t];
-        double Yi = (double) num_samples_at_risk[t];
-        double Yi1 = (double) num_samples_at_risk_right_child;
-        numerator += di1 - Yi1 * (di / Yi);
-        denominator_squared += (Yi1 / Yi) * (1.0 - Yi1 / Yi) * ((Yi - di) / (Yi - 1)) * di;
-      }
-
-      // Reduce number of samples at risk for next timepoint
-      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
-
-    }
-    double logrank = -1;
-    if (denominator_squared != 0) {
-      logrank = fabs(numerator / sqrt(denominator_squared));
-    }
-
-    if (logrank > best_logrank) {
-      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
-      best_varID = varID;
-      best_logrank = logrank;
-
-      // Use smaller value if average is numerically the same as the larger value
-      if (best_value == possible_split_values[i + 1]) {
-        best_value = possible_split_values[i];
-      }
-    }
-  }
-}
-
-void TreeSurvival::findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
-    double& best_brier) {
-
-  // Create possible split values
-  std::vector<double> possible_split_values;
-  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
-
-  // Try next variable if all equal for this
-  if (possible_split_values.size() < 2) {
-    return; // best split does not change
-  }
-
-  // -1 because no split possible at largest value
-  size_t num_splits = possible_split_values.size() - 1;
-
-  // -----------
-  // unique timepoints do not necessarily include zero!!!
-  // num_events_right_child            = number of events at unique time points (event and censored) for each possible split
-  // delta_samples_at_risk_right_child = number of subjects that leave the at risk set compared to previous time point
-  // num_samples_right_child = how many subjects would be in right child
-  // -----------
-
-  // Initialize
-  std::vector<size_t> num_events_right_child(num_splits * num_timepoints);
-  std::vector<size_t> num_events_left_child(num_splits * num_timepoints);
-  std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
-  std::vector<size_t> delta_samples_at_risk_left_child(num_splits * num_timepoints);
-  std::vector<size_t> num_samples_right_child(num_splits);
-
-  computeAllChildrenEventCounts(nodeID, varID, possible_split_values, num_samples_right_child,
-      delta_samples_at_risk_right_child, delta_samples_at_risk_left_child, num_events_right_child,
-      num_events_left_child, num_splits);
-
-  // Compute brier test for all possible splits and use best
-  for (size_t i = 0; i < num_splits; ++i) {
-
-    // Stop if minimal node size reached
-    size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
-
-    // move to next possible split
-    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
-      continue;
-    }
-
-    // Compute brier test statistic for this split
-
-    // Initialize total number at risk in right child with the total number of subjects in right child
-    size_t num_samples_at_risk_right_child = num_samples_right_child[i];
-
-    double km1 = 1;
-    double km2 = 1;
-
-    for (size_t t = 0; t < time_interest_index; ++t) {
-      size_t num_samples_at_risk_left_child = (num_samples_at_risk[t] - num_samples_at_risk_right_child);
-      if (num_samples_at_risk[t]) {
-        break;
-      }
-      if (num_samples_at_risk_right_child > 0) {
-        if (num_events_right_child[i * num_timepoints + t] > 0) {
-          // Kaplan-Meier in right child 
-          km1 *= (1 - (double) num_events_right_child[i * num_timepoints + t] / (double) num_samples_at_risk_right_child);
+void TreeSurvival::computeAllChildrenEventCounts(size_t nodeID, size_t varID,
+                                                 std::vector<double>& possible_split_values, std::vector<size_t>& num_samples_right_child,
+                                                 std::vector<size_t>& delta_samples_at_risk_right_child, std::vector<size_t>& delta_samples_at_risk_left_child,
+                                                 std::vector<size_t>& num_events_right_child, std::vector<size_t>& num_events_left_child, size_t num_splits) {
+  
+  // Count events in right child per timepoint and possbile split
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    double value = data->get(sampleID, varID);
+    size_t survival_timeID = (*response_timepointIDs)[sampleID];
+    
+    // Count events until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+      
+      if (value > possible_split_values[i]) {
+        ++num_samples_right_child[i];
+        ++delta_samples_at_risk_right_child[i * num_timepoints + survival_timeID];
+        if (data->get(sampleID, status_varID) == 1) {
+          ++num_events_right_child[i * num_timepoints + survival_timeID];
         }
-      }
-      if (num_samples_at_risk_left_child > 0) {
-        if (num_events_left_child[i * num_timepoints + t] > 0) {
-          // Kaplan-Meier in left child 
-          km2 *= (1 - (double) num_events_left_child[i * num_timepoints + t] / (double) num_samples_at_risk_left_child);
+      } else {
+        ++delta_samples_at_risk_left_child[i * num_timepoints + survival_timeID];
+        if (data->get(sampleID, status_varID) == 1) {
+          ++num_events_left_child[i * num_timepoints + survival_timeID];
         }
-      }
-      // std::cout << "t=" << t << " km1=" << km1 << " km2=" << km2 << std::endl;
-      // Reduce number of samples at risk for next timepoint
-      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
-      num_samples_at_risk_left_child -= delta_samples_at_risk_left_child[i * num_timepoints + t];
-    }
-    double brier = km1 * (1 - km1) + km2 * (1 - km2);
-    // Rprintf("brier=%1.2f\n",brier);
-    if (brier < best_brier || best_brier < 0) {
-      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
-      best_varID = varID;
-      best_brier = brier;
-
-      // Use smaller value if average is numerically the same as the larger value
-      if (best_value == possible_split_values[i + 1]) {
-        best_value = possible_split_values[i];
       }
     }
   }
@@ -683,6 +519,170 @@ void TreeSurvival::findBestSplitValueLogRankUnordered(size_t nodeID, size_t varI
       best_value = splitID;
       best_varID = varID;
       best_logrank = logrank;
+    }
+  }
+}
+
+void TreeSurvival::findBestSplitValueLogRankCR(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
+                                               double& best_logrank) {
+  
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+  
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return;
+  }
+  
+  // -1 because no split possible at largest value
+  size_t num_splits = possible_split_values.size() - 1;
+  
+  // Initialize
+  std::vector<size_t> num_deaths_right_child(num_splits * num_timepoints);
+  std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
+  std::vector<size_t> num_samples_right_child(num_splits);
+  
+  computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
+                          delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
+  
+  // Compute logrank test for all splits and use best
+  for (size_t i = 0; i < num_splits; ++i) {
+    double numerator = 0;
+    double denominator_squared = 0;
+    
+    // Stop if minimal node size reached
+    size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
+    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
+      continue;
+    }
+    
+    // Compute logrank test statistic for this split
+    size_t num_samples_at_risk_right_child = num_samples_right_child[i];
+    for (size_t t = 0; t < num_timepoints; ++t) {
+      // MARVIN: Wo kommt num_samples_at_risk her? Büffelherde. Wir müssen die subjects mit competing risks wieder reintun
+      // (also für immer unter risiko halten, siehe Ishwaran et al. (Biostatistics, 15(4):757--773, 2014. seite 6 mitte)
+      if (num_samples_at_risk[t] < 2 || num_samples_at_risk_right_child < 1) {
+        break;
+      }
+      
+      if (num_deaths[t] > 0) {
+        // Numerator and demoninator for log-rank test, notation from Ishwaran et al.
+        double di = (double) num_deaths[t];
+        double di1 = (double) num_deaths_right_child[i * num_timepoints + t];
+        double Yi = (double) num_samples_at_risk[t];
+        double Yi1 = (double) num_samples_at_risk_right_child;
+        numerator += di1 - Yi1 * (di / Yi);
+        denominator_squared += (Yi1 / Yi) * (1.0 - Yi1 / Yi) * ((Yi - di) / (Yi - 1)) * di;
+      }
+      
+      // Reduce number of samples at risk for next timepoint
+      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
+      
+    }
+    double logrank = -1;
+    if (denominator_squared != 0) {
+      logrank = fabs(numerator / sqrt(denominator_squared));
+    }
+    
+    if (logrank > best_logrank) {
+      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
+      best_varID = varID;
+      best_logrank = logrank;
+      
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == possible_split_values[i + 1]) {
+        best_value = possible_split_values[i];
+      }
+    }
+  }
+}
+
+void TreeSurvival::findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
+                                           double& best_brier) {
+  
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
+  
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return; // best split does not change
+  }
+  
+  // -1 because no split possible at largest value
+  size_t num_splits = possible_split_values.size() - 1;
+  
+  // -----------
+  // unique timepoints do not necessarily include zero!!!
+  // num_events_right_child            = number of events at unique time points (event and censored) for each possible split
+  // delta_samples_at_risk_right_child = number of subjects that leave the at risk set compared to previous time point
+  // num_samples_right_child = how many subjects would be in right child
+  // -----------
+  
+  // Initialize
+  std::vector<size_t> num_events_right_child(num_splits * num_timepoints);
+  std::vector<size_t> num_events_left_child(num_splits * num_timepoints);
+  std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
+  std::vector<size_t> delta_samples_at_risk_left_child(num_splits * num_timepoints);
+  std::vector<size_t> num_samples_right_child(num_splits);
+  
+  computeAllChildrenEventCounts(nodeID, varID, possible_split_values, num_samples_right_child,
+                                delta_samples_at_risk_right_child, delta_samples_at_risk_left_child, num_events_right_child,
+                                num_events_left_child, num_splits);
+  
+  // Compute brier test for all possible splits and use best
+  for (size_t i = 0; i < num_splits; ++i) {
+    
+    // Stop if minimal node size reached
+    size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
+    
+    // move to next possible split
+    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
+      continue;
+    }
+    
+    // Compute brier test statistic for this split
+    
+    // Initialize total number at risk in right child with the total number of subjects in right child
+    size_t num_samples_at_risk_right_child = num_samples_right_child[i];
+    
+    double km1 = 1;
+    double km2 = 1;
+    
+    for (size_t t = 0; t < time_interest_index; ++t) {
+      size_t num_samples_at_risk_left_child = (num_samples_at_risk[t] - num_samples_at_risk_right_child);
+      if (num_samples_at_risk[t]) {
+        break;
+      }
+      if (num_samples_at_risk_right_child > 0) {
+        if (num_events_right_child[i * num_timepoints + t] > 0) {
+          // Kaplan-Meier in right child 
+          km1 *= (1 - (double) num_events_right_child[i * num_timepoints + t] / (double) num_samples_at_risk_right_child);
+        }
+      }
+      if (num_samples_at_risk_left_child > 0) {
+        if (num_events_left_child[i * num_timepoints + t] > 0) {
+          // Kaplan-Meier in left child 
+          km2 *= (1 - (double) num_events_left_child[i * num_timepoints + t] / (double) num_samples_at_risk_left_child);
+        }
+      }
+      // std::cout << "t=" << t << " km1=" << km1 << " km2=" << km2 << std::endl;
+      // Reduce number of samples at risk for next timepoint
+      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
+      num_samples_at_risk_left_child -= delta_samples_at_risk_left_child[i * num_timepoints + t];
+    }
+    double brier = km1 * (1 - km1) + km2 * (1 - km2);
+    // Rprintf("brier=%1.2f\n",brier);
+    if (brier < best_brier || best_brier < 0) {
+      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
+      best_varID = varID;
+      best_brier = brier;
+      
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == possible_split_values[i + 1]) {
+        best_value = possible_split_values[i];
+      }
     }
   }
 }

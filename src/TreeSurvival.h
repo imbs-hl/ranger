@@ -63,32 +63,28 @@ private:
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   bool findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
 
-  void findBestSplitValueLogRank(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
-      double& best_value, size_t& best_varID, double& best_logrank);
-  void findBestSplitValueLogRankUnordered(size_t nodeID, size_t varID, std::vector<double>& factor_levels,
-      double& best_value, size_t& best_varID, double& best_logrank);
-  void findBestSplitValueAUC(size_t nodeID, size_t varID, double& best_value, size_t& best_varID, double& best_auc);
-
   void computeDeathCounts(size_t nodeID);
   void computeChildDeathCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
       std::vector<size_t>& num_samples_right_child, std::vector<size_t>& num_samples_at_risk_right_child,
       std::vector<size_t>& num_deaths_right_child, size_t num_splits);
-
   void computeAllChildrenEventCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
       std::vector<size_t>& num_samples_right_child, std::vector<size_t>& delta_samples_at_risk_right_child,
       std::vector<size_t>& delta_samples_at_risk_left_child, std::vector<size_t>& num_events_right_child,
       std::vector<size_t>& num_events_left_child, size_t num_splits);
-  void findBestSplitValueLogRankCR(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
-      double& best_logrank);
-  void findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID, double& best_brier);
-  void computeAucSplit(double time_k, double time_l, double status_k, double status_l, double value_k, double value_l,
-      size_t num_splits, std::vector<double>& possible_split_values, std::vector<double>& num_count,
-      std::vector<double>& num_total);
-
+ 
   void findBestSplitValueLogRank(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
       double& best_logrank);
   void findBestSplitValueLogRankUnordered(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
       double& best_logrank);
+  
+  void findBestSplitValueLogRankCR(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
+      double& best_logrank);
+  void findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID, double& best_brier);
+
+  void findBestSplitValueAUC(size_t nodeID, size_t varID, double& best_value, size_t& best_varID, double& best_auc);
+  void computeAucSplit(double time_k, double time_l, double status_k, double status_l, double value_k, double value_l,
+      size_t num_splits, std::vector<double>& possible_split_values, std::vector<double>& num_count,
+      std::vector<double>& num_total);
 
   bool findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
