@@ -6,8 +6,8 @@
 \usage{
 \method{predict}{ranger}(object, data = NULL, predict.all = FALSE,
   num.trees = object$num.trees, type = "response",
-  se.method = "infjack", quantiles = c(0.1, 0.5, 0.9), seed = NULL,
-  num.threads = NULL, verbose = TRUE, ...)
+  se.method = "infjack", quantiles = c(0.1, 0.5, 0.9), what = NULL,
+  seed = NULL, num.threads = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger} object.}
@@ -23,6 +23,8 @@
 \item{se.method}{Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.}
 
 \item{quantiles}{Vector of quantiles for quantile prediction. Set \code{type = 'quantiles'} to use.}
+
+\item{what}{User specified function for quantile prediction used instead of \code{quantile}. Must return numeric vector, see examples.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
@@ -58,6 +60,30 @@ If \code{type = 'se'} is selected, the method to estimate the variances can be c
 
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+}
+\examples{
+require(ranger)
+
+## Classification forest
+ranger(Species ~ ., data = iris)
+train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
+iris.train <- iris[train.idx, ]
+iris.test <- iris[-train.idx, ]
+rg.iris <- ranger(Species ~ ., data = iris.train)
+pred.iris <- predict(rg.iris, data = iris.test)
+table(iris.test$Species, pred.iris$predictions)
+
+## Quantile regression forest
+rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+pred <- predict(rf, mtcars[27:32, ], type = "quantiles", quantiles = c(0.1, 0.5, 0.9))
+pred$predictions
+
+## Quantile regression forest with user-specified function
+rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+pred <- predict(rf, mtcars[27:32, ], type = "quantiles", 
+                what = function(x) sample(x, 10, replace = TRUE))
+pred$predictions
+
 }
 \references{
 \itemize{

@@ -45,3 +45,8 @@ test_that("Error message if not grown with quantreg=TRUE", {
   expect_error(predict(rf, mtcars[27:32, ], type = "quantiles"), 
                "Error\\: Set quantreg\\=TRUE in ranger\\(\\.\\.\\.\\) for quantile prediction\\.")
 })
+
+test_that("User specified function works as expected", {
+  pred_sample <- predict(rf.quant, mtcars[27:32, ], type = "quantiles", what = function(x) sample(x, 10, replace = TRUE))
+  expect_equal(dim(pred_sample$predictions), c(pred_sample$num.samples, 10))
+})
