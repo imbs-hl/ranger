@@ -12,7 +12,11 @@ parse.formula <- function(formula, data) {
   f <- as.formula(formula)
   t <- terms(f, data = data)
   ## Get dependent var(s)
-  response <- data.frame(eval(f[[2]], envir = data))
+  response <- eval(f[[2]], envir = data)
+  if (class(response) == "Hist") {
+    class(response) <- "matrix"
+  }
+  response <- data.frame(response)
   colnames(response) <- deparse(f[[2]])
   
   ## Get independent vars

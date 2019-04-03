@@ -56,7 +56,7 @@ public:
       bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
       std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
       std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
-	     uint num_random_splits, bool order_snps, uint max_depth);
+	    uint num_random_splits, bool order_snps, uint max_depth);
   void init(std::string dependent_variable_name, MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry,
       std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
       uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
@@ -140,7 +140,6 @@ public:
   const std::vector<std::vector<size_t>>& getSnpOrder() const {
     return data->getSnpOrder();
   }
-
 
 protected:
   void grow();

@@ -146,7 +146,7 @@ void Forest::initR(std::string dependent_variable_name, std::unique_ptr<Data> in
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
     bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-		   PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth) {
+		PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth) {
 
   this->verbose_out = verbose_out;
 

@@ -44,23 +44,22 @@ public:
   const std::vector<double>& getUniqueTimepoints() const {
     return unique_timepoints;
   }
-  void setCause(uint cause){
-      this->cause=cause;
+  void setCause(uint cause) {
+    this->cause = cause;
   }
-  void setTimeInterest(double time_interest){
-    if (time_interest>=0){
+  void setTimeInterest(double time_interest) {
+    if (time_interest >= 0) {
       for (size_t t = 0; t < unique_timepoints.size(); ++t) {
-	if (unique_timepoints[t]>time_interest){
-	  time_interest_index=t;
-	  break;
-	}
+        if (unique_timepoints[t] > time_interest) {
+          time_interest_index = t;
+          break;
+        }
       }
-    }else{
-      time_interest_index=0;
+    } else {
+      time_interest_index = 0;
     }
   }
 
-  
 private:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;

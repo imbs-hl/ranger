@@ -46,7 +46,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{class.weights}{Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.}
 
-\item{splitrule}{Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
+\item{splitrule}{Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C", "maxstat" or "brier" with default "logrank".}
 
 \item{num.random.splits}{For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.}
 
@@ -84,9 +84,9 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
 
-\item{cause}{Numeric. Default is \code{1}. The cause of interest. Competing risk case only.}
+\item{cause}{The cause of interest (numeric). Competing risk case only. Default is \code{1}.}
 
-\item{time.interest}{For \code{splitrule="brier"} the prediction horizon.}
+\item{time.interest}{For \code{splitrule = "brier"} the prediction horizon. Use \code{"random"} to randomly select the time of interest in each split.}
 
 \item{classification}{Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.}
 }
@@ -198,8 +198,8 @@ plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 ## Competing risk forest
 require(survival)
 require(prodlim)
-data(pbc,package="survival")
-rg.pbc <- ranger(Hist(time, status) ~ ., data = pbc)
+data(pbc, package = "survival")
+rg.pbc <- ranger(Hist(time, status) ~ ., data = pbc[complete.cases(pbc), ])
 
 ## Alternative interface
 ranger(dependent.variable.name = "Species", data = iris)
