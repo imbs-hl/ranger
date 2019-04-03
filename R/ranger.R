@@ -343,9 +343,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       names.selected <- names(data.selected)
       ordered.idx <- sapply(data.selected, is.ordered)
       factor.idx <- sapply(data.selected, is.factor)
-      independent.idx <- names.selected != dependent.variable.name & 
-        names.selected != status.variable.name & 
-        names.selected != paste0("Surv(", dependent.variable.name, ", ", status.variable.name, ")")
+      independent.idx <- names.selected %in% independent.variable.names
       recode.idx <- independent.idx & (character.idx | (factor.idx & !ordered.idx))
 
       if (any(recode.idx) & (importance == "impurity_corrected" || importance == "impurity_unbiased")) {
