@@ -477,6 +477,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.
 ##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
 ##' @param quantiles Vector of quantiles for quantile prediction. Set \code{type = 'quantiles'} to use.
+##' @param what User specified function for quantile prediction used instead of \code{quantile}. Must return numeric vector, see examples.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -492,6 +493,29 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##'       \code{treetype}    \tab Type of forest/tree. Classification, regression or survival. \cr
 ##'       \code{num.samples}     \tab Number of samples.
 ##'   }
+##' @examples
+##' require(ranger)
+##'
+##' ## Classification forest
+##' ranger(Species ~ ., data = iris)
+##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
+##' iris.train <- iris[train.idx, ]
+##' iris.test <- iris[-train.idx, ]
+##' rg.iris <- ranger(Species ~ ., data = iris.train)
+##' pred.iris <- predict(rg.iris, data = iris.test)
+##' table(iris.test$Species, pred.iris$predictions)
+##' 
+##' ## Quantile regression forest
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles", quantiles = c(0.1, 0.5, 0.9))
+##' pred$predictions
+##' 
+##' ## Quantile regression forest with user-specified function
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles", 
+##'                 what = function(x) sample(x, 10, replace = TRUE))
+##' pred$predictions
+##' 
 ##' @references
 ##' \itemize{
 ##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
@@ -505,6 +529,7 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
                            num.trees = object$num.trees,
                            type = "response", se.method = "infjack",
                            quantiles = c(0.1, 0.5, 0.9), 
+                           what = NULL,
                            seed = NULL, num.threads = NULL,
                            verbose = TRUE, ...) {
   forest <- object$forest
@@ -546,13 +571,22 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
                    num.trees = num.trees)
     class(result) <- "ranger.prediction"
 
-    ## Compute quantiles of distribution
-    result$predictions <- t(apply(node.values, 1, quantile, quantiles, na.rm=TRUE))
-    if (nrow(result$predictions) != result$num.samples) {
-      ## Fix result for single quantile
-      result$predictions <- t(result$predictions)
+    if (is.null(what)) {
+      ## Compute quantiles of distribution
+      result$predictions <- t(apply(node.values, 1, quantile, quantiles, na.rm=TRUE))
+      if (nrow(result$predictions) != result$num.samples) {
+        ## Fix result for single quantile
+        result$predictions <- t(result$predictions)
+      }
+      colnames(result$predictions) <- paste("quantile=", quantiles)
+    } else {
+      ## User function
+      if (!is.function(what)) {
+        stop("Error: Argument 'what' is not a function.")
+      }
+      result$predictions <- t(apply(node.values, 1, what))
     }
-    colnames(result$predictions) <- paste("quantile=", quantiles)
+   
     result
   } else {
     ## Non-quantile prediction

@@ -1,3 +1,6 @@
+##### Version 0.11.3
+* Accept user-specified function in quantile prediction
+
 ##### Version 0.11.2
 * Bug fixes
 
