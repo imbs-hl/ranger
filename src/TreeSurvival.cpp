@@ -22,9 +22,10 @@
 namespace ranger {
 
 TreeSurvival::TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID,
-    std::vector<size_t>* response_timepointIDs, uint cause, size_t time_interest_index) :
+    std::vector<size_t>* response_timepointIDs, uint cause, size_t time_interest_index, bool competing_risks) :
     status_varID(status_varID), unique_timepoints(unique_timepoints), response_timepointIDs(response_timepointIDs), num_deaths(
-        0), num_samples_at_risk(0), cause(cause), time_interest_index(time_interest_index) {
+        0), num_samples_at_risk(0), cause(cause), time_interest_index(time_interest_index), competing_risks(
+        competing_risks) {
   this->num_timepoints = unique_timepoints->size();
 }
 
@@ -105,7 +106,11 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
   size_t best_varID = 0;
   double best_value = 0;
 
-  computeDeathCounts(nodeID);
+  if (competing_risks) {
+    computeDeathCountsCR(nodeID);
+  } else {
+    computeDeathCounts(nodeID);
+  }
 
   // Stop if maximum node size or depth reached (will check again for each child node)
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
@@ -122,7 +127,12 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
       // Find best split value, if ordered consider all values as split values, else all 2-partitions
       if (data->isOrderedVariable(varID)) {
         if (splitrule == LOGRANK) {
-          findBestSplitValueLogRank(nodeID, varID, best_value, best_varID, best_decrease);
+          if (competing_risks) {
+            findBestSplitValueLogRankCR(nodeID, varID, best_value, best_varID, best_decrease);
+          } else {
+            findBestSplitValueLogRank(nodeID, varID, best_value, best_varID, best_decrease);
+          }
+
         } else if (splitrule == BRIER) {
           findBestSplitValueBrier(nodeID, varID, best_value, best_varID, best_decrease);
         } else if (splitrule == AUC || splitrule == AUC_IGNORE_TIES) {
@@ -302,6 +312,53 @@ void TreeSurvival::computeDeathCounts(size_t nodeID) {
   }
 }
 
+// TODO: Use 'cause' instead fixed '1' for event of interest
+void TreeSurvival::computeDeathCountsCR(size_t nodeID) {
+
+  // Initialize
+  for (size_t i = 0; i < num_timepoints; ++i) {
+    num_deaths[i] = 0;
+    num_samples_at_risk[i] = 0;
+  }
+
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    double survival_time = data->get(sampleID, dependent_varID);
+
+    size_t t = 0;
+    if (data->get(sampleID, status_varID) == 1) {
+      // Event of interest: At risk until event
+      while (t < num_timepoints && (*unique_timepoints)[t] < survival_time) {
+        ++num_samples_at_risk[t];
+        ++t;
+      }
+
+      // Now t is the survival time, add to at risk and to death if event
+      if (t < num_timepoints) {
+        ++num_samples_at_risk[t];
+        ++num_deaths[t];
+      }
+    } else if (data->get(sampleID, status_varID) == 0) {
+      // Censored: At risk until censored or end
+      while (t < num_timepoints && (*unique_timepoints)[t] < survival_time) {
+        ++num_samples_at_risk[t];
+        ++t;
+      }
+
+      // Now t is the survival time, add to at risk
+      if (t < num_timepoints) {
+        ++num_samples_at_risk[t];
+      }
+    } else {
+      // Other event: At risk until end
+      while (t < num_timepoints) {
+        ++num_samples_at_risk[t];
+        ++t;
+      }
+    }
+
+  }
+}
+
 void TreeSurvival::computeChildDeathCounts(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
     std::vector<size_t>& num_samples_right_child, std::vector<size_t>& delta_samples_at_risk_right_child,
     std::vector<size_t>& num_deaths_right_child, size_t num_splits) {
@@ -327,19 +384,53 @@ void TreeSurvival::computeChildDeathCounts(size_t nodeID, size_t varID, std::vec
   }
 }
 
+// TODO: Use 'cause' instead fixed '1' for event of interest
+void TreeSurvival::computeChildDeathCountsCR(size_t nodeID, size_t varID, std::vector<double>& possible_split_values,
+    std::vector<size_t>& num_samples_right_child, std::vector<size_t>& delta_samples_at_risk_right_child,
+    std::vector<size_t>& num_deaths_right_child, size_t num_splits) {
+
+  // Count deaths in right child per timepoint and possbile split
+  for (auto& sampleID : sampleIDs[nodeID]) {
+    double value = data->get(sampleID, varID);
+    size_t survival_timeID = (*response_timepointIDs)[sampleID];
+
+    // Count deaths until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+
+      if (value > possible_split_values[i]) {
+        ++num_samples_right_child[i];
+
+        // Don't count event when competing event
+        if (data->get(sampleID, status_varID) == 1) {
+          // Event of interest: At risk until event
+          ++delta_samples_at_risk_right_child[i * num_timepoints + survival_timeID];
+          ++num_deaths_right_child[i * num_timepoints + survival_timeID];
+        } else if (data->get(sampleID, status_varID) == 0) {
+          // Censored: At risk until censored or end
+          ++delta_samples_at_risk_right_child[i * num_timepoints + survival_timeID];
+        } else {
+          // Other event: At risk until end
+        }
+      } else {
+        break;
+      }
+    }
+  }
+}
+
 void TreeSurvival::computeAllChildrenEventCounts(size_t nodeID, size_t varID,
-                                                 std::vector<double>& possible_split_values, std::vector<size_t>& num_samples_right_child,
-                                                 std::vector<size_t>& delta_samples_at_risk_right_child, std::vector<size_t>& delta_samples_at_risk_left_child,
-                                                 std::vector<size_t>& num_events_right_child, std::vector<size_t>& num_events_left_child, size_t num_splits) {
-  
+    std::vector<double>& possible_split_values, std::vector<size_t>& num_samples_right_child,
+    std::vector<size_t>& delta_samples_at_risk_right_child, std::vector<size_t>& delta_samples_at_risk_left_child,
+    std::vector<size_t>& num_events_right_child, std::vector<size_t>& num_events_left_child, size_t num_splits) {
+
   // Count events in right child per timepoint and possbile split
   for (auto& sampleID : sampleIDs[nodeID]) {
     double value = data->get(sampleID, varID);
     size_t survival_timeID = (*response_timepointIDs)[sampleID];
-    
+
     // Count events until split_value reached
     for (size_t i = 0; i < num_splits; ++i) {
-      
+
       if (value > possible_split_values[i]) {
         ++num_samples_right_child[i];
         ++delta_samples_at_risk_right_child[i * num_timepoints + survival_timeID];
@@ -523,40 +614,41 @@ void TreeSurvival::findBestSplitValueLogRankUnordered(size_t nodeID, size_t varI
   }
 }
 
+// TODO: Do we need this? Isn't it the same as standard LR splitting with substituting Y?
 void TreeSurvival::findBestSplitValueLogRankCR(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
-                                               double& best_logrank) {
-  
+    double& best_logrank) {
+
   // Create possible split values
   std::vector<double> possible_split_values;
   data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
-  
+
   // Try next variable if all equal for this
   if (possible_split_values.size() < 2) {
     return;
   }
-  
+
   // -1 because no split possible at largest value
   size_t num_splits = possible_split_values.size() - 1;
-  
+
   // Initialize
   std::vector<size_t> num_deaths_right_child(num_splits * num_timepoints);
   std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
   std::vector<size_t> num_samples_right_child(num_splits);
-  
-  computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
-                          delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
-  
+
+  computeChildDeathCountsCR(nodeID, varID, possible_split_values, num_samples_right_child,
+      delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
+
   // Compute logrank test for all splits and use best
   for (size_t i = 0; i < num_splits; ++i) {
     double numerator = 0;
     double denominator_squared = 0;
-    
+
     // Stop if minimal node size reached
     size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
     if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
       continue;
     }
-    
+
     // Compute logrank test statistic for this split
     size_t num_samples_at_risk_right_child = num_samples_right_child[i];
     for (size_t t = 0; t < num_timepoints; ++t) {
@@ -565,7 +657,7 @@ void TreeSurvival::findBestSplitValueLogRankCR(size_t nodeID, size_t varID, doub
       if (num_samples_at_risk[t] < 2 || num_samples_at_risk_right_child < 1) {
         break;
       }
-      
+
       if (num_deaths[t] > 0) {
         // Numerator and demoninator for log-rank test, notation from Ishwaran et al.
         double di = (double) num_deaths[t];
@@ -575,21 +667,21 @@ void TreeSurvival::findBestSplitValueLogRankCR(size_t nodeID, size_t varID, doub
         numerator += di1 - Yi1 * (di / Yi);
         denominator_squared += (Yi1 / Yi) * (1.0 - Yi1 / Yi) * ((Yi - di) / (Yi - 1)) * di;
       }
-      
+
       // Reduce number of samples at risk for next timepoint
       num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
-      
+
     }
     double logrank = -1;
     if (denominator_squared != 0) {
       logrank = fabs(numerator / sqrt(denominator_squared));
     }
-    
+
     if (logrank > best_logrank) {
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_logrank = logrank;
-      
+
       // Use smaller value if average is numerically the same as the larger value
       if (best_value == possible_split_values[i + 1]) {
         best_value = possible_split_values[i];
@@ -599,57 +691,57 @@ void TreeSurvival::findBestSplitValueLogRankCR(size_t nodeID, size_t varID, doub
 }
 
 void TreeSurvival::findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
-                                           double& best_brier) {
-  
+    double& best_brier) {
+
   // Create possible split values
   std::vector<double> possible_split_values;
   data->getAllValues(possible_split_values, sampleIDs[nodeID], varID);
-  
+
   // Try next variable if all equal for this
   if (possible_split_values.size() < 2) {
     return; // best split does not change
   }
-  
+
   // -1 because no split possible at largest value
   size_t num_splits = possible_split_values.size() - 1;
-  
+
   // -----------
   // unique timepoints do not necessarily include zero!!!
   // num_events_right_child            = number of events at unique time points (event and censored) for each possible split
   // delta_samples_at_risk_right_child = number of subjects that leave the at risk set compared to previous time point
   // num_samples_right_child = how many subjects would be in right child
   // -----------
-  
+
   // Initialize
   std::vector<size_t> num_events_right_child(num_splits * num_timepoints);
   std::vector<size_t> num_events_left_child(num_splits * num_timepoints);
   std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
   std::vector<size_t> delta_samples_at_risk_left_child(num_splits * num_timepoints);
   std::vector<size_t> num_samples_right_child(num_splits);
-  
+
   computeAllChildrenEventCounts(nodeID, varID, possible_split_values, num_samples_right_child,
-                                delta_samples_at_risk_right_child, delta_samples_at_risk_left_child, num_events_right_child,
-                                num_events_left_child, num_splits);
-  
+      delta_samples_at_risk_right_child, delta_samples_at_risk_left_child, num_events_right_child,
+      num_events_left_child, num_splits);
+
   // Compute brier test for all possible splits and use best
   for (size_t i = 0; i < num_splits; ++i) {
-    
+
     // Stop if minimal node size reached
     size_t num_samples_left_child = sampleIDs[nodeID].size() - num_samples_right_child[i];
-    
+
     // move to next possible split
     if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
       continue;
     }
-    
+
     // Compute brier test statistic for this split
-    
+
     // Initialize total number at risk in right child with the total number of subjects in right child
     size_t num_samples_at_risk_right_child = num_samples_right_child[i];
-    
+
     double km1 = 1;
     double km2 = 1;
-    
+
     for (size_t t = 0; t < time_interest_index; ++t) {
       size_t num_samples_at_risk_left_child = (num_samples_at_risk[t] - num_samples_at_risk_right_child);
       if (num_samples_at_risk[t]) {
@@ -658,7 +750,8 @@ void TreeSurvival::findBestSplitValueBrier(size_t nodeID, size_t varID, double& 
       if (num_samples_at_risk_right_child > 0) {
         if (num_events_right_child[i * num_timepoints + t] > 0) {
           // Kaplan-Meier in right child 
-          km1 *= (1 - (double) num_events_right_child[i * num_timepoints + t] / (double) num_samples_at_risk_right_child);
+          km1 *=
+              (1 - (double) num_events_right_child[i * num_timepoints + t] / (double) num_samples_at_risk_right_child);
         }
       }
       if (num_samples_at_risk_left_child > 0) {
@@ -678,7 +771,7 @@ void TreeSurvival::findBestSplitValueBrier(size_t nodeID, size_t varID, double& 
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_brier = brier;
-      
+
       // Use smaller value if average is numerically the same as the larger value
       if (best_value == possible_split_values[i + 1]) {
         best_value = possible_split_values[i];
@@ -980,7 +1073,7 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
     // Draw random subsets, sample all partitions with equal probability
     if (indices_in_node.size() > 1) {
       size_t num_partitions = (2 << (indices_in_node.size() - 1)) - 2; // 2^n-2 (don't allow full or empty)
-      std::uniform_int_distribution <size_t> udist(1, num_partitions);
+      std::uniform_int_distribution<size_t> udist(1, num_partitions);
       size_t splitID_in_node = udist(random_number_generator);
       for (size_t j = 0; j < indices_in_node.size(); ++j) {
         if ((splitID_in_node & (1 << j)) > 0) {
@@ -990,7 +1083,7 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
     }
     if (indices_out_node.size() > 1) {
       size_t num_partitions = (2 << (indices_out_node.size() - 1)) - 1; // 2^n-1 (allow full or empty)
-      std::uniform_int_distribution <size_t> udist(0, num_partitions);
+      std::uniform_int_distribution<size_t> udist(0, num_partitions);
       size_t splitID_out_node = udist(random_number_generator);
       for (size_t j = 0; j < indices_out_node.size(); ++j) {
         if ((splitID_out_node & (1 << j)) > 0) {

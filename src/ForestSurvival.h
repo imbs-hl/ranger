@@ -77,6 +77,7 @@ private:
   std::vector<size_t> response_timepointIDs;
   uint cause;
   size_t time_interest_index;
+  bool competing_risks;
 
 private:
   const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;

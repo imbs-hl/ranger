@@ -99,12 +99,21 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
   if (splitrule == EXTRATREES && !memory_saving_splitting) {
     data->sort();
   }
+
+  // Check for competing risks
+  competing_risks = false;
+  for (size_t i = 0; i < num_samples; ++i) {
+    if (data->get(i, status_varID) > 1) {
+      competing_risks = true;
+      break;
+    }
+  }
 }
 
 void ForestSurvival::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, status_varID, &response_timepointIDs, cause, time_interest_index));
+    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, status_varID, &response_timepointIDs, cause, time_interest_index, competing_risks));
   }
 }
 
