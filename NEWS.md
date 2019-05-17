@@ -1,3 +1,6 @@
+##### Version 0.10.4-86
+* Fix impurity importance for "hellinger" splitrule
+
 ##### Version 0.10.4-85
 * Add "hellinger" splitrule
 * Add inbag argument for manual selection of observations in trees

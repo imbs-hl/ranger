@@ -701,18 +701,22 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
 void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double decrease) {
 
-  std::vector<size_t> class_counts;
-  class_counts.resize(class_values->size(), 0);
+  double best_decrease;
+  if (splitrule != HELLINGER) {
+    std::vector<size_t> class_counts;
+    class_counts.resize(class_values->size(), 0);
 
-  for (auto& sampleID : sampleIDs[nodeID]) {
-    uint sample_classID = (*response_classIDs)[sampleID];
-    class_counts[sample_classID]++;
+    for (auto& sampleID : sampleIDs[nodeID]) {
+      uint sample_classID = (*response_classIDs)[sampleID];
+      class_counts[sample_classID]++;
+    }
+
+    double sum_node = 0;
+    for (auto& class_count : class_counts) {
+      sum_node += class_count * class_count;
+    }
+    best_decrease = decrease - sum_node / (double) sampleIDs[nodeID].size();
   }
-  double sum_node = 0;
-  for (auto& class_count : class_counts) {
-    sum_node += class_count * class_count;
-  }
-  double best_gini = decrease - sum_node / (double) sampleIDs[nodeID].size();
 
   // No variable importance for no split variables
   size_t tempvarID = data->getUnpermutedVarID(varID);
@@ -724,9 +728,9 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
 
   // Subtract if corrected importance and permuted variable, else add
   if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
-    (*variable_importance)[tempvarID] -= best_gini;
+    (*variable_importance)[tempvarID] -= best_decrease;
   } else {
-    (*variable_importance)[tempvarID] += best_gini;
+    (*variable_importance)[tempvarID] += best_decrease;
   }
 }
 
