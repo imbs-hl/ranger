@@ -338,3 +338,16 @@ test_that("Does not crash when variable named 'none'", {
   expect_equal(rf$forest$independent.variable.names, c("x", "none"))
   expect_silent(predict(rf, dat))
 })
+
+test_that("mtry function input should be allowed", {
+  rf = ranger(Species ~ ., data = iris, mtry = function(n) n - 1)
+  expect_equal(3, rf$mtry)
+})
+
+
+test_that("mtry function error should halt the ranger function", {
+  expect_error(
+    ranger(Species ~ ., data = iris, mtry = function(n) stop("this is some error"))
+    , "mtry function evaluation resulted in an error"
+    )
+})
