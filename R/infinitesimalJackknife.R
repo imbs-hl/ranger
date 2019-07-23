@@ -98,7 +98,15 @@ rInfJack = function(pred, inbag, calibrate = TRUE, used.trees = NULL) {
     sigma2 = (delta^2 + (1 - delta)^2) / (2 * (1 - delta)^2) * sigma2.ss
     
     # Use Monte Carlo noise scale estimate for empirical Bayes calibration
-    vars.calibrated = calibrateEB(vars, sigma2)
+    vars.calibrated = tryCatch(
+      expr = {
+        calibrateEB(vars, sigma2)
+      }, 
+      error = function(e) {
+        warning("Calibration failed. Falling back to non-calibrated variance estimates.")
+        rInfJack(pred, inbag, calibrate = FALSE, used.trees = used.trees)
+      }
+    )
     results$var.hat = vars.calibrated
   }
   
