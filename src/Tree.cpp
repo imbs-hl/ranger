@@ -178,7 +178,7 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
         size_t splitID = floor(split_values[nodeID]);
 
         // Left if 0 found at position factorID
-        if (!(splitID & (1 << factorID))) {
+        if (!(splitID & (1ULL << factorID))) {
           // Move to left child
           nodeID = child_nodeIDs[0][nodeID];
         } else {
@@ -326,7 +326,7 @@ bool Tree::splitNode(size_t nodeID) {
       size_t splitID = floor(split_value);
 
       // Left if 0 found at position factorID
-      if (!(splitID & (1 << factorID))) {
+      if (!(splitID & (1ULL << factorID))) {
         // If going to left, do nothing
         ++pos;
       } else {
@@ -384,7 +384,7 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
       size_t splitID = floor(split_values[nodeID]);
 
       // Left if 0 found at position factorID
-      if (!(splitID & (1 << factorID))) {
+      if (!(splitID & (1ULL << factorID))) {
         // Move to left child
         nodeID = child_nodeIDs[0][nodeID];
       } else {
