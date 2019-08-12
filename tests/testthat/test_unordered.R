@@ -328,3 +328,18 @@ test_that("Order splitting working when numerics in data", {
                              respect.unordered.factors = 'order'))
   expect_silent(predict(rf, dt_surv))
 })
+
+test_that("Partition splitting working for large number of levels", {
+  n <- 43
+  dt <- data.frame(x = factor(1:n, ordered = FALSE),  
+                   y = rbinom(n, 1, 0.5))
+  
+  rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
+  
+  max_split <- max(sapply(1:rf$num.trees, function(i) {
+    max(log2(rf$forest$split.values[[i]][rf$forest$split.varIDs[[i]] > 0]))
+  }))
+
+  expect_lte(max_split, n)
+})
+
