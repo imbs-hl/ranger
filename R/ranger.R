@@ -84,7 +84,7 @@
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix}, \code{dgCMatrix} (Matrix) or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
-##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
+##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. Alternatively, a single argument function returning an integer, given the number of independent variables.
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
@@ -426,7 +426,35 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Invalid value for num.trees.")
   }
   
-  ## mtry
+  ## mtry as a function
+  if (is.function(mtry)) { 
+    nv <- length(all.independent.variable.names)
+    
+    if (length(formals(mtry)) > 1){
+      stop("Error: Given mtry function requires single argument (the number of independent variables in the model).")
+    }
+    
+    # Evaluate function
+    mtry <- try(mtry(nv), silent = TRUE)
+    
+    if (inherits(mtry, "try-error")) {
+      message("The mtry function produced the error: ", mtry)
+      stop("Error: mtry function evaluation resulted in an error.")
+    }
+    
+    ## Check for a single numeric
+    if (!is.numeric(mtry) || length(mtry) != 1) {
+      stop("Error: Given mtry function should return a single integer or numeric.")
+    } else {
+      mtry <- as.integer(mtry)
+    }
+    
+    ## Check for limits
+    if (mtry < 1 || mtry > nv) {
+      stop("Error: Given mtry function should evaluate to a value not less than 1 and not greater than the number of independent variables ( = ", nv, " )")
+    }
+  }
+  
   if (is.null(mtry)) {
     mtry <- 0
   } else if (!is.numeric(mtry) || mtry < 0) {
