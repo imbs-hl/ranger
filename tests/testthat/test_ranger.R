@@ -339,15 +339,14 @@ test_that("Does not crash when variable named 'none'", {
   expect_silent(predict(rf, dat))
 })
 
-test_that("mtry function input should be allowed", {
-  rf = ranger(Species ~ ., data = iris, mtry = function(n) n - 1)
+test_that("mtry function input works as expected", {
+  rf <- ranger(Species ~ ., data = iris, mtry = function(n) n - 1)
   expect_equal(3, rf$mtry)
 })
 
 
-test_that("mtry function error should halt the ranger function", {
+test_that("mtry function error halts the ranger function", {
   expect_error(
-    ranger(Species ~ ., data = iris, mtry = function(n) stop("this is some error"))
-    , "mtry function evaluation resulted in an error"
-    )
+    ranger(Species ~ ., data = iris, mtry = function(n) stop("this is some error")), 
+    "mtry function evaluation resulted in an error.")
 })
