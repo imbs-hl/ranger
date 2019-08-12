@@ -367,7 +367,7 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
   }
 
   // Number of possible splits is 2^num_levels
-  size_t num_splits = (1 << factor_levels.size());
+  size_t num_splits = (1ULL << factor_levels.size());
 
   // Compute decrease of impurity for each possible split
   // Split where all left (0) or all right (1) are excluded
@@ -377,10 +377,10 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
     // Compute overall splitID by shifting local factorIDs to global positions
     size_t splitID = 0;
     for (size_t j = 0; j < factor_levels.size(); ++j) {
-      if ((local_splitID & (1 << j))) {
+      if ((local_splitID & (1ULL << j))) {
         double level = factor_levels[j];
         size_t factorID = floor(level) - 1;
-        splitID = splitID | (1 << factorID);
+        splitID = splitID | (1ULL << factorID);
       }
     }
 
@@ -397,7 +397,7 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
 
       // If in right child, count
       // In right child, if bitwise splitID at position factorID is 1
-      if ((splitID & (1 << factorID))) {
+      if ((splitID & (1ULL << factorID))) {
         ++n_right;
         ++class_counts_right[sample_classID];
       }
@@ -599,7 +599,7 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
       std::uniform_int_distribution<size_t> udist(1, num_partitions);
       size_t splitID_in_node = udist(random_number_generator);
       for (size_t j = 0; j < indices_in_node.size(); ++j) {
-        if ((splitID_in_node & (1 << j)) > 0) {
+        if ((splitID_in_node & (1ULL << j)) > 0) {
           split_subset.push_back(indices_in_node[j]);
         }
       }
@@ -609,7 +609,7 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
       std::uniform_int_distribution<size_t> udist(0, num_partitions);
       size_t splitID_out_node = udist(random_number_generator);
       for (size_t j = 0; j < indices_out_node.size(); ++j) {
-        if ((splitID_out_node & (1 << j)) > 0) {
+        if ((splitID_out_node & (1ULL << j)) > 0) {
           split_subset.push_back(indices_out_node[j]);
         }
       }
@@ -618,7 +618,7 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
     // Assign union of the two subsets to right child
     size_t splitID = 0;
     for (auto& idx : split_subset) {
-      splitID |= 1 << idx;
+      splitID |= 1ULL << idx;
     }
 
     // Initialize
@@ -634,7 +634,7 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
       // If in right child, count
       // In right child, if bitwise splitID at position factorID is 1
-      if ((splitID & (1 << factorID))) {
+      if ((splitID & (1ULL << factorID))) {
         ++n_right;
         ++class_counts_right[sample_classID];
       }
