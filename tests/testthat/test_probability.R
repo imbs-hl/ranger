@@ -19,7 +19,8 @@ test_that("probability estimations are a matrix with correct size", {
 })
 
 test_that("growing works for single observations, probability prediction", {
-  rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE)
+  expect_warning(rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE), 
+                 "Dropped unused factor level\\(s\\) in dependent variable\\: versicolor\\, virginica\\.")
   expect_is(rf$predictions, "matrix")
 })
 
@@ -76,8 +77,22 @@ test_that("Probability estimation works correctly if labels are reversed", {
   expect_gte(mean(pred.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
 })
 
+test_that("Probability estimation works correctly if first or second factor level empty", {
+  expect_warning(rf <- ranger(Species ~ ., iris[51:150, ], probability = TRUE), 
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: setosa\\.")
+  expect_silent(pred <- predict(rf, iris[101:150, ]))
+  expect_gte(mean(pred$predictions[1:50, "virginica"], na.rm = TRUE), 0.9)
+  
+  expect_warning(rf <- ranger(Species ~ ., iris[c(101:150, 51:100), ], probability = TRUE), 
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: setosa\\.")
+  expect_silent(pred <- predict(rf, iris[c(101:150, 51:100), ]))
+  expect_gte(mean(pred$predictions[1:50, "virginica"], na.rm = TRUE), 0.9)
+  expect_gte(mean(pred$predictions[51:100, "versicolor"], na.rm = TRUE), 0.9)
+})
+
 test_that("No error if unused factor levels in outcome", {
-  rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5, probability = TRUE)
+  expect_warning(rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5, probability = TRUE),
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: virginica\\.")
   pred <- predict(rf, iris)
   expect_equal(ncol(pred$predictions), 2)
 })

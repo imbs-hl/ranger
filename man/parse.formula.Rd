@@ -4,12 +4,14 @@
 \alias{parse.formula}
 \title{Parse formula}
 \usage{
-parse.formula(formula, data)
+parse.formula(formula, data, env = parent.frame())
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}
 
 \item{data}{Training data of class \code{data.frame}.}
+
+\item{env}{The environment in which the left hand side of \code{formula} is evaluated.}
 }
 \value{
 Dataset including selected columns and interactions.

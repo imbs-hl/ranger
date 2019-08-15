@@ -18,7 +18,7 @@ Instead of out-of-bag data, the other fold is used to compute permutation import
 Related to the novel permutation variable importance by Janitza et al. (2015).
 }
 \references{
-Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{http://dx.doi.org/10.1007/s11634-016-0276-4}. \cr
+Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{https://doi.org/10.1007/s11634-016-0276-4}. \cr
 }
 \seealso{
 \code{\link{ranger}}

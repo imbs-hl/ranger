@@ -34,34 +34,42 @@
 #include "utility.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataSparse: public Data {
 public:
-  DataSparse();
-  DataSparse(Eigen::SparseMatrix<double>* data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) :
-      data(data) {
-    this->variable_names = variable_names;
-    this->num_rows = num_rows;
-    this->num_cols = num_cols;
-    this->num_cols_no_snp = num_cols;
-  }
-  virtual ~DataSparse();
+  DataSparse() = default;
 
-  double get(size_t row, size_t col) const {
-    return data->coeff(row, col);
+  DataSparse(Eigen::SparseMatrix<double>& data, std::vector<std::string> variable_names, size_t num_rows,
+      size_t num_cols);
+
+  DataSparse(const DataSparse&) = delete;
+  DataSparse& operator=(const DataSparse&) = delete;
+
+  virtual ~DataSparse() override = default;
+
+  double get(size_t row, size_t col) const override {
+    // Use permuted data for corrected impurity importance
+    size_t col_permuted = col;
+    if (col >= num_cols) {
+      col = getUnpermutedVarID(col);
+      row = getPermutedSampleID(row);
+    }
+    return data.coeff(row, col);
   }
 
-  void reserveMemory() {
-    data = new Eigen::SparseMatrix<double>(num_rows, num_cols);
+  void reserveMemory() override {
+    data.resize(num_rows, num_cols);
   }
 
-  void set(size_t col, size_t row, double value, bool& error) {
-    data->coeffRef(row, col) = value;
+  void set(size_t col, size_t row, double value, bool& error) override {
+    data.coeffRef(row, col) = value;
   }
 
 private:
-  Eigen::SparseMatrix<double>* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataSparse);
+  Eigen::SparseMatrix<double> data;
 };
+
+} // namespace ranger
 
 #endif /* DATASPARSE_H_ */

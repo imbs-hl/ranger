@@ -6,14 +6,15 @@
 #'
 #' @param formula Object of class \code{formula} or \code{character} describing the model to fit.
 #' @param data Training data of class \code{data.frame}.
+#' @param env The environment in which the left hand side of \code{formula} is evaluated.
 #'
 #' @return Dataset including selected columns and interactions.
-parse.formula <- function(formula, data) {
+parse.formula <- function(formula, data, env = parent.frame()) {
   f <- as.formula(formula)
   t <- terms(f, data = data)
   
   ## Get dependent var(s)
-  response <- data.frame(eval(f[[2]], envir = data))
+  response <- data.frame(eval(f[[2]], envir = data, enclos = env))
   colnames(response) <- deparse(f[[2]])
   
   ## Get independent vars

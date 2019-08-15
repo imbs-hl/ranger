@@ -1,5 +1,95 @@
+##### Version 0.11.4
+* Add "beta" splitrule for bounded outcomes
+
+##### Version 0.11.3
+* Accept user-specified function in quantile prediction
+
+##### Version 0.11.2
+* Bug fixes
+
+##### Version 0.11.1
+* Bug fixes
+
+##### Version 0.11.0
+* New CRAN version
+
+##### Version 0.10.6
+* Internal changes (slightly improved computation speed)
+* Warning: Possible seed differences compared to older versions
+* Bug fixes
+
+##### Version 0.10.5
+* Add support of splitting weights for corrected impurity importance 
+* Bug fixes
+
+##### Version 0.10.4
+* Add inbag argument for manual selection of observations in trees
+
+##### Version 0.10.3
+* Bug fixes
+
+##### Version 0.10.2
+* Add max.depth parameter to limit tree depth
+
+##### Version 0.10.1
+* Bug fixes
+
+##### Version 0.10.0
+* New CRAN version
+
+##### Version 0.9.12
+* Remove GenABEL from suggested packages (removed from CRAN). GenABEL data is still supported
+
+##### Version 0.9.11
+* Improve memory management (internal changes)
+
+##### Version 0.9.10
+* Add impurity importance for the maxstat splitting rule
+* Bug fixes
+
+##### Version 0.9.9
+* Add 'order' mode for unordered factors for GenABEL SNP data (binary classification and regression)
+
+##### Version 0.9.8
+* Bug fixes
+
+##### Version 0.9.7
+* Change license of C++ core to MIT (R package is still GPL3)
+
+##### Version 0.9.6
+* Better 'order' mode for unordered factors for multiclass and survival
+
+##### Version 0.9.5
+* Bug fixes
+
+##### Version 0.9.4
+* Add class-weighted Gini splitting
+
+##### Version 0.9.3
+* Bug fixes
+
+##### Version 0.9.2
+* Add fixed proportion sampling
+
+##### Version 0.9.1
+* Bug fixes
+
+##### Version 0.9.0
+* New CRAN version
+
+##### Version 0.8.5
+* Faster aggregation of predictions
+* Fix memory issues on Windows 7
+* Add treeInfo() function to extract human readable tree structure
+
+##### Version 0.8.4
+* Add quantile prediction as in quantile regression forests
+
+##### Version 0.8.3
+* Add standard error estimation with the infinitesimal jackknife (now the default)
+
 ##### Version 0.8.2
-* Add bias-corrected impurity importance
+* Add bias-corrected impurity importance (actual impurity reduction, AIR)
 * Add impurity importance for survival forests
 
 ##### Version 0.8.1

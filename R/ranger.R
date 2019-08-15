@@ -26,9 +26,10 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
+##' Ranger is a fast implementation of random forests (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 ##' Classification, regression, and survival forests are supported.
 ##' Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).
+##' Includes implementations of extremely randomized trees (Geurts et al. 2006) and quantile regression forests (Meinshausen 2006). 
 ##'
 ##' The tree type is determined by the type of the dependent variable.
 ##' For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
@@ -45,7 +46,7 @@
 ##'
 ##' Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
 ##' For survival all nodes contain at \code{min.node.size} samples. 
-##' Variables selected with \code{always.split.variables} are tried additionaly to the mtry variables randomly selected.
+##' Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
 ##' In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
 ##' Weights do not need to sum up to 1, they will be normalized later. 
 ##' The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
@@ -55,9 +56,14 @@
 ##' Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
 ##' For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
 ##' For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
-##' For multiclass classification and survival outcomes, 'order' is experimental and should be used with care.
-##' The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels. 
+##' For multiclass classification the factor levels are ordered by the first principal component of the weighted covariance matrix of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available).
+##' The use of 'order' is recommended, as it computationally fast and can handle an unlimited number of factor levels. 
 ##' Note that the factors are only reordered once and not again in each split. 
+##'
+##' The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
+##' It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
+##' See Nembrini et al. (2018) for details.
+##' This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 ##'
 ##' For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 ##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
@@ -76,30 +82,35 @@
 ##' 
 ##' @title Ranger
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
-##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
+##' @param data Training data of class \code{data.frame}, \code{matrix}, \code{dgCMatrix} (Matrix) or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
-##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
+##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. Alternatively, a single argument function returning an integer, given the number of independent variables.
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
+##' @param max.depth Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).
 ##' @param replace Sample with replacement. 
-##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. 
+##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
+##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
-##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribtuion to be considered for splitting.
+##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
+##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
+##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
+##' @param oob.error Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
-##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. 
+##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
 ##' @param classification Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.
@@ -107,7 +118,7 @@
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
 ##'   \item{\code{variable.importance}}{Variable importance for each independent variable.}
-##'   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for regression the mean squared error and for survival one minus Harrell's c-index.}
+##'   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
 ##'   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
 ##'   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
 ##'   \item{\code{unique.death.times}}{Unique death times (survival only).}
@@ -132,9 +143,14 @@
 ##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 ##' iris.train <- iris[train.idx, ]
 ##' iris.test <- iris[-train.idx, ]
-##' rg.iris <- ranger(Species ~ ., data = iris.train, write.forest = TRUE)
-##' pred.iris <- predict(rg.iris, dat = iris.test)
+##' rg.iris <- ranger(Species ~ ., data = iris.train)
+##' pred.iris <- predict(rg.iris, data = iris.test)
 ##' table(iris.test$Species, pred.iris$predictions)
+##' 
+##' ## Quantile regression forest
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles")
+##' pred$predictions
 ##'
 ##' ## Variable importance
 ##' rg.iris <- ranger(Species ~ ., data = iris, importance = "impurity")
@@ -161,16 +177,21 @@
 ##' @author Marvin N. Wright
 ##' @references
 ##' \itemize{
-##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
-##'   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{http://dx.doi.org/10.1016/j.eswa.2016.07.018}. 
-##'   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med. \url{http://dx.doi.org/10.1002/sim.7212}.
-##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{http://dx.doi.org/10.1023/A:1010933404324}. 
-##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{http://dx.doi.org/10.1097/JTO.0b013e318233d835}. 
-##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{http://dx.doi.org/10.3414/ME00-01-0052}.
+##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
+##'   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}. 
+##'   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. \url{https://doi.org/10.1002/sim.7212}.
+##'   \item Nembrini, S., Koenig, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \url{https://doi.org/10.1093/bioinformatics/bty373}.
+##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \url{https://doi.org/10.1023/A:1010933404324}. 
+##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}. 
+##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{https://doi.org/10.3414/ME00-01-0052}.
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}. 
+##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}.
+##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
+##'   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{https://doi.org/10.1198/106186008X344522}.
+##'   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
+##' @encoding UTF-8
 ##' @useDynLib ranger, .registration = TRUE
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
@@ -179,14 +200,15 @@
 ##' @export
 ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
-                   min.node.size = NULL, replace = TRUE, 
+                   min.node.size = NULL, max.depth = NULL, replace = TRUE, 
                    sample.fraction = ifelse(replace, 1, 0.632), 
-                   case.weights = NULL, splitrule = NULL, 
+                   case.weights = NULL, class.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
-                   keep.inbag = FALSE, holdout = FALSE,
+                   keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
+                   quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
@@ -224,10 +246,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Please give formula or dependent variable name.")
     }
     if (is.null(status.variable.name)) {
-      status.variable.name <- "none"
-      response <- data[, dependent.variable.name]
+      status.variable.name <- ""
+      response <- data[, dependent.variable.name, drop = TRUE]
     } else {
-      response <- data[, c(dependent.variable.name, status.variable.name)]
+      response <- survival::Surv(data[, dependent.variable.name], data[, status.variable.name]) #data[, c(dependent.variable.name, status.variable.name)]
     }
     data.selected <- data
   } else {
@@ -235,7 +257,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (class(formula) != "formula") {
       stop("Error: Invalid formula.")
     }
-    data.selected <- parse.formula(formula, data)
+    data.selected <- parse.formula(formula, data, env = parent.frame())
     response <- data.selected[, 1]
   }
   
@@ -246,6 +268,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
          paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
   
+  ## Check response levels
+  if (is.factor(response)) {
+    if (nlevels(response) != nlevels(droplevels(response))) {
+      dropped_levels <- setdiff(levels(response), levels(droplevels(response)))
+      warning("Dropped unused factor level(s) in dependent variable: ",
+              paste0(dropped_levels, collapse = ", "), ".", call. = FALSE)
+    }
+  }
+  
   ## Treetype
   if (is.factor(response)) {
     if (probability) {
@@ -253,8 +284,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       treetype <- 1
     }
-  } else if (is.numeric(response) && is.vector(response)) {
-    if (!is.null(classification) && classification) {
+  } else if (is.numeric(response) && (is.null(ncol(response)) || ncol(response) == 1)) {
+    if (!is.null(classification) && classification && !probability) {
       treetype <- 1
     } else if (probability) {
       treetype <- 9
@@ -267,6 +298,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Unsupported type of dependent variable.")
   }
   
+  ## Quantile prediction only for regression
+  if (quantreg && treetype != 3) {
+    stop("Error: Quantile prediction implemented only for regression outcomes.")
+  }
+  
   ## Dependent and status variable name. For non-survival dummy status variable name.
   if (!is.null(formula)) {
     if (treetype == 5) {
@@ -274,7 +310,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       status.variable.name <- dimnames(response)[[2]][2]
     } else {
       dependent.variable.name <- names(data.selected)[1]
-      status.variable.name <- "none"
+      status.variable.name <- ""
     }
     independent.variable.names <- names(data.selected)[-1]
   } else {
@@ -307,28 +343,48 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       names.selected <- names(data.selected)
       ordered.idx <- sapply(data.selected, is.ordered)
       factor.idx <- sapply(data.selected, is.factor)
-      independent.idx <- names.selected != dependent.variable.name & 
-        names.selected != status.variable.name & 
-        names.selected != paste0("Surv(", dependent.variable.name, ", ", status.variable.name, ")")
+      independent.idx <- names.selected %in% independent.variable.names
       recode.idx <- independent.idx & (character.idx | (factor.idx & !ordered.idx))
 
+      if (any(recode.idx) & (importance == "impurity_corrected" || importance == "impurity_unbiased")) {
+        warning("Corrected impurity importance may not be unbiased for re-ordered factor levels. Consider setting respect.unordered.factors to 'ignore' or 'partition' or manually compute corrected importance.")
+      }
+      
       ## Numeric response
       if (is.factor(response)) {
         num.response <- as.numeric(response)
-      } else if (!is.null(dim(response))) {
-        num.response <- response[, 1]
       } else {
         num.response <- response
       }
 
       ## Recode each column
       data.selected[recode.idx] <- lapply(data.selected[recode.idx], function(x) {
-        ## Order factor levels
-        means <- aggregate(num.response~x, FUN=mean)
-        levels.ordered <- means$x[order(means$num.response)]
+        if (!is.factor(x)) {
+          x <- as.factor(x)
+        } 
+        
+        if (length(levels(x)) == 1) {
+          ## Don't order if only one level
+          levels.ordered <- levels(x)
+        } else if ("Surv" %in% class(response)) {
+          ## Use median survival if available or largest quantile available in all strata if median not available
+          levels.ordered <- largest.quantile(response ~ x)
+          
+          ## Get all levels not in node
+          levels.missing <- setdiff(levels(x), levels.ordered)
+          levels.ordered <- c(levels.missing, levels.ordered)
+        } else if (is.factor(response) & nlevels(response) > 2) {
+          levels.ordered <- pca.order(y = response, x = x)
+        } else {
+          ## Order factor levels by mean response
+          means <- sapply(levels(x), function(y) {
+            mean(num.response[x == y])
+          })
+          levels.ordered <- as.character(levels(x)[order(means)])
+        }
         
         ## Return reordered factor
-        factor(x, levels = levels.ordered)
+        factor(x, levels = levels.ordered, ordered = TRUE, exclude = NULL)
       })
       
       ## Save levels
@@ -370,7 +426,35 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Invalid value for num.trees.")
   }
   
-  ## mtry
+  ## mtry as a function
+  if (is.function(mtry)) { 
+    nv <- length(all.independent.variable.names)
+    
+    if (length(formals(mtry)) > 1){
+      stop("Error: Given mtry function requires single argument (the number of independent variables in the model).")
+    }
+    
+    # Evaluate function
+    mtry <- try(mtry(nv), silent = TRUE)
+    
+    if (inherits(mtry, "try-error")) {
+      message("The mtry function produced the error: ", mtry)
+      stop("Error: mtry function evaluation resulted in an error.")
+    }
+    
+    ## Check for a single numeric
+    if (!is.numeric(mtry) || length(mtry) != 1) {
+      stop("Error: Given mtry function should return a single integer or numeric.")
+    } else {
+      mtry <- as.integer(mtry)
+    }
+    
+    ## Check for limits
+    if (mtry < 1 || mtry > nv) {
+      stop("Error: Given mtry function should evaluate to a value not less than 1 and not greater than the number of independent variables ( = ", nv, " )")
+    }
+  }
+  
   if (is.null(mtry)) {
     mtry <- 0
   } else if (!is.numeric(mtry) || mtry < 0) {
@@ -402,9 +486,43 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Invalid value for min.node.size")
   }
   
+  ## Tree depth
+  if (is.null(max.depth)) {
+    max.depth <- 0
+  } else if (!is.numeric(max.depth) || max.depth < 0) {
+    stop("Error: Invalid value for max.depth. Please give a positive integer.")
+  }
+  
   ## Sample fraction
-  if (!is.numeric(sample.fraction) || sample.fraction <= 0 || sample.fraction > 1) {
-    stop("Error: Invalid value for sample.fraction. Please give a value in (0,1].")
+  if (!is.numeric(sample.fraction)) {
+    stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+  }
+  if (length(sample.fraction) > 1) {
+    if (!(treetype %in% c(1, 9))) {
+      stop("Error: Invalid value for sample.fraction. Vector values only valid for classification forests.")
+    }
+    if (any(sample.fraction < 0) || any(sample.fraction > 1)) {
+      stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+    }
+    if (sum(sample.fraction) <= 0) {
+      stop("Error: Invalid value for sample.fraction. Sum of values must be >0.")
+    }
+    if (length(sample.fraction) != nlevels(response)) {
+      stop("Error: Invalid value for sample.fraction. Expecting ", nlevels(response), " values, provided ", length(sample.fraction), ".")
+    }
+    if (!replace & any(sample.fraction * length(response) > table(response))) {
+      idx <- which(sample.fraction * length(response) > table(response))[1]
+      stop("Error: Not enough samples in class ", names(idx), 
+           "; available: ", table(response)[idx], 
+           ", requested: ", (sample.fraction * length(response))[idx], ".")
+    }
+    if (!is.null(case.weights)) {
+      stop("Error: Combination of case.weights and class-wise sampling not supported.")
+    }
+  } else {
+    if (sample.fraction <= 0 || sample.fraction > 1) {
+      stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
+    }
   }
   
   ## Importance mode
@@ -414,9 +532,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 1
   } else if (importance == "impurity_corrected" || importance == "impurity_unbiased") {
     importance.mode <- 5
-    if (!is.null(split.select.weights)) {
-      stop("Corrected impurity importance not supported in combination with split.select.weights.")
-    }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {
       importance.mode <- 2
@@ -445,6 +560,43 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (!replace && sum(case.weights > 0) < sample.fraction * nrow(data.final)) {
       stop("Error: Fewer non-zero case weights than observations to sample.")
     }
+  }
+  
+  ## Manual inbag selection
+  if (is.null(inbag)) {
+    inbag <- list(c(0,0))
+    use.inbag <- FALSE
+  } else if (is.list(inbag)) {
+    use.inbag <- TRUE
+    if (use.case.weights) {
+      stop("Error: Combination of case.weights and inbag not supported.")
+    }
+    if (length(sample.fraction) > 1) {
+      stop("Error: Combination of class-wise sampling and inbag not supported.")
+    }
+    if (length(inbag) != num.trees) {
+      stop("Error: Size of inbag list not equal to number of trees.")
+    }
+  } else {
+    stop("Error: Invalid inbag, expects list of vectors of size num.trees.")
+  }
+  
+  ## Class weights: NULL for no weights (all 1)
+  if (is.null(class.weights)) {
+    class.weights <- rep(1, nlevels(response))
+  } else {
+    if (!(treetype %in% c(1, 9))) {
+      stop("Error: Argument class.weights only valid for classification forests.")
+    }
+    if (!is.numeric(class.weights) || any(class.weights < 0)) {
+      stop("Error: Invalid value for class.weights. Please give a vector of non-negative values.")
+    }
+    if (length(class.weights) != nlevels(response)) {
+      stop("Error: Number of class weights not equal to number of classes.")
+    }
+
+    ## Reorder (C++ expects order as appearing in the data)
+    class.weights <- class.weights[unique(as.numeric(response))]
   }
   
   ## Split select weights: NULL for no weights
@@ -599,16 +751,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Warning for experimental 'order' splitting 
   if (respect.unordered.factors == "order") {
-    if (treetype == 5) {
-      warning("Warning: The 'order' mode for unordered factor handling for survival outcomes is experimental.")
-    } else if (treetype == 1 || treetype == 9) {
-      if (nlevels(response) > 2) {
-        warning("Warning: The 'order' mode for unordered factor handling for multiclass classification is experimental.")
-      }
-    } else if (treetype == 3 && splitrule == "maxstat") {
+    if (treetype == 3 && splitrule == "maxstat") {
       warning("Warning: The 'order' mode for unordered factor handling with the 'maxstat' splitrule is experimental.")
     }
+    if (gwa.mode & ((treetype %in% c(1,9) & nlevels(response) > 2) | treetype == 5)) {
+      stop("Error: Ordering of SNPs currently only implemented for regression and binary outcomes.")
+    }
   }
+  
 
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
@@ -628,6 +778,13 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     use.sparse.data <- FALSE
   }
   
+  if (respect.unordered.factors == "order"){
+    order.snps <- TRUE
+  } else {
+    order.snps <- FALSE
+  }
+  
+  
   ## Clean up
   rm("data.selected")
 
@@ -638,9 +795,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
-                      save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data)
+                      save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
+                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth, 
+                      inbag, use.inbag)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -652,14 +810,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   ## Set predictions
-  if (treetype == 1 && is.factor(response)) {
+  if (treetype == 1 && is.factor(response) && oob.error) {
     result$predictions <- integer.to.factor(result$predictions,
                                             levels(response))
     true.values <- integer.to.factor(unlist(data.final[, dependent.variable.name]),
                                      levels(response))
     result$confusion.matrix <- table(true.values, result$predictions, 
                                      dnn = c("true", "predicted"), useNA = "ifany")
-  } else if (treetype == 5) {
+  } else if (treetype == 5 && oob.error) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
     } 
@@ -669,7 +827,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$chf <- result$predictions
     result$predictions <- NULL
     result$survival <- exp(-result$chf)
-  } else if (treetype == 9 && !is.matrix(data)) {
+  } else if (treetype == 9 && !is.matrix(data) && oob.error) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
     } 
@@ -679,7 +837,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     
     ## Set colnames and sort by levels
     colnames(result$predictions) <- unique(response)
-    result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
+    if (is.factor(response)) {
+      result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
+    }
   }
   
   ## Splitrule
@@ -706,7 +866,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Write forest object
   if (write.forest) {
     if (is.factor(response)) {
-      result$forest$levels <- levels(droplevels(response))
+      result$forest$levels <- levels(response)
     }
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
@@ -719,12 +879,54 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   class(result) <- "ranger"
+  
+  ## Prepare quantile prediction
+  if (quantreg) {
+    terminal.nodes <- predict(result, data, type = "terminalNodes")$predictions + 1
+    n <- result$num.samples
+    result$random.node.values <- matrix(nrow = max(terminal.nodes), ncol = num.trees)
+    
+    ## Select one random obs per node and tree
+    for (tree in 1:num.trees){
+      idx <- sample(1:n, n)
+      result$random.node.values[terminal.nodes[idx, tree], tree] <- response[idx]
+    }
+    
+    ## Prepare out-of-bag quantile regression
+    if(!is.null(result$inbag.counts)) {
+      inbag.counts <- simplify2array(result$inbag.counts)
+      random.node.values.oob <- 0 * terminal.nodes
+      random.node.values.oob[inbag.counts > 0] <- NA
+      
+      ## For each tree and observation select one random obs in the same node (not the same obs)
+      for (tree in 1:num.trees){
+        is.oob <- inbag.counts[, tree] == 0
+        num.oob <- sum(is.oob)
+        
+        if (num.oob != 0) {
+          oob.obs <- which(is.oob)
+          oob.nodes <- terminal.nodes[oob.obs, tree]
+          for (j in 1:num.oob) {
+            idx <- terminal.nodes[, tree] == oob.nodes[j]
+            idx[oob.obs[j]] <- FALSE
+            random.node.values.oob[oob.obs[j], tree] <- save.sample(response[idx], size = 1)
+          }
+        }
+      }
+      
+      ## Check num.trees
+      minoob <- min(rowSums(inbag.counts == 0))
+      if (minoob < 10) {
+        stop("Error: Too few trees for out-of-bag quantile regression.")
+      }
+      
+      ## Use the same number of values for all obs, select randomly
+      result$random.node.values.oob <- t(apply(random.node.values.oob, 1, function(x) {
+        sample(x[!is.na(x)], minoob)
+      }))
+    }
+  }
+  
   return(result)
 }
 
-
-
-
-integer.to.factor <- function(x, labels) {
-  factor(x, levels = seq_along(labels), labels = labels)
-}

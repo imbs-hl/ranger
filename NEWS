@@ -1,8 +1,42 @@
-##### Version 0.8.2
-* Add bias-corrected impurity importance
-* Add impurity importance for survival forests
+##### Version 0.11.4
+* Add "beta" splitrule for bounded outcomes
 
-##### Version 0.8.1
+##### Version 0.11.3
+* Accept user-specified function in quantile prediction
+
+##### Version 0.11.2
+* Bug fixes
+
+##### Version 0.11.1
+* Bug fixes
+
+##### Version 0.11.0
+* Add max.depth parameter to limit tree depth
+* Add inbag argument for manual selection of observations in trees
+* Add support of splitting weights for corrected impurity importance 
+* Internal changes (slightly improved computation speed)
+* Warning: Possible seed differences compared to older versions
+* Bug fixes
+
+##### Version 0.10.0
+* Change license of C++ core to MIT (R package is still GPL3)
+* Better 'order' mode for unordered factors for multiclass and survival
+* Add 'order' mode for unordered factors for GenABEL SNP data (binary classification and regression)
+* Add class-weighted Gini splitting
+* Add fixed proportion sampling
+* Add impurity importance for the maxstat splitting rule
+* Remove GenABEL from suggested packages (removed from CRAN). GenABEL data is still supported
+* Improve memory management (internal changes)
+* Bug fixes
+
+##### Version 0.9.0
+* Add bias-corrected impurity importance (actual impurity reduction, AIR)
+* Add quantile prediction as in quantile regression forests
+* Add treeInfo() function to extract human readable tree structure
+* Add standard error estimation with the infinitesimal jackknife (now the default)
+* Add impurity importance for survival forests
+* Faster aggregation of predictions
+* Fix memory issues on Windows 7
 * Bug fixes
 
 ##### Version 0.8.0

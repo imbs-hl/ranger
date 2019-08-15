@@ -4,9 +4,10 @@
 \alias{predict.ranger}
 \title{Ranger prediction}
 \usage{
-\method{predict}{ranger}(object, data, predict.all = FALSE,
-  num.trees = object$num.trees, type = "response", seed = NULL,
-  num.threads = NULL, verbose = TRUE, ...)
+\method{predict}{ranger}(object, data = NULL, predict.all = FALSE,
+  num.trees = object$num.trees, type = "response",
+  se.method = "infjack", quantiles = c(0.1, 0.5, 0.9), what = NULL,
+  seed = NULL, num.threads = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{object}{Ranger \code{ranger} object.}
@@ -17,9 +18,15 @@
 
 \item{num.trees}{Number of trees used for prediction. The first \code{num.trees} in the forest are used.}
 
-\item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.}
+\item{type}{Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.}
 
-\item{seed}{Random seed used in Ranger.}
+\item{se.method}{Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.}
+
+\item{quantiles}{Vector of quantiles for quantile prediction. Set \code{type = 'quantiles'} to use.}
+
+\item{what}{User specified function for quantile prediction used instead of \code{quantile}. Must return numeric vector, see examples.}
+
+\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 
@@ -45,16 +52,44 @@ Prediction with new data and a saved forest from Ranger.
 }
 \details{
 For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
-For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
+For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap or infinitesimal jackknife for bagging is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
+For \code{type = 'quantiles'}, the selected quantiles for each observation are estimated. See Meinshausen (2006) for details.
+
+If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife-after-bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
 
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 }
+\examples{
+require(ranger)
+
+## Classification forest
+ranger(Species ~ ., data = iris)
+train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
+iris.train <- iris[train.idx, ]
+iris.test <- iris[-train.idx, ]
+rg.iris <- ranger(Species ~ ., data = iris.train)
+pred.iris <- predict(rg.iris, data = iris.test)
+table(iris.test$Species, pred.iris$predictions)
+
+## Quantile regression forest
+rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+pred <- predict(rf, mtcars[27:32, ], type = "quantiles", quantiles = c(0.1, 0.5, 0.9))
+pred$predictions
+
+## Quantile regression forest with user-specified function
+rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+pred <- predict(rf, mtcars[27:32, ], type = "quantiles", 
+                what = function(x) sample(x, 10, replace = TRUE))
+pred$predictions
+
+}
 \references{
 \itemize{
-  \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
+  \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
+  \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
   }
 }
 \seealso{
