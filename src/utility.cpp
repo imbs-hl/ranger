@@ -586,4 +586,27 @@ std::stringstream& readFromStream(std::stringstream& in, double& token) {
   return in;
 }
 
+double betaLogLik(double y, double mean, double phi) {
+
+  // Avoid 0 and 1
+  if (y < std::numeric_limits<double>::epsilon()) {
+    y = std::numeric_limits<double>::epsilon();
+  } else if (y >= 1) {
+    y = 1 - std::numeric_limits<double>::epsilon();
+  }
+  if (mean < std::numeric_limits<double>::epsilon()) {
+    mean = std::numeric_limits<double>::epsilon();
+  } else if (mean >= 1) {
+    mean = 1 - std::numeric_limits<double>::epsilon();
+  }
+  if (phi < std::numeric_limits<double>::epsilon()) {
+    phi = std::numeric_limits<double>::epsilon();
+  } else if (mean >= 1) {
+    phi = 1 - std::numeric_limits<double>::epsilon();
+  }
+
+  return (lgamma(phi) - lgamma(mean * phi) - lgamma((1 - mean) * phi) + (mean * phi - 1) * log(y)
+      + ((1 - mean) * phi - 1) * log(1 - y));
+}
+
 } // namespace ranger

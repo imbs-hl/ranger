@@ -1,3 +1,6 @@
+##### Version 0.11.4
+* Add "beta" splitrule for bounded outcomes
+
 ##### Version 0.11.3
 * Accept user-specified function in quantile prediction
 
