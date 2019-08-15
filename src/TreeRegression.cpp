@@ -239,11 +239,6 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
       continue;
     }
 
-    // Stop if minimal node size reached
-    if (n_left < min_node_size || n_right[i] < min_node_size) {
-      continue;
-    }
-
     double sum_right = sums_right[i];
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
@@ -296,11 +291,6 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     size_t n_right = num_samples_node - n_left;
     if (n_right == 0) {
       break;
-    }
-
-    // Stop if minimal node size reached
-    if (n_right < min_node_size || n_left < min_node_size) {
-      continue;
     }
 
     double sum_right = sum_node - sum_left;
@@ -393,11 +383,6 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
 bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
-
-  // Check node size, stop if maximum reached
-  if (num_samples_node <= min_node_size) {
-    return true;
-  }
 
   // Compute ranks
   std::vector<double> response;
@@ -512,19 +497,15 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
     sum_node += data->get(sampleID, dependent_varID);
   }
 
-  // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_node_size) {
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
 
-    // For all possible split variables
-    for (auto& varID : possible_split_varIDs) {
-
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-        findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-      } else {
-        findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
-            best_decrease);
-      }
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if (data->isOrderedVariable(varID)) {
+      findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+    } else {
+      findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
+          best_decrease);
     }
   }
 
@@ -592,13 +573,6 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
 
     // Count samples until split_value reached
     for (size_t i = 0; i < num_splits; ++i) {
-
-      // Stop if minimal node size reached
-      size_t n_left = num_samples_node - n_right[i];
-      if (n_right[i] < min_node_size || n_left < min_node_size) {
-        continue;
-      }
-
       if (value > possible_split_values[i]) {
         ++n_right[i];
         sums_right[i] += response;
@@ -736,13 +710,9 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
     sum_node += data->get(sampleID, dependent_varID);
   }
 
-  // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_node_size) {
-
-    // For all possible split variables find best split value
-    for (auto& varID : possible_split_varIDs) {
-      findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-    }
+  // For all possible split variables find best split value
+  for (auto& varID : possible_split_varIDs) {
+    findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
   }
 
   // Stop if no good split found
@@ -817,11 +787,6 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     // Stop if one child too small
     size_t n_left = num_samples_node - n_right[i];
     if (n_left < 2 || n_right[i] < 2) {
-      continue;
-    }
-
-    // Stop if minimal node size reached
-    if (n_right[i] < min_node_size || n_left < min_node_size) {
       continue;
     }
 
