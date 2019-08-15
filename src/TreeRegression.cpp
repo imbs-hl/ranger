@@ -137,30 +137,26 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
     sum_node += data->get(sampleID, dependent_varID);
   }
 
-  // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_node_size) {
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
 
-    // For all possible split variables
-    for (auto& varID : possible_split_varIDs) {
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if (data->isOrderedVariable(varID)) {
 
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-
-        // Use memory saving method if option set
-        if (memory_saving_splitting) {
+      // Use memory saving method if option set
+      if (memory_saving_splitting) {
+        findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+      } else {
+        // Use faster method for both cases
+        double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+        if (q < Q_THRESHOLD) {
           findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
         } else {
-          // Use faster method for both cases
-          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-          if (q < Q_THRESHOLD) {
-            findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-          } else {
-            findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-          }
+          findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
         }
-      } else {
-        findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
       }
+    } else {
+      findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
     }
   }
 
