@@ -489,6 +489,15 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::
  */
 std::stringstream& readFromStream(std::stringstream& in, double& token);
 
+/**
+ * Compute log-likelihood of beta distribution
+ * @param y Response
+ * @param mean Mean
+ * @param phi Phi
+ * @return Log-likelihood
+ */
+double betaLogLik(double y, double mean, double phi);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {

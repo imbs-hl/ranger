@@ -90,6 +90,8 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
     stop = findBestSplitMaxstat(nodeID, possible_split_varIDs);
   } else if (splitrule == EXTRATREES) {
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
+  } else if (splitrule == BETA) {
+    stop = findBestSplitBeta(nodeID, possible_split_varIDs);
   } else {
     stop = findBestSplit(nodeID, possible_split_varIDs);
   }
@@ -686,6 +688,169 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
       best_value = splitID;
       best_varID = varID;
       best_decrease = decrease;
+    }
+  }
+}
+
+bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+
+  size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+  double best_decrease = -std::numeric_limits<double>::infinity();
+  size_t best_varID = 0;
+  double best_value = 0;
+
+  // Compute sum of responses in node
+  double sum_node = 0;
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    sum_node += data->get(sampleID, dependent_varID);
+  }
+
+  // For all possible split variables find best split value
+  for (auto& varID : possible_split_varIDs) {
+    findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+  }
+
+  // Stop if no good split found
+  if (std::isinf(-best_decrease)) {
+    return true;
+  }
+
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+
+  // Compute decrease of impurity for this node and add to variable importance if needed
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+    addImpurityImportance(nodeID, best_varID, best_decrease);
+  }
+  return false;
+}
+
+void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+    double& best_value, size_t& best_varID, double& best_decrease) {
+
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs, varID, start_pos[nodeID], end_pos[nodeID]);
+
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return;
+  }
+
+  // -1 because no split possible at largest value
+  size_t num_splits = possible_split_values.size() - 1;
+  if (memory_saving_splitting) {
+    std::vector<double> sums_right(num_splits);
+    std::vector<size_t> n_right(num_splits);
+    findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
+        possible_split_values, sums_right, n_right);
+  } else {
+    std::fill_n(sums.begin(), num_splits, 0);
+    std::fill_n(counter.begin(), num_splits, 0);
+    findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
+        possible_split_values, sums, counter);
+  }
+}
+
+void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+    double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+    std::vector<double>& sums_right, std::vector<size_t>& n_right) {
+  // -1 because no split possible at largest value
+  const size_t num_splits = possible_split_values.size() - 1;
+
+  // Sum in right child and possbile split
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    double value = data->get(sampleID, varID);
+    double response = data->get(sampleID, dependent_varID);
+
+    // Count samples until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+      if (value > possible_split_values[i]) {
+        ++n_right[i];
+        sums_right[i] += response;
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Compute LogLik of beta distribution for each possible split
+  for (size_t i = 0; i < num_splits; ++i) {
+
+    // Stop if one child too small
+    size_t n_left = num_samples_node - n_right[i];
+    if (n_left < 2 || n_right[i] < 2) {
+      continue;
+    }
+
+    // Compute mean
+    double sum_right = sums_right[i];
+    double mean_right = sum_right / (double) n_right[i];
+    double sum_left = sum_node - sum_right;
+    double mean_left = sum_left / (double) n_left;
+
+    // Compute variance
+    double var_right = 0;
+    double var_left = 0;
+    for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+      size_t sampleID = sampleIDs[pos];
+      double value = data->get(sampleID, varID);
+      double response = data->get(sampleID, dependent_varID);
+
+      if (value > possible_split_values[i]) {
+        var_right += (response - mean_right) * (response - mean_right);
+      } else {
+        var_left += (response - mean_left) * (response - mean_left);
+      }
+    }
+    var_right /= (double) n_right[i] - 1;
+    var_left /= (double) n_left - 1;
+
+    // Stop if zero variance
+    if (var_right < std::numeric_limits<double>::epsilon() || var_left < std::numeric_limits<double>::epsilon()) {
+      continue;
+    }
+
+    // Compute phi for beta distribution
+    double phi_right = mean_right * (1 - mean_right) / var_right - 1;
+    double phi_left = mean_left * (1 - mean_left) / var_left - 1;
+
+    // Compute LogLik of beta distribution
+    double beta_loglik_right = 0;
+    double beta_loglik_left = 0;
+    for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+      size_t sampleID = sampleIDs[pos];
+      double value = data->get(sampleID, varID);
+      double response = data->get(sampleID, dependent_varID);
+
+      if (value > possible_split_values[i]) {
+        beta_loglik_right += betaLogLik(response, mean_right, phi_right);
+      } else {
+        beta_loglik_left += betaLogLik(response, mean_left, phi_left);
+      }
+    }
+
+    // Split statistic is sum of both log-likelihoods
+    double decrease = beta_loglik_right + beta_loglik_left;
+
+    // Stop if no result
+    if (std::isnan(decrease)) {
+      continue;
+    }
+
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
+      best_varID = varID;
+      best_decrease = decrease;
+
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == possible_split_values[i + 1]) {
+        best_value = possible_split_values[i];
+      }
     }
   }
 }
