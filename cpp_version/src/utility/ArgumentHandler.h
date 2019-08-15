@@ -1,29 +1,12 @@
 /*-------------------------------------------------------------------------------
-This file is part of Ranger.
-    
-Ranger is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This file is part of ranger.
 
-Ranger is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+Copyright (c) [2014-2018] [Marvin N. Wright]
 
-You should have received a copy of the GNU General Public License
-along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+This software may be modified and distributed under the terms of the MIT license.
 
-Written by: 
-
-Marvin N. Wright
-Institut für Medizinische Biometrie und Statistik
-Universität zu Lübeck
-Ratzeburger Allee 160
-23562 Lübeck 
-Germany
-
-http://www.imbs-luebeck.de
+Please note that the C++ core of ranger is distributed under MIT license and the
+R package "ranger" under GPL3 license.
 #-------------------------------------------------------------------------------*/
 
 #ifndef ARGUMENTHANDLER_H_
@@ -34,6 +17,8 @@ http://www.imbs-luebeck.de
 #include <vector>
 
 #include "globals.h"
+
+namespace ranger {
 
 /*
  * Encapsulate getopt.
@@ -51,7 +36,10 @@ http://www.imbs-luebeck.de
 class ArgumentHandler {
 public:
   ArgumentHandler(int argc, char **argv);
-  virtual ~ArgumentHandler();
+  virtual ~ArgumentHandler() = default;
+
+  ArgumentHandler(const ArgumentHandler&)            = delete;
+  ArgumentHandler& operator=(const ArgumentHandler&) = delete;
 
   // Get arguments and catch conversion exceptions
   int processArguments();
@@ -67,6 +55,7 @@ public:
   bool holdout;
   MemoryMode memmode;
   bool savemem;
+  bool skipoob;
   std::string predict;
   PredictionType predictiontype;
   uint randomsplits;
@@ -78,6 +67,7 @@ public:
   double alpha;
   double minprop;
   std::vector<std::string> catvars;
+  uint maxdepth;
   std::string file;
   ImportanceMode impmeasure;
   uint targetpartitionsize;
@@ -100,8 +90,8 @@ private:
 
   int argc;
   char** argv;
-
-  DISALLOW_COPY_AND_ASSIGN(ArgumentHandler);
 };
+
+} // namespace ranger
 
 #endif /* ARGUMENTHANDLER_H_ */

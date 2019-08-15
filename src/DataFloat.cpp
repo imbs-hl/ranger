@@ -1,42 +1,21 @@
 /*-------------------------------------------------------------------------------
-This file is part of Ranger.
-    
-Ranger is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This file is part of ranger.
 
-Ranger is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-You should have received a copy of the GNU General Public License
-along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Written by: 
-
-Marvin N. Wright
-Institut für Medizinische Biometrie und Statistik
-Universität zu Lübeck
-Ratzeburger Allee 160
-23562 Lübeck 
-Germany
-
-http://www.imbs-luebeck.de
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 // Ignore in coverage report (not used in R package)
 // #nocov start
- 
 #include <iostream>
-#include <vector>
 
 #include "DataFloat.h"
 
-DataFloat::DataFloat() :
-    data(0) {
-}
+namespace ranger {
 
 DataFloat::DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
   this->variable_names = variable_names;
@@ -52,11 +31,6 @@ DataFloat::DataFloat(double* data_double, std::vector<std::string> variable_name
   }
 }
 
-DataFloat::~DataFloat() {
-  if (!externalData) {
-    delete[] data;
-  }
-}
-
 // #nocov end
 
+}// namespace ranger

@@ -5,13 +5,12 @@ library(survival)
 context("ranger_surv")
 
 ## Initialize the random forest for survival analysis
-rg.surv <- ranger(Surv(time, status) ~ ., data = veteran, verbose = FALSE, 
-                  write.forest = TRUE, num.trees = 10)
+rg.surv <- ranger(Surv(time, status) ~ ., data = veteran, num.trees = 10)
 
 ## Basic tests (for all random forests equal)
-test_that("survival result is of class ranger with 16 elements", {
+test_that("survival result is of class ranger with 15 elements", {
   expect_is(rg.surv, "ranger")
-  expect_equal(length(rg.surv), 16)
+  expect_equal(length(rg.surv), 15)
 })
 
 test_that("results have right number of trees", {
@@ -62,7 +61,7 @@ test_that("unique death times in survival result is right", {
 })
 
 test_that("C-index splitting works", {
-  rf <- ranger(Surv(time, status) ~ ., data = veteran, verbose = FALSE, 
+  rf <- ranger(Surv(time, status) ~ ., data = veteran, 
                splitrule = "C", num.trees = 10)
   expect_equal(rf$treetype, "Survival")
 })

@@ -1,29 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of Ranger.
+ This file is part of ranger.
 
- Ranger is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
- Ranger is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+ This software may be modified and distributed under the terms of the MIT license.
 
- You should have received a copy of the GNU General Public License
- along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-
- Written by:
-
- Marvin N. Wright
- Institut für Medizinische Biometrie und Statistik
- Universität zu Lübeck
- Ratzeburger Allee 160
- 23562 Lübeck
- Germany
-
- http://www.imbs-luebeck.de
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <math.h>
@@ -41,6 +24,8 @@
 #include "utility.h"
 #include "globals.h"
 #include "Data.h"
+
+namespace ranger {
 
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts) {
 
@@ -97,7 +82,7 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
 } // #nocov end
 
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples) {
+    const std::vector<size_t>& skip, size_t num_samples) {
   if (num_samples < max / 10) {
     drawWithoutReplacementSimple(result, random_number_generator, max, skip, num_samples);
   } else {
@@ -107,7 +92,7 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
 }
 
 void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    std::vector<size_t>& skip, size_t num_samples) {
+    const std::vector<size_t>& skip, size_t num_samples) {
 
   result.reserve(num_samples);
 
@@ -132,7 +117,7 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
 }
 
 void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t max, std::vector<size_t>& skip, size_t num_samples) {
+    size_t max, const std::vector<size_t>& skip, size_t num_samples) {
 
   // Create indices
   result.resize(max);
@@ -154,7 +139,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
 }
 
 void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    std::vector<size_t>& indices, size_t num_samples, std::vector<double>& weights) {
+    const std::vector<size_t>& indices, size_t num_samples, const std::vector<double>& weights) {
 
   result.reserve(num_samples);
 
@@ -174,7 +159,7 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
 }
 
 void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t max_index, size_t num_samples, std::vector<double>& weights) {
+    size_t max_index, size_t num_samples, const std::vector<double>& weights) {
 
   result.reserve(num_samples);
 
@@ -193,7 +178,8 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
   }
 }
 
-double mostFrequentValue(std::unordered_map<double, size_t>& class_count, std::mt19937_64 random_number_generator) {
+double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
+    std::mt19937_64 random_number_generator) {
   std::vector<double> major_classes;
 
   // Find maximum count
@@ -217,8 +203,8 @@ double mostFrequentValue(std::unordered_map<double, size_t>& class_count, std::m
   }
 }
 
-double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t dependent_varID, size_t status_varID,
-    std::vector<size_t>& sample_IDs) {
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
+    size_t status_varID, const std::vector<size_t>& sample_IDs) {
 
   // Compute concordance index
   double concordance = 0;
@@ -228,16 +214,16 @@ double computeConcordanceIndex(Data* data, std::vector<double>& sum_chf, size_t 
     if (!sample_IDs.empty()) {
       sample_i = sample_IDs[i];
     }
-    double time_i = data->get(sample_i, dependent_varID);
-    double status_i = data->get(sample_i, status_varID);
+    double time_i = data.get(sample_i, dependent_varID);
+    double status_i = data.get(sample_i, status_varID);
 
     for (size_t j = i + 1; j < sum_chf.size(); ++j) {
       size_t sample_j = j;
       if (!sample_IDs.empty()) {
         sample_j = sample_IDs[j];
       }
-      double time_j = data->get(sample_j, dependent_varID);
-      double status_j = data->get(sample_j, status_varID);
+      double time_j = data.get(sample_j, dependent_varID);
+      double status_j = data.get(sample_j, status_varID);
 
       if (time_i < time_j && status_i == 0) {
         continue;
@@ -323,7 +309,7 @@ size_t roundToNextMultiple(size_t value, uint multiple) {
   return value + multiple - remainder;
 }
 
-void splitString(std::vector<std::string>& result, std::string input, char split_char) { // #nocov start
+void splitString(std::vector<std::string>& result, const std::string& input, char split_char) { // #nocov start
 
   std::istringstream ss(input);
   std::string token;
@@ -351,16 +337,44 @@ void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& secon
   first_part.resize(n_first);
 }
 
-std::string checkUnorderedVariables(Data* data, std::vector<std::string> unordered_variable_names) { // #nocov start
-  size_t num_rows = data->getNumRows();
+void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all,
+    size_t n_first, const std::vector<size_t>& mapping, std::mt19937_64 random_number_generator) {
+  // Old end is start position for new data
+  size_t first_old_size = first_part.size();
+  size_t second_old_size = second_part.size();
+
+  // Reserve space
+  first_part.resize(first_old_size + n_all);
+  std::vector<size_t>::iterator first_start_pos = first_part.begin() + first_old_size;
+
+  // Fill with 0..n_all-1 and shuffle
+  std::iota(first_start_pos, first_part.end(), 0);
+  std::shuffle(first_start_pos, first_part.end(), random_number_generator);
+
+  // Mapping
+  for (std::vector<size_t>::iterator j = first_start_pos; j != first_part.end(); ++j) {
+    *j = mapping[*j];
+  }
+
+  // Copy to second part
+  second_part.resize(second_part.size() + n_all - n_first);
+  std::vector<size_t>::iterator second_start_pos = second_part.begin() + second_old_size;
+  std::copy(first_start_pos + n_first, first_part.end(), second_start_pos);
+
+  // Resize first part
+  first_part.resize(first_old_size + n_first);
+}
+
+std::string checkUnorderedVariables(const Data& data, const std::vector<std::string>& unordered_variable_names) { // #nocov start
+  size_t num_rows = data.getNumRows();
   std::vector<size_t> sampleIDs(num_rows);
   std::iota(sampleIDs.begin(), sampleIDs.end(), 0);
 
   // Check for all unordered variables
   for (auto& variable_name : unordered_variable_names) {
-    size_t varID = data->getVariableID(variable_name);
+    size_t varID = data.getVariableID(variable_name);
     std::vector<double> all_values;
-    data->getAllValues(all_values, sampleIDs, varID);
+    data.getAllValues(all_values, sampleIDs, varID, 0, sampleIDs.size());
 
     // Check level count
     size_t max_level_count = 8 * sizeof(size_t) - 1;
@@ -377,7 +391,7 @@ std::string checkUnorderedVariables(Data* data, std::vector<std::string> unorder
   return "";
 } // #nocov end
 
-bool checkPositiveIntegers(std::vector<double>& all_values) { // #nocov start
+bool checkPositiveIntegers(const std::vector<double>& all_values) { // #nocov start
   for (auto& value : all_values) {
     if (value < 1 || !(floor(value) == value)) {
       return false;
@@ -405,7 +419,7 @@ double maxstatPValueLau92(double b, double minprop, double maxprop) {
   }
 }
 
-double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, std::vector<size_t>& m) {
+double maxstatPValueLau94(double b, double minprop, double maxprop, size_t N, const std::vector<size_t>& m) {
 
   double D = 0;
   for (size_t i = 0; i < m.size() - 1; ++i) {
@@ -450,7 +464,7 @@ std::vector<double> adjustPvalues(std::vector<double>& unadjusted_pvalues) {
   return adjusted_pvalues;
 }
 
-std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>& status) {
+std::vector<double> logrankScores(const std::vector<double>& time, const std::vector<double>& status) {
   size_t n = time.size();
   std::vector<double> scores(n);
 
@@ -482,8 +496,8 @@ std::vector<double> logrankScores(std::vector<double>& time, std::vector<double>
   return scores;
 }
 
-void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<size_t>& indices, double& best_maxstat,
-    double& best_split_value, double minprop, double maxprop) {
+void maxstat(const std::vector<double>& scores, const std::vector<double>& x, const std::vector<size_t>& indices,
+    double& best_maxstat, double& best_split_value, double minprop, double maxprop) {
   size_t n = x.size();
 
   double sum_all_scores = 0;
@@ -548,7 +562,7 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
   }
 }
 
-std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector<size_t>& indices) {
+std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::vector<size_t>& indices) {
   std::vector<size_t> num_samples_left;
   num_samples_left.reserve(x.size());
 
@@ -563,6 +577,13 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector
   }
 
   return num_samples_left;
+}
+
+std::stringstream& readFromStream(std::stringstream& in, double& token) {
+  if (!(in >> token) && (std::fpclassify(token) == FP_SUBNORMAL)) {
+    in.clear();
+  }
+  return in;
 }
 
 double betaLogLik(double y, double mean, double phi) {
@@ -584,7 +605,8 @@ double betaLogLik(double y, double mean, double phi) {
     phi = 1 - std::numeric_limits<double>::epsilon();
   }
 
-  return (lgamma(phi) - lgamma(mean * phi) - lgamma((1 - mean) * phi)
-      + (mean * phi - 1) * log(y) + ((1 - mean) * phi - 1) * log(1 - y));
+  return (lgamma(phi) - lgamma(mean * phi) - lgamma((1 - mean) * phi) + (mean * phi - 1) * log(y)
+      + ((1 - mean) * phi - 1) * log(1 - y));
 }
 
+} // namespace ranger

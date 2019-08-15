@@ -48,7 +48,7 @@ csrf(Species ~ ., training_data = iris.train, test_data = iris.test,
 
 }
 \references{
-Xu, R., Nettleton, D. & Nordman, D.J. (2014). Case-specific random forests. J Comp Graph Stat 25:49-65. \url{http://dx.doi.org/10.1080/10618600.2014.983641}.
+Xu, R., Nettleton, D. & Nordman, D.J. (2014). Case-specific random forests. J Comp Graph Stat 25:49-65. \url{https://doi.org/10.1080/10618600.2014.983641}.
 }
 \author{
 Marvin N. Wright

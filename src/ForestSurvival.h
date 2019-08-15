@@ -1,29 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of Ranger.
+ This file is part of ranger.
 
- Ranger is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
- Ranger is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+ This software may be modified and distributed under the terms of the MIT license.
 
- You should have received a copy of the GNU General Public License
- along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-
- Written by:
-
- Marvin N. Wright
- Institut für Medizinische Biometrie und Statistik
- Universität zu Lübeck
- Ratzeburger Allee 160
- 23562 Lübeck
- Germany
-
- http://www.imbs-luebeck.de
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef FORESTSURVIVAL_H_
@@ -36,10 +19,16 @@
 #include "Forest.h"
 #include "TreeSurvival.h"
 
+namespace ranger {
+
 class ForestSurvival: public Forest {
 public:
-  ForestSurvival();
-  virtual ~ForestSurvival();
+  ForestSurvival() = default;
+
+  ForestSurvival(const ForestSurvival&) = delete;
+  ForestSurvival& operator=(const ForestSurvival&) = delete;
+
+  virtual ~ForestSurvival() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -47,15 +36,8 @@ public:
       size_t status_varID, std::vector<std::vector<std::vector<double>> >& forest_chf,
       std::vector<double>& unique_timepoints, std::vector<bool>& is_ordered_variable);
 
-  std::vector<std::vector<std::vector<double>>>getChf() {
-    std::vector<std::vector<std::vector<double>>> result;
-    result.reserve(num_trees);
-    for (Tree* tree : trees) {
-      TreeSurvival* temp = (TreeSurvival*) tree;
-      result.push_back(temp->getChf());
-    }
-    return result;
-  }
+  std::vector<std::vector<std::vector<double>>> getChf() const;
+
   size_t getStatusVarId() const {
     return status_varID;
   }
@@ -64,21 +46,26 @@ public:
   }
 
 private:
-  void initInternal(std::string status_variable_name);
-  void growInternal();
-  void predictInternal();
-  void computePredictionErrorInternal();
-  void writeOutputInternal();
-  void writeConfusionFile();
-  void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  void initInternal(std::string status_variable_name) override;
+  void growInternal() override;
+  void allocatePredictMemory() override;
+  void predictInternal(size_t sample_idx) override;
+  void computePredictionErrorInternal() override;
+  void writeOutputInternal() override;
+  void writeConfusionFile() override;
+  void writePredictionFile() override;
+  void saveToFileInternal(std::ofstream& outfile) override;
+  void loadFromFileInternal(std::ifstream& infile) override;
 
   size_t status_varID;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
 
-  DISALLOW_COPY_AND_ASSIGN(ForestSurvival);
+private:
+  const std::vector<double>& getTreePrediction(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
+
+} // namespace ranger
 
 #endif /* FORESTSURVIVAL_H_ */

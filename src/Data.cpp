@@ -1,29 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of Ranger.
+ This file is part of ranger.
 
- Ranger is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
- Ranger is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+ This software may be modified and distributed under the terms of the MIT license.
 
- You should have received a copy of the GNU General Public License
- along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-
- Written by:
-
- Marvin N. Wright
- Institut für Medizinische Biometrie und Statistik
- Universität zu Lübeck
- Ratzeburger Allee 160
- 23562 Lübeck
- Germany
-
- http://www.imbs-luebeck.de
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <fstream>
@@ -35,23 +18,19 @@
 #include "Data.h"
 #include "utility.h"
 
+namespace ranger {
+
 Data::Data() :
-    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(
-        0), max_num_unique_values(0) {
+    num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
+        0), order_snps(false) {
 }
 
-Data::~Data() {
-  if (index_data != 0) {
-    delete[] index_data;
-  }
-}
-
-size_t Data::getVariableID(std::string variable_name) {
-  std::vector<std::string>::iterator it = std::find(variable_names.begin(), variable_names.end(), variable_name);
-  if (it == variable_names.end()) {
+size_t Data::getVariableID(const std::string& variable_name) const {
+  auto it = std::find(variable_names.cbegin(), variable_names.cend(), variable_name);
+  if (it == variable_names.cend()) {
     throw std::runtime_error("Variable " + variable_name + " not found.");
   }
-  return (std::distance(variable_names.begin(), it));
+  return (std::distance(variable_names.cbegin(), it));
 }
 
 void Data::addSnpData(unsigned char* snp_data, size_t num_cols_snp) {
@@ -120,14 +99,17 @@ bool Data::loadFromFileWhitespace(std::ifstream& input_file, std::string header_
     double token;
     std::stringstream line_stream(line);
     size_t column = 0;
-    while (line_stream >> token) {
+    while (readFromStream(line_stream, token)) {
       set(column, row, token, error);
       ++column;
     }
     if (column > num_cols) {
-      throw std::runtime_error("Could not open input file. Too many columns in a row.");
+      throw std::runtime_error(
+          std::string("Could not open input file. Too many columns in row ") + std::to_string(row) + std::string("."));
     } else if (column < num_cols) {
-      throw std::runtime_error("Could not open input file. Too few columns in a row. Are all values numeric?");
+      throw std::runtime_error(
+          std::string("Could not open input file. Too few columns in row ") + std::to_string(row)
+              + std::string(". Are all values numeric?"));
     }
     ++row;
   }
@@ -158,7 +140,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
     size_t column = 0;
     while (getline(line_stream, token_string, seperator)) {
       std::stringstream token_stream(token_string);
-      token_stream >> token;
+      readFromStream(token_stream, token);
       set(column, row, token, error);
       ++column;
     }
@@ -169,30 +151,30 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
 }
 // #nocov end
 
-void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID) {
+void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const {
 
   // All values for varID (no duplicates) for given sampleIDs
   if (getUnpermutedVarID(varID) < num_cols_no_snp) {
 
-    all_values.reserve(sampleIDs.size());
-    for (size_t i = 0; i < sampleIDs.size(); ++i) {
-      all_values.push_back(get(sampleIDs[i], varID));
+    all_values.reserve(end-start);
+    for (size_t pos = start; pos < end; ++pos) {
+      all_values.push_back(get(sampleIDs[pos], varID));
     }
     std::sort(all_values.begin(), all_values.end());
-    all_values.erase(unique(all_values.begin(), all_values.end()), all_values.end());
+    all_values.erase(std::unique(all_values.begin(), all_values.end()), all_values.end());
   } else {
     // If GWA data just use 0, 1, 2
     all_values = std::vector<double>( { 0, 1, 2 });
   }
 }
 
-void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID) {
+void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const {
   if (sampleIDs.size() > 0) {
-    min = get(sampleIDs[0], varID);
+    min = get(sampleIDs[start], varID);
     max = min;
   }
-  for (size_t i = 1; i < sampleIDs.size(); ++i) {
-    double value = get(sampleIDs[i], varID);
+  for (size_t pos = start; pos < end; ++pos) {
+    double value = get(sampleIDs[pos], varID);
     if (value < min) {
       min = value;
     }
@@ -205,7 +187,7 @@ void Data::getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleI
 void Data::sort() {
 
   // Reserve memory
-  index_data = new size_t[num_cols_no_snp * num_rows];
+  index_data.resize(num_cols_no_snp * num_rows);
 
   // For all columns, get unique values and save index for each observation
   for (size_t col = 0; col < num_cols_no_snp; ++col) {
@@ -231,3 +213,63 @@ void Data::sort() {
     }
   }
 }
+
+// TODO: Implement ordering for multiclass and survival
+void Data::orderSnpLevels(std::string dependent_variable_name, bool corrected_importance) {
+  // Stop if now SNP data
+  if (snp_data == 0) {
+    return;
+  }
+
+  size_t dependent_varID = getVariableID(dependent_variable_name);
+  size_t num_snps;
+  if (corrected_importance) {
+    num_snps = 2 * (num_cols - num_cols_no_snp);
+  } else {
+    num_snps = num_cols - num_cols_no_snp;
+  }
+
+  // Reserve space
+  snp_order.resize(num_snps, std::vector<size_t>(3));
+
+  // For each SNP
+  for (size_t i = 0; i < num_snps; ++i) {
+    size_t col = i;
+    if (i >= (num_cols - num_cols_no_snp)) {
+      // Get unpermuted SNP ID
+      col = i - num_cols + num_cols_no_snp;
+    }
+
+    // Order by mean response
+    std::vector<double> means(3, 0);
+    std::vector<double> counts(3, 0);
+    for (size_t row = 0; row < num_rows; ++row) {
+      size_t row_permuted = row;
+      if (i >= (num_cols - num_cols_no_snp)) {
+        row_permuted = getPermutedSampleID(row);
+      }
+      size_t idx = col * num_rows_rounded + row_permuted;
+      size_t value = (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+
+      // TODO: Better way to treat missing values?
+      if (value > 2) {
+        value = 0;
+      }
+
+      means[value] += get(row, dependent_varID);
+      ++counts[value];
+    }
+
+    for (size_t value = 0; value < 3; ++value) {
+      means[value] /= counts[value];
+    }
+
+    // Save order
+    snp_order[i] = order(means, false);
+  }
+
+  order_snps = true;
+}
+
+} // namespace ranger
+

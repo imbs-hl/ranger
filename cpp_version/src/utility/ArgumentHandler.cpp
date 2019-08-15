@@ -1,29 +1,12 @@
 /*-------------------------------------------------------------------------------
-This file is part of Ranger.
+This file is part of ranger.
 
-Ranger is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Copyright (c) [2014-2018] [Marvin N. Wright]
 
-Ranger is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+This software may be modified and distributed under the terms of the MIT license.
 
-You should have received a copy of the GNU General Public License
-along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-
-Written by:
-
-Marvin N. Wright
-Institut für Medizinische Biometrie und Statistik
-Universität zu Lübeck
-Ratzeburger Allee 160
-23562 Lübeck
-Germany
-
-http://www.imbs-luebeck.de
+Please note that the C++ core of ranger is distributed under MIT license and the
+R package "ranger" under GPL3 license.
 #-------------------------------------------------------------------------------*/
 
 #include <fstream>
@@ -34,24 +17,23 @@ http://www.imbs-luebeck.de
 #include "version.h"
 #include "utility.h"
 
+namespace ranger {
+
 ArgumentHandler::ArgumentHandler(int argc, char **argv) :
-    caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), predict(""), predictiontype(
-        DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
-        DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), file(""), impmeasure(
-        DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix("ranger_out"), probability(false), splitrule(
-        DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(true), verbose(false), write(false), treetype(
-        TREE_CLASSIFICATION), seed(0) {
+    caseweights(""), depvarname(""), fraction(1), holdout(false), memmode(MEM_DOUBLE), savemem(false), skipoob(false), predict(
+        ""), predictiontype(DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
+        DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), maxdepth(
+        DEFAULT_MAXDEPTH), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix(
+        "ranger_out"), probability(false), splitrule(DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(
+        true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0) {
   this->argc = argc;
   this->argv = argv;
-}
-
-ArgumentHandler::~ArgumentHandler() {
 }
 
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NP:Q:R:S:U:XZa:b:c:f:hil::m:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hil::m:o:pr:s:t:uvwy:z:";
 
   // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -63,6 +45,7 @@ int ArgumentHandler::processArguments() {
       { "holdout",              no_argument,        0, 'H'},
       { "memmode",              required_argument,  0, 'M'},
       { "savemem",              no_argument,        0, 'N'},
+      { "skipoob",              no_argument,        0, 'O'},
       { "predict",              required_argument,  0, 'P'},
       { "predictiontype",       required_argument,  0, 'Q'},
       { "randomsplits",         required_argument,  0, 'R'},
@@ -74,6 +57,7 @@ int ArgumentHandler::processArguments() {
       { "alpha",                required_argument,  0, 'a'},
       { "minprop",              required_argument,  0, 'b'},
       { "catvars",              required_argument,  0, 'c'},
+      { "maxdepth",             required_argument,  0, 'd'},
       { "file",                 required_argument,  0, 'f'},
       { "help",                 no_argument,        0, 'h'},
       { "impmeasure",           required_argument,  0, 'i'},
@@ -147,6 +131,10 @@ int ArgumentHandler::processArguments() {
 
     case 'N':
       savemem = true;
+      break;
+
+    case 'O':
+      skipoob = true;
       break;
 
     case 'P':
@@ -243,6 +231,20 @@ int ArgumentHandler::processArguments() {
 
     case 'c':
       splitString(catvars, optarg, ',');
+      break;
+
+    case 'd':
+      try {
+        int temp = std::stoi(optarg);
+        if (temp < 0) {
+          throw std::runtime_error("");
+        } else {
+          maxdepth = temp;
+        }
+      } catch (...) {
+        throw std::runtime_error(
+            "Illegal argument for option 'maxdepth'. Please give a positive integer. See '--help' for details.");
+      }
       break;
 
     case 'f':
@@ -521,6 +523,8 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              For Survival growing is stopped if one child would reach a size smaller than N." << std::endl;
   std::cout << "    " << "                              This means nodes with size smaller N can occur for Classification and Regression." << std::endl;
   std::cout << "    " << "                              (Default: 1 for Classification, 5 for Regression, and 3 for Survival)" << std::endl;
+  std::cout << "    " << "--maxdepth N                  Set maximal tree depth to N." << std::endl;
+  std::cout << "    " << "                              Set to 0 for unlimited depth. A value of 1 corresponds to tree stumps (1 split)." << std::endl;
   std::cout << "    " << "--catvars V1,V2,..            Comma separated list of names of (unordered) categorical variables. " << std::endl;
   std::cout << "    " << "                              Categorical variables must contain only positive integer values." << std::endl;
   std::cout << "    " << "--write                       Save forest to file <outprefix>.forest." << std::endl;
@@ -557,6 +561,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              importance and prediction error." << std::endl;
   std::cout << "    " << "--splitweights FILE           Filename of split select weights file." << std::endl;
   std::cout << "    " << "--alwayssplitvars V1,V2,..    Comma separated list of variable names to be always considered for splitting." << std::endl;
+  std::cout << "    " << "--skipoob                     Skip computation of OOB error." << std::endl;
   std::cout << "    " << "--nthreads N                  Set number of parallel threads to N." << std::endl;
   std::cout << "    " << "                              (Default: Number of CPUs available)" << std::endl;
   std::cout << "    " << "--seed SEED                   Set random seed to SEED." << std::endl;
@@ -573,7 +578,6 @@ void ArgumentHandler::displayHelp() {
   std::cout << "See README file for details and examples." << std::endl;
 }
 
-// TODO: Change citation info
 void ArgumentHandler::displayVersion() {
   std::cout << "Ranger version: " << RANGER_VERSION << std::endl;
   std::cout << std::endl;
@@ -591,3 +595,5 @@ void ArgumentHandler::displayVersion() {
   std::cout << "    doi = {10.18637/jss.v077.i01}," << std::endl;
   std::cout << "}" << std::endl;
 }
+
+} // namespace ranger

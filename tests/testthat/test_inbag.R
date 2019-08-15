@@ -100,3 +100,15 @@ test_that("Number of samples is right sample fraction, replace=TRUE, 0.5, weight
   expect_gt(sample.fraction, expected.sample.fraction-0.05)
   expect_lt(sample.fraction, expected.sample.fraction+0.05)
 })
+
+test_that("Manual inbag selection selects correct observations", {
+  inbag <- replicate(5, rbinom(nrow(iris), 1, .5), simplify = FALSE)
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, keep.inbag = TRUE, inbag = inbag)
+  expect_equal(rf$inbag.counts, 
+               inbag)
+  
+  inbag <- replicate(5, round(runif(nrow(iris), 0, 5)), simplify = FALSE)
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = TRUE, keep.inbag = TRUE, inbag = inbag)
+  expect_equal(rf$inbag.counts, 
+               inbag)
+})

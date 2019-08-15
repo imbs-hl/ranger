@@ -6,13 +6,13 @@ context("ranger_class")
 ## Initialize the random forest for classification
 dat <- data.matrix(iris)
 
-rg.class <- ranger(Species ~ ., data = iris, verbose = FALSE, write.forest = TRUE)
-rg.mat   <- ranger(dependent.variable.name = "Species", data = dat, write.forest = TRUE, classification = TRUE)
+rg.class <- ranger(Species ~ ., data = iris)
+rg.mat   <- ranger(dependent.variable.name = "Species", data = dat, classification = TRUE)
 
 ## Basic tests (for all random forests equal)
-test_that("classification result is of class ranger with 15 elements", {
+test_that("classification result is of class ranger with 14 elements", {
   expect_is(rg.class, "ranger")
-  expect_equal(length(rg.class), 15)
+  expect_equal(length(rg.class), 14)
 })
 
 test_that("classification prediction returns factor", {
@@ -186,4 +186,18 @@ test_that("Working with numerically almost exact splitting values", {
                     z = c(1.7629414498915687570246291215880773, 
                           1.7629414498915689790692340466193854))
   expect_silent(ranger(a ~ ., data = dat, num.threads = 1, num.trees = 1))
+})
+
+test_that("No error if unused factor levels in outcome", {
+  expect_warning(rf <- ranger(Species ~ ., iris[1:100, ], num.trees = 5),
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: virginica\\.")
+  pred <- predict(rf, iris)
+  expect_equal(levels(pred$predictions), levels(iris$Species))
+})
+
+test_that("Predictions with unused factor levels are not NA", {
+  expect_warning(rf <- ranger(Species ~ ., iris[51:150, ], num.trees = 5),
+                 "^Dropped unused factor level\\(s\\) in dependent variable\\: setosa\\.")
+  pred <- predict(rf, iris)
+  expect_equal(sum(is.na(pred$predictions)), 0)
 })

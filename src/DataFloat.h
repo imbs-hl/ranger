@@ -1,48 +1,39 @@
 /*-------------------------------------------------------------------------------
-This file is part of Ranger.
-    
-Ranger is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ This file is part of ranger.
 
-Ranger is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
-You should have received a copy of the GNU General Public License
-along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+ This software may be modified and distributed under the terms of the MIT license.
 
-Written by: 
-
-Marvin N. Wright
-Institut für Medizinische Biometrie und Statistik
-Universität zu Lübeck
-Ratzeburger Allee 160
-23562 Lübeck 
-Germany
-
-http://www.imbs-luebeck.de
-#-------------------------------------------------------------------------------*/
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
+ #-------------------------------------------------------------------------------*/
 
 // Ignore in coverage report (not used in R package)
 // #nocov start
- 
 #ifndef DATAFLOAT_H_
 #define DATAFLOAT_H_
+
+#include <vector>
 
 #include "globals.h"
 #include "Data.h"
 
+namespace ranger {
+
 class DataFloat: public Data {
 public:
-  DataFloat();
+  DataFloat() = default;
   DataFloat(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols);
-  virtual ~DataFloat();
 
-  double get(size_t row, size_t col) const {
+  DataFloat(const DataFloat&) = delete;
+  DataFloat& operator=(const DataFloat&) = delete;
+
+  virtual ~DataFloat() override = default;
+
+  double get(size_t row, size_t col) const override {
     // Use permuted data for corrected impurity importance
+    size_t col_permuted = col;
     if (col >= num_cols) {
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
@@ -51,25 +42,23 @@ public:
     if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
-      // Get data out of snp storage. -1 because of GenABEL coding.
-      size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
-      return (((snp_data[idx / 4] & mask[idx % 4]) >> offset[idx % 4]) - 1);
+      return getSnp(row, col, col_permuted);
     }
   }
 
-  void reserveMemory() {
-    data = new float[num_cols * num_rows];
+  void reserveMemory() override {
+    data.resize(num_cols * num_rows);
   }
 
-  void set(size_t col, size_t row, double value, bool& error) {
-    data[col * num_rows + row] = (float) value;
+  void set(size_t col, size_t row, double value, bool& error) override {
+    data[col * num_rows + row] = value;
   }
 
 private:
-  float* data;
-
-  DISALLOW_COPY_AND_ASSIGN(DataFloat);
+  std::vector<float> data;
 };
+
+} // namespace ranger
 
 #endif /* DATAFLOAT_H_ */
 // #nocov end

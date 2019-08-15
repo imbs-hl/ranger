@@ -1,29 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of Ranger.
+ This file is part of ranger.
 
- Ranger is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+ Copyright (c) [2014-2018] [Marvin N. Wright]
 
- Ranger is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+ This software may be modified and distributed under the terms of the MIT license.
 
- You should have received a copy of the GNU General Public License
- along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-
- Written by:
-
- Marvin N. Wright
- Institut für Medizinische Biometrie und Statistik
- Universität zu Lübeck
- Ratzeburger Allee 160
- 23562 Lübeck
- Germany
-
- http://www.imbs-luebeck.de
+ Please note that the C++ core of ranger is distributed under MIT license and the
+ R package "ranger" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef FORESTCLASSIFICATION_H_
@@ -37,10 +20,16 @@
 #include "globals.h"
 #include "Forest.h"
 
+namespace ranger {
+
 class ForestClassification: public Forest {
 public:
-  ForestClassification();
-  virtual ~ForestClassification();
+  ForestClassification() = default;
+
+  ForestClassification(const ForestClassification&) = delete;
+  ForestClassification& operator=(const ForestClassification&) = delete;
+
+  virtual ~ForestClassification() override = default;
 
   void loadForest(size_t dependent_varID, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -51,26 +40,38 @@ public:
     return class_values;
   }
 
+  void setClassWeights(std::vector<double>& class_weights) {
+    this->class_weights = class_weights;
+  }
+
 protected:
-  void initInternal(std::string status_variable_name);
-  void growInternal();
-  void predictInternal();
-  void computePredictionErrorInternal();
-  void writeOutputInternal();
-  void writeConfusionFile();
-  void writePredictionFile();
-  void saveToFileInternal(std::ofstream& outfile);
-  void loadFromFileInternal(std::ifstream& infile);
+  void initInternal(std::string status_variable_name) override;
+  void growInternal() override;
+  void allocatePredictMemory() override;
+  void predictInternal(size_t sample_idx) override;
+  void computePredictionErrorInternal() override;
+  void writeOutputInternal() override;
+  void writeConfusionFile() override;
+  void writePredictionFile() override;
+  void saveToFileInternal(std::ofstream& outfile) override;
+  void loadFromFileInternal(std::ifstream& infile) override;
 
   // Classes of the dependent variable and classIDs for responses
   std::vector<double> class_values;
   std::vector<uint> response_classIDs;
+  std::vector<std::vector<size_t>> sampleIDs_per_class;
+
+  // Splitting weights
+  std::vector<double> class_weights;
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
 
 private:
-  DISALLOW_COPY_AND_ASSIGN(ForestClassification);
+  double getTreePrediction(size_t tree_idx, size_t sample_idx) const;
+  size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
 };
+
+} // namespace ranger
 
 #endif /* FORESTCLASSIFICATION_H_ */
