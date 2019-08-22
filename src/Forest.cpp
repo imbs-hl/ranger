@@ -80,7 +80,14 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     prediction_mode = true;
   }
 
-  // Sample fraction to vector
+  // Sample fraction default and convert to vector
+  if (sample_fraction == 0) {
+    if (sample_with_replacement) {
+      sample_fraction = DEFAULT_SAMPLE_FRACTION_REPLACE;
+    } else {
+      sample_fraction = DEFAULT_SAMPLE_FRACTION_NOREPLACE;
+    }
+  }
   std::vector<double> sample_fraction_vector = { sample_fraction };
 
   // Call other init function
