@@ -708,6 +708,9 @@ void TreeSurvival::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, dou
   for (size_t i = 0; i < num_random_splits; ++i) {
     possible_split_values.push_back(udist(random_number_generator));
   }
+  if (num_random_splits > 1) {
+    std::sort(possible_split_values.begin(), possible_split_values.end());
+  }
 
   size_t num_splits = possible_split_values.size();
 
