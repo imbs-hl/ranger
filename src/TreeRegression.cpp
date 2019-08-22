@@ -541,6 +541,9 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
   for (size_t i = 0; i < num_random_splits; ++i) {
     possible_split_values.push_back(udist(random_number_generator));
   }
+  if (num_random_splits > 1) {
+    std::sort(possible_split_values.begin(), possible_split_values.end());
+  }
 
   const size_t num_splits = possible_split_values.size();
   if (memory_saving_splitting) {
