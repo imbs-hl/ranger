@@ -109,9 +109,6 @@ public:
   const std::vector<std::vector<std::vector<double>>>& getPredictions() const {
     return predictions;
   }
-  size_t getDependentVarId() const {
-    return dependent_varID;
-  }
   size_t getNumTrees() const {
     return num_trees;
   }
@@ -123,6 +120,9 @@ public:
   }
   size_t getNumIndependentVariables() const {
     return num_independent_variables;
+  }
+  std::string getDependentVarName() const {
+    return dependent_variable_name;
   }
 
   const std::vector<bool>& getIsOrderedVariable() const {
@@ -164,6 +164,8 @@ protected:
 
   // Load forest from file
   void loadFromFile(std::string filename);
+  std::string loadDependentVariableNameFromFile(std::string filename);
+  virtual std::string loadStatusVariableNameFromFile(std::string filename);
   virtual void loadFromFileInternal(std::ifstream& infile) = 0;
 
   // Set split select weights and variables to be always considered for splitting
@@ -180,13 +182,12 @@ protected:
   // Verbose output stream, cout if verbose==true, logfile if not
   std::ostream* verbose_out;
 
+  std::string dependent_variable_name;
   size_t num_trees;
   uint mtry;
   uint min_node_size;
-  size_t num_variables;
   size_t num_independent_variables;
   uint seed;
-  size_t dependent_varID;
   size_t num_samples;
   bool prediction_mode;
   MemoryMode memory_mode;

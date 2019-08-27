@@ -92,7 +92,7 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   double pure_value = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, dependent_varID);
+    double value = data->get_y(sampleID, 0);
     if (pos != start_pos[nodeID] && value != pure_value) {
       pure = false;
       break;
@@ -233,7 +233,7 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
   // Count samples in right child per class and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, varID);
+    double value = data->get_x(sampleID, varID);
     uint sample_classID = (*response_classIDs)[sampleID];
 
     // Count samples until split_value reached
@@ -396,7 +396,7 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
       uint sample_classID = (*response_classIDs)[sampleID];
-      double value = data->get(sampleID, varID);
+      double value = data->get_x(sampleID, varID);
       size_t factorID = floor(value) - 1;
 
       // If in right child, count
@@ -522,7 +522,7 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
   // Count samples in right child per class and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, varID);
+    double value = data->get_x(sampleID, varID);
     uint sample_classID = (*response_classIDs)[sampleID];
 
     // Count samples until split_value reached
@@ -636,7 +636,7 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
       uint sample_classID = (*response_classIDs)[sampleID];
-      double value = data->get(sampleID, varID);
+      double value = data->get_x(sampleID, varID);
       size_t factorID = floor(value) - 1;
 
       // If in right child, count
@@ -690,11 +690,6 @@ void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double 
 
   // No variable importance for no split variables
   size_t tempvarID = data->getUnpermutedVarID(varID);
-  for (auto& skip : data->getNoSplitVariables()) {
-    if (tempvarID >= skip) {
-      --tempvarID;
-    }
-  }
 
   // Subtract if corrected importance and permuted variable, else add
   if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {

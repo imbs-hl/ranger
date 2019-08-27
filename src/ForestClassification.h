@@ -31,7 +31,7 @@ public:
 
   virtual ~ForestClassification() override = default;
 
-  void loadForest(size_t dependent_varID, size_t num_trees,
+  void loadForest(std::string dependent_variable_name, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
       std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
       std::vector<double>& class_values, std::vector<bool>& is_ordered_variable);
