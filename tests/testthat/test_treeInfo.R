@@ -234,4 +234,20 @@ test_that("Spitting value is numeric for order splitting", {
   expect_is(ti.order$splitval[!ti.order$terminal & ti.order$splitvarName == "Species"], "numeric")
 })
 
+test_that("treeInfo works for 31 unordered factor levels but not for 32", {
+  n <- 31
+  dt <- data.frame(x = factor(1:n, ordered = FALSE),  
+                   y = rbinom(n, 1, 0.5))
+  rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
+  expect_silent(treeInfo(rf))
+  
+  n <- 32
+  dt <- data.frame(x = factor(1:n, ordered = FALSE),  
+                   y = rbinom(n, 1, 0.5))
+  rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
+  expect_warning(treeInfo(rf), "Unordered splitting levels can only be shown for up to 31 levels.")
+})
+
+
+
 

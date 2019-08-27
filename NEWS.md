@@ -1,3 +1,7 @@
+##### Version 0.11.5
+* Add x/y interface
+* Internal changes (seed differences possible)
+
 ##### Version 0.11.4
 * Add "beta" splitrule for bounded outcomes
 

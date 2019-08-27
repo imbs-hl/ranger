@@ -81,6 +81,17 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
   }
 } // #nocov end
 
+// TODO: Can be faster if skip entirely removed?
+void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max, size_t num_samples) {
+  std::vector<size_t> skip; // Empty vector (no skip)
+  if (num_samples < max / 10) {
+    drawWithoutReplacementSimple(result, random_number_generator, max, skip, num_samples);
+  } else {
+    //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
+    drawWithoutReplacementFisherYates(result, random_number_generator, max, skip, num_samples);
+  }
+}
+
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     const std::vector<size_t>& skip, size_t num_samples) {
   if (num_samples < max / 10) {
@@ -203,8 +214,7 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
   }
 }
 
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
-    size_t status_varID, const std::vector<size_t>& sample_IDs) {
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, const std::vector<size_t>& sample_IDs) {
 
   // Compute concordance index
   double concordance = 0;
@@ -214,16 +224,16 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
     if (!sample_IDs.empty()) {
       sample_i = sample_IDs[i];
     }
-    double time_i = data.get(sample_i, dependent_varID);
-    double status_i = data.get(sample_i, status_varID);
+    double time_i = data.get_y(sample_i, 0);
+    double status_i = data.get_y(sample_i, 1);
 
     for (size_t j = i + 1; j < sum_chf.size(); ++j) {
       size_t sample_j = j;
       if (!sample_IDs.empty()) {
         sample_j = sample_IDs[j];
       }
-      double time_j = data.get(sample_j, dependent_varID);
-      double status_j = data.get(sample_j, status_varID);
+      double time_j = data.get_y(sample_j, 0);
+      double status_j = data.get_y(sample_j, 1);
 
       if (time_i < time_j && status_i == 0) {
         continue;

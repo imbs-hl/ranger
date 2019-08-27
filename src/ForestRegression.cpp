@@ -20,12 +20,12 @@
 
 namespace ranger {
 
-void ForestRegression::loadForest(size_t dependent_varID, size_t num_trees,
+void ForestRegression::loadForest(std::string dependent_variable_name, size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
     std::vector<bool>& is_ordered_variable) {
 
-  this->dependent_varID = dependent_varID;
+  this->dependent_variable_name = dependent_variable_name;
   this->num_trees = num_trees;
   data->setIsOrderedVariable(is_ordered_variable);
 
@@ -44,7 +44,7 @@ void ForestRegression::initInternal(std::string status_variable_name) {
 
   // If mtry not set, use floored square root of number of independent variables
   if (mtry == 0) {
-    unsigned long temp = sqrt((double) (num_variables - 1));
+    unsigned long temp = sqrt((double) num_independent_variables);
     mtry = std::max((unsigned long) 1, temp);
   }
 
@@ -122,7 +122,7 @@ void ForestRegression::computePredictionErrorInternal() {
       ++num_predictions;
       predictions[0][0][i] /= (double) samples_oob_count[i];
       double predicted_value = predictions[0][0][i];
-      double real_value = data->get(i, dependent_varID);
+      double real_value = data->get_y(i, 0);
       overall_prediction_error += (predicted_value - real_value) * (predicted_value - real_value);
     } else {
       predictions[0][0][i] = NAN;
@@ -196,7 +196,7 @@ void ForestRegression::writePredictionFile() {
 void ForestRegression::saveToFileInternal(std::ofstream& outfile) {
 
 // Write num_variables
-  outfile.write((char*) &num_variables, sizeof(num_variables));
+  outfile.write((char*) &num_independent_variables, sizeof(num_independent_variables));
 
 // Write treetype
   TreeType treetype = TREE_REGRESSION;
@@ -226,13 +226,9 @@ void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
     std::vector<double> split_values;
     readVector1D(split_values, infile);
 
-    // If dependent variable not in test data, change variable IDs accordingly
-    if (num_variables_saved > num_variables) {
-      for (auto& varID : split_varIDs) {
-        if (varID >= dependent_varID) {
-          --varID;
-        }
-      }
+    // If dependent variable not in test data, throw error
+    if (num_variables_saved != num_independent_variables) {
+      throw std::runtime_error("Number of independent variables in data does not match with the loaded forest.");
     }
 
     // Create tree

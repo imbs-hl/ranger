@@ -424,7 +424,7 @@ void ArgumentHandler::checkArguments() {
     throw std::runtime_error("Please specify a dependent variable name with '--depvarname'. See '--help' for details.");
   }
 
-  if (treetype == TREE_SURVIVAL && statusvarname.empty()) {
+  if (predict.empty() && treetype == TREE_SURVIVAL && statusvarname.empty()) {
     throw std::runtime_error("Please specify a status variable name with '--statusvarname'. See '--help' for details.");
   }
   if (treetype != TREE_SURVIVAL && !statusvarname.empty()) {
@@ -448,8 +448,8 @@ void ArgumentHandler::checkArguments() {
       throw std::runtime_error("Could not read from input file: " + predict + ".");
     }
 
-    // Do not read dependent_varID, num_variables, num_trees and is_ordered_variable
-    infile.seekg(2 * sizeof(size_t));
+    // Do not read num_variables, num_trees and is_ordered_variable
+    infile.seekg(sizeof(size_t));
     size_t length;
     infile.read((char*) &length, sizeof(length));
     infile.seekg(4 * sizeof(size_t) + length * sizeof(bool));

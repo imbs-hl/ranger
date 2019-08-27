@@ -16,7 +16,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   inbag = NULL, holdout = FALSE, quantreg = FALSE,
   oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
   verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  status.variable.name = NULL, classification = NULL, x = NULL,
+  y = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -84,6 +85,10 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
 
 \item{classification}{Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.}
+
+\item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
+
+\item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
 }
 \value{
 Object of class \code{ranger} with elements
@@ -190,8 +195,9 @@ require(survival)
 rg.veteran <- ranger(Surv(time, status) ~ ., data = veteran)
 plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 
-## Alternative interface
+## Alternative interfaces (same results)
 ranger(dependent.variable.name = "Species", data = iris)
+ranger(y = iris[, 5], x = iris[, -5])
 
 \dontrun{
 ## Use GenABEL interface to read Plink data into R and grow a classification forest

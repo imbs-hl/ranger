@@ -30,19 +30,19 @@ public:
 
   virtual ~ForestSurvival() override = default;
 
-  void loadForest(size_t dependent_varID, size_t num_trees,
+  void loadForest(std::string dependent_variable_name, std::string status_variable_name, size_t num_trees,
       std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
       std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-      size_t status_varID, std::vector<std::vector<std::vector<double>> >& forest_chf,
-      std::vector<double>& unique_timepoints, std::vector<bool>& is_ordered_variable);
+      std::vector<std::vector<std::vector<double>> >& forest_chf, std::vector<double>& unique_timepoints,
+      std::vector<bool>& is_ordered_variable);
 
   std::vector<std::vector<std::vector<double>>> getChf() const;
 
-  size_t getStatusVarId() const {
-    return status_varID;
-  }
   const std::vector<double>& getUniqueTimepoints() const {
     return unique_timepoints;
+  }
+  std::string getStatusVarName() const {
+    return status_variable_name;
   }
 
 private:
@@ -56,8 +56,9 @@ private:
   void writePredictionFile() override;
   void saveToFileInternal(std::ofstream& outfile) override;
   void loadFromFileInternal(std::ifstream& infile) override;
+  std::string loadStatusVariableNameFromFile(std::string filename) override;
 
-  size_t status_varID;
+  std::string status_variable_name;
   std::vector<double> unique_timepoints;
   std::vector<size_t> response_timepointIDs;
 
