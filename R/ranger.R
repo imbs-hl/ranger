@@ -66,7 +66,8 @@
 ##' This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 ##'
 ##' For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
-##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
+##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
+##' Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
 ##' Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing. 
 ##' 
 ##' For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
