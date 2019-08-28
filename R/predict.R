@@ -98,8 +98,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         is.null(forest$treetype)) {
     stop("Error: Invalid forest object.")
   }
-  if (forest$treetype == "Survival" && (is.null(forest$status.variable.name)  ||
-                                        is.null(forest$chf) || is.null(forest$unique.death.times))) {
+  if (forest$treetype == "Survival" && (is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
   
@@ -213,7 +212,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Defaults for variables not needed
-  dependent.variable.name <- ""
   mtry <- 0
   importance <- 0
   min.node.size <- 0
@@ -221,7 +219,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   use.split.select.weights <- FALSE
   always.split.variables <- c("0", "0")
   use.always.split.variables <- FALSE
-  status.variable.name <- "status"
   prediction.mode <- TRUE
   write.forest <- FALSE
   replace <- TRUE
@@ -258,11 +255,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, x, y, forest$independent.variable.names, mtry,
+  result <- rangerCpp(treetype, x, y, forest$independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, forest, snp.data, replace, probability,
+                      prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 

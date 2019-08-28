@@ -31,8 +31,7 @@ public:
 
   virtual ~ForestProbability() override = default;
 
-  void loadForest(std::string dependent_variable_name, size_t num_trees,
-      std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
+  void loadForest(size_t num_trees, std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
       std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
       std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts,
       std::vector<bool>& is_ordered_variable);
@@ -48,7 +47,7 @@ public:
   }
 
 protected:
-  void initInternal(std::string status_variable_name) override;
+  void initInternal() override;
   void growInternal() override;
   void allocatePredictMemory() override;
   void predictInternal(size_t sample_idx) override;
