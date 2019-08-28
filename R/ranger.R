@@ -761,7 +761,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   } else {
     sparse.x <- Matrix(matrix(c(0, 0)))
     use.sparse.data <- FALSE
-    x <- data.matrix(x)
+    if (is.data.frame(x)) {
+      x <- data.matrix(x)
+    }
   }
   
   if (treetype == 5) {
