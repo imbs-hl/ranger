@@ -81,14 +81,13 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
   }
 } // #nocov end
 
-// TODO: Can be faster if skip entirely removed?
-void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max, size_t num_samples) {
-  std::vector<size_t> skip; // Empty vector (no skip)
+void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    size_t num_samples) {
   if (num_samples < max / 10) {
-    drawWithoutReplacementSimple(result, random_number_generator, max, skip, num_samples);
+    drawWithoutReplacementSimple(result, random_number_generator, max, num_samples);
   } else {
     //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
-    drawWithoutReplacementFisherYates(result, random_number_generator, max, skip, num_samples);
+    drawWithoutReplacementFisherYates(result, random_number_generator, max, num_samples);
   }
 }
 
@@ -99,6 +98,26 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
   } else {
     //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
     drawWithoutReplacementFisherYates(result, random_number_generator, max, skip, num_samples);
+  }
+}
+
+void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    size_t num_samples) {
+
+  result.reserve(num_samples);
+
+  // Set all to not selected
+  std::vector<bool> temp;
+  temp.resize(max, false);
+
+  std::uniform_int_distribution<size_t> unif_dist(0, max - 1);
+  for (size_t i = 0; i < num_samples; ++i) {
+    size_t draw;
+    do {
+      draw = unif_dist(random_number_generator);
+    } while (temp[draw]);
+    temp[draw] = true;
+    result.push_back(draw);
   }
 }
 
@@ -125,6 +144,23 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
     temp[draw] = true;
     result.push_back(draw);
   }
+}
+
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+    size_t max, size_t num_samples) {
+
+  // Create indices
+  result.resize(max);
+  std::iota(result.begin(), result.end(), 0);
+
+  // Draw without replacement using Fisher Yates algorithm
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  for (size_t i = 0; i < num_samples; ++i) {
+    size_t j = i + distribution(random_number_generator) * (max - i);
+    std::swap(result[i], result[j]);
+  }
+
+  result.resize(num_samples);
 }
 
 void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
@@ -214,7 +250,8 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
   }
 }
 
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, const std::vector<size_t>& sample_IDs) {
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
+    const std::vector<size_t>& sample_IDs) {
 
   // Compute concordance index
   double concordance = 0;
