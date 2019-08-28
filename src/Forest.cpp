@@ -38,38 +38,6 @@ Forest::Forest() :
 }
 
 // #nocov start
-std::unique_ptr<Data> load_data_from_file(const std::string& data_path, const std::string& dependent_variable_name,
-    const std::string& status_variable_name, const MemoryMode memory_mode, std::ostream* verbose_out = nullptr) {
-  std::unique_ptr<Data> result { };
-  switch (memory_mode) {
-  case MEM_DOUBLE:
-    result = make_unique<DataDouble>();
-    break;
-  case MEM_FLOAT:
-    result = make_unique<DataFloat>();
-    break;
-  case MEM_CHAR:
-    result = make_unique<DataChar>();
-    break;
-  }
-
-  std::vector<std::string> dependent_variable_names;
-  if (status_variable_name.empty()) {
-    dependent_variable_names = {dependent_variable_name};
-  } else {
-    dependent_variable_names = {dependent_variable_name, status_variable_name};
-  }
-
-  if (verbose_out)
-    *verbose_out << "Loading input file: " << data_path << "." << std::endl;
-  bool found_rounding_error = result->loadFromFile(data_path, dependent_variable_names);
-  if (found_rounding_error && verbose_out) {
-    *verbose_out << "Warning: Rounding or Integer overflow occurred. Use FLOAT or DOUBLE precision to avoid this."
-        << std::endl;
-  }
-  return result;
-}
-
 void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode, std::string input_file, uint mtry,
     std::string output_prefix, uint num_trees, std::ostream* verbose_out, uint seed, uint num_threads,
     std::string load_forest_filename, ImportanceMode importance_mode, uint min_node_size,
@@ -80,6 +48,14 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     PredictionType prediction_type, uint num_random_splits, uint max_depth) {
 
   this->verbose_out = verbose_out;
+
+  if (!dependent_variable_name.empty()) {
+    if (status_variable_name.empty()) {
+      this->dependent_variable_names = {dependent_variable_name};
+    } else {
+      this->dependent_variable_names = {dependent_variable_name, status_variable_name};
+    }
+  }
 
   // Set prediction mode
   bool prediction_mode = false;
@@ -98,17 +74,14 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   std::vector<double> sample_fraction_vector = { sample_fraction };
 
   if (prediction_mode) {
-    dependent_variable_name = loadDependentVariableNameFromFile(load_forest_filename);
-    status_variable_name = loadStatusVariableNameFromFile(load_forest_filename);
+    loadDependentVariableNamesFromFile(load_forest_filename);
   }
 
   // Call other init function
-  init(dependent_variable_name, memory_mode,
-      load_data_from_file(input_file, dependent_variable_name, status_variable_name, memory_mode, verbose_out), mtry,
-      output_prefix, num_trees, seed, num_threads, importance_mode, min_node_size, status_variable_name,
-      prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting, splitrule,
-      predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type, num_random_splits, false,
-      max_depth);
+  init(memory_mode, loadDataFromFile(input_file), mtry, output_prefix, num_trees, seed, num_threads, importance_mode,
+      min_node_size, prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting,
+      splitrule, predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type, num_random_splits,
+      false, max_depth);
 
   if (prediction_mode) {
     loadFromFile(load_forest_filename);
@@ -159,22 +132,21 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
 }
 // #nocov end
 
-void Forest::initR(std::string dependent_variable_name, std::unique_ptr<Data> input_data, uint mtry, uint num_trees,
-    std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
+void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, std::ostream* verbose_out, uint seed,
+    uint num_threads, ImportanceMode importance_mode, uint min_node_size,
     std::vector<std::vector<double>>& split_select_weights, const std::vector<std::string>& always_split_variable_names,
-    std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
-    const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-    std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
-    bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth) {
+    bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
+    bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
+    std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
+    std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
+    uint num_random_splits, bool order_snps, uint max_depth) {
 
   this->verbose_out = verbose_out;
 
   // Call other init function
-  init(dependent_variable_name, MEM_DOUBLE, std::move(input_data), mtry, "", num_trees, seed, num_threads,
-      importance_mode, min_node_size, status_variable_name, prediction_mode, sample_with_replacement,
-      unordered_variable_names, memory_saving_splitting, splitrule, predict_all, sample_fraction, alpha, minprop,
-      holdout, prediction_type, num_random_splits, order_snps, max_depth);
+  init(MEM_DOUBLE, std::move(input_data), mtry, "", num_trees, seed, num_threads, importance_mode, min_node_size,
+      prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting, splitrule,
+      predict_all, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, order_snps, max_depth);
 
   // Set variables to be always considered for splitting
   if (!always_split_variable_names.empty()) {
@@ -203,12 +175,12 @@ void Forest::initR(std::string dependent_variable_name, std::unique_ptr<Data> in
   this->keep_inbag = keep_inbag;
 }
 
-void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, std::unique_ptr<Data> input_data,
-    uint mtry, std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
-    uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
-    const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-    bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth) {
+void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry, std::string output_prefix,
+    uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
+    bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
+    bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
+    double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
+    uint max_depth) {
 
   // Initialize data with memmode
   this->data = std::move(input_data);
@@ -233,7 +205,6 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, s
   }
 
   // Set member variables
-  this->dependent_variable_name = dependent_variable_name;
   this->num_trees = num_trees;
   this->mtry = mtry;
   this->seed = seed;
@@ -263,7 +234,7 @@ void Forest::init(std::string dependent_variable_name, MemoryMode memory_mode, s
     data->setIsOrderedVariable(unordered_variable_names);
   }
 
-  initInternal(status_variable_name);
+  initInternal();
 
   // Init split select weights
   split_select_weights.push_back(std::vector<double>());
@@ -330,7 +301,9 @@ void Forest::writeOutput() {
     *verbose_out << std::endl;
   writeOutputInternal();
   if (verbose_out) {
-    *verbose_out << "Dependent variable name:           " << dependent_variable_name << std::endl;
+    if (dependent_variable_names.size() >= 1) {
+      *verbose_out << "Dependent variable name:           " << dependent_variable_names[0] << std::endl;
+    }
     *verbose_out << "Number of trees:                   " << num_trees << std::endl;
     *verbose_out << "Sample size:                       " << num_samples << std::endl;
     *verbose_out << "Number of independent variables:   " << num_independent_variables << std::endl;
@@ -398,10 +371,18 @@ void Forest::saveToFile() {
     throw std::runtime_error("Could not write to output file: " + filename + ".");
   }
 
-  // Write dependent variable name
-  size_t length = dependent_variable_name.size();
-  outfile.write((char*) &length, sizeof(length));
-  outfile.write((char*) dependent_variable_name.c_str(), length * sizeof(char));
+  // Write dependent variable names
+  uint num_dependent_variables = dependent_variable_names.size();
+  if (num_dependent_variables >= 1) {
+    outfile.write((char*) &num_dependent_variables, sizeof(num_dependent_variables));
+    for (auto& var_name : dependent_variable_names) {
+      size_t length = var_name.size();
+      outfile.write((char*) &length, sizeof(length));
+      outfile.write((char*) var_name.c_str(), length * sizeof(char));
+    }
+  } else {
+    throw std::runtime_error("Missing dependent variable name.");
+  }
 
   // Write num_trees
   outfile.write((char*) &num_trees, sizeof(num_trees));
@@ -819,14 +800,14 @@ void Forest::loadFromFile(std::string filename) {
     throw std::runtime_error("Could not read from input file: " + filename + ".");
   }
 
-  // Read dependent variable name
-  size_t length;
-  infile.read((char*) &length, sizeof(size_t));
-  char* temp = new char[length + 1];
-  infile.read((char*) temp, length * sizeof(char));
-  temp[length] = '\0';
-  //dependent_variable_name = temp;
-  delete[] temp;
+  // Skip dependent variable names (already read)
+  uint num_dependent_variables;
+  infile.read((char*) &num_dependent_variables, sizeof(num_dependent_variables));
+  for (size_t i = 0; i < num_dependent_variables; ++i) {
+    size_t length;
+    infile.read((char*) &length, sizeof(size_t));
+    infile.ignore(length);
+  }
 
   // Read num_trees
   infile.read((char*) &num_trees, sizeof(num_trees));
@@ -845,7 +826,7 @@ void Forest::loadFromFile(std::string filename) {
 // #nocov end
 
 // #nocov start
-std::string Forest::loadDependentVariableNameFromFile(std::string filename) {
+void Forest::loadDependentVariableNamesFromFile(std::string filename) {
 
   // Open file for reading
   std::ifstream infile;
@@ -854,24 +835,46 @@ std::string Forest::loadDependentVariableNameFromFile(std::string filename) {
     throw std::runtime_error("Could not read from input file: " + filename + ".");
   }
 
-  // Read dependent variable name
-  size_t length;
-  infile.read((char*) &length, sizeof(size_t));
-  char* temp = new char[length + 1];
-  infile.read((char*) temp, length * sizeof(char));
-  temp[length] = '\0';
-  std::string variable_name = temp;
-  delete[] temp;
+  // Read dependent variable names
+  uint num_dependent_variables = 0;
+  infile.read((char*) &num_dependent_variables, sizeof(num_dependent_variables));
+  for (size_t i = 0; i < num_dependent_variables; ++i) {
+    size_t length;
+    infile.read((char*) &length, sizeof(size_t));
+    char* temp = new char[length + 1];
+    infile.read((char*) temp, length * sizeof(char));
+    temp[length] = '\0';
+    dependent_variable_names.push_back(temp);
+    delete[] temp;
+  }
 
   infile.close();
-
-  return variable_name;
 }
 // #nocov end
 
 // #nocov start
-std::string Forest::loadStatusVariableNameFromFile(std::string filename) {
-  return "";
+std::unique_ptr<Data> Forest::loadDataFromFile(const std::string& data_path) {
+  std::unique_ptr<Data> result { };
+  switch (memory_mode) {
+  case MEM_DOUBLE:
+    result = make_unique<DataDouble>();
+    break;
+  case MEM_FLOAT:
+    result = make_unique<DataFloat>();
+    break;
+  case MEM_CHAR:
+    result = make_unique<DataChar>();
+    break;
+  }
+
+  if (verbose_out)
+    *verbose_out << "Loading input file: " << data_path << "." << std::endl;
+  bool found_rounding_error = result->loadFromFile(data_path, dependent_variable_names);
+  if (found_rounding_error && verbose_out) {
+    *verbose_out << "Warning: Rounding or Integer overflow occurred. Use FLOAT or DOUBLE precision to avoid this."
+        << std::endl;
+  }
+  return result;
 }
 // #nocov end
 

@@ -21,14 +21,11 @@
 
 namespace ranger {
 
-void ForestSurvival::loadForest(std::string dependent_variable_name, std::string status_variable_name, size_t num_trees,
-    std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
+void ForestSurvival::loadForest(size_t num_trees, std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
     std::vector<std::vector<std::vector<double>> >& forest_chf, std::vector<double>& unique_timepoints,
     std::vector<bool>& is_ordered_variable) {
 
-  this->dependent_variable_name = dependent_variable_name;
-  this->status_variable_name = status_variable_name;
   this->num_trees = num_trees;
   this->unique_timepoints = unique_timepoints;
   data->setIsOrderedVariable(is_ordered_variable);
@@ -55,9 +52,7 @@ std::vector<std::vector<std::vector<double>>> ForestSurvival::getChf() const {
   return result;
 }
 
-void ForestSurvival::initInternal(std::string status_variable_name) {
-
-  this->status_variable_name = status_variable_name;
+void ForestSurvival::initInternal() {
 
   // If mtry not set, use floored square root of number of independent variables.
   if (mtry == 0) {
@@ -189,7 +184,9 @@ void ForestSurvival::computePredictionErrorInternal() {
 void ForestSurvival::writeOutputInternal() {
   if (verbose_out) {
     *verbose_out << "Tree type:                         " << "Survival" << std::endl;
-    *verbose_out << "Status variable name:              " << status_variable_name << std::endl;
+    if (dependent_variable_names.size() >= 2) {
+      *verbose_out << "Status variable name:              " << dependent_variable_names[1] << std::endl;
+    }
   }
 }
 
@@ -258,11 +255,6 @@ void ForestSurvival::writePredictionFile() {
 
 void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
 
-  // Write status variable name variable name
-  size_t length = status_variable_name.size();
-  outfile.write((char*) &length, sizeof(size_t));
-  outfile.write((char*) status_variable_name.c_str(), length * sizeof(char));
-
   // Write num_variables
   outfile.write((char*) &num_independent_variables, sizeof(num_independent_variables));
 
@@ -275,15 +267,6 @@ void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
 }
 
 void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
-
-  // Read status variable name
-  size_t length;
-  infile.read((char*) &length, sizeof(size_t));
-  char* temp = new char[length + 1];
-  infile.read((char*) temp, length * sizeof(char));
-  temp[length] = '\0';
-  //status_variable_name = temp;
-  delete[] temp;
 
   // Read number of variables
   size_t num_variables_saved;
@@ -336,41 +319,6 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
         make_unique<TreeSurvival>(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
             &response_timepointIDs));
   }
-}
-
-std::string ForestSurvival::loadStatusVariableNameFromFile(std::string filename) {
-  // Open file for reading
-  std::ifstream infile;
-  infile.open(filename, std::ios::binary);
-  if (!infile.good()) {
-    throw std::runtime_error("Could not read from input file: " + filename + ".");
-  }
-
-  // Skip dependent variable name
-  size_t length;
-  infile.read((char*) &length, sizeof(size_t));
-  infile.ignore(length);
-
-  // Read num_trees
-  infile.ignore(sizeof(size_t));
-  //size_t temp2;
-  //infile.read((char*) &temp2, sizeof(temp2));
-
-  // Skip is_ordered_variable
-  infile.read((char*) &length, sizeof(size_t));
-  infile.ignore(length);
-
-  // Read status variable name
-  infile.read((char*) &length, sizeof(size_t));
-  char* temp = new char[length + 1];
-  infile.read((char*) temp, length * sizeof(char));
-  temp[length] = '\0';
-  std::string status_variable_name = temp;
-  delete[] temp;
-
-  infile.close();
-
-  return status_variable_name;
 }
 
 const std::vector<double>& ForestSurvival::getTreePrediction(size_t tree_idx, size_t sample_idx) const {

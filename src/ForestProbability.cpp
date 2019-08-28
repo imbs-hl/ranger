@@ -18,13 +18,12 @@
 
 namespace ranger {
 
-void ForestProbability::loadForest(std::string dependent_variable_name, size_t num_trees,
+void ForestProbability::loadForest(size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
     std::vector<double>& class_values, std::vector<std::vector<std::vector<double>>>& forest_terminal_class_counts,
     std::vector<bool>& is_ordered_variable) {
 
-  this->dependent_variable_name = dependent_variable_name;
   this->num_trees = num_trees;
   this->class_values = class_values;
   data->setIsOrderedVariable(is_ordered_variable);
@@ -51,7 +50,7 @@ std::vector<std::vector<std::vector<double>>> ForestProbability::getTerminalClas
   return result;
 }
 
-void ForestProbability::initInternal(std::string status_variable_name) {
+void ForestProbability::initInternal() {
 
   // If mtry not set, use floored square root of number of independent variables.
   if (mtry == 0) {

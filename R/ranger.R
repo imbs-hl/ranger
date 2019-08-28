@@ -226,8 +226,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (is.null(x) | is.null(y)) {
       stop("Error: Either data or x and y is required.")
     }
-    dependent.variable.name <- ""
-    status.variable.name <- ""
   }  else {
     ## GenABEL GWA data
     if ("gwaa.data" %in% class(data)) {
@@ -246,12 +244,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       if (is.null(dependent.variable.name)) {
         if (is.null(y) | is.null(x)) {
           stop("Error: Please give formula, dependent variable name or x/y.")
-        } else {
-          dependent.variable.name <- colnames(y)[1]
-        }
+        } 
       } else {
         if (is.null(status.variable.name)) {
-          status.variable.name <- ""
           y <- data[, dependent.variable.name, drop = TRUE]
           x <- data[, !(colnames(data) %in% dependent.variable.name), drop = FALSE]
         } else {
@@ -267,13 +262,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       data.selected <- parse.formula(formula, data, env = parent.frame())
       y <- data.selected[, 1]
       x <- data.selected[, -1, drop = FALSE]
-      if (survival::is.Surv(y)) {
-        dependent.variable.name <- colnames(y)[1]
-        status.variable.name <- colnames(y)[2]
-      } else {
-        dependent.variable.name <- colnames(data.selected)[1]
-        status.variable.name <- ""
-      }
     }
   }
   
@@ -789,11 +777,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, x, y.mat, independent.variable.names, mtry,
+  result <- rangerCpp(treetype, x, y.mat, independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, loaded.forest, snp.data,
+                      prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 

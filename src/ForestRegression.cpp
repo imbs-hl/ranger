@@ -20,12 +20,11 @@
 
 namespace ranger {
 
-void ForestRegression::loadForest(std::string dependent_variable_name, size_t num_trees,
+void ForestRegression::loadForest(size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
     std::vector<bool>& is_ordered_variable) {
 
-  this->dependent_variable_name = dependent_variable_name;
   this->num_trees = num_trees;
   data->setIsOrderedVariable(is_ordered_variable);
 
@@ -40,7 +39,7 @@ void ForestRegression::loadForest(std::string dependent_variable_name, size_t nu
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
 
-void ForestRegression::initInternal(std::string status_variable_name) {
+void ForestRegression::initInternal() {
 
   // If mtry not set, use floored square root of number of independent variables
   if (mtry == 0) {
