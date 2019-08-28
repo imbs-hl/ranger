@@ -155,8 +155,8 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
  * @param range_length Length of range. Interval to draw from: 0..max-1
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t range_length, size_t num_samples);
+void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t range_length,
+    size_t num_samples);
 
 /**
  * Draw random numbers in a range without replacement and skip values.
@@ -174,6 +174,16 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param range_length Length of range. Interval to draw from: 0..max-1
+ * @param num_samples Number of samples to draw
+ */
+void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    size_t num_samples);
+
+/**
+ * Simple algorithm for sampling without replacement (skip values), faster for smaller num_samples
+ * @param result Vector to add results to. Will not be cleaned before filling.
+ * @param random_number_generator Random number generator
+ * @param range_length Length of range. Interval to draw from: 0..max-1
  * @param skip Values to skip
  * @param num_samples Number of samples to draw
  */
@@ -182,6 +192,16 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
 
 /**
  * Fisher Yates algorithm for sampling without replacement.
+ * @param result Vector to add results to. Will not be cleaned before filling.
+ * @param random_number_generator Random number generator
+ * @param max Length of range. Interval to draw from: 0..max-1
+ * @param num_samples Number of samples to draw
+ */
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+    size_t max, size_t num_samples);
+
+/**
+ * Fisher Yates algorithm for sampling without replacement (skip values).
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param max Length of range. Interval to draw from: 0..max-1
@@ -286,7 +306,8 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
  * @param sample_IDs IDs of samples, for example OOB samples
  * @return concordance index
  */
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, const std::vector<size_t>& sample_IDs);
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
+    const std::vector<size_t>& sample_IDs);
 
 /**
  * Convert a unsigned integer to string
