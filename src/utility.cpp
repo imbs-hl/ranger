@@ -342,6 +342,7 @@ std::string beautifyTime(uint seconds) { // #nocov start
   return result;
 } // #nocov end
 
+// #nocov start
 size_t roundToNextMultiple(size_t value, uint multiple) {
 
   if (multiple == 0) {
@@ -355,6 +356,7 @@ size_t roundToNextMultiple(size_t value, uint multiple) {
 
   return value + multiple - remainder;
 }
+// #nocov end
 
 void splitString(std::vector<std::string>& result, const std::string& input, char split_char) { // #nocov start
 
@@ -626,12 +628,14 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::
   return num_samples_left;
 }
 
+// #nocov start
 std::stringstream& readFromStream(std::stringstream& in, double& token) {
   if (!(in >> token) && (std::fpclassify(token) == FP_SUBNORMAL)) {
     in.clear();
   }
   return in;
 }
+// #nocov end
 
 double betaLogLik(double y, double mean, double phi) {
 

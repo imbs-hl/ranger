@@ -222,6 +222,7 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
   }
 }
 
+// #nocov start
 void Tree::appendToFile(std::ofstream& file) {
 
 // Save general fields
@@ -232,6 +233,7 @@ void Tree::appendToFile(std::ofstream& file) {
 // Call special functions for subclasses to save special fields.
   appendToFileInternal(file);
 }
+// #nocov end
 
 void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 

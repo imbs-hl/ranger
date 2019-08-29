@@ -449,6 +449,7 @@ void Forest::grow() {
 
 // Grow trees in multiple threads
 #ifdef OLD_WIN_R_BUILD
+  // #nocov start
   progress = 0;
   clock_t start_time = clock();
   clock_t lap_time = clock();
@@ -457,6 +458,7 @@ void Forest::grow() {
     progress++;
     showProgress("Growing trees..", start_time, lap_time);
   }
+  // #nocov end
 #else
   progress = 0;
 #ifdef R_BUILD
@@ -512,6 +514,7 @@ void Forest::predict() {
 
 // Predict trees in multiple threads and join the threads with the main thread
 #ifdef OLD_WIN_R_BUILD
+  // #nocov start
   progress = 0;
   clock_t start_time = clock();
   clock_t lap_time = clock();
@@ -526,6 +529,7 @@ void Forest::predict() {
   for (size_t sample_idx = 0; sample_idx < data->getNumRows(); ++sample_idx) {
     predictInternal(sample_idx);
   }
+  // #nocov end
 #else
   progress = 0;
 #ifdef R_BUILD
@@ -569,6 +573,7 @@ void Forest::computePredictionError() {
 
 // Predict trees in multiple threads
 #ifdef OLD_WIN_R_BUILD
+  // #nocov start
   progress = 0;
   clock_t start_time = clock();
   clock_t lap_time = clock();
@@ -577,6 +582,7 @@ void Forest::computePredictionError() {
     progress++;
     showProgress("Predicting..", start_time, lap_time);
   }
+  // #nocov end
 #else
   std::vector<std::thread> threads;
   threads.reserve(num_threads);
@@ -604,6 +610,7 @@ void Forest::computePermutationImportance() {
 
 // Compute tree permutation importance in multiple threads
 #ifdef OLD_WIN_R_BUILD
+  // #nocov start
   progress = 0;
   clock_t start_time = clock();
   clock_t lap_time = clock();
@@ -621,6 +628,7 @@ void Forest::computePermutationImportance() {
     progress++;
     showProgress("Computing permutation importance..", start_time, lap_time);
   }
+  // #nocov end
 #else
   progress = 0;
 #ifdef R_BUILD
@@ -823,9 +831,7 @@ void Forest::loadFromFile(std::string filename) {
   // Create thread ranges
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
-// #nocov end
 
-// #nocov start
 void Forest::loadDependentVariableNamesFromFile(std::string filename) {
 
   // Open file for reading
@@ -850,9 +856,7 @@ void Forest::loadDependentVariableNamesFromFile(std::string filename) {
 
   infile.close();
 }
-// #nocov end
 
-// #nocov start
 std::unique_ptr<Data> Forest::loadDataFromFile(const std::string& data_path) {
   std::unique_ptr<Data> result { };
   switch (memory_mode) {
@@ -978,6 +982,7 @@ void Forest::setAlwaysSplitVariables(const std::vector<std::string>& always_spli
 }
 
 #ifdef OLD_WIN_R_BUILD
+// #nocov start
 void Forest::showProgress(std::string operation, clock_t start_time, clock_t& lap_time) {
 
 // Check for user interrupt
@@ -997,6 +1002,7 @@ void Forest::showProgress(std::string operation, clock_t start_time, clock_t& la
     lap_time = clock();
   }
 }
+// #nocov end
 #else
 void Forest::showProgress(std::string operation, size_t max_progress) {
   using std::chrono::steady_clock;

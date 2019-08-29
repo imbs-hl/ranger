@@ -33,11 +33,13 @@ size_t Data::getVariableID(const std::string& variable_name) const {
   return (std::distance(variable_names.cbegin(), it));
 }
 
+// #nocov start (cannot be tested anymore because GenABEL not on CRAN)
 void Data::addSnpData(unsigned char* snp_data, size_t num_cols_snp) {
   num_cols = num_cols_no_snp + num_cols_snp;
   num_rows_rounded = roundToNextMultiple(num_rows, 4);
   this->snp_data = snp_data;
 }
+// #nocov end
 
 // #nocov start
 bool Data::loadFromFile(std::string filename, std::vector<std::string>& dependent_variable_names) {
@@ -279,6 +281,7 @@ void Data::sort() {
 }
 
 // TODO: Implement ordering for multiclass and survival
+// #nocov start (cannot be tested anymore because GenABEL not on CRAN)
 void Data::orderSnpLevels(bool corrected_importance) {
   // Stop if now SNP data
   if (snp_data == 0) {
@@ -333,6 +336,7 @@ void Data::orderSnpLevels(bool corrected_importance) {
 
   order_snps = true;
 }
+// #nocov end
 
 } // namespace ranger
 
