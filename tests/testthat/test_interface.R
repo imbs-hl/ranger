@@ -102,6 +102,19 @@ test_that("Same result with x/y interface, survival", {
   expect_equal(rf_formula$predictions, rf_xy$predictions)
 })
 
+test_that("Column order does not change prediction", {
+  dat <- iris[, c(sample(1:4), 5)]
+  rf <- ranger(dependent.variable.name = "Species", data = iris)
+  
+  set.seed(42)
+  pred1 <- predict(rf, iris)$predictions
+  
+  set.seed(42)
+  pred2 <- predict(rf, dat)$predictions
+  
+  expect_equal(pred1, pred2)
+})
+
 # Tibbles
 # This is failing on Rdevel. Possible without suggesting tibble package?
 # if (requireNamespace("tibble", quietly = TRUE)) {
