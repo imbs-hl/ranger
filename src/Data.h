@@ -70,6 +70,7 @@ public:
     }
   }
 
+  // #nocov start (cannot be tested anymore because GenABEL not on CRAN)
   size_t getSnp(size_t row, size_t col, size_t col_permuted) const {
     // Get data out of snp storage. -1 because of GenABEL coding.
     size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
@@ -90,6 +91,7 @@ public:
     }
     return result;
   }
+  // #nocov end
 
   double getUniqueDataValue(size_t varID, size_t index) const {
     // Use permuted data for corrected impurity importance
@@ -184,6 +186,7 @@ public:
     return varID;
   }
 
+  // #nocov start (cannot be tested anymore because GenABEL not on CRAN)
   const std::vector<std::vector<size_t>>& getSnpOrder() const {
     return snp_order;
   }
@@ -192,6 +195,7 @@ public:
     this->snp_order = snp_order;
     order_snps = true;
   }
+  // #nocov end
 
 protected:
   std::vector<std::string> variable_names;

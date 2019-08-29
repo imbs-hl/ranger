@@ -72,6 +72,7 @@ public:
     return y[col * num_rows + row];
   }
   
+  // #nocov start 
   void reserveMemory(size_t y_cols) override {
     // Not needed
   }
@@ -83,6 +84,7 @@ public:
   void set_y(size_t col, size_t row, double value, bool& error) override {
     y[col * num_rows + row] = value;
   }
+  // #nocov end 
   
 private:
   Rcpp::NumericMatrix x;
