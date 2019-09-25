@@ -61,9 +61,9 @@
 #' @author Marvin N. Wright
 #' @export
 treeInfo <- function(object, tree = 1) {
-  if (class(object) != "ranger" & class(object) != "holdoutRF") {
+  if (!inherits(object, "ranger")) {
     stop("Error: Invalid class of input object.")
-  } 
+  }
   forest <- object$forest
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
