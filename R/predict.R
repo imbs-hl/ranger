@@ -312,15 +312,17 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       result$chf <- result$predictions
       result$predictions <- NULL
       result$survival <- exp(-result$chf)
-    } else if (forest$treetype == "Probability estimation" && !is.null(forest$levels)) {
+    } else if (forest$treetype == "Probability estimation") {
       if (!predict.all) {
         if (is.vector(result$predictions)) {
           result$predictions <- matrix(result$predictions, nrow = 1)
         }
         
         ## Set colnames and sort by levels
-        colnames(result$predictions) <- forest$levels[forest$class.values]
-        result$predictions <- result$predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+        if (!is.null(forest$levels)) {
+          colnames(result$predictions) <- forest$levels[forest$class.values]
+          result$predictions <- result$predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+        }
       }
     }
   } else if (type == "terminalNodes") {
