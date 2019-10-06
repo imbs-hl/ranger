@@ -74,8 +74,9 @@ void TreeSurvival::computeSurvival(size_t nodeID) {
   chf[nodeID] = chf_temp;
 }
 
-double TreeSurvival::computePredictionAccuracyInternal() {
-
+double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) {
+  // TODO: implement casewise prediction errors that make sense for TreeSurvival?
+  
   // Compute summed chf for samples
   std::vector<double> sum_chf;
   for (size_t i = 0; i < prediction_terminal_nodeIDs.size(); ++i) {

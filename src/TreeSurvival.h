@@ -55,8 +55,8 @@ private:
 
   void createEmptyNodeInternal() override;
   void computeSurvival(size_t nodeID);
-  double computePredictionAccuracyInternal() override;
-
+  double computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) override;
+  
   bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
 
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);

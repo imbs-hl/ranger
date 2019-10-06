@@ -227,6 +227,9 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       result.push_back(forest->getMinNodeSize(), "min.node.size");
       if (importance_mode != IMP_NONE) {
         result.push_back(forest->getVariableImportance(), "variable.importance");
+        if (importance_mode == IMP_PERM_CASEWISE) {
+          result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.casewise");
+        }
       }
       result.push_back(forest->getOverallPredictionError(), "prediction.error");
     }
