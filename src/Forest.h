@@ -103,6 +103,9 @@ public:
   const std::vector<double>& getVariableImportance() const {
     return variable_importance;
   }
+  const std::vector<double>& getVariableImportanceCasewise() const {
+    return variable_importance_casewise;
+  }
   double getOverallPredictionError() const {
     return overall_prediction_error;
   }
@@ -160,7 +163,7 @@ protected:
   void predictTreesInThread(uint thread_idx, const Data* prediction_data, bool oob_prediction);
   void predictInternalInThread(uint thread_idx);
   void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>& importance,
-      std::vector<double>& variance);
+      std::vector<double>& variance, std::vector<double>& importance_casewise);
 
   // Load forest from file
   void loadFromFile(std::string filename);
@@ -239,6 +242,9 @@ protected:
 
   // Variable importance for all variables in forest
   std::vector<double> variable_importance;
+  
+  // Casewise variable importance for all variables in forest
+  std::vector<double> variable_importance_casewise;
 
   // Computation progress (finished trees)
   size_t progress;

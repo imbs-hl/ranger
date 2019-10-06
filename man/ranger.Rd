@@ -11,11 +11,12 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   class.weights = NULL, splitrule = NULL, num.random.splits = 1,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
-  scale.permutation.importance = FALSE, keep.inbag = FALSE,
-  inbag = NULL, holdout = FALSE, quantreg = FALSE,
-  oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
-  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  scale.permutation.importance = FALSE, local.importance = FALSE,
+  keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
+  quantreg = FALSE, oob.error = TRUE, num.threads = NULL,
+  save.memory = FALSE, verbose = TRUE, seed = NULL,
+  dependent.variable.name = NULL, status.variable.name = NULL,
+  classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -59,6 +60,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.}
 
 \item{scale.permutation.importance}{Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
+
+\item{local.importance}{Calculate and return local importance values as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
 
 \item{keep.inbag}{Save how often observations are in-bag in each tree.}
 

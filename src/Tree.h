@@ -49,7 +49,8 @@ public:
 
   void predict(const Data* prediction_data, bool oob_prediction);
 
-  void computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance);
+  void computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance,
+      std::vector<double>& forest_importance_casewise);
 
   void appendToFile(std::ofstream& file);
   virtual void appendToFileInternal(std::ofstream& file) = 0;
@@ -87,8 +88,8 @@ protected:
   size_t dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size_t permuted_sampleID);
   void permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t>& permutations);
 
-  virtual double computePredictionAccuracyInternal() = 0;
-
+  virtual double computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) = 0;
+  
   void bootstrap();
   void bootstrapWithoutReplacement();
 
