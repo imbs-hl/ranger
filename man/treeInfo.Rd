@@ -38,7 +38,6 @@ However, with "order" the values correspond to the order in \code{object$forest$
 In the "partition" mode, the \code{splitval} values for unordered factor are comma separated lists of values, representing the factor levels (in the original order) going to the right.
 }
 \examples{
-require(ranger)
 rf <- ranger(Species ~ ., data = iris)
 treeInfo(rf, 1)
 }

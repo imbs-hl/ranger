@@ -37,7 +37,6 @@
 ##' @return Matrix with terminal nodeIDs for all observations in dataset and trees.
 ##'
 ##' @examples
-##' library(ranger)
 ##' rf <- ranger(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
 ##' getTerminalNodeIDs(rf, iris)
 ##' @export

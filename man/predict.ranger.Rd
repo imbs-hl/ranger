@@ -62,8 +62,6 @@ For classification and \code{predict.all = TRUE}, a factor levels are returned a
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 }
 \examples{
-require(ranger)
-
 ## Classification forest
 ranger(Species ~ ., data = iris)
 train.idx <- sample(nrow(iris), 2/3 * nrow(iris))

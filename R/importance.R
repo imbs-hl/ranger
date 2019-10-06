@@ -76,8 +76,6 @@ importance.ranger <- function(x, ...) {
 ##' @param ... Further arguments passed to \code{ranger()}. Used in the "altmann" method only.
 ##' @return Variable importance and p-value for each variable.
 ##' @examples
-##' require(ranger)
-##' 
 ##' ## Janitza's p-values with corrected Gini importance
 ##' n <- 50
 ##' p <- 400
