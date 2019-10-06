@@ -191,7 +191,6 @@
 ##'   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
-##' @encoding UTF-8
 ##' @useDynLib ranger, .registration = TRUE
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
