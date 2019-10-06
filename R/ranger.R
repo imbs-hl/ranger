@@ -814,11 +814,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       result$variable.importance.casewise <-
         matrix(
           result$variable.importance.casewise,
-          byrow = TRUE,
-          nrow = length(all.independent.variable.names),
+          byrow = FALSE,
+          ncol = length(all.independent.variable.names),
           dimnames = list(
-            all.independent.variable.names,
-            rownames(data)
+            rownames(data),
+            all.independent.variable.names
           )
         )
     }
