@@ -54,7 +54,6 @@
 #'       \code{prediction} \tab One column with the predicted class (factor) for classification and the predicted numerical value for regression. One probability per class for probability estimation in several columns. Nothing for survival, refer to \code{object$forest$chf} for the CHF node predictions. \cr
 #'   }
 #' @examples
-#' require(ranger)
 #' rf <- ranger(Species ~ ., data = iris)
 #' treeInfo(rf, 1)
 #' @seealso \code{\link{ranger}}

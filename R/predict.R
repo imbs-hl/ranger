@@ -496,8 +496,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##'       \code{num.samples}     \tab Number of samples.
 ##'   }
 ##' @examples
-##' require(ranger)
-##'
 ##' ## Classification forest
 ##' ranger(Species ~ ., data = iris)
 ##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))

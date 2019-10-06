@@ -134,8 +134,6 @@
 ##'   \item{\code{num.samples}}{Number of samples.}
 ##'   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
 ##' @examples
-##' require(ranger)
-##'
 ##' ## Classification forest with default settings
 ##' ranger(Species ~ ., data = iris)
 ##'
