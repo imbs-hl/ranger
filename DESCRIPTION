@@ -19,3 +19,4 @@ Suggests: survival, testthat
 RoxygenNote: 6.1.1
 URL: https://github.com/imbs-hl/ranger
 BugReports: https://github.com/imbs-hl/ranger/issues
+Encoding: UTF-8
