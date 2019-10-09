@@ -204,11 +204,19 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
 }
 
 double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
-    size_t status_varID, const std::vector<size_t>& sample_IDs) {
-
+    size_t status_varID, const std::vector<size_t>& sample_IDs, std::vector<double>* prederr_casewise) {
+  
   // Compute concordance index
   double concordance = 0;
   double permissible = 0;
+  
+  std::vector<double> concordance_casewise;
+  std::vector<double> permissible_casewise;
+  if (prederr_casewise) {
+    concordance_casewise.resize(prederr_casewise->size(), 0);
+    permissible_casewise.resize(prederr_casewise->size(), 0);
+  }
+  
   for (size_t i = 0; i < sum_chf.size(); ++i) {
     size_t sample_i = i;
     if (!sample_IDs.empty()) {
@@ -216,7 +224,16 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
     }
     double time_i = data.get(sample_i, dependent_varID);
     double status_i = data.get(sample_i, status_varID);
-
+    
+    double conc, perm;
+    if (prederr_casewise) {
+      conc = concordance_casewise[i];
+      perm = permissible_casewise[i];
+    } else {
+      conc = 0;
+      perm = 0;
+    }
+    
     for (size_t j = i + 1; j < sum_chf.size(); ++j) {
       size_t sample_j = j;
       if (!sample_IDs.empty()) {
@@ -235,16 +252,37 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
         continue;
       }
 
-      permissible += 1;
-
+      double co;
       if (time_i < time_j && sum_chf[i] > sum_chf[j]) {
-        concordance += 1;
+        co = 1;
       } else if (time_j < time_i && sum_chf[j] > sum_chf[i]) {
-        concordance += 1;
+        co = 1;
       } else if (sum_chf[i] == sum_chf[j]) {
-        concordance += 0.5;
+        co = 0.5;
+      } else {
+        co = 0;
       }
-
+      
+      conc += co;
+      perm += 1;
+      
+      if (prederr_casewise) {
+        concordance_casewise[j] += co;
+        permissible_casewise[j] += 1;
+      }
+    }
+    
+    concordance += conc;
+    permissible += perm;
+    if (prederr_casewise) {
+      concordance_casewise[i] = conc;
+      permissible_casewise[i] = perm;
+    }
+  }
+  
+  if (prederr_casewise) {
+    for (size_t i = 0; i < prederr_casewise->size(); ++i) {
+      (*prederr_casewise)[i] = 1 - concordance_casewise[i] / permissible_casewise[i];
     }
   }
 

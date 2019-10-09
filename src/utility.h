@@ -276,10 +276,12 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
  * @param dependent_varID ID of dependent variable
  * @param status_varID ID of status variable
  * @param sample_IDs IDs of samples, for example OOB samples
+ * @param prederr_casewise An optional output vector with casewise prediction errors. 
+ *   If pointer is NULL, casewise prediction errors should not be computed.
  * @return concordance index
  */
 double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
-    size_t status_varID, const std::vector<size_t>& sample_IDs);
+    size_t status_varID, const std::vector<size_t>& sample_IDs, std::vector<double>* prederr_casewise);
 
 /**
  * Convert a unsigned integer to string
