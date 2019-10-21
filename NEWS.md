@@ -1,3 +1,6 @@
+##### Version 0.11.6
+* Add "hellinger" splitrule for binary classification
+
 ##### Version 0.11.5
 * Add x/y interface
 * Internal changes (seed differences possible, prediction incompatible with older versions)
@@ -27,6 +30,7 @@
 * Bug fixes
 
 ##### Version 0.10.4
+>>>>>>> master
 * Add inbag argument for manual selection of observations in trees
 
 ##### Version 0.10.3

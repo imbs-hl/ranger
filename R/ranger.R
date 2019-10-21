@@ -95,7 +95,7 @@
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
-##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
@@ -195,7 +195,6 @@
 ##'   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
-##' @encoding UTF-8
 ##' @useDynLib ranger, .registration = TRUE
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
@@ -678,6 +677,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (min(y) < 0 || max(y) > 1) {
       stop("Error: beta splitrule applicable to regression data with outcome between 0 and 1 only.")
     }
+  } else if (splitrule == "hellinger") {
+    if (treetype %in% c(1, 9)) {
+      splitrule.num <- 7
+    } else {
+      stop("Error: Hellinger splitrule only implemented for binary classification.")
+    }
+    if ((is.factor(y) && nlevels(y) > 2) || (length(unique(y)) > 2)) {
+      stop("Error: Hellinger splitrule only implemented for binary classification.")
+    }  
   } else {
     stop("Error: Unknown splitrule.")
   }
