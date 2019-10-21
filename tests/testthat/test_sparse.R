@@ -16,6 +16,11 @@ dat <- data.frame(y = y, x)
 dat_matrix <- data.matrix(dat)
 dat_sparse <- Matrix(dat_matrix, sparse = TRUE)
 
+# Survival sparse data
+dat_survival <- data.frame(x, time = round(runif(n, 0, 10)), status = rbinom(n, 1, .7))
+dat_survival_matrix <- data.matrix(dat_survival)
+dat_survival_sparse <- Matrix(dat_survival_matrix, sparse = TRUE)
+
 test_that("Same result with sparse data for iris classification", {
   set.seed(56)
   rf1 <- ranger(data = iris_sparse, dependent.variable.name = "Species", classification = TRUE, num.trees = 5)
@@ -83,6 +88,29 @@ test_that("Same result with sparse data for 0/1 probability prediction", {
   
   pred1 <- rf1$predictions[!is.na(rf1$predictions)]
   pred2 <- rf2$predictions[!is.na(rf2$predictions)]
+  expect_equal(pred1, pred2)
+})
+
+test_that("Same result with sparse data for survival", {
+  set.seed(56)
+  rf1 <- ranger(data = dat_survival_sparse, dependent.variable.name = "time", status.variable.name = "status", num.trees = 5)
+  
+  set.seed(56)
+  rf2 <- ranger(data = dat_survival, dependent.variable.name = "time", status.variable.name = "status", num.trees = 5)
+  
+  expect_equal(rf1$prediction.error, rf2$prediction.error)
+  
+  pred1 <- rf1$survival[!is.na(rf1$survival)]
+  pred2 <- rf2$survival[!is.na(rf2$survival)]
+  expect_equal(pred1, pred2)
+})
+
+test_that("Survival prediction is the same with or without outcome in prediction data", {
+  rf <- ranger(data = dat_survival_sparse, dependent.variable.name = "time", status.variable.name = "status", num.trees = 5)
+
+  pred1 <- predict(rf, dat_survival_sparse)$survival  
+  pred2 <- predict(rf, dat_survival_sparse[, c(-6, -7)])$survival  
+  
   expect_equal(pred1, pred2)
 })
 
