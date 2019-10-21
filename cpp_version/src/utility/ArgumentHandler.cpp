@@ -302,6 +302,7 @@ int ArgumentHandler::processArguments() {
           break;
         case 6:
           splitrule = BETA;
+          break;
         case 7:
           splitrule = HELLINGER;
           break;
