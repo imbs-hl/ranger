@@ -728,8 +728,8 @@ void TreeProbability::addImpurityImportance(size_t nodeID, size_t varID, double 
       class_counts[sample_classID]++;
     }
     double sum_node = 0;
-    for (auto& class_count : class_counts) {
-      sum_node += class_count * class_count;
+    for (size_t i = 0; i < class_counts.size(); ++i) {
+      sum_node += (*class_weights)[i] * class_counts[i] * class_counts[i];
     }
     best_decrease = decrease - sum_node / (double) num_samples_node;
   }
