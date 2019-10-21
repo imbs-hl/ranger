@@ -31,22 +31,29 @@ public:
 
   virtual ~Data() = default;
 
-  virtual double get(size_t row, size_t col) const = 0;
+  virtual double get_x(size_t row, size_t col) const = 0;
+  virtual double get_y(size_t row, size_t col) const = 0;
 
   size_t getVariableID(const std::string& variable_name) const;
 
-  virtual void reserveMemory() = 0;
-  virtual void set(size_t col, size_t row, double value, bool& error) = 0;
+  virtual void reserveMemory(size_t y_cols) = 0;
+
+  virtual void set_x(size_t col, size_t row, double value, bool& error) = 0;
+  virtual void set_y(size_t col, size_t row, double value, bool& error) = 0;
 
   void addSnpData(unsigned char* snp_data, size_t num_cols_snp);
 
-  bool loadFromFile(std::string filename);
-  bool loadFromFileWhitespace(std::ifstream& input_file, std::string header_line);
-  bool loadFromFileOther(std::ifstream& input_file, std::string header_line, char seperator);
+  bool loadFromFile(std::string filename, std::vector<std::string>& dependent_variable_names);
+  bool loadFromFileWhitespace(std::ifstream& input_file, std::string header_line,
+      std::vector<std::string>& dependent_variable_names);
+  bool loadFromFileOther(std::ifstream& input_file, std::string header_line,
+      std::vector<std::string>& dependent_variable_names, char seperator);
 
-  void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const;
+  void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID, size_t start,
+      size_t end) const;
 
-  void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID, size_t start, size_t end) const;
+  void getMinMaxValues(double& min, double&max, std::vector<size_t>& sampleIDs, size_t varID, size_t start,
+      size_t end) const;
 
   size_t getIndex(size_t row, size_t col) const {
     // Use permuted data for corrected impurity importance
@@ -63,6 +70,7 @@ public:
     }
   }
 
+  // #nocov start (cannot be tested anymore because GenABEL not on CRAN)
   size_t getSnp(size_t row, size_t col, size_t col_permuted) const {
     // Get data out of snp storage. -1 because of GenABEL coding.
     size_t idx = (col - num_cols_no_snp) * num_rows_rounded + row;
@@ -76,13 +84,14 @@ public:
     // Order SNPs
     if (order_snps) {
       if (col_permuted >= num_cols) {
-        result = snp_order[col_permuted + no_split_variables.size() - 2 * num_cols_no_snp][result];
+        result = snp_order[col_permuted - 2 * num_cols_no_snp][result];
       } else {
         result = snp_order[col - num_cols_no_snp][result];
       }
     }
     return result;
   }
+  // #nocov end
 
   double getUniqueDataValue(size_t varID, size_t index) const {
     // Use permuted data for corrected impurity importance
@@ -114,7 +123,7 @@ public:
 
   void sort();
 
-  void orderSnpLevels(std::string dependent_variable_name, bool corrected_importance);
+  void orderSnpLevels(bool corrected_importance);
 
   const std::vector<std::string>& getVariableNames() const {
     return variable_names;
@@ -134,15 +143,6 @@ public:
       // If snp data and no variable with more than 3 unique values, return 3
       return 3;
     }
-  }
-
-  const std::vector<size_t>& getNoSplitVariables() const noexcept {
-    return no_split_variables;
-  }
-
-  void addNoSplitVariable(size_t varID) {
-    no_split_variables.push_back(varID);
-    std::sort(no_split_variables.begin(), no_split_variables.end());
   }
 
   std::vector<bool>& getIsOrderedVariable() noexcept {
@@ -182,16 +182,11 @@ public:
   size_t getUnpermutedVarID(size_t varID) const {
     if (varID >= num_cols) {
       varID -= num_cols;
-
-      for (auto& skip : no_split_variables) {
-        if (varID >= skip) {
-          ++varID;
-        }
-      }
     }
     return varID;
   }
 
+  // #nocov start (cannot be tested anymore because GenABEL not on CRAN)
   const std::vector<std::vector<size_t>>& getSnpOrder() const {
     return snp_order;
   }
@@ -200,6 +195,7 @@ public:
     this->snp_order = snp_order;
     order_snps = true;
   }
+  // #nocov end
 
 protected:
   std::vector<std::string> variable_names;
@@ -215,9 +211,6 @@ protected:
   std::vector<size_t> index_data;
   std::vector<std::vector<double>> unique_data_values;
   size_t max_num_unique_values;
-
-  // Variable to not split at (only dependent_varID for non-survival trees)
-  std::vector<size_t> no_split_variables;
 
   // For each varID true if ordered
   std::vector<bool> is_ordered_variable;

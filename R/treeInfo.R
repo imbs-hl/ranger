@@ -68,14 +68,13 @@ treeInfo <- function(object, tree = 1) {
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
   }
-  if (is.null(forest$dependent.varID) || is.null(forest$num.trees) ||
+  if (is.null(forest$num.trees) ||
       is.null(forest$child.nodeIDs) || is.null(forest$split.varIDs) ||
       is.null(forest$split.values) || is.null(forest$independent.variable.names) ||
       is.null(forest$treetype)) {
     stop("Error: Invalid forest object.")
   }
-  if (forest$treetype == "Survival" && (is.null(forest$status.varID)  ||
-                                        is.null(forest$chf) || is.null(forest$unique.death.times))) {
+  if (forest$treetype == "Survival" && (is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
   if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
@@ -99,25 +98,19 @@ treeInfo <- function(object, tree = 1) {
   result$splitvarID[result$terminal] <- NA
   result$splitvarName[result$terminal] <- NA
   result$splitval[result$terminal] <- NA
-
-  ## Get names of splitting variables 
-  # should be -1 for all >= dependent.varID but +1 change for 1-index
-  # for survival another -1 if >= status.varID
-  independent.varID <- result$splitvarID
-  idx <- !is.na(result$splitvarID) & result$splitvarID < forest$dependent.varID
-  independent.varID[idx] <- result$splitvarID[idx] + 1
-  if (forest$treetype == "Survival") {
-    idx <- !is.na(result$splitvarID) & result$splitvarID >= forest$status.varID
-    independent.varID[idx] <- independent.varID[idx] - 1
-  }
-  result$splitvarName <- forest$independent.variable.names[independent.varID]
+  result$splitvarName <- forest$independent.variable.names[result$splitvarID + 1]
 
   ## Unordered splitting
   idx.unordered <- !result$terminal & !forest$is.ordered[result$splitvarID + 1]
   if (any(idx.unordered)) {
-    result$splitval[idx.unordered] <- sapply(result$splitval[idx.unordered], function(x) {
-      paste(which(as.logical(intToBits(x))), collapse = ",")
-    })
+    if (any(result$splitval[idx.unordered] > (2^31 - 1))) {
+      warning("Unordered splitting levels can only be shown for up to 31 levels.")
+      result$splitval[idx.unordered] <- NA
+    } else {
+      result$splitval[idx.unordered] <- sapply(result$splitval[idx.unordered], function(x) {
+        paste(which(as.logical(intToBits(x))), collapse = ",")
+      })
+    }
   }
   
   ## Prediction
