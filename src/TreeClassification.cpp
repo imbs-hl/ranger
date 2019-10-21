@@ -712,7 +712,7 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
 void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double decrease) {
 
-  double best_decrease;
+  double best_decrease = decrease;
   if (splitrule != HELLINGER) {
     size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
     std::vector<size_t> class_counts;
