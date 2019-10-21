@@ -16,7 +16,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   inbag = NULL, holdout = FALSE, quantreg = FALSE,
   oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
   verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  status.variable.name = NULL, classification = NULL, x = NULL,
+  y = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -84,6 +85,10 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
 
 \item{classification}{Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.}
+
+\item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
+
+\item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
 }
 \value{
 Object of class \code{ranger} with elements
@@ -148,7 +153,8 @@ See Nembrini et al. (2018) for details.
 This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
-Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
+Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
+Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
 Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing.
 
 For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
@@ -190,8 +196,9 @@ require(survival)
 rg.veteran <- ranger(Surv(time, status) ~ ., data = veteran)
 plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 
-## Alternative interface
+## Alternative interfaces (same results)
 ranger(dependent.variable.name = "Species", data = iris)
+ranger(y = iris[, 5], x = iris[, -5])
 
 \dontrun{
 ## Use GenABEL interface to read Plink data into R and grow a classification forest

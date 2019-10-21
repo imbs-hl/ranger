@@ -337,7 +337,7 @@ test_that("Partition splitting working for large number of levels", {
   rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
   
   max_split <- max(sapply(1:rf$num.trees, function(i) {
-    max(log2(rf$forest$split.values[[i]][rf$forest$split.varIDs[[i]] > 0]))
+    max(log2(rf$forest$split.values[[i]]), na.rm = TRUE)
   }))
 
   expect_lte(max_split, n)

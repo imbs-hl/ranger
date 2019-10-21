@@ -24,12 +24,11 @@
 
 namespace ranger {
 
-void ForestClassification::loadForest(size_t dependent_varID, size_t num_trees,
+void ForestClassification::loadForest(size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
     std::vector<double>& class_values, std::vector<bool>& is_ordered_variable) {
 
-  this->dependent_varID = dependent_varID;
   this->num_trees = num_trees;
   this->class_values = class_values;
   data->setIsOrderedVariable(is_ordered_variable);
@@ -46,11 +45,11 @@ void ForestClassification::loadForest(size_t dependent_varID, size_t num_trees,
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
 
-void ForestClassification::initInternal(std::string status_variable_name) {
+void ForestClassification::initInternal() {
 
   // If mtry not set, use floored square root of number of independent variables.
   if (mtry == 0) {
-    unsigned long temp = sqrt((double) (num_variables - 1));
+    unsigned long temp = sqrt((double) num_independent_variables);
     mtry = std::max((unsigned long) 1, temp);
   }
 
@@ -62,7 +61,7 @@ void ForestClassification::initInternal(std::string status_variable_name) {
   // Create class_values and response_classIDs
   if (!prediction_mode) {
     for (size_t i = 0; i < num_samples; ++i) {
-      double value = data->get(i, dependent_varID);
+      double value = data->get_y(i, 0);
 
       // If classID is already in class_values, use ID. Else create a new one.
       uint classID = find(class_values.begin(), class_values.end(), value) - class_values.begin();
@@ -168,7 +167,7 @@ void ForestClassification::computePredictionErrorInternal() {
     double predicted_value = predictions[0][0][i];
     if (!std::isnan(predicted_value)) {
       ++num_predictions;
-      double real_value = data->get(i, dependent_varID);
+      double real_value = data->get_y(i, 0);
       if (predicted_value != real_value) {
         ++num_missclassifications;
       }
@@ -268,7 +267,7 @@ void ForestClassification::writePredictionFile() {
 void ForestClassification::saveToFileInternal(std::ofstream& outfile) {
 
   // Write num_variables
-  outfile.write((char*) &num_variables, sizeof(num_variables));
+  outfile.write((char*) &num_independent_variables, sizeof(num_independent_variables));
 
   // Write treetype
   TreeType treetype = TREE_CLASSIFICATION;
@@ -304,13 +303,9 @@ void ForestClassification::loadFromFileInternal(std::ifstream& infile) {
     std::vector<double> split_values;
     readVector1D(split_values, infile);
 
-    // If dependent variable not in test data, change variable IDs accordingly
-    if (num_variables_saved > num_variables) {
-      for (auto& varID : split_varIDs) {
-        if (varID >= dependent_varID) {
-          --varID;
-        }
-      }
+    // If dependent variable not in test data, throw error
+    if (num_variables_saved != num_independent_variables) {
+      throw std::runtime_error("Number of independent variables in data does not match with the loaded forest.");
     }
 
     // Create tree
