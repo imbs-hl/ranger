@@ -301,9 +301,9 @@ int ArgumentHandler::processArguments() {
           splitrule = EXTRATREES;
           break;
         case 6:
-            splitrule = BETA;
+          splitrule = BETA;
         case 7:
-            splitrule = HELLINGER;
+          splitrule = HELLINGER;
             break;
         default:
           throw std::runtime_error("");
