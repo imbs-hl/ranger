@@ -67,7 +67,8 @@ enum SplitRule {
   AUC_IGNORE_TIES = 3,
   MAXSTAT = 4,
   EXTRATREES = 5,
-  HELLINGER = 6
+  BETA = 6,
+  HELLINGER = 7
 };
 
 // Prediction type
@@ -94,7 +95,8 @@ const uint DEFAULT_MAXDEPTH = 0;
 const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
 const uint DEFAULT_NUM_RANDOM_SPLITS = 1;
 
-//const std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
+const double DEFAULT_SAMPLE_FRACTION_REPLACE = 1;
+const double DEFAULT_SAMPLE_FRACTION_NOREPLACE = 0.632;
 
 // Interval to print progress in seconds
 const double STATUS_INTERVAL = 30.0;

@@ -149,6 +149,16 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
 // #nocov end
 
 /**
+ * Draw random numbers in a range without replacements.
+ * @param result Vector to add results to. Will not be cleaned before filling.
+ * @param random_number_generator Random number generator
+ * @param range_length Length of range. Interval to draw from: 0..max-1
+ * @param num_samples Number of samples to draw
+ */
+void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t range_length,
+    size_t num_samples);
+
+/**
  * Draw random numbers in a range without replacement and skip values.
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
@@ -164,6 +174,16 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param range_length Length of range. Interval to draw from: 0..max-1
+ * @param num_samples Number of samples to draw
+ */
+void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    size_t num_samples);
+
+/**
+ * Simple algorithm for sampling without replacement (skip values), faster for smaller num_samples
+ * @param result Vector to add results to. Will not be cleaned before filling.
+ * @param random_number_generator Random number generator
+ * @param range_length Length of range. Interval to draw from: 0..max-1
  * @param skip Values to skip
  * @param num_samples Number of samples to draw
  */
@@ -172,6 +192,16 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
 
 /**
  * Fisher Yates algorithm for sampling without replacement.
+ * @param result Vector to add results to. Will not be cleaned before filling.
+ * @param random_number_generator Random number generator
+ * @param max Length of range. Interval to draw from: 0..max-1
+ * @param num_samples Number of samples to draw
+ */
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+    size_t max, size_t num_samples);
+
+/**
+ * Fisher Yates algorithm for sampling without replacement (skip values).
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param max Length of range. Interval to draw from: 0..max-1
@@ -273,13 +303,11 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
  * Compute concordance index for given data and summed cumulative hazard function/estimate
  * @param data Reference to Data object
  * @param sum_chf Summed chf over timepoints for each sample
- * @param dependent_varID ID of dependent variable
- * @param status_varID ID of status variable
  * @param sample_IDs IDs of samples, for example OOB samples
  * @return concordance index
  */
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
-    size_t status_varID, const std::vector<size_t>& sample_IDs);
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
+    const std::vector<size_t>& sample_IDs);
 
 /**
  * Convert a unsigned integer to string
@@ -480,6 +508,24 @@ void maxstat(const std::vector<double>& scores, const std::vector<double>& x, co
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::vector<size_t>& indices);
 
+/**
+ * Read from stringstream and ignore failbit for subnormal numbers
+ * See: https://bugs.llvm.org/show_bug.cgi?id=39012
+ * @param in Input string stream
+ * @param token Output token
+ * @return Input string stream with removed failbit if subnormal number
+ */
+std::stringstream& readFromStream(std::stringstream& in, double& token);
+
+/**
+ * Compute log-likelihood of beta distribution
+ * @param y Response
+ * @param mean Mean
+ * @param phi Phi
+ * @return Log-likelihood
+ */
+double betaLogLik(double y, double mean, double phi);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {
@@ -506,7 +552,7 @@ template<class T, size_t N> struct _Unique_if<T[N]> {
   typedef void _Known_bound;
 };
 
-} // namespace detail 
+} // namespace detail
 
 template<class T, class ... Args>
 typename detail::_Unique_if<T>::_Single_object make_unique(Args&&... args) {
@@ -523,6 +569,6 @@ template<class T, class ... Args>
 typename detail::_Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
 }
- // namespace ranger
+// namespace ranger
 
 #endif /* UTILITY_H_ */

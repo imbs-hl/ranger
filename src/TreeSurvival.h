@@ -21,7 +21,7 @@ namespace ranger {
 
 class TreeSurvival: public Tree {
 public:
-  TreeSurvival(std::vector<double>* unique_timepoints, size_t status_varID, std::vector<size_t>* response_timepointIDs);
+  TreeSurvival(std::vector<double>* unique_timepoints, std::vector<size_t>* response_timepointIDs);
 
   // Create from loaded forest
   TreeSurvival(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -96,8 +96,6 @@ private:
     num_samples_at_risk.clear();
     num_samples_at_risk.shrink_to_fit();
   }
-
-  size_t status_varID;
 
   // Unique time points for all individuals (not only this bootstrap), sorted
   const std::vector<double>* unique_timepoints;

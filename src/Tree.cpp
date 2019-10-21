@@ -17,7 +17,7 @@
 namespace ranger {
 
 Tree::Tree() :
-    dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
+    mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
         0), split_select_weights(0), case_weights(0), manual_inbag(0), oob_sampleIDs(0), holdout(false), keep_inbag(
         false), data(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
@@ -27,7 +27,7 @@ Tree::Tree() :
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values) :
-    dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
+    mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
         0), split_select_weights(0), case_weights(0), manual_inbag(0), split_varIDs(split_varIDs), split_values(
         split_values), child_nodeIDs(child_nodeIDs), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(
         0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(0), memory_saving_splitting(
@@ -35,7 +35,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0) {
 }
 
-void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
+void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed,
     std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
     std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
@@ -44,7 +44,6 @@ void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_
 
   this->data = data;
   this->mtry = mtry;
-  this->dependent_varID = dependent_varID;
   this->num_samples = num_samples;
   this->memory_saving_splitting = memory_saving_splitting;
 
@@ -103,6 +102,10 @@ void Tree::grow(std::vector<double>* variable_importance) {
     }
   }
 
+  // Init start and end positions
+  start_pos[0] = 0;
+  end_pos[0] = sampleIDs.size();
+
   // While not all nodes terminal, split next node
   size_t num_open_nodes = 1;
   size_t i = 0;
@@ -117,7 +120,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
       if (i >= last_left_nodeID) {
         // If new level, increase depth
         // (left_node saves left-most node in current level, new level reached if that node is splitted)
-        last_left_nodeID = sampleIDs.size() - 2;
+        last_left_nodeID = split_varIDs.size() - 2;
         ++depth;
       }
     }
@@ -160,7 +163,7 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
       // Move to child
       size_t split_varID = split_varIDs[nodeID];
 
-      double value = prediction_data->get(sample_idx, split_varID);
+      double value = prediction_data->get_x(sample_idx, split_varID);
       if (prediction_data->isOrderedVariable(split_varID)) {
         if (value <= split_values[nodeID]) {
           // Move to left child
@@ -174,7 +177,7 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
         size_t splitID = floor(split_values[nodeID]);
 
         // Left if 0 found at position factorID
-        if (!(splitID & (1 << factorID))) {
+        if (!(splitID & (1ULL << factorID))) {
           // Move to left child
           nodeID = child_nodeIDs[0][nodeID];
         } else {
@@ -190,7 +193,7 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 
 void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance) {
 
-  size_t num_independent_variables = data->getNumCols() - data->getNoSplitVariables().size();
+  size_t num_independent_variables = data->getNumCols();
 
 // Compute normal prediction accuracy for each tree. Predictions already computed..
   double accuracy_normal = computePredictionAccuracyInternal();
@@ -204,16 +207,8 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
 // Randomly permute for all independent variables
   for (size_t i = 0; i < num_independent_variables; ++i) {
 
-    // Skip no split variables
-    size_t varID = i;
-    for (auto& skip : data->getNoSplitVariables()) {
-      if (varID >= skip) {
-        ++varID;
-      }
-    }
-
     // Permute and compute prediction accuracy again for this permutation and save difference
-    permuteAndPredictOobSamples(varID, permutations);
+    permuteAndPredictOobSamples(i, permutations);
     double accuracy_permuted = computePredictionAccuracyInternal();
     double accuracy_difference = accuracy_normal - accuracy_permuted;
     forest_importance[i] += accuracy_difference;
@@ -227,6 +222,7 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
   }
 }
 
+// #nocov start
 void Tree::appendToFile(std::ofstream& file) {
 
 // Save general fields
@@ -237,6 +233,7 @@ void Tree::appendToFile(std::ofstream& file) {
 // Call special functions for subclasses to save special fields.
   appendToFileInternal(file);
 }
+// #nocov end
 
 void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 
@@ -244,21 +241,22 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 
   // For corrected Gini importance add dummy variables
   if (importance_mode == IMP_GINI_CORRECTED) {
-    num_vars += data->getNumCols() - data->getNoSplitVariables().size();
+    num_vars += data->getNumCols();
+  }
+
+  // Randomly add non-deterministic variables (according to weights if needed)
+  if (split_select_weights->empty()) {
+    if (deterministic_varIDs->empty()) {
+      drawWithoutReplacement(result, random_number_generator, num_vars, mtry);
+    } else {
+      drawWithoutReplacementSkip(result, random_number_generator, num_vars, (*deterministic_varIDs), mtry);
+    }
+  } else {
+    drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, mtry, *split_select_weights);
   }
 
   // Always use deterministic variables
   std::copy(deterministic_varIDs->begin(), deterministic_varIDs->end(), std::inserter(result, result.end()));
-
-  // Randomly add non-deterministic variables (according to weights if needed)
-  if (split_select_weights->empty()) {
-    drawWithoutReplacementSkip(result, random_number_generator, num_vars, data->getNoSplitVariables(), mtry);
-  } else {
-    // No corrected Gini importance supported for weighted splitting
-    size_t num_draws = mtry - result.size();
-    drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, num_draws,
-        *split_select_weights);
-  }
 }
 
 bool Tree::splitNode(size_t nodeID) {
@@ -281,40 +279,55 @@ bool Tree::splitNode(size_t nodeID) {
   split_varIDs[nodeID] = data->getUnpermutedVarID(split_varID);
 
   // Create child nodes
-  size_t left_child_nodeID = sampleIDs.size();
+  size_t left_child_nodeID = split_varIDs.size();
   child_nodeIDs[0][nodeID] = left_child_nodeID;
   createEmptyNode();
+  start_pos[left_child_nodeID] = start_pos[nodeID];
 
-  size_t right_child_nodeID = sampleIDs.size();
+  size_t right_child_nodeID = split_varIDs.size();
   child_nodeIDs[1][nodeID] = right_child_nodeID;
   createEmptyNode();
+  start_pos[right_child_nodeID] = end_pos[nodeID];
 
   // For each sample in node, assign to left or right child
   if (data->isOrderedVariable(split_varID)) {
     // Ordered: left is <= splitval and right is > splitval
-    for (auto& sampleID : sampleIDs[nodeID]) {
-      if (data->get(sampleID, split_varID) <= split_value) {
-        sampleIDs[left_child_nodeID].push_back(sampleID);
+    size_t pos = start_pos[nodeID];
+    while (pos < start_pos[right_child_nodeID]) {
+      size_t sampleID = sampleIDs[pos];
+      if (data->get_x(sampleID, split_varID) <= split_value) {
+        // If going to left, do nothing
+        ++pos;
       } else {
-        sampleIDs[right_child_nodeID].push_back(sampleID);
+        // If going to right, move to right end
+        --start_pos[right_child_nodeID];
+        std::swap(sampleIDs[pos], sampleIDs[start_pos[right_child_nodeID]]);
       }
     }
   } else {
     // Unordered: If bit at position is 1 -> right, 0 -> left
-    for (auto& sampleID : sampleIDs[nodeID]) {
-
-      double level = data->get(sampleID, split_varID);
+    size_t pos = start_pos[nodeID];
+    while (pos < start_pos[right_child_nodeID]) {
+      size_t sampleID = sampleIDs[pos];
+      double level = data->get_x(sampleID, split_varID);
       size_t factorID = floor(level) - 1;
       size_t splitID = floor(split_value);
 
       // Left if 0 found at position factorID
-      if (!(splitID & (1 << factorID))) {
-        sampleIDs[left_child_nodeID].push_back(sampleID);
+      if (!(splitID & (1ULL << factorID))) {
+        // If going to left, do nothing
+        ++pos;
       } else {
-        sampleIDs[right_child_nodeID].push_back(sampleID);
+        // If going to right, move to right end
+        --start_pos[right_child_nodeID];
+        std::swap(sampleIDs[pos], sampleIDs[start_pos[right_child_nodeID]]);
       }
     }
   }
+
+  // End position of left child is start position of right child
+  end_pos[left_child_nodeID] = start_pos[right_child_nodeID];
+  end_pos[right_child_nodeID] = end_pos[nodeID];
 
   // No terminal node
   return false;
@@ -325,7 +338,8 @@ void Tree::createEmptyNode() {
   split_values.push_back(0);
   child_nodeIDs[0].push_back(0);
   child_nodeIDs[1].push_back(0);
-  sampleIDs.push_back(std::vector<size_t>());
+  start_pos.push_back(0);
+  end_pos.push_back(0);
 
   createEmptyNodeInternal();
 }
@@ -344,7 +358,7 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
     }
 
     // Move to child
-    double value = data->get(sampleID_final, split_varID);
+    double value = data->get_x(sampleID_final, split_varID);
     if (data->isOrderedVariable(split_varID)) {
       if (value <= split_values[nodeID]) {
         // Move to left child
@@ -358,7 +372,7 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
       size_t splitID = floor(split_values[nodeID]);
 
       // Left if 0 found at position factorID
-      if (!(splitID & (1 << factorID))) {
+      if (!(splitID & (1ULL << factorID))) {
         // Move to left child
         nodeID = child_nodeIDs[0][nodeID];
       } else {
@@ -390,7 +404,7 @@ void Tree::bootstrap() {
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
 
 // Reserve space, reserve a little more to be save)
-  sampleIDs[0].reserve(num_samples_inbag);
+  sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
@@ -401,7 +415,7 @@ void Tree::bootstrap() {
 // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
   for (size_t s = 0; s < num_samples_inbag; ++s) {
     size_t draw = unif_dist(random_number_generator);
-    sampleIDs[0].push_back(draw);
+    sampleIDs.push_back(draw);
     ++inbag_counts[draw];
   }
 
@@ -425,7 +439,7 @@ void Tree::bootstrapWeighted() {
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
 
 // Reserve space, reserve a little more to be save)
-  sampleIDs[0].reserve(num_samples_inbag);
+  sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
   std::discrete_distribution<> weighted_dist(case_weights->begin(), case_weights->end());
@@ -436,7 +450,7 @@ void Tree::bootstrapWeighted() {
 // Draw num_samples samples with replacement (n out of n) as inbag and mark as not OOB
   for (size_t s = 0; s < num_samples_inbag; ++s) {
     size_t draw = weighted_dist(random_number_generator);
-    sampleIDs[0].push_back(draw);
+    sampleIDs.push_back(draw);
     ++inbag_counts[draw];
   }
 
@@ -466,7 +480,7 @@ void Tree::bootstrapWithoutReplacement() {
 
 // Use fraction (default 63.21%) of the samples
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
-  shuffleAndSplit(sampleIDs[0], oob_sampleIDs, num_samples, num_samples_inbag, random_number_generator);
+  shuffleAndSplit(sampleIDs, oob_sampleIDs, num_samples, num_samples_inbag, random_number_generator);
   num_samples_oob = oob_sampleIDs.size();
 
   if (keep_inbag) {
@@ -482,12 +496,11 @@ void Tree::bootstrapWithoutReplacementWeighted() {
 
 // Use fraction (default 63.21%) of the samples
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
-  drawWithoutReplacementWeighted(sampleIDs[0], random_number_generator, num_samples - 1, num_samples_inbag,
-      *case_weights);
+  drawWithoutReplacementWeighted(sampleIDs, random_number_generator, num_samples - 1, num_samples_inbag, *case_weights);
 
 // All observation are 0 or 1 times inbag
   inbag_counts.resize(num_samples, 0);
-  for (auto& sampleID : sampleIDs[0]) {
+  for (auto& sampleID : sampleIDs) {
     inbag_counts[sampleID] = 1;
   }
 
@@ -523,13 +536,13 @@ void Tree::bootstrapWithoutReplacementClassWise() {
 
 void Tree::setManualInbag() {
   // Select observation as specified in manual_inbag vector
-  sampleIDs[0].reserve(manual_inbag->size());
+  sampleIDs.reserve(manual_inbag->size());
   inbag_counts.resize(num_samples, 0);
   for (size_t i = 0; i < manual_inbag->size(); ++i) {
     size_t inbag_count = (*manual_inbag)[i];
     if ((*manual_inbag)[i] > 0) {
       for (size_t j = 0; j < inbag_count; ++j) {
-        sampleIDs[0].push_back(i);
+        sampleIDs.push_back(i);
       }
       inbag_counts[i] = inbag_count;
     } else {
@@ -539,7 +552,7 @@ void Tree::setManualInbag() {
   num_samples_oob = oob_sampleIDs.size();
 
   // Shuffle samples
-  std::shuffle(sampleIDs[0].begin(), sampleIDs[0].end(), random_number_generator);
+  std::shuffle(sampleIDs.begin(), sampleIDs.end(), random_number_generator);
 
   if (!keep_inbag) {
     inbag_counts.clear();

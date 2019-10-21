@@ -66,7 +66,8 @@
 ##' This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 ##'
 ##' For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
-##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
+##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
+##' Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
 ##' Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing. 
 ##' 
 ##' For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
@@ -84,7 +85,7 @@
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix}, \code{dgCMatrix} (Matrix) or \code{gwaa.data} (GenABEL).
 ##' @param num.trees Number of trees.
-##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
+##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. Alternatively, a single argument function returning an integer, given the number of independent variables.
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
@@ -94,7 +95,7 @@
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
-##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
@@ -114,6 +115,8 @@
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
 ##' @param classification Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.
+##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
+##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
@@ -161,8 +164,9 @@
 ##' rg.veteran <- ranger(Surv(time, status) ~ ., data = veteran)
 ##' plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 ##'
-##' ## Alternative interface
+##' ## Alternative interfaces (same results)
 ##' ranger(dependent.variable.name = "Species", data = iris)
+##' ranger(y = iris[, 5], x = iris[, -5])
 ##' 
 ##' \dontrun{
 ##' ## Use GenABEL interface to read Plink data into R and grow a classification forest
@@ -191,7 +195,6 @@
 ##'   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
-##' @encoding UTF-8
 ##' @useDynLib ranger, .registration = TRUE
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
@@ -212,79 +215,93 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL) {
+                   classification = NULL, x = NULL, y = NULL) {
   
-  ## GenABEL GWA data
-  if ("gwaa.data" %in% class(data)) {
-    snp.names <- data@gtdata@snpnames
-    snp.data <- data@gtdata@gtps@.Data
-    data <- data@phdata
-    if ("id" %in% names(data)) {
-      data$"id" <- NULL
+  ## By default not in GWAS mode
+  snp.data <- as.matrix(0)
+  gwa.mode <- FALSE
+  
+  if (is.null(data)) {
+    ## x/y interface
+    if (is.null(x) | is.null(y)) {
+      stop("Error: Either data or x and y is required.")
     }
-    gwa.mode <- TRUE
-    save.memory <- FALSE
-  } else {
-    snp.data <- as.matrix(0)
-    gwa.mode <- FALSE
+  }  else {
+    ## GenABEL GWA data
+    if ("gwaa.data" %in% class(data)) {
+      snp.names <- data@gtdata@snpnames
+      snp.data <- data@gtdata@gtps@.Data
+      data <- data@phdata
+      if ("id" %in% names(data)) {
+        data$"id" <- NULL
+      }
+      gwa.mode <- TRUE
+      save.memory <- FALSE
+    } 
+    
+    ## Formula interface. Use whole data frame if no formula provided and depvarname given
+    if (is.null(formula)) {
+      if (is.null(dependent.variable.name)) {
+        if (is.null(y) | is.null(x)) {
+          stop("Error: Please give formula, dependent variable name or x/y.")
+        } 
+      } else {
+        if (is.null(status.variable.name)) {
+          y <- data[, dependent.variable.name, drop = TRUE]
+          x <- data[, !(colnames(data) %in% dependent.variable.name), drop = FALSE]
+        } else {
+          y <- survival::Surv(data[, dependent.variable.name], data[, status.variable.name]) 
+          x <- data[, !(colnames(data) %in% c(dependent.variable.name, status.variable.name)), drop = FALSE]
+        }
+      }
+    } else {
+      formula <- formula(formula)
+      if (class(formula) != "formula") {
+        stop("Error: Invalid formula.")
+      }
+      data.selected <- parse.formula(formula, data, env = parent.frame())
+      y <- data.selected[, 1]
+      x <- data.selected[, -1, drop = FALSE]
+    }
   }
   
   ## Sparse matrix data
-  if (inherits(data, "Matrix")) {
-    if (!("dgCMatrix" %in% class(data))) {
+  if (inherits(x, "Matrix")) {
+    if (!("dgCMatrix" %in% class(x))) {
       stop("Error: Currently only sparse data of class 'dgCMatrix' supported.")
-    }
-  
+    } 
     if (!is.null(formula)) {
-      stop("Error: Sparse matrices only supported with alternative interface. Use dependent.variable.name instead of formula.")
+      stop("Error: Sparse matrices only supported with alternative interface. Use dependent.variable.name or x/y instead of formula.")
     }
-  }
-    
-  ## Formula interface. Use whole data frame is no formula provided and depvarname given
-  if (is.null(formula)) {
-    if (is.null(dependent.variable.name)) {
-      stop("Error: Please give formula or dependent variable name.")
-    }
-    if (is.null(status.variable.name)) {
-      status.variable.name <- "none"
-      response <- data[, dependent.variable.name, drop = TRUE]
-    } else {
-      response <- data[, c(dependent.variable.name, status.variable.name)]
-    }
-    data.selected <- data
-  } else {
-    formula <- formula(formula)
-    if (class(formula) != "formula") {
-      stop("Error: Invalid formula.")
-    }
-    data.selected <- parse.formula(formula, data)
-    response <- data.selected[, 1]
   }
   
   ## Check missing values
-  if (any(is.na(data.selected))) {
-    offending_columns <- colnames(data.selected)[colSums(is.na(data.selected)) > 0]
+  if (any(is.na(x))) {
+    offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
     stop("Missing data in columns: ",
          paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
+  if (any(is.na(y))) {
+    stop("Missing data in dependent variable.", call. = FALSE)
+  }
   
   ## Check response levels
-  if (is.factor(response)) {
-    if (nlevels(response) != nlevels(droplevels(response))) {
-      dropped_levels <- setdiff(levels(response), levels(droplevels(response)))
+  if (is.factor(y)) {
+    if (nlevels(y) != nlevels(droplevels(y))) {
+      dropped_levels <- setdiff(levels(y), levels(droplevels(y)))
       warning("Dropped unused factor level(s) in dependent variable: ",
               paste0(dropped_levels, collapse = ", "), ".", call. = FALSE)
     }
   }
   
   ## Treetype
-  if (is.factor(response)) {
+  if (is.factor(y)) {
     if (probability) {
       treetype <- 9
     } else {
       treetype <- 1
     }
-  } else if (is.numeric(response) && is.vector(response)) {
+  } else if (is.numeric(y) && (is.null(ncol(y)) || ncol(y) == 1)) {
     if (!is.null(classification) && classification && !probability) {
       treetype <- 1
     } else if (probability) {
@@ -292,7 +309,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       treetype <- 3
     }
-  } else if (class(response) == "Surv" || is.data.frame(response) || is.matrix(response)) {
+  } else if (class(y) == "Surv" || is.data.frame(y) || is.matrix(y)) {
     treetype <- 5
   } else {
     stop("Error: Unsupported type of dependent variable.")
@@ -302,21 +319,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (quantreg && treetype != 3) {
     stop("Error: Quantile prediction implemented only for regression outcomes.")
   }
-  
-  ## Dependent and status variable name. For non-survival dummy status variable name.
-  if (!is.null(formula)) {
-    if (treetype == 5) {
-      dependent.variable.name <- dimnames(response)[[2]][1]
-      status.variable.name <- dimnames(response)[[2]][2]
-    } else {
-      dependent.variable.name <- names(data.selected)[1]
-      status.variable.name <- "none"
-    }
-    independent.variable.names <- names(data.selected)[-1]
-  } else {
-    independent.variable.names <- colnames(data.selected)[colnames(data.selected) != dependent.variable.name &
-                                                          colnames(data.selected) != status.variable.name]
-  }
+
+  independent.variable.names <- colnames(x)
   
   ## respect.unordered.factors
   if (is.null(respect.unordered.factors)) {
@@ -335,81 +339,66 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Recode characters as factors and recode factors if 'order' mode
-  if (!is.matrix(data.selected) && !inherits(data.selected, "Matrix")) {
-    character.idx <- sapply(data.selected, is.character)
+  if (!is.matrix(x) && !inherits(x, "Matrix") && ncol(x) > 0) {
+    character.idx <- sapply(x, is.character)
     
     if (respect.unordered.factors == "order") {
       ## Recode characters and unordered factors
-      names.selected <- names(data.selected)
-      ordered.idx <- sapply(data.selected, is.ordered)
-      factor.idx <- sapply(data.selected, is.factor)
-      independent.idx <- names.selected != dependent.variable.name & 
-        names.selected != status.variable.name & 
-        names.selected != paste0("Surv(", dependent.variable.name, ", ", status.variable.name, ")")
-      recode.idx <- independent.idx & (character.idx | (factor.idx & !ordered.idx))
+      ordered.idx <- sapply(x, is.ordered)
+      factor.idx <- sapply(x, is.factor)
+      recode.idx <- character.idx | (factor.idx & !ordered.idx)
 
       if (any(recode.idx) & (importance == "impurity_corrected" || importance == "impurity_unbiased")) {
         warning("Corrected impurity importance may not be unbiased for re-ordered factor levels. Consider setting respect.unordered.factors to 'ignore' or 'partition' or manually compute corrected importance.")
       }
       
       ## Numeric response
-      if (is.factor(response)) {
-        num.response <- as.numeric(response)
+      if (is.factor(y)) {
+        num.y <- as.numeric(y)
       } else {
-        num.response <- response
+        num.y <- y
       }
 
       ## Recode each column
-      data.selected[recode.idx] <- lapply(data.selected[recode.idx], function(x) {
-        if (!is.factor(x)) {
-          x <- as.factor(x)
+      x[recode.idx] <- lapply(x[recode.idx], function(xx) {
+        if (!is.factor(xx)) {
+          xx <- as.factor(xx)
         } 
         
-        if ("Surv" %in% class(response)) {
+        if (length(levels(xx)) == 1) {
+          ## Don't order if only one level
+          levels.ordered <- levels(xx)
+        } else if ("Surv" %in% class(y)) {
           ## Use median survival if available or largest quantile available in all strata if median not available
-          levels.ordered <- largest.quantile(response ~ x)
+          levels.ordered <- largest.quantile(y ~ xx)
           
           ## Get all levels not in node
-          levels.missing <- setdiff(levels(x), levels.ordered)
+          levels.missing <- setdiff(levels(xx), levels.ordered)
           levels.ordered <- c(levels.missing, levels.ordered)
-        } else if (is.factor(response) & nlevels(response) > 2) {
-          levels.ordered <- pca.order(y = response, x = x)
+        } else if (is.factor(y) & nlevels(y) > 2) {
+          levels.ordered <- pca.order(y = y, x = xx)
         } else {
           ## Order factor levels by mean response
-          means <- sapply(levels(x), function(y) {
-            mean(num.response[x == y])
+          means <- sapply(levels(xx), function(y) {
+            mean(num.y[xx == y])
           })
-          levels.ordered <- as.character(levels(x)[order(means)])
+          levels.ordered <- as.character(levels(xx)[order(means)])
         }
         
         ## Return reordered factor
-        factor(x, levels = levels.ordered, ordered = TRUE)
+        factor(xx, levels = levels.ordered, ordered = TRUE, exclude = NULL)
       })
       
       ## Save levels
-      covariate.levels <- lapply(data.selected[independent.idx], levels)
+      covariate.levels <- lapply(x, levels)
     } else {
       ## Recode characters only
-      data.selected[character.idx] <- lapply(data.selected[character.idx], factor)
+      x[character.idx] <- lapply(x[character.idx], factor)
     }
   }
   
-  ## Input data and variable names, create final data matrix
-  if (!is.null(formula) && treetype == 5) {
-    data.final <- data.matrix(cbind(response[, 1], response[, 2],
-                              data.selected[-1]))
-    colnames(data.final) <- c(dependent.variable.name, status.variable.name,
-                              independent.variable.names)
-  } else if (is.matrix(data.selected) || inherits(data.selected, "Matrix")) {
-    data.final <- data.selected
-  } else {
-    data.final <- data.matrix(data.selected)
-  }
-  variable.names <- colnames(data.final)
-  
   ## If gwa mode, add snp variable names
   if (gwa.mode) {
-    variable.names <- c(variable.names, snp.names)
     all.independent.variable.names <- c(independent.variable.names, snp.names)
   } else {
     all.independent.variable.names <- independent.variable.names
@@ -425,7 +414,35 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Invalid value for num.trees.")
   }
   
-  ## mtry
+  ## mtry as a function
+  if (is.function(mtry)) { 
+    nv <- length(all.independent.variable.names)
+    
+    if (length(formals(mtry)) > 1){
+      stop("Error: Given mtry function requires single argument (the number of independent variables in the model).")
+    }
+    
+    # Evaluate function
+    mtry <- try(mtry(nv), silent = TRUE)
+    
+    if (inherits(mtry, "try-error")) {
+      message("The mtry function produced the error: ", mtry)
+      stop("Error: mtry function evaluation resulted in an error.")
+    }
+    
+    ## Check for a single numeric
+    if (!is.numeric(mtry) || length(mtry) != 1) {
+      stop("Error: Given mtry function should return a single integer or numeric.")
+    } else {
+      mtry <- as.integer(mtry)
+    }
+    
+    ## Check for limits
+    if (mtry < 1 || mtry > nv) {
+      stop("Error: Given mtry function should evaluate to a value not less than 1 and not greater than the number of independent variables ( = ", nv, " )")
+    }
+  }
+  
   if (is.null(mtry)) {
     mtry <- 0
   } else if (!is.numeric(mtry) || mtry < 0) {
@@ -478,14 +495,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (sum(sample.fraction) <= 0) {
       stop("Error: Invalid value for sample.fraction. Sum of values must be >0.")
     }
-    if (length(sample.fraction) != nlevels(response)) {
-      stop("Error: Invalid value for sample.fraction. Expecting ", nlevels(response), " values, provided ", length(sample.fraction), ".")
+    if (length(sample.fraction) != nlevels(y)) {
+      stop("Error: Invalid value for sample.fraction. Expecting ", nlevels(y), " values, provided ", length(sample.fraction), ".")
     }
-    if (!replace & any(sample.fraction * length(response) > table(response))) {
-      idx <- which(sample.fraction * length(response) > table(response))[1]
+    if (!replace & any(sample.fraction * length(y) > table(y))) {
+      idx <- which(sample.fraction * length(y) > table(y))[1]
       stop("Error: Not enough samples in class ", names(idx), 
-           "; available: ", table(response)[idx], 
-           ", requested: ", (sample.fraction * length(response))[idx], ".")
+           "; available: ", table(y)[idx], 
+           ", requested: ", (sample.fraction * length(y))[idx], ".")
     }
     if (!is.null(case.weights)) {
       stop("Error: Combination of case.weights and class-wise sampling not supported.")
@@ -503,9 +520,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 1
   } else if (importance == "impurity_corrected" || importance == "impurity_unbiased") {
     importance.mode <- 5
-    if (!is.null(split.select.weights)) {
-      stop("Corrected impurity importance not supported in combination with split.select.weights.")
-    }
   } else if (importance == "permutation") {
     if (scale.permutation.importance) {
       importance.mode <- 2
@@ -531,7 +545,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       sample.fraction <- sample.fraction * mean(case.weights > 0)
     }
     
-    if (!replace && sum(case.weights > 0) < sample.fraction * nrow(data.final)) {
+    if (!replace && sum(case.weights > 0) < sample.fraction * nrow(x)) {
       stop("Error: Fewer non-zero case weights than observations to sample.")
     }
   }
@@ -557,7 +571,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Class weights: NULL for no weights (all 1)
   if (is.null(class.weights)) {
-    class.weights <- rep(1, nlevels(response))
+    class.weights <- rep(1, nlevels(y))
   } else {
     if (!(treetype %in% c(1, 9))) {
       stop("Error: Argument class.weights only valid for classification forests.")
@@ -565,12 +579,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (!is.numeric(class.weights) || any(class.weights < 0)) {
       stop("Error: Invalid value for class.weights. Please give a vector of non-negative values.")
     }
-    if (length(class.weights) != nlevels(response)) {
+    if (length(class.weights) != nlevels(y)) {
       stop("Error: Number of class weights not equal to number of classes.")
     }
 
     ## Reorder (C++ expects order as appearing in the data)
-    class.weights <- class.weights[unique(as.numeric(response))]
+    class.weights <- class.weights[unique(as.numeric(y))]
   }
   
   ## Split select weights: NULL for no weights
@@ -652,11 +666,26 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   } else if (splitrule == "extratrees") {
     splitrule.num <- 5
+  } else if (splitrule == "beta") {
+    if (treetype == 3) {
+      splitrule.num <- 6
+    } else {
+      stop("Error: beta splitrule applicable to regression data only.")
+    }
+    
+    ## Check for 0..1 outcome
+    if (min(y) < 0 || max(y) > 1) {
+      stop("Error: beta splitrule applicable to regression data with outcome between 0 and 1 only.")
+    }
   } else if (splitrule == "hellinger") {
-    splitrule.num <- 6
-    if (nlevels(response) > 2) {
+    if (treetype %in% c(1, 9)) {
+      splitrule.num <- 7
+    } else {
       stop("Error: Hellinger splitrule only implemented for binary classification.")
     }
+    if ((is.factor(y) && nlevels(y) > 2) || (length(unique(y)) > 2)) {
+      stop("Error: Hellinger splitrule only implemented for binary classification.")
+    }  
   } else {
     stop("Error: Unknown splitrule.")
   }
@@ -679,16 +708,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
   ## Unordered factors  
   if (respect.unordered.factors == "partition") {
-    names.selected <- names(data.selected)
-    ordered.idx <- sapply(data.selected, is.ordered)
-    factor.idx <- sapply(data.selected, is.factor)
-    independent.idx <- names.selected != dependent.variable.name & names.selected != status.variable.name
-    unordered.factor.variables <- names.selected[factor.idx & !ordered.idx & independent.idx]
+    ordered.idx <- sapply(x, is.ordered)
+    factor.idx <- sapply(x, is.factor)
+    unordered.factor.variables <- independent.variable.names[factor.idx & !ordered.idx]
     
     if (length(unordered.factor.variables) > 0) {
       use.unordered.factor.variables <- TRUE
       ## Check level count
-      num.levels <- sapply(data.selected[, factor.idx & !ordered.idx & independent.idx, drop = FALSE], nlevels)
+      num.levels <- sapply(x[, factor.idx & !ordered.idx, drop = FALSE], nlevels)
       max.level.count <- .Machine$double.digits
       if (max(num.levels) > max.level.count) {
         stop(paste("Too many levels in unordered categorical variable ", unordered.factor.variables[which.max(num.levels)], 
@@ -712,6 +739,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Unordered factor splitting not implemented for 'maxstat' splitting rule.")
     } else if (splitrule %in% c("C", "auc", "C_ignore_ties", "auc_ignore_ties")) {
       stop("Error: Unordered factor splitting not implemented for 'C' splitting rule.")
+    } else if (splitrule == "beta") {
+      stop("Error: Unordered factor splitting not implemented for 'beta' splitting rule.")
     }
   }
   
@@ -720,12 +749,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (treetype == 3 && splitrule == "maxstat") {
       warning("Warning: The 'order' mode for unordered factor handling with the 'maxstat' splitrule is experimental.")
     }
-    if (gwa.mode & ((treetype %in% c(1,9) & nlevels(response) > 2) | treetype == 5)) {
+    if (gwa.mode & ((treetype %in% c(1,9) & nlevels(y) > 2) | treetype == 5)) {
       stop("Error: Ordering of SNPs currently only implemented for regression and binary outcomes.")
     }
   }
   
-
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
   predict.all <- FALSE
@@ -735,13 +763,22 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   loaded.forest <- list()
   
   ## Use sparse matrix
-  if ("dgCMatrix" %in% class(data.final)) {
-    sparse.data <- data.final
-    data.final <- matrix(c(0, 0))
+  if ("dgCMatrix" %in% class(x)) {
+    sparse.x <- x
+    x <- matrix(c(0, 0))
     use.sparse.data <- TRUE
   } else {
-    sparse.data <- Matrix(matrix(c(0, 0)))
+    sparse.x <- Matrix(matrix(c(0, 0)))
     use.sparse.data <- FALSE
+    if (is.data.frame(x)) {
+      x <- data.matrix(x)
+    }
+  }
+  
+  if (treetype == 5) {
+    y.mat <- as.matrix(y)
+  } else {
+    y.mat <- as.matrix(as.numeric(y))
   }
   
   if (respect.unordered.factors == "order"){
@@ -750,20 +787,16 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     order.snps <- FALSE
   }
   
-  
-  ## Clean up
-  rm("data.selected")
-
   ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
+  result <- rangerCpp(treetype, x, y.mat, independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, loaded.forest, snp.data,
+                      prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth, 
+                      num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag)
   
   if (length(result) == 0) {
@@ -776,12 +809,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   ## Set predictions
-  if (treetype == 1 && is.factor(response) && oob.error) {
-    result$predictions <- integer.to.factor(result$predictions,
-                                            levels(response))
-    true.values <- integer.to.factor(unlist(data.final[, dependent.variable.name]),
-                                     levels(response))
-    result$confusion.matrix <- table(true.values, result$predictions, 
+  if (treetype == 1 && oob.error) {
+    if (is.factor(y)) {
+      result$predictions <- integer.to.factor(result$predictions,
+                                              levels(y))
+    } 
+    result$confusion.matrix <- table(y, result$predictions, 
                                      dnn = c("true", "predicted"), useNA = "ifany")
   } else if (treetype == 5 && oob.error) {
     if (is.list(result$predictions)) {
@@ -793,7 +826,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$chf <- result$predictions
     result$predictions <- NULL
     result$survival <- exp(-result$chf)
-  } else if (treetype == 9 && !is.matrix(data) && oob.error) {
+  } else if (treetype == 9 && oob.error) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
     } 
@@ -802,9 +835,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
     
     ## Set colnames and sort by levels
-    colnames(result$predictions) <- unique(response)
-    if (is.factor(response)) {
-      result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
+    colnames(result$predictions) <- unique(y)
+    if (is.factor(y)) {
+      result$predictions <- result$predictions[, levels(droplevels(y)), drop = FALSE]
     }
   }
   
@@ -822,24 +855,24 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$treetype <- "Probability estimation"
   }
   if (treetype == 3) {
-    result$r.squared <- 1 - result$prediction.error / var(response)
+    result$r.squared <- 1 - result$prediction.error / var(y)
   }
   result$call <- sys.call()
   result$importance.mode <- importance
-  result$num.samples <- nrow(data.final)
+  result$num.samples <- nrow(x)
   result$replace <- replace
   
   ## Write forest object
   if (write.forest) {
-    if (is.factor(response)) {
-      result$forest$levels <- levels(response)
+    if (is.factor(y)) {
+      result$forest$levels <- levels(y)
     }
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
     class(result$forest) <- "ranger.forest"
     
     ## In 'ordered' mode, save covariate levels
-    if (respect.unordered.factors == "order" && !is.matrix(data)) {
+    if (respect.unordered.factors == "order" && ncol(x) > 0) {
       result$forest$covariate.levels <- covariate.levels
     }
   }
@@ -848,14 +881,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Prepare quantile prediction
   if (quantreg) {
-    terminal.nodes <- predict(result, data, type = "terminalNodes")$predictions + 1
+    terminal.nodes <- predict(result, x, type = "terminalNodes")$predictions + 1
     n <- result$num.samples
     result$random.node.values <- matrix(nrow = max(terminal.nodes), ncol = num.trees)
     
     ## Select one random obs per node and tree
     for (tree in 1:num.trees){
       idx <- sample(1:n, n)
-      result$random.node.values[terminal.nodes[idx, tree], tree] <- response[idx]
+      result$random.node.values[terminal.nodes[idx, tree], tree] <- y[idx]
     }
     
     ## Prepare out-of-bag quantile regression
@@ -875,7 +908,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           for (j in 1:num.oob) {
             idx <- terminal.nodes[, tree] == oob.nodes[j]
             idx[oob.obs[j]] <- FALSE
-            random.node.values.oob[oob.obs[j], tree] <- save.sample(response[idx], size = 1)
+            random.node.values.oob[oob.obs[j], tree] <- save.sample(y[idx], size = 1)
           }
         }
       }

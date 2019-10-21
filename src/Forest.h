@@ -48,22 +48,21 @@ public:
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
       bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth);
-  void initR(std::string dependent_variable_name, std::unique_ptr<Data> input_data, uint mtry, uint num_trees,
-      std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
+  void initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, std::ostream* verbose_out, uint seed,
+      uint num_threads, ImportanceMode importance_mode, uint min_node_size,
       std::vector<std::vector<double>>& split_select_weights,
-      const std::vector<std::string>& always_split_variable_names, std::string status_variable_name,
-      bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
-      bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
-      std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
-      std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
-      uint num_random_splits, bool order_snps, uint max_depth);
-  void init(std::string dependent_variable_name, MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry,
-      std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
-      uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
+      const std::vector<std::string>& always_split_variable_names, bool prediction_mode, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-      bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
+      std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
+      bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth);
-  virtual void initInternal(std::string status_variable_name) = 0;
+  void init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry, std::string output_prefix,
+      uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
+      bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
+      bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
+      double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits,
+      bool order_snps, uint max_depth);
+  virtual void initInternal() = 0;
 
   // Grow or predict
   void run(bool verbose, bool compute_oob_error);
@@ -108,9 +107,6 @@ public:
   }
   const std::vector<std::vector<std::vector<double>>>& getPredictions() const {
     return predictions;
-  }
-  size_t getDependentVarId() const {
-    return dependent_varID;
   }
   size_t getNumTrees() const {
     return num_trees;
@@ -165,6 +161,10 @@ protected:
   // Load forest from file
   void loadFromFile(std::string filename);
   virtual void loadFromFileInternal(std::ifstream& infile) = 0;
+  void loadDependentVariableNamesFromFile(std::string filename);
+
+  // Load data from file
+  std::unique_ptr<Data> loadDataFromFile(const std::string& data_path);
 
   // Set split select weights and variables to be always considered for splitting
   void setSplitWeightVector(std::vector<std::vector<double>>& split_select_weights);
@@ -180,13 +180,12 @@ protected:
   // Verbose output stream, cout if verbose==true, logfile if not
   std::ostream* verbose_out;
 
+  std::vector<std::string> dependent_variable_names; // time,status for survival
   size_t num_trees;
   uint mtry;
   uint min_node_size;
-  size_t num_variables;
   size_t num_independent_variables;
   uint seed;
-  size_t dependent_varID;
   size_t num_samples;
   bool prediction_mode;
   MemoryMode memory_mode;

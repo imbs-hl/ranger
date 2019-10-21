@@ -2,6 +2,7 @@
 
 library(ranger)
 library(survival)
+library(methods)
 context("ranger_jackknife")
 
 test_that("jackknife standard error prediction working for regression", {
@@ -128,37 +129,6 @@ test_that("standard error response prediction is the same as response prediction
   expect_equal(pred_se$predictions, pred_resp$predictions)
 })
 
-test_that("standard error is larger for fewer trees, regression", {
-  idx <- sample(nrow(iris), 25)
-  test <- iris[idx, ]
-  train <- iris[-idx, ]
-  
-  rf5 <- ranger(Petal.Length ~ ., train, num.trees = 5, keep.inbag = TRUE)
-  pred5_jack <- predict(rf5, test, type = "se", se.method = "jack")
-  pred5_ij <- predict(rf5, test, type = "se", se.method = "infjack")
-  
-  rf50 <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
-  pred50_jack <- predict(rf50, test, type = "se", se.method = "jack")
-  pred50_ij <- predict(rf50, test, type = "se", se.method = "infjack")
-  
-  expect_lt(mean(pred50_jack$se), mean(pred5_jack$se))
-  expect_lt(mean(pred50_ij$se), mean(pred5_ij$se))
-})
-
-test_that("standard error is larger for fewer trees, probability", {
-  idx <- sample(nrow(iris), 25)
-  test <- iris[idx, ]
-  train <- iris[-idx, ]
-  
-  rf5 <- ranger(Species ~ ., train, num.trees = 5, keep.inbag = TRUE, probability = TRUE)
-  pred5 <- predict(rf5, test, type = "se", se.method = "infjack")
-  
-  rf50 <- ranger(Petal.Length ~ ., train, num.trees = 50, keep.inbag = TRUE)
-  pred50 <- predict(rf50, test, type = "se", se.method = "infjack")
-  
-  expect_lt(mean(pred50$se), mean(pred5$se))
-})
-
 test_that("Warning for few observations with IJ", {
   idx <- sample(nrow(iris), 10)
   test <- iris[idx, ]
@@ -198,4 +168,30 @@ test_that("No error for se estimation for many observations", {
   dat <- data.frame(y = rbinom(n, 1, .5), x = rbinom(n, 1, .5))
   rf <- ranger(y ~ x, dat, num.trees = 2, keep.inbag = TRUE)
   expect_silent(predict(rf, dat, type = "se", se.method = "infjack"))
+})
+
+test_that("Standard error prediction working for single observation, regression", {
+  test <- iris[1, , drop = FALSE]
+  train <- iris[-1, ]
+  
+  rf <- ranger(Petal.Length ~ ., train, num.trees = 5, keep.inbag = TRUE)
+  
+  # Jackknife
+  pred <- predict(rf, test, type = "se", se.method = "jack")
+  expect_length(pred$se, 1)
+  
+  # IJ
+  pred <- expect_warning(predict(rf, test, type = "se", se.method = "infjack"))
+  expect_length(pred$se, 1)
+})
+
+test_that("Standard error prediction working for single observation, probability", {
+  test <- iris[134, , drop = FALSE]
+  train <- iris[-134, ]
+  
+  rf <- ranger(Species ~ ., train, num.trees = 5, keep.inbag = TRUE, probability = TRUE)
+  
+  # IJ
+  pred <- expect_warning(predict(rf, test, type = "se", se.method = "infjack"))
+  expect_equal(dim(pred$se), c(1, 3))
 })

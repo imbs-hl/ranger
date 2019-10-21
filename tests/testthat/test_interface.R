@@ -57,6 +57,64 @@ test_that("Error if interaction of factor variable included", {
                "Error: Only numeric columns allowed in interaction terms.")
 })
 
+test_that("Working if dependent variable has attributes other than names", {
+  iris2 <- iris
+  attr(iris2$Sepal.Width, "aaa") <- "bbb"
+  expect_silent(ranger(data = iris2, dependent.variable = "Sepal.Width"))
+})
+
+test_that("Working if dependent variable is matrix with one column", {
+  iris2 <- iris
+  iris2$Sepal.Width = scale(iris$Sepal.Width)
+  expect_silent(ranger(data = iris2, dependent.variable = "Sepal.Width"))
+})
+
+test_that("Same result with x/y interface, classification", {
+  set.seed(300)
+  rf_formula <- ranger(Species ~ ., iris, num.trees = 5)
+  
+  set.seed(300)
+  rf_xy <- ranger(y = iris[, 5], x = iris[, -5], num.trees = 5)
+  
+  expect_equal(rf_formula$prediction.error, rf_xy$prediction.error)
+  expect_equal(rf_formula$predictions, rf_xy$predictions)
+})
+
+test_that("Same result with x/y interface, regression", {
+  set.seed(300)
+  rf_formula <- ranger(Sepal.Length ~ ., iris, num.trees = 5)
+  
+  set.seed(300)
+  rf_xy <- ranger(y = iris[, 1], x = iris[, -1], num.trees = 5)
+  
+  expect_equal(rf_formula$prediction.error, rf_xy$prediction.error)
+  expect_equal(rf_formula$predictions, rf_xy$predictions)
+})
+
+test_that("Same result with x/y interface, survival", {
+  set.seed(300)
+  rf_formula <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
+  
+  set.seed(300)
+  rf_xy <- ranger(y = veteran[, c(3, 4)], x = veteran[, c(-3, -4)], num.trees = 5)
+  
+  expect_equal(rf_formula$prediction.error, rf_xy$prediction.error)
+  expect_equal(rf_formula$predictions, rf_xy$predictions)
+})
+
+test_that("Column order does not change prediction", {
+  dat <- iris[, c(sample(1:4), 5)]
+  rf <- ranger(dependent.variable.name = "Species", data = iris)
+  
+  set.seed(42)
+  pred1 <- predict(rf, iris)$predictions
+  
+  set.seed(42)
+  pred2 <- predict(rf, dat)$predictions
+  
+  expect_equal(pred1, pred2)
+})
+
 # Tibbles
 # This is failing on Rdevel. Possible without suggesting tibble package?
 # if (requireNamespace("tibble", quietly = TRUE)) {

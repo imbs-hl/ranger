@@ -35,7 +35,7 @@ public:
   Tree(const Tree&) = delete;
   Tree& operator=(const Tree&) = delete;
 
-  void init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
+  void init(const Data* data, uint mtry, size_t num_samples, uint seed,
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
@@ -102,7 +102,6 @@ protected:
 
   virtual void cleanUpInternal() = 0;
 
-  size_t dependent_varID;
   uint mtry;
 
   // Number of samples (all samples, not only inbag for this tree)
@@ -136,8 +135,12 @@ protected:
   // Vector of left and right child node IDs, 0 for no child
   std::vector<std::vector<size_t>> child_nodeIDs;
 
-  // For each node a vector with IDs of samples in node
-  std::vector<std::vector<size_t>> sampleIDs;
+  // All sampleIDs in the tree, will be re-ordered while splitting
+  std::vector<size_t> sampleIDs;
+
+  // For each node a vector with start and end positions
+  std::vector<size_t> start_pos;
+  std::vector<size_t> end_pos;
 
   // IDs of OOB individuals, sorted
   std::vector<size_t> oob_sampleIDs;

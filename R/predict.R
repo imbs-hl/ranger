@@ -81,11 +81,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     snp.data <- data@gtdata@gtps@.Data
     data <- data@phdata[, -1, drop = FALSE]
     gwa.mode <- TRUE
-    variable.names <- c(names(data), snp.names)
   } else {
     snp.data <- as.matrix(0)
     gwa.mode <- FALSE
-    variable.names <- colnames(data)
   }
 
   ## Check forest argument
@@ -94,20 +92,22 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   } else {
     forest <- object
   }
-  if (is.null(forest$dependent.varID) || is.null(forest$num.trees) ||
+  if (is.null(forest$num.trees) ||
         is.null(forest$child.nodeIDs) || is.null(forest$split.varIDs) ||
         is.null(forest$split.values) || is.null(forest$independent.variable.names) ||
         is.null(forest$treetype)) {
     stop("Error: Invalid forest object.")
   }
-  if (forest$treetype == "Survival" && (is.null(forest$status.varID)  ||
-                                        is.null(forest$chf) || is.null(forest$unique.death.times))) {
+  if (forest$treetype == "Survival" && (is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
   
   ## Check for old ranger version
   if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
+  }
+  if (!is.null(forest$dependent.varID)) {
+    stop("Error: Invalid forest object. Is the forest grown in ranger version <0.11.5? Try to predict with the same version the forest was grown.")
   }
   
   ## Prediction type
@@ -142,104 +142,51 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (type == "se") {
     predict.all <- TRUE
   }
+  
+  x <- data
+  
+  if (sum(!(forest$independent.variable.names %in% colnames(x))) > 0) {
+    stop("Error: One or more independent variables not found in data.")
+  }
 
-  ## Create final data
-  if (forest$treetype == "Survival") {
-    if (forest$dependent.varID > 0 && forest$status.varID > 1) {
-      if (ncol(data) == length(forest$independent.variable.names)+2) {
-        ## If alternative interface used and same data structure, don't subset data
-        data.used <- data
-      } else if (ncol(data) == length(forest$independent.variable.names)) {
-        data.selected <- data[, forest$independent.variable.names, drop = FALSE]
-        data.used <- cbind(0, 0, data.selected)
-        variable.names <- c("time", "status", forest$independent.variable.names)
-        forest$dependent.varID <- 0
-        forest$status.varID <- 1
-      } else {
-        stop("Invalid prediction data. Include both time and status variable or none.")
-      }
-    } else {
-      ## If formula interface used, subset data
-      data.selected <- data[, forest$independent.variable.names, drop = FALSE]
-
-      ## Arange data as in original data
-      data.used <- cbind(0, 0, data.selected)
-      variable.names <- c("time", "status", forest$independent.variable.names)
-    }
-
-  ## Index of no-recode variables
-  idx.norecode <- c(-(forest$dependent.varID+1), -(forest$status.varID+1))
-
-  } else {
-    ## No survival
-    if (ncol(data) == length(forest$independent.variable.names)+1 && forest$dependent.varID > 0) {
-      ## If alternative interface used and same data structure, don't subset data
-      data.used <- data
-    } else {
-      ## If formula interface used, subset data
-      data.selected <- data[, forest$independent.variable.names, drop = FALSE]
-
-      ## Arange data as in original data
-      if (forest$dependent.varID == 0) {
-        data.used <- cbind(0, data.selected)
-        variable.names <- c("dependent", forest$independent.variable.names)
-      } else if (forest$dependent.varID >= ncol(data)) {
-        data.used <- cbind(data.selected, 0)
-        variable.names <- c(forest$independent.variable.names, "dependent")
-      } else {
-        data.used <- cbind(data.selected[, 1:forest$dependent.varID],
-                           0,
-                           data.selected[, (forest$dependent.varID+1):ncol(data.selected)])
-        variable.names <- c(forest$independent.variable.names[1:forest$dependent.varID],
-                            "dependent",
-                            forest$independent.variable.names[(forest$dependent.varID+1):length(forest$independent.variable.names)])
-      }
-    }
-
-    ## Index of no-recode variables
-    idx.norecode <- -(forest$dependent.varID+1)
+  ## Subset to same column as in training if necessary
+  if (length(colnames(x)) != length(forest$independent.variable.names) || any(colnames(x) != forest$independent.variable.names)) {
+    x <- x[, forest$independent.variable.names, drop = FALSE]
   }
 
   ## Recode characters
-  if (!is.matrix(data.used) && !inherits(data.used, "Matrix")) {
-    char.columns <- sapply(data.used, is.character)
-    data.used[char.columns] <- lapply(data.used[char.columns], factor)
+  if (!is.matrix(x) && !inherits(x, "Matrix")) {
+    char.columns <- sapply(x, is.character)
+    if (length(char.columns) > 0) {
+      x[char.columns] <- lapply(x[char.columns], factor)
+    }
   }
-
+  
   ## Recode factors if forest grown 'order' mode
   if (!is.null(forest$covariate.levels) && !all(sapply(forest$covariate.levels, is.null))) {
-    data.used[, idx.norecode] <- mapply(function(x, y) {
-      if(is.null(y)) {
-        x
+    x <- mapply(function(xx, yy) {
+      if(is.null(yy)) {
+        xx
       } else {
-        new.levels <- setdiff(levels(x), y)
-        factor(x, levels = c(y, new.levels))
+        new.levels <- setdiff(levels(xx), yy)
+        factor(xx, levels = c(yy, new.levels), exclude = NULL)
       }
-    }, data.used[, idx.norecode], forest$covariate.levels, SIMPLIFY = !is.data.frame(data.used[, idx.norecode]))
+    }, x, forest$covariate.levels, SIMPLIFY = !is.data.frame(x))
+  }
+  if (is.list(x) && !is.data.frame(x)) {
+    x <- as.data.frame(x)
   }
 
   ## Convert to data matrix
-  if (is.matrix(data.used) || inherits(data.used, "Matrix")) {
-    data.final <- data.used
-  } else {
-    data.final <- data.matrix(data.used)
-  }
-  
-
-  ## If gwa mode, add snp variable names
-  if (gwa.mode) {
-    variable.names <- c(variable.names, snp.names)
+  if (!is.matrix(x) & !inherits(x, "Matrix")) {
+    x <- data.matrix(x)
   }
 
   ## Check missing values
-  if (any(is.na(data.final))) {
-    offending_columns <- colnames(data.final)[colSums(is.na(data.final)) > 0]
+  if (any(is.na(x))) {
+    offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
     stop("Missing data in columns: ",
          paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
-  }
-
-  if (sum(!(forest$independent.variable.names %in% variable.names)) > 0) {
-    stop("Error: One or more independent variables not found in data.")
   }
 
   ## Num threads
@@ -268,7 +215,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Defaults for variables not needed
-  dependent.variable.name <- "none"
   mtry <- 0
   importance <- 0
   min.node.size <- 0
@@ -276,7 +222,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   use.split.select.weights <- FALSE
   always.split.variables <- c("0", "0")
   use.always.split.variables <- FALSE
-  status.variable.name <- "status"
   prediction.mode <- TRUE
   write.forest <- FALSE
   replace <- TRUE
@@ -299,27 +244,29 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   max.depth <- 0
   inbag <- list(c(0,0))
   use.inbag <- FALSE
+  y <- matrix(c(0, 0))
   
   ## Use sparse matrix
-  if ("dgCMatrix" %in% class(data.final)) {
-    sparse.data <- data.final
-    data.final <- matrix(c(0, 0))
+  if ("dgCMatrix" %in% class(x)) {
+    sparse.x <- x
+    x <- matrix(c(0, 0))
     use.sparse.data <- TRUE
   } else {
-    sparse.data <- Matrix(matrix(c(0, 0)))
+    sparse.x <- Matrix(matrix(c(0, 0)))
     use.sparse.data <- FALSE
+    x <- data.matrix(x)
   }
   
   ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
+  result <- rangerCpp(treetype, x, y, forest$independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, forest, snp.data, replace, probability,
+                      prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
-                      prediction.type, num.random.splits, sparse.data, use.sparse.data,
+                      prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag)
 
   if (length(result) == 0) {
@@ -327,7 +274,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Prepare results
-  result$num.samples <- nrow(data.final)
+  result$num.samples <- nrow(x)
   result$treetype <- forest$treetype
 
   if (predict.all) {
@@ -338,7 +285,10 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         result$predictions <- array(result$predictions, dim = c(1, length(result$predictions)))
       }
     } else {
-      ## TODO: Better solution for this?
+      if (is.list(result$predictions) & length(result$predictions) >= 1 & is.numeric(result$predictions[[1]])) {
+        # Fix for single test observation
+        result$predictions <- list(result$predictions)
+      }
       result$predictions <- aperm(array(unlist(result$predictions), 
                                         dim = rev(c(length(result$predictions), 
                                                     length(result$predictions[[1]]), 
@@ -362,15 +312,17 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       result$chf <- result$predictions
       result$predictions <- NULL
       result$survival <- exp(-result$chf)
-    } else if (forest$treetype == "Probability estimation" && !is.null(forest$levels)) {
+    } else if (forest$treetype == "Probability estimation") {
       if (!predict.all) {
         if (is.vector(result$predictions)) {
           result$predictions <- matrix(result$predictions, nrow = 1)
         }
         
         ## Set colnames and sort by levels
-        colnames(result$predictions) <- forest$levels[forest$class.values]
-        result$predictions <- result$predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+        if (!is.null(forest$levels)) {
+          colnames(result$predictions) <- forest$levels[forest$class.values]
+          result$predictions <- result$predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+        }
       }
     }
   } else if (type == "terminalNodes") {
@@ -441,6 +393,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       ## Set colnames and sort by levels
       colnames(result$predictions) <- forest$levels[forest$class.values]
       result$predictions <- result$predictions[, forest$levels, drop = FALSE]
+      
+      if (!is.matrix(result$se)) {
+        result$se <- matrix(result$se, ncol = length(forest$levels))
+      }
+      colnames(result$se) <- forest$levels[forest$class.values]
+      result$se <- result$se[, forest$levels, drop = FALSE]
     }
   }
 
@@ -468,6 +426,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.
 ##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
 ##' @param quantiles Vector of quantiles for quantile prediction. Set \code{type = 'quantiles'} to use.
+##' @param what User specified function for quantile prediction used instead of \code{quantile}. Must return numeric vector, see examples.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
@@ -483,6 +442,29 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##'       \code{treetype}    \tab Type of forest/tree. Classification, regression or survival. \cr
 ##'       \code{num.samples}     \tab Number of samples.
 ##'   }
+##' @examples
+##' require(ranger)
+##'
+##' ## Classification forest
+##' ranger(Species ~ ., data = iris)
+##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
+##' iris.train <- iris[train.idx, ]
+##' iris.test <- iris[-train.idx, ]
+##' rg.iris <- ranger(Species ~ ., data = iris.train)
+##' pred.iris <- predict(rg.iris, data = iris.test)
+##' table(iris.test$Species, pred.iris$predictions)
+##' 
+##' ## Quantile regression forest
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles", quantiles = c(0.1, 0.5, 0.9))
+##' pred$predictions
+##' 
+##' ## Quantile regression forest with user-specified function
+##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles", 
+##'                 what = function(x) sample(x, 10, replace = TRUE))
+##' pred$predictions
+##' 
 ##' @references
 ##' \itemize{
 ##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
@@ -496,6 +478,7 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
                            num.trees = object$num.trees,
                            type = "response", se.method = "infjack",
                            quantiles = c(0.1, 0.5, 0.9), 
+                           what = NULL,
                            seed = NULL, num.threads = NULL,
                            verbose = TRUE, ...) {
   forest <- object$forest
@@ -537,13 +520,22 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
                    num.trees = num.trees)
     class(result) <- "ranger.prediction"
 
-    ## Compute quantiles of distribution
-    result$predictions <- t(apply(node.values, 1, quantile, quantiles, na.rm=TRUE))
-    if (nrow(result$predictions) != result$num.samples) {
-      ## Fix result for single quantile
-      result$predictions <- t(result$predictions)
+    if (is.null(what)) {
+      ## Compute quantiles of distribution
+      result$predictions <- t(apply(node.values, 1, quantile, quantiles, na.rm=TRUE))
+      if (nrow(result$predictions) != result$num.samples) {
+        ## Fix result for single quantile
+        result$predictions <- t(result$predictions)
+      }
+      colnames(result$predictions) <- paste("quantile=", quantiles)
+    } else {
+      ## User function
+      if (!is.function(what)) {
+        stop("Error: Argument 'what' is not a function.")
+      }
+      result$predictions <- t(apply(node.values, 1, what))
     }
-    colnames(result$predictions) <- paste("quantile=", quantiles)
+   
     result
   } else {
     ## Non-quantile prediction

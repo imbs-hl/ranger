@@ -1,8 +1,36 @@
-##### Version 0.10.4-86
-* Fix impurity importance for "hellinger" splitrule
+##### Version 0.11.6
+* Add "hellinger" splitrule for binary classification
 
-##### Version 0.10.4-85
-* Add "hellinger" splitrule
+##### Version 0.11.5
+* Add x/y interface
+* Internal changes (seed differences possible, prediction incompatible with older versions)
+
+##### Version 0.11.4
+* Add "beta" splitrule for bounded outcomes
+
+##### Version 0.11.3
+* Accept user-specified function in quantile prediction
+
+##### Version 0.11.2
+* Bug fixes
+
+##### Version 0.11.1
+* Bug fixes
+
+##### Version 0.11.0
+* New CRAN version
+
+##### Version 0.10.6
+* Internal changes (slightly improved computation speed)
+* Warning: Possible seed differences compared to older versions
+* Bug fixes
+
+##### Version 0.10.5
+* Add support of splitting weights for corrected impurity importance 
+* Bug fixes
+
+##### Version 0.10.4
+>>>>>>> master
 * Add inbag argument for manual selection of observations in trees
 
 ##### Version 0.10.3
