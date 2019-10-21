@@ -304,7 +304,7 @@ int ArgumentHandler::processArguments() {
           splitrule = BETA;
         case 7:
           splitrule = HELLINGER;
-            break;
+          break;
         default:
           throw std::runtime_error("");
           break;
