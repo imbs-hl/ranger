@@ -48,7 +48,7 @@ double TreeRegression::estimate(size_t nodeID) {
   size_t num_samples_in_node = end_pos[nodeID] - start_pos[nodeID];
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    sum_responses_in_node += data->get(sampleID, dependent_varID);
+    sum_responses_in_node += data->get_y(sampleID, 0);
   }
   return (sum_responses_in_node / (double) num_samples_in_node);
 }
@@ -72,7 +72,7 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   double pure_value = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, dependent_varID);
+    double value = data->get_y(sampleID, 0);
     if (pos != start_pos[nodeID] && value != pure_value) {
       pure = false;
       break;
@@ -115,7 +115,7 @@ double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* pr
   for (size_t i = 0; i < num_predictions; ++i) {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[i];
     double predicted_value = split_values[terminal_nodeID];
-    double real_value = data->get(oob_sampleIDs[i], dependent_varID);
+    double real_value = data->get_y(oob_sampleIDs[i], 0);
     if (predicted_value != real_value) {
       double diff = (predicted_value - real_value) * (predicted_value - real_value);
       if (prederr_casewise) (*prederr_casewise)[i] = diff;
@@ -136,7 +136,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   double sum_node = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    sum_node += data->get(sampleID, dependent_varID);
+    sum_node += data->get_y(sampleID, 0);
   }
 
   // For all possible split variables
@@ -214,8 +214,8 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
   // Sum in right child and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, varID);
-    double response = data->get(sampleID, dependent_varID);
+    double value = data->get_x(sampleID, varID);
+    double response = data->get_y(sampleID, 0);
 
     // Count samples until split_value reached
     for (size_t i = 0; i < num_splits; ++i) {
@@ -267,7 +267,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     size_t sampleID = sampleIDs[pos];
     size_t index = data->getIndex(sampleID, varID);
 
-    sums[index] += data->get(sampleID, dependent_varID);
+    sums[index] += data->get_y(sampleID, 0);
     ++counter[index];
   }
 
@@ -352,8 +352,8 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
     // Sum in right child
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      double response = data->get(sampleID, dependent_varID);
-      double value = data->get(sampleID, varID);
+      double response = data->get_y(sampleID, 0);
+      double value = data->get_x(sampleID, varID);
       size_t factorID = floor(value) - 1;
 
       // If in right child, count
@@ -387,7 +387,7 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
   response.reserve(num_samples_node);
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    response.push_back(data->get(sampleID, dependent_varID));
+    response.push_back(data->get_y(sampleID, 0));
   }
   std::vector<double> ranks = rank(response);
 
@@ -409,7 +409,7 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
     x.reserve(num_samples_node);
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      x.push_back(data->get(sampleID, varID));
+      x.push_back(data->get_x(sampleID, varID));
     }
 
     // Order by x
@@ -492,7 +492,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   double sum_node = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    sum_node += data->get(sampleID, dependent_varID);
+    sum_node += data->get_y(sampleID, 0);
   }
 
   // For all possible split variables
@@ -569,8 +569,8 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
   // Sum in right child and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, varID);
-    double response = data->get(sampleID, dependent_varID);
+    double value = data->get_x(sampleID, varID);
+    double response = data->get_y(sampleID, 0);
 
     // Count samples until split_value reached
     for (size_t i = 0; i < num_splits; ++i) {
@@ -671,8 +671,8 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
     // Sum in right child
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      double response = data->get(sampleID, dependent_varID);
-      double value = data->get(sampleID, varID);
+      double response = data->get_y(sampleID, 0);
+      double value = data->get_x(sampleID, varID);
       size_t factorID = floor(value) - 1;
 
       // If in right child, count
@@ -708,7 +708,7 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   double sum_node = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    sum_node += data->get(sampleID, dependent_varID);
+    sum_node += data->get_y(sampleID, 0);
   }
 
   // For all possible split variables find best split value
@@ -768,8 +768,8 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
   // Sum in right child and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get(sampleID, varID);
-    double response = data->get(sampleID, dependent_varID);
+    double value = data->get_x(sampleID, varID);
+    double response = data->get_y(sampleID, 0);
 
     // Count samples until split_value reached
     for (size_t i = 0; i < num_splits; ++i) {
@@ -802,8 +802,8 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     double var_left = 0;
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      double value = data->get(sampleID, varID);
-      double response = data->get(sampleID, dependent_varID);
+      double value = data->get_x(sampleID, varID);
+      double response = data->get_y(sampleID, 0);
 
       if (value > possible_split_values[i]) {
         var_right += (response - mean_right) * (response - mean_right);
@@ -828,8 +828,8 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     double beta_loglik_left = 0;
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      double value = data->get(sampleID, varID);
-      double response = data->get(sampleID, dependent_varID);
+      double value = data->get_x(sampleID, varID);
+      double response = data->get_y(sampleID, 0);
 
       if (value > possible_split_values[i]) {
         beta_loglik_right += betaLogLik(response, mean_right, phi_right);
@@ -869,18 +869,13 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
     double sum_node = 0;
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      sum_node += data->get(sampleID, dependent_varID);
+      sum_node += data->get_y(sampleID, 0);
     }
     best_decrease = decrease - sum_node * sum_node / (double) num_samples_node;
   }
 
   // No variable importance for no split variables
   size_t tempvarID = data->getUnpermutedVarID(varID);
-  for (auto& skip : data->getNoSplitVariables()) {
-    if (tempvarID >= skip) {
-      --tempvarID;
-    }
-  }
 
   // Subtract if corrected importance and permuted variable, else add
   if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {

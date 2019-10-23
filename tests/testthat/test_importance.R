@@ -98,3 +98,13 @@ test_that("Survival corrected impurity importance is smaller than 1", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 20, importance = "impurity_corrected")
   expect_lt(min(abs(rf$variable.importance)), 1)
 })
+
+test_that("Gini importance non-negative with class weights", {
+  rf <- ranger(Species ~ ., data = iris, class.weights = c(.2, .3, .8),
+               num.trees = 5, importance = "impurity")
+  expect_true(all(rf$variable.importance >= 0))
+  
+  rf <- ranger(Species ~ ., data = iris, class.weights = c(.2, .3, .8),
+               num.trees = 5, importance = "impurity", probability = TRUE)
+  expect_true(all(rf$variable.importance >= 0))
+})

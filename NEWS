@@ -1,3 +1,14 @@
+
+##### Version 0.11.7
+* Add local variable importance 
+
+##### Version 0.11.6
+* Add "hellinger" splitrule for binary classification
+
+##### Version 0.11.5
+* Add x/y interface
+* Internal changes (seed differences possible, prediction incompatible with older versions)
+
 ##### Version 0.11.4
 * Add "beta" splitrule for bounded outcomes
 

@@ -35,7 +35,7 @@ public:
   Tree(const Tree&) = delete;
   Tree& operator=(const Tree&) = delete;
 
-  void init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
+  void init(const Data* data, uint mtry, size_t num_samples, uint seed,
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
@@ -103,7 +103,6 @@ protected:
 
   virtual void cleanUpInternal() = 0;
 
-  size_t dependent_varID;
   uint mtry;
 
   // Number of samples (all samples, not only inbag for this tree)

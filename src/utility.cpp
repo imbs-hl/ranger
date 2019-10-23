@@ -81,6 +81,16 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
   }
 } // #nocov end
 
+void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    size_t num_samples) {
+  if (num_samples < max / 10) {
+    drawWithoutReplacementSimple(result, random_number_generator, max, num_samples);
+  } else {
+    //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
+    drawWithoutReplacementFisherYates(result, random_number_generator, max, num_samples);
+  }
+}
+
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     const std::vector<size_t>& skip, size_t num_samples) {
   if (num_samples < max / 10) {
@@ -88,6 +98,26 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
   } else {
     //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
     drawWithoutReplacementFisherYates(result, random_number_generator, max, skip, num_samples);
+  }
+}
+
+void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+    size_t num_samples) {
+
+  result.reserve(num_samples);
+
+  // Set all to not selected
+  std::vector<bool> temp;
+  temp.resize(max, false);
+
+  std::uniform_int_distribution<size_t> unif_dist(0, max - 1);
+  for (size_t i = 0; i < num_samples; ++i) {
+    size_t draw;
+    do {
+      draw = unif_dist(random_number_generator);
+    } while (temp[draw]);
+    temp[draw] = true;
+    result.push_back(draw);
   }
 }
 
@@ -114,6 +144,23 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
     temp[draw] = true;
     result.push_back(draw);
   }
+}
+
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+    size_t max, size_t num_samples) {
+
+  // Create indices
+  result.resize(max);
+  std::iota(result.begin(), result.end(), 0);
+
+  // Draw without replacement using Fisher Yates algorithm
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  for (size_t i = 0; i < num_samples; ++i) {
+    size_t j = i + distribution(random_number_generator) * (max - i);
+    std::swap(result[i], result[j]);
+  }
+
+  result.resize(num_samples);
 }
 
 void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
@@ -203,9 +250,9 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
   }
 }
 
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf, size_t dependent_varID,
-    size_t status_varID, const std::vector<size_t>& sample_IDs, std::vector<double>* prederr_casewise) {
-  
+double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
+    const std::vector<size_t>& sample_IDs, std::vector<double>* prederr_casewise) {
+
   // Compute concordance index
   double concordance = 0;
   double permissible = 0;
@@ -222,9 +269,9 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
     if (!sample_IDs.empty()) {
       sample_i = sample_IDs[i];
     }
-    double time_i = data.get(sample_i, dependent_varID);
-    double status_i = data.get(sample_i, status_varID);
-    
+    double time_i = data.get_y(sample_i, 0);
+    double status_i = data.get_y(sample_i, 1);
+
     double conc, perm;
     if (prederr_casewise) {
       conc = concordance_casewise[i];
@@ -239,8 +286,8 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       if (!sample_IDs.empty()) {
         sample_j = sample_IDs[j];
       }
-      double time_j = data.get(sample_j, dependent_varID);
-      double status_j = data.get(sample_j, status_varID);
+      double time_j = data.get_y(sample_j, 0);
+      double status_j = data.get_y(sample_j, 1);
 
       if (time_i < time_j && status_i == 0) {
         continue;
@@ -272,6 +319,7 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       }
     }
     
+    
     concordance += conc;
     permissible += perm;
     if (prederr_casewise) {
@@ -285,7 +333,7 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       (*prederr_casewise)[i] = 1 - concordance_casewise[i] / permissible_casewise[i];
     }
   }
-
+  
   return (concordance / permissible);
 
 }
@@ -333,6 +381,7 @@ std::string beautifyTime(uint seconds) { // #nocov start
   return result;
 } // #nocov end
 
+// #nocov start
 size_t roundToNextMultiple(size_t value, uint multiple) {
 
   if (multiple == 0) {
@@ -346,6 +395,7 @@ size_t roundToNextMultiple(size_t value, uint multiple) {
 
   return value + multiple - remainder;
 }
+// #nocov end
 
 void splitString(std::vector<std::string>& result, const std::string& input, char split_char) { // #nocov start
 
@@ -617,12 +667,14 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, const std::
   return num_samples_left;
 }
 
+// #nocov start
 std::stringstream& readFromStream(std::stringstream& in, double& token) {
   if (!(in >> token) && (std::fpclassify(token) == FP_SUBNORMAL)) {
     in.clear();
   }
   return in;
 }
+// #nocov end
 
 double betaLogLik(double y, double mean, double phi) {
 

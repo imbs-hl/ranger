@@ -21,14 +21,11 @@
 
 namespace ranger {
 
-void ForestSurvival::loadForest(size_t dependent_varID, size_t num_trees,
-    std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
+void ForestSurvival::loadForest(size_t num_trees, std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
     std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-    size_t status_varID, std::vector<std::vector<std::vector<double>> >& forest_chf,
-    std::vector<double>& unique_timepoints, std::vector<bool>& is_ordered_variable) {
+    std::vector<std::vector<std::vector<double>> >& forest_chf, std::vector<double>& unique_timepoints,
+    std::vector<bool>& is_ordered_variable) {
 
-  this->dependent_varID = dependent_varID;
-  this->status_varID = status_varID;
   this->num_trees = num_trees;
   this->unique_timepoints = unique_timepoints;
   data->setIsOrderedVariable(is_ordered_variable);
@@ -55,18 +52,11 @@ std::vector<std::vector<std::vector<double>>> ForestSurvival::getChf() const {
   return result;
 }
 
-void ForestSurvival::initInternal(std::string status_variable_name) {
-
-  // Convert status variable name to ID
-  if (!prediction_mode && !status_variable_name.empty()) {
-    status_varID = data->getVariableID(status_variable_name);
-  }
-
-  data->addNoSplitVariable(status_varID);
+void ForestSurvival::initInternal() {
 
   // If mtry not set, use floored square root of number of independent variables.
   if (mtry == 0) {
-    unsigned long temp = ceil(sqrt((double) (num_variables - 2)));
+    unsigned long temp = ceil(sqrt((double) num_independent_variables));
     mtry = std::max((unsigned long) 1, temp);
   }
 
@@ -78,7 +68,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
   // Create unique timepoints
   std::set<double> unique_timepoint_set;
   for (size_t i = 0; i < num_samples; ++i) {
-    unique_timepoint_set.insert(data->get(i, dependent_varID));
+    unique_timepoint_set.insert(data->get_y(i, 0));
   }
   unique_timepoints.reserve(unique_timepoint_set.size());
   for (auto& t : unique_timepoint_set) {
@@ -88,7 +78,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
   // Create response_timepointIDs
   if (!prediction_mode) {
     for (size_t i = 0; i < num_samples; ++i) {
-      double value = data->get(i, dependent_varID);
+      double value = data->get_y(i, 0);
 
       // If timepoint is already in unique_timepoints, use ID. Else create a new one.
       uint timepointID = find(unique_timepoints.begin(), unique_timepoints.end(), value) - unique_timepoints.begin();
@@ -105,7 +95,7 @@ void ForestSurvival::initInternal(std::string status_variable_name) {
 void ForestSurvival::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, status_varID, &response_timepointIDs));
+    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, &response_timepointIDs));
   }
 }
 
@@ -187,15 +177,16 @@ void ForestSurvival::computePredictionErrorInternal() {
   }
 
   // Use all samples which are OOB at least once
-  overall_prediction_error = 1 - computeConcordanceIndex(*data, sum_chf, dependent_varID, status_varID, oob_sampleIDs, NULL);
+  overall_prediction_error = 1 - computeConcordanceIndex(*data, sum_chf, oob_sampleIDs, NULL);
 }
 
 // #nocov start
 void ForestSurvival::writeOutputInternal() {
   if (verbose_out) {
     *verbose_out << "Tree type:                         " << "Survival" << std::endl;
-    *verbose_out << "Status variable name:              " << data->getVariableNames()[status_varID] << std::endl;
-    *verbose_out << "Status variable ID:                " << status_varID << std::endl;
+    if (dependent_variable_names.size() >= 2) {
+      *verbose_out << "Status variable name:              " << dependent_variable_names[1] << std::endl;
+    }
   }
 }
 
@@ -265,14 +256,11 @@ void ForestSurvival::writePredictionFile() {
 void ForestSurvival::saveToFileInternal(std::ofstream& outfile) {
 
   // Write num_variables
-  outfile.write((char*) &num_variables, sizeof(num_variables));
+  outfile.write((char*) &num_independent_variables, sizeof(num_independent_variables));
 
   // Write treetype
   TreeType treetype = TREE_SURVIVAL;
   outfile.write((char*) &treetype, sizeof(treetype));
-
-  // Write status_varID
-  outfile.write((char*) &status_varID, sizeof(status_varID));
 
   // Write unique timepoints
   saveVector1D(unique_timepoints, outfile);
@@ -290,9 +278,6 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
   if (treetype != TREE_SURVIVAL) {
     throw std::runtime_error("Wrong treetype. Loaded file is not a survival forest.");
   }
-
-  // Read status_varID
-  infile.read((char*) &status_varID, sizeof(status_varID));
 
   // Read unique timepoints
   unique_timepoints.clear();
@@ -324,20 +309,9 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
       chf[terminal_nodes[j]] = chf_vector[j];
     }
 
-    // If dependent variable not in test data, change variable IDs accordingly
-    if (num_variables_saved > num_variables) {
-      for (auto& varID : split_varIDs) {
-        if (varID >= dependent_varID) {
-          --varID;
-        }
-      }
-    }
-    if (num_variables_saved > num_variables + 1) {
-      for (auto& varID : split_varIDs) {
-        if (varID >= status_varID) {
-          --varID;
-        }
-      }
+    // If dependent variable not in test data, throw error
+    if (num_variables_saved != num_independent_variables) {
+      throw std::runtime_error("Number of independent variables in data does not match with the loaded forest.");
     }
 
     // Create tree
