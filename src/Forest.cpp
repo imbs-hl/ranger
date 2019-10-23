@@ -351,10 +351,29 @@ void Forest::writeImportanceFile() {
     throw std::runtime_error("Could not write to importance file: " + filename + ".");
   }
 
-  // Write importance to file
-  for (size_t i = 0; i < variable_importance.size(); ++i) {
-    std::string variable_name = data->getVariableNames()[i];
-    importance_file << variable_name << ": " << variable_importance[i] << std::endl;
+  if (importance_mode == IMP_PERM_CASEWISE) {
+    // Write variable names
+    for (auto& variable_name : data->getVariableNames()) {
+      importance_file << variable_name << " ";
+    }
+    importance_file << std::endl;
+
+    // Write importance values
+    for (size_t i = 0; i < num_samples; ++i) {
+      for (size_t j = 0; j < num_independent_variables; ++j) {
+        if (variable_importance_casewise.size() <= (j * num_samples + i)) {
+          throw std::runtime_error("Memory error in local variable importance.");
+        }
+        importance_file << variable_importance_casewise[j * num_samples + i] << " ";
+      }
+      importance_file << std::endl;
+    }
+  } else {
+    // Write importance to file
+    for (size_t i = 0; i < variable_importance.size(); ++i) {
+      std::string variable_name = data->getVariableNames()[i];
+      importance_file << variable_name << ": " << variable_importance[i] << std::endl;
+    }
   }
 
   importance_file.close();
@@ -622,7 +641,7 @@ void Forest::computePermutationImportance() {
   if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
     variance.resize(num_independent_variables, 0);
   }
-  if (importance_mode == IMP_PER_CASEWISE) {
+  if (importance_mode == IMP_PERM_CASEWISE) {
     variable_importance_casewise.resize(num_independent_variables * num_samples, 0);
   }
 

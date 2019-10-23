@@ -581,6 +581,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    "
       << "                              TYPE = 5: Corrected node impurity: Bias-corrected version of node impurity importance."
       << std::endl;
+  std::cout << "    " << "                              TYPE = 6: Local (casewise) permutation importance." << std::endl;
   std::cout << "    " << "                              (Default: 0)" << std::endl;
   std::cout << "    " << "--noreplace                   Sample without replacement." << std::endl;
   std::cout << "    "
