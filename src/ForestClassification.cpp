@@ -95,26 +95,6 @@ void ForestClassification::initInternal() {
   if (!memory_saving_splitting) {
     data->sort();
   }
-
-  // Create sampleIDs_per_class if required
-  if (sample_fraction.size() > 1) {
-    sampleIDs_per_class.resize(sample_fraction.size());
-    for (auto& v : sampleIDs_per_class) {
-      v.reserve(num_samples);
-    }
-    for (size_t i = 0; i < num_samples; ++i) {
-      size_t classID = response_classIDs[i];
-      sampleIDs_per_class[classID].push_back(i);
-    }
-  }
-
-  // Set class weights all to 1
-  class_weights = std::vector<double>(class_values.size(), 1.0);
-
-  // Sort data if memory saving mode
-  if (!memory_saving_splitting) {
-    data->sort();
-  }
 }
 
 void ForestClassification::growInternal() {

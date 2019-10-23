@@ -26,6 +26,7 @@ namespace ranger {
 class DataDouble: public Data {
 public:
   DataDouble() = default;
+  
   DataDouble(const DataDouble&) = delete;
   DataDouble& operator=(const DataDouble&) = delete;
 

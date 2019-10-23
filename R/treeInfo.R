@@ -67,7 +67,6 @@ treeInfo <- function(object, tree = 1) {
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
   }
-
   if (is.null(forest$num.trees) ||
       is.null(forest$child.nodeIDs) || is.null(forest$split.varIDs) ||
       is.null(forest$split.values) || is.null(forest$independent.variable.names) ||

@@ -247,3 +247,6 @@ test_that("treeInfo works for 31 unordered factor levels but not for 32", {
   rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
   expect_warning(treeInfo(rf), "Unordered splitting levels can only be shown for up to 31 levels.")
 })
+
+
+

@@ -67,7 +67,7 @@ public:
       return getSnp(row, col, col_permuted);
     }
   }
-
+  
   double get_y(size_t row, size_t col) const override {
     return y[col * num_rows + row];
   }
