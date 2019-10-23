@@ -15,9 +15,10 @@
 #define DATACHAR_H_
 
 #include <vector>
-#include <limits.h>
+#include <utility>
 
 #include "globals.h"
+#include "utility.h"
 #include "Data.h"
 
 namespace ranger {
@@ -25,14 +26,13 @@ namespace ranger {
 class DataChar: public Data {
 public:
   DataChar() = default;
-  DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, bool& error);
 
   DataChar(const DataChar&) = delete;
   DataChar& operator=(const DataChar&) = delete;
 
   virtual ~DataChar() override = default;
 
-  double get(size_t row, size_t col) const override {
+  double get_x(size_t row, size_t col) const override {
     // Use permuted data for corrected impurity importance
     size_t col_permuted = col;
     if (col >= num_cols) {
@@ -41,28 +41,32 @@ public:
     }
 
     if (col < num_cols_no_snp) {
-      return data[col * num_rows + row];
+      return x[col * num_rows + row];
     } else {
       return getSnp(row, col, col_permuted);
     }
   }
 
-  void reserveMemory() override {
-    data.resize(num_cols * num_rows);
+  double get_y(size_t row, size_t col) const override {
+    return y[col * num_rows + row];
   }
 
-  void set(size_t col, size_t row, double value, bool& error) override {
-    if (value > CHAR_MAX || value < CHAR_MIN) {
-      error = true;
-    }
-    if (floor(value) != ceil(value)) {
-      error = true;
-    }
-    data[col * num_rows + row] = value;
+  void reserveMemory(size_t y_cols) override {
+    x.resize(num_cols * num_rows);
+    y.resize(y_cols * num_rows);
+  }
+
+  void set_x(size_t col, size_t row, double value, bool& error) override {
+    x[col * num_rows + row] = value;
+  }
+
+  void set_y(size_t col, size_t row, double value, bool& error) override {
+    y[col * num_rows + row] = value;
   }
 
 private:
-  std::vector<char> data;
+  std::vector<char> x;
+  std::vector<char> y;
 };
 
 } // namespace ranger

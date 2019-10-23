@@ -39,8 +39,9 @@ namespace ranger {
 class DataRcpp: public Data {
 public:
   DataRcpp() = default;
-  DataRcpp(Rcpp::NumericMatrix& data, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
-      this->data = data;
+  DataRcpp(Rcpp::NumericMatrix& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
+      this->x = x;
+      this->y = y;
       this->variable_names = variable_names;
       this->num_rows = num_rows;
       this->num_cols = num_cols;
@@ -52,7 +53,7 @@ public:
   
   virtual ~DataRcpp() override = default;
   
-  double get(size_t row, size_t col) const override {
+  double get_x(size_t row, size_t col) const override {
     // Use permuted data for corrected impurity importance
     size_t col_permuted = col;
     if (col >= num_cols) {
@@ -61,22 +62,33 @@ public:
     }
     
     if (col < num_cols_no_snp) {
-      return data[col * num_rows + row];
+      return x[col * num_rows + row];
     } else {
       return getSnp(row, col, col_permuted);
     }
   }
+
+  double get_y(size_t row, size_t col) const override {
+    return y[col * num_rows + row];
+  }
   
-  void reserveMemory() override {
+  // #nocov start 
+  void reserveMemory(size_t y_cols) override {
     // Not needed
   }
   
-  void set(size_t col, size_t row, double value, bool& error) override {
-    data[col * num_rows + row] = value;
+  void set_x(size_t col, size_t row, double value, bool& error) override {
+    x[col * num_rows + row] = value;
   }
   
+  void set_y(size_t col, size_t row, double value, bool& error) override {
+    y[col * num_rows + row] = value;
+  }
+  // #nocov end 
+  
 private:
-  Rcpp::NumericMatrix data;
+  Rcpp::NumericMatrix x;
+  Rcpp::NumericMatrix y;
 };
 
 } // namespace ranger
