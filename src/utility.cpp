@@ -251,7 +251,7 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
 }
 
 double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
-    const std::vector<size_t>& sample_IDs, std::vector<double>* prederr_casewise) {
+    const std::vector<size_t>& sample_IDs, std::vector<double>* prediction_error_casewise) {
 
   // Compute concordance index
   double concordance = 0;
@@ -259,9 +259,9 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
   
   std::vector<double> concordance_casewise;
   std::vector<double> permissible_casewise;
-  if (prederr_casewise) {
-    concordance_casewise.resize(prederr_casewise->size(), 0);
-    permissible_casewise.resize(prederr_casewise->size(), 0);
+  if (prediction_error_casewise) {
+    concordance_casewise.resize(prediction_error_casewise->size(), 0);
+    permissible_casewise.resize(prediction_error_casewise->size(), 0);
   }
   
   for (size_t i = 0; i < sum_chf.size(); ++i) {
@@ -273,7 +273,7 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
     double status_i = data.get_y(sample_i, 1);
 
     double conc, perm;
-    if (prederr_casewise) {
+    if (prediction_error_casewise) {
       conc = concordance_casewise[i];
       perm = permissible_casewise[i];
     } else {
@@ -313,29 +313,27 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       conc += co;
       perm += 1;
       
-      if (prederr_casewise) {
+      if (prediction_error_casewise) {
         concordance_casewise[j] += co;
         permissible_casewise[j] += 1;
       }
     }
     
-    
     concordance += conc;
     permissible += perm;
-    if (prederr_casewise) {
+    if (prediction_error_casewise) {
       concordance_casewise[i] = conc;
       permissible_casewise[i] = perm;
     }
   }
   
-  if (prederr_casewise) {
-    for (size_t i = 0; i < prederr_casewise->size(); ++i) {
-      (*prederr_casewise)[i] = 1 - concordance_casewise[i] / permissible_casewise[i];
+  if (prediction_error_casewise) {
+    for (size_t i = 0; i < prediction_error_casewise->size(); ++i) {
+      (*prediction_error_casewise)[i] = 1 - concordance_casewise[i] / permissible_casewise[i];
     }
   }
   
   return (concordance / permissible);
-
 }
 
 std::string uintToString(uint number) {

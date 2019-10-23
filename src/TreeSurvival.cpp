@@ -73,8 +73,7 @@ void TreeSurvival::computeSurvival(size_t nodeID) {
   chf[nodeID] = chf_temp;
 }
 
-double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) {
-  // TODO: implement casewise prediction errors that make sense for TreeSurvival?
+double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
 
   // Compute summed chf for samples
   std::vector<double> sum_chf;
@@ -84,7 +83,7 @@ double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* pred
   }
 
   // Return concordance index
-  return computeConcordanceIndex(*data, sum_chf, oob_sampleIDs, prederr_casewise);
+  return computeConcordanceIndex(*data, sum_chf, oob_sampleIDs, prediction_error_casewise);
 }
 
 bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {

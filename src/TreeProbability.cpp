@@ -124,7 +124,7 @@ void TreeProbability::createEmptyNodeInternal() {
   terminal_class_counts.push_back(std::vector<double>());
 }
 
-double TreeProbability::computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) {
+double TreeProbability::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
 
   size_t num_predictions = prediction_terminal_nodeIDs.size();
   double sum_of_squares = 0;
@@ -134,7 +134,9 @@ double TreeProbability::computePredictionAccuracyInternal(std::vector<double>* p
     size_t terminal_nodeID = prediction_terminal_nodeIDs[i];
     double predicted_value = terminal_class_counts[terminal_nodeID][real_classID];
     double err = (1 - predicted_value) * (1 - predicted_value);
-    if (prederr_casewise) (*prederr_casewise)[i] = err;
+    if (prediction_error_casewise) {
+      (*prediction_error_casewise)[i] = err;
+    }
     sum_of_squares += err;
   }
   return (1.0 - sum_of_squares / (double) num_predictions);

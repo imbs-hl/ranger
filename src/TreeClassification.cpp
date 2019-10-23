@@ -120,7 +120,7 @@ void TreeClassification::createEmptyNodeInternal() {
   // Empty on purpose
 }
 
-double TreeClassification::computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) {
+double TreeClassification::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
 
   size_t num_predictions = prediction_terminal_nodeIDs.size();
   size_t num_missclassifications = 0;
@@ -130,9 +130,13 @@ double TreeClassification::computePredictionAccuracyInternal(std::vector<double>
     double real_value = data->get_y(oob_sampleIDs[i], 0);
     if (predicted_value != real_value) {
       ++num_missclassifications;
-      if (prederr_casewise) (*prederr_casewise)[i] = 1;
+      if (prediction_error_casewise) {
+        (*prediction_error_casewise)[i] = 1;
+      }
     } else {
-      if (prederr_casewise) (*prederr_casewise)[i] = 0;
+      if (prediction_error_casewise) {
+        (*prediction_error_casewise)[i] = 0;
+      }
     }
   }
   return (1.0 - (double) num_missclassifications / (double) num_predictions);

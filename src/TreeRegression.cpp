@@ -108,7 +108,7 @@ void TreeRegression::createEmptyNodeInternal() {
 // Empty on purpose
 }
 
-double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* prederr_casewise) {
+double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
 
   size_t num_predictions = prediction_terminal_nodeIDs.size();
   double sum_of_squares = 0;
@@ -118,7 +118,9 @@ double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* pr
     double real_value = data->get_y(oob_sampleIDs[i], 0);
     if (predicted_value != real_value) {
       double diff = (predicted_value - real_value) * (predicted_value - real_value);
-      if (prederr_casewise) (*prederr_casewise)[i] = diff;
+      if (prediction_error_casewise) {
+        (*prediction_error_casewise)[i] = diff;
+      }
       sum_of_squares += diff;
     }
   }
