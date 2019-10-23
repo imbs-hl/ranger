@@ -811,9 +811,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     
     if (importance.mode == 6) {
       # process casewise vimp
-      result$variable.importance.casewise <-
+      result$variable.importance.local <-
         matrix(
-          result$variable.importance.casewise,
+          result$variable.importance.local,
           byrow = FALSE,
           ncol = length(all.independent.variable.names),
           dimnames = list(
