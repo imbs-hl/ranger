@@ -1,11 +1,12 @@
 context("test_casewise_importances")
 
 test_that("casewise importance works, classification", {
+  n <- 1000
   data <- 
     data.frame(
-      x = runif(1000),
-      y = rnorm(1000, mean = 1),
-      z = rnorm(1000, mean = 2)
+      x = round(runif(n), 1),
+      y = round(rnorm(n, mean = 1), 1),
+      z = round(rnorm(n, mean = 2), 1)
     )
   rownames(data) <- paste0("case_", seq_len(nrow(data)))
   data$a <- factor(ifelse(ifelse(data$x < .5, data$y, data$z) > 1.5, "left", "right"))
@@ -15,7 +16,7 @@ test_that("casewise importance works, classification", {
     dependent.variable.name = "a",
     importance = "permutation",
     local.importance = TRUE,
-    num.threads = 1
+    num.trees = 5
   )
   vic <- rf$variable.importance.local
   
@@ -32,11 +33,12 @@ test_that("casewise importance works, classification", {
 })
 
 test_that("casewise importance works, regression", {
+  n <- 1000
   data <- 
     data.frame(
-      x = runif(1000),
-      y = rnorm(1000, mean = 1),
-      z = rnorm(1000, mean = 2)
+      x = round(runif(n), 1),
+      y = round(rnorm(n, mean = 1), 1),
+      z = round(rnorm(n, mean = 2), 1)
     )
   rownames(data) <- paste0("case_", seq_len(nrow(data)))
   data$a <- ifelse(data$x < .5, data$y, data$z)
@@ -46,7 +48,7 @@ test_that("casewise importance works, regression", {
     dependent.variable.name = "a",
     importance = "permutation",
     local.importance = TRUE,
-    num.threads = 1
+    num.trees = 5
   )
   vic <- rf$variable.importance.local
   
@@ -62,13 +64,13 @@ test_that("casewise importance works, regression", {
   expect_gte(wilcox.test(vic[data$x < .5, 3], vic[data$x >= .5, 3], "greater")$p.value, .99)
 })
 
-
 test_that("casewise importance works, probability", {
+  n <- 1000
   data <- 
     data.frame(
-      x = runif(1000),
-      y = rnorm(1000, mean = 1),
-      z = rnorm(1000, mean = 2)
+      x = round(runif(n), 1),
+      y = round(rnorm(n, mean = 1), 1),
+      z = round(rnorm(n, mean = 2), 1)
     )
   rownames(data) <- paste0("case_", seq_len(nrow(data)))
   # data$a <- ifelse(data$x < .5, data$y, data$z)
@@ -80,7 +82,7 @@ test_that("casewise importance works, probability", {
     importance = "permutation",
     probability = TRUE,
     local.importance = TRUE,
-    num.threads = 1
+    num.trees = 5
   )
   vic <- rf$variable.importance.local
   
@@ -96,18 +98,17 @@ test_that("casewise importance works, probability", {
   expect_gte(wilcox.test(vic[data$x < .5, 3], vic[data$x >= .5, 3], "greater")$p.value, .99)
 })
 
-
-
 test_that("casewise importance works, survival", {
+  n <- 1000
   data <- 
     data.frame(
-      x = runif(1000),
-      y = rnorm(1000, mean = 1),
-      z = rnorm(1000, mean = 2),
-      surv = sample(0:1, 1000, replace = TRUE)
+      x = round(runif(n), 1),
+      y = round(rnorm(n, mean = 1), 1),
+      z = round(rnorm(n, mean = 2), 1),
+      surv = rbinom(n, 1, .8)
     )
   rownames(data) <- paste0("case_", seq_len(nrow(data)))
-  data$a <- ifelse(data$x < .5, data$y, data$z) * ifelse(data$surv, runif(1000, min = .8, max = 1), 1)
+  data$a <- (ifelse(data$x < .5, data$y, data$z))
   
   rf <- ranger(
     data = data,
@@ -115,7 +116,7 @@ test_that("casewise importance works, survival", {
     status.variable.name = "surv",
     importance = "permutation",
     local.importance = TRUE,
-    num.threads = 1
+    num.trees = 5
   )
   vic <- rf$variable.importance.local
   
@@ -125,8 +126,8 @@ test_that("casewise importance works, survival", {
   expect_equal(rownames(vic), rownames(data))
   expect_equal(colnames(vic), colnames(data)[1:3])
   
-  expect_lte(wilcox.test(vic[data$x < .5, 2], vic[data$x >= .5, 2], "greater")$p.value, .01)
-  expect_gte(wilcox.test(vic[data$x < .5, 2], vic[data$x >= .5, 2], "less")$p.value, .99)
-  expect_lte(wilcox.test(vic[data$x < .5, 3], vic[data$x >= .5, 3], "less")$p.value, .01)
-  expect_gte(wilcox.test(vic[data$x < .5, 3], vic[data$x >= .5, 3], "greater")$p.value, .99)
+  expect_lte(wilcox.test(vic[data$x < .5, 2], vic[data$x >= .5, 2], "greater")$p.value, .1)
+  expect_gte(wilcox.test(vic[data$x < .5, 2], vic[data$x >= .5, 2], "less")$p.value, .9)
+  expect_lte(wilcox.test(vic[data$x < .5, 3], vic[data$x >= .5, 3], "less")$p.value, .1)
+  expect_gte(wilcox.test(vic[data$x < .5, 3], vic[data$x >= .5, 3], "greater")$p.value, .9)
 })
