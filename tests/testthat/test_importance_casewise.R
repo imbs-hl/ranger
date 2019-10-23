@@ -17,7 +17,7 @@ test_that("casewise importance works, classification", {
     local.importance = TRUE,
     num.threads = 1
   )
-  vic <- rf$variable.importance.casewise
+  vic <- rf$variable.importance.local
   
   # should see clear pattern here:
   # pheatmap::pheatmap(vic[order(data$x),], cluster_cols = FALSE, cluster_rows = FALSE)
@@ -48,7 +48,7 @@ test_that("casewise importance works, regression", {
     local.importance = TRUE,
     num.threads = 1
   )
-  vic <- rf$variable.importance.casewise
+  vic <- rf$variable.importance.local
   
   # should see clear pattern here:
   # pheatmap::pheatmap(vic[order(data$x),], cluster_cols = FALSE, cluster_rows = FALSE)
@@ -82,7 +82,7 @@ test_that("casewise importance works, probability", {
     local.importance = TRUE,
     num.threads = 1
   )
-  vic <- rf$variable.importance.casewise
+  vic <- rf$variable.importance.local
   
   # should see clear pattern here:
   # pheatmap::pheatmap(vic[order(data$x),], cluster_cols = FALSE, cluster_rows = FALSE)
@@ -117,7 +117,7 @@ test_that("casewise importance works, survival", {
     local.importance = TRUE,
     num.threads = 1
   )
-  vic <- rf$variable.importance.casewise
+  vic <- rf$variable.importance.local
   
   # should see clear pattern here:
   # pheatmap::pheatmap(vic[order(data$x),], cluster_cols = FALSE, cluster_rows = FALSE)

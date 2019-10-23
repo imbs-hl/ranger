@@ -225,7 +225,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       if (importance_mode != IMP_NONE) {
         result.push_back(forest->getVariableImportance(), "variable.importance");
         if (importance_mode == IMP_PERM_CASEWISE) {
-          result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.casewise");
+          result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.local");
         }
       }
       result.push_back(forest->getOverallPredictionError(), "prediction.error");
