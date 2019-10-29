@@ -579,7 +579,7 @@ void ArgumentHandler::displayHelp() {
       << "                              RULE = 4: MAXSTAT for Survival and Regression, not available for Classification."
       << std::endl;
   std::cout << "    " << "                              RULE = 5: ExtraTrees for all tree types." << std::endl;
-  std::cout << "    " << "                              RULE = 6: BETA for regression." << std::endl;
+  std::cout << "    " << "                              RULE = 6: BETA for regression, only for (0,1) bounded outcomes." << std::endl;
   std::cout << "    " << "                              RULE = 7: Hellinger for Classification, not available for Regression and Survival." << std::endl;
   std::cout << "    " << "                              (Default: 1)" << std::endl;
   std::cout << "    "
