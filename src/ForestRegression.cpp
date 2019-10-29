@@ -52,6 +52,16 @@ void ForestRegression::initInternal() {
     min_node_size = DEFAULT_MIN_NODE_SIZE_REGRESSION;
   }
 
+  // Error if beta splitrule used with data outside of [0,1]
+  if (splitrule == BETA) {
+    for (size_t i = 0; i < num_samples; ++i) {
+      double y = data->get_y(i, 0);
+      if (y < 0 || y > 1) {
+        throw std::runtime_error("Beta splitrule applicable to regression data with outcome between 0 and 1 only.");
+      }
+    }
+  }
+
   // Sort data if memory saving mode
   if (!memory_saving_splitting) {
     data->sort();
