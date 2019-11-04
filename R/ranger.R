@@ -103,7 +103,7 @@
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
-##' @param local.importance Calculate and return local importance values as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
+##' @param local.importance Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
@@ -137,6 +137,7 @@
 ##'   \item{\code{importance.mode}}{Importance mode used.}
 ##'   \item{\code{num.samples}}{Number of samples.}
 ##'   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
+##'   \item{\code{variable.importance.local}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'}}
 ##' @examples
 ##' ## Classification forest with default settings
 ##' ranger(Species ~ ., data = iris)

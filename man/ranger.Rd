@@ -61,7 +61,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{scale.permutation.importance}{Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
 
-\item{local.importance}{Calculate and return local importance values as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
+\item{local.importance}{Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.}
 
 \item{keep.inbag}{Save how often observations are in-bag in each tree.}
 
@@ -111,6 +111,7 @@ Object of class \code{ranger} with elements
   \item{\code{importance.mode}}{Importance mode used.}
   \item{\code{num.samples}}{Number of samples.}
   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
+  \item{\code{variable.importance.local}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'}}
 }
 \description{
 Ranger is a fast implementation of random forests (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
