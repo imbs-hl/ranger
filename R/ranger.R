@@ -122,6 +122,7 @@
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
 ##'   \item{\code{variable.importance}}{Variable importance for each independent variable.}
+##'   \item{\code{variable.importance.local}}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'.}
 ##'   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
 ##'   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
 ##'   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
@@ -137,7 +138,6 @@
 ##'   \item{\code{importance.mode}}{Importance mode used.}
 ##'   \item{\code{num.samples}}{Number of samples.}
 ##'   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
-##'   \item{\code{variable.importance.local}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'}}
 ##' @examples
 ##' ## Classification forest with default settings
 ##' ranger(Species ~ ., data = iris)
