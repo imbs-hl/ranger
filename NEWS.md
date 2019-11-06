@@ -1,3 +1,7 @@
+
+##### Version 0.11.7
+* Add local variable importance 
+
 ##### Version 0.11.6
 * Add "hellinger" splitrule for binary classification
 
@@ -30,7 +34,6 @@
 * Bug fixes
 
 ##### Version 0.10.4
->>>>>>> master
 * Add inbag argument for manual selection of observations in trees
 
 ##### Version 0.10.3

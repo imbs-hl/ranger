@@ -1,4 +1,7 @@
 
+##### Version 0.11.7
+* Add local variable importance 
+
 ##### Version 0.11.6
 * Add "hellinger" splitrule for binary classification
 

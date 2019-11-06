@@ -219,7 +219,7 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
 
   // All values for varID (no duplicates) for given sampleIDs
   if (getUnpermutedVarID(varID) < num_cols_no_snp) {
-
+    
     all_values.reserve(end - start);
     for (size_t pos = start; pos < end; ++pos) {
       all_values.push_back(get_x(sampleIDs[pos], varID));

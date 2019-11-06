@@ -177,7 +177,7 @@ void ForestSurvival::computePredictionErrorInternal() {
   }
 
   // Use all samples which are OOB at least once
-  overall_prediction_error = 1 - computeConcordanceIndex(*data, sum_chf, oob_sampleIDs);
+  overall_prediction_error = 1 - computeConcordanceIndex(*data, sum_chf, oob_sampleIDs, NULL);
 }
 
 // #nocov start

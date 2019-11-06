@@ -35,25 +35,47 @@ int ArgumentHandler::processArguments() {
   // short options
   char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hil::m:o:pr:s:t:uvwy:z:";
 
-  // long options: longname, no/optional/required argument?, flag(not used!), shortname
-  const struct option long_options[] = {
+// long options: longname, no/optional/required argument?, flag(not used!), shortname
+    const struct option long_options[] = {
 
-  { "alwayssplitvars", required_argument, 0, 'A' }, { "caseweights", required_argument, 0, 'C' }, { "depvarname",
-      required_argument, 0, 'D' }, { "fraction", required_argument, 0, 'F' }, { "holdout", no_argument, 0, 'H' }, {
-      "memmode", required_argument, 0, 'M' }, { "savemem", no_argument, 0, 'N' }, { "skipoob", no_argument, 0, 'O' }, {
-      "predict", required_argument, 0, 'P' }, { "predictiontype", required_argument, 0, 'Q' }, { "randomsplits",
-      required_argument, 0, 'R' }, { "splitweights", required_argument, 0, 'S' }, { "nthreads", required_argument, 0,
-      'U' }, { "predall", no_argument, 0, 'X' }, { "version", no_argument, 0, 'Z' },
+      { "alwayssplitvars",      required_argument,  0, 'A'},
+      { "caseweights",          required_argument,  0, 'C'},
+      { "depvarname",           required_argument,  0, 'D'},
+      { "fraction",             required_argument,  0, 'F'},
+      { "holdout",              no_argument,        0, 'H'},
+      { "memmode",              required_argument,  0, 'M'},
+      { "savemem",              no_argument,        0, 'N'},
+      { "skipoob",              no_argument,        0, 'O'},
+      { "predict",              required_argument,  0, 'P'},
+      { "predictiontype",       required_argument,  0, 'Q'},
+      { "randomsplits",         required_argument,  0, 'R'},
+      { "splitweights",         required_argument,  0, 'S'},
+      { "nthreads",             required_argument,  0, 'U'},
+      { "predall",              no_argument,        0, 'X'},
+      { "version",              no_argument,        0, 'Z'},
 
-  { "alpha", required_argument, 0, 'a' }, { "minprop", required_argument, 0, 'b' }, { "catvars", required_argument, 0,
-      'c' }, { "maxdepth", required_argument, 0, 'd' }, { "file", required_argument, 0, 'f' }, { "help", no_argument, 0,
-      'h' }, { "impmeasure", required_argument, 0, 'i' }, { "targetpartitionsize", required_argument, 0, 'l' }, {
-      "mtry", required_argument, 0, 'm' }, { "outprefix", required_argument, 0, 'o' }, { "probability", no_argument, 0,
-      'p' }, { "splitrule", required_argument, 0, 'r' }, { "statusvarname", required_argument, 0, 's' }, { "ntree",
-      required_argument, 0, 't' }, { "noreplace", no_argument, 0, 'u' }, { "verbose", no_argument, 0, 'v' }, { "write",
-      no_argument, 0, 'w' }, { "treetype", required_argument, 0, 'y' }, { "seed", required_argument, 0, 'z' },
+      { "alpha",                required_argument,  0, 'a'},
+      { "minprop",              required_argument,  0, 'b'},
+      { "catvars",              required_argument,  0, 'c'},
+      { "maxdepth",             required_argument,  0, 'd'},
+      { "file",                 required_argument,  0, 'f'},
+      { "help",                 no_argument,        0, 'h'},
+      { "impmeasure",           required_argument,  0, 'i'},
+      { "targetpartitionsize",  required_argument,  0, 'l'},
+      { "mtry",                 required_argument,  0, 'm'},
+      { "outprefix",            required_argument,  0, 'o'},
+      { "probability",          no_argument,        0, 'p'},
+      { "splitrule",            required_argument,  0, 'r'},
+      { "statusvarname",        required_argument,  0, 's'},
+      { "ntree",                required_argument,  0, 't'},
+      { "noreplace",            no_argument,        0, 'u'},
+      { "verbose",              no_argument,        0, 'v'},
+      { "write",                no_argument,        0, 'w'},
+      { "treetype",             required_argument,  0, 'y'},
+      { "seed",                 required_argument,  0, 'z'},
 
-  { 0, 0, 0, 0 } };
+      { 0, 0, 0, 0}
+    };
 
   while (1) {
     int option_index = 0;
@@ -559,6 +581,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    "
       << "                              TYPE = 5: Corrected node impurity: Bias-corrected version of node impurity importance."
       << std::endl;
+  std::cout << "    " << "                              TYPE = 6: Local (casewise) permutation importance." << std::endl;
   std::cout << "    " << "                              (Default: 0)" << std::endl;
   std::cout << "    " << "--noreplace                   Sample without replacement." << std::endl;
   std::cout << "    "

@@ -11,12 +11,12 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   class.weights = NULL, splitrule = NULL, num.random.splits = 1,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
-  scale.permutation.importance = FALSE, keep.inbag = FALSE,
-  inbag = NULL, holdout = FALSE, quantreg = FALSE,
-  oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
-  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL, x = NULL,
-  y = NULL)
+  scale.permutation.importance = FALSE, local.importance = FALSE,
+  keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
+  quantreg = FALSE, oob.error = TRUE, num.threads = NULL,
+  save.memory = FALSE, verbose = TRUE, seed = NULL,
+  dependent.variable.name = NULL, status.variable.name = NULL,
+  classification = NULL, x = NULL, y = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -61,6 +61,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{scale.permutation.importance}{Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
 
+\item{local.importance}{Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.}
+
 \item{keep.inbag}{Save how often observations are in-bag in each tree.}
 
 \item{inbag}{Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.}
@@ -94,6 +96,7 @@ Object of class \code{ranger} with elements
   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
   \item{\code{variable.importance}}{Variable importance for each independent variable.}
+  \item{\code{variable.importance.local}}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'.}
   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
@@ -168,8 +171,6 @@ With recent R versions, multithreading on Windows platforms should just work.
 If you compile yourself, the new RTools toolchain is required.
 }
 \examples{
-require(ranger)
-
 ## Classification forest with default settings
 ranger(Species ~ ., data = iris)
 

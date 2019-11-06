@@ -43,8 +43,6 @@ However, much larger numbers have to be used to estimate more precise p-values.
 We add 1 to the numerator and denominator to avoid zero p-values.
 }
 \examples{
-require(ranger)
-
 ## Janitza's p-values with corrected Gini importance
 n <- 50
 p <- 400

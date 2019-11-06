@@ -191,12 +191,22 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
   }
 }
 
-void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance) {
+void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance,
+    std::vector<double>& forest_importance_casewise) {
 
   size_t num_independent_variables = data->getNumCols();
 
 // Compute normal prediction accuracy for each tree. Predictions already computed..
-  double accuracy_normal = computePredictionAccuracyInternal();
+  double accuracy_normal;
+  std::vector<double> prederr_normal_casewise;
+  std::vector<double> prederr_shuf_casewise;
+  if (importance_mode == IMP_PERM_CASEWISE) {
+    prederr_normal_casewise.resize(num_samples_oob, 0);
+    prederr_shuf_casewise.resize(num_samples_oob, 0);
+    accuracy_normal = computePredictionAccuracyInternal(&prederr_normal_casewise);
+  } else {
+    accuracy_normal = computePredictionAccuracyInternal(NULL);
+  }
 
   prediction_terminal_nodeIDs.clear();
   prediction_terminal_nodeIDs.resize(num_samples_oob, 0);
@@ -209,7 +219,17 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
 
     // Permute and compute prediction accuracy again for this permutation and save difference
     permuteAndPredictOobSamples(i, permutations);
-    double accuracy_permuted = computePredictionAccuracyInternal();
+    double accuracy_permuted;
+    if (importance_mode == IMP_PERM_CASEWISE) {
+      accuracy_permuted = computePredictionAccuracyInternal(&prederr_shuf_casewise);
+      for (size_t j = 0; j < num_samples_oob; ++j) {
+        size_t pos = i * num_samples + oob_sampleIDs[j];
+        forest_importance_casewise[pos] += prederr_shuf_casewise[j] - prederr_normal_casewise[j];
+      }
+    } else {
+      accuracy_permuted = computePredictionAccuracyInternal(NULL);
+    }
+
     double accuracy_difference = accuracy_normal - accuracy_permuted;
     forest_importance[i] += accuracy_difference;
 
