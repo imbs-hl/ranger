@@ -533,8 +533,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Unknown importance mode.")
   }
   
-  ## Case weights: NULL for no weights
-  if (is.null(case.weights)) {
+  ## Case weights: NULL for no weights or all weights equal
+  if (is.null(case.weights) || length(unique(case.weights)) == 1) {
     case.weights <- c(0,0)
     use.case.weights <- FALSE
     if (holdout) {
