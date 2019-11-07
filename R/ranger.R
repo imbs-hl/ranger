@@ -296,7 +296,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Treetype
-  if (is.factor(y)) {
+  if (is.factor(y) || is.logical(y)) {
     if (probability) {
       treetype <- 9
     } else {
