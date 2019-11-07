@@ -863,6 +863,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Splitrule
   result$splitrule <- splitrule
+  if (splitrule == "extratrees") {
+    result$num.random.splits <- num.random.splits
+  }
   
   ## Set treetype
   if (treetype == 1) {

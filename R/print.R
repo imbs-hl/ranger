@@ -49,6 +49,9 @@ print.ranger <- function(x, ...) {
   if (x$treetype == "Survival") {
     cat("Number of unique death times:    ", length(x$unique.death.times), "\n")
   }
+  if (x$splitrule == "extratrees") {
+    cat("Number of random splits:         ", x$num.random.splits, "\n")
+  }
   if (x$treetype == "Classification") {
     cat("OOB prediction error:            ", sprintf("%1.2f %%", 100*x$prediction.error), "\n")
   } else if (x$treetype == "Regression") {
