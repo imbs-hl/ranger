@@ -882,7 +882,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   result$call <- sys.call()
   result$importance.mode <- importance
-  result$num.samples <- nrow(x)
+  if (use.sparse.data) {
+    result$num.samples <- nrow(sparse.x)
+  } else {
+    result$num.samples <- nrow(x)
+  }
   result$replace <- replace
   
   ## Write forest object
