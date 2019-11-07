@@ -148,5 +148,11 @@ test_that("Corrected importance working for sparse data", {
   expect_equal(names(rf$variable.importance), colnames(dat_sparse)[-1])
 })
 
-
+test_that("Sample size output is correct for sparse data", {
+  rf <- ranger(data = dat_sparse, dependent.variable.name = "y", classification = TRUE, num.trees = 5)
+  expect_equal(rf$num.samples, nrow(dat_sparse))
+  
+  rf <- ranger(x = dat_sparse[, -1], y = as.factor(y), num.trees = 5)
+  expect_equal(rf$num.samples, nrow(dat_sparse))
+})
 
