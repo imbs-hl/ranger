@@ -708,6 +708,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (splitrule.num == 5 && save.memory && respect.unordered.factors == "partition") {
     stop("Error: save.memory option not possible in extraTrees mode with unordered predictors.")
   }
+  if (num.random.splits > 1 && splitrule.num != 5) {
+    warning("Argument 'num.random.splits' ignored if splitrule is not 'extratrees'.")
+  }
 
   ## Unordered factors  
   if (respect.unordered.factors == "partition") {
