@@ -201,3 +201,13 @@ test_that("Predictions with unused factor levels are not NA", {
   pred <- predict(rf, iris)
   expect_equal(sum(is.na(pred$predictions)), 0)
 })
+
+test_that("classification with logical returns factor", {
+  rf <- ranger(Species=="setosa" ~ ., data = iris, num.trees = 5)
+  expect_is(rf$predictions, "numeric")
+  expect_null(dim(rf$predictions))
+  
+  pred <- predict(rf, iris)
+  expect_is(pred$predictions, "numeric")
+  expect_null(dim(pred$predictions))
+})

@@ -115,7 +115,7 @@
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
-##' @param classification Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.
+##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
 ##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
 ##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
 ##' @return Object of class \code{ranger} with elements
@@ -296,7 +296,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Treetype
-  if (is.factor(y)) {
+  if (is.factor(y) || is.logical(y)) {
     if (probability) {
       treetype <- 9
     } else {

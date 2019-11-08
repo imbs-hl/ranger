@@ -85,7 +85,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
 
-\item{classification}{Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.}
+\item{classification}{Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric.}
 
 \item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
 
