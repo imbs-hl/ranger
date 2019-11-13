@@ -55,7 +55,8 @@ public:
   }
 
 private:
-  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
+  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                         std::vector<double> coef_reg, uint use_depth) override;
   void createEmptyNodeInternal() override;
 
   double computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) override;

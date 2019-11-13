@@ -60,7 +60,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
-    std::vector<std::vector<size_t>>& inbag, bool use_inbag) {
+    std::vector<std::vector<size_t>>& inbag, bool use_inbag,
+    std::vector<double> coef_reg, uint use_depth) {
   
   Rcpp::List result;
 
@@ -148,7 +149,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
         importance_mode, min_node_size, split_select_weights, always_split_variable_names,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
-        order_snps, max_depth);
+        order_snps, max_depth, coef_reg, use_depth);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {
