@@ -194,10 +194,11 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
     addImpurityImportance(nodeID, best_varID, best_decrease,
                           use_depth, coef_reg,  depth);
   }
-  
+
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  (*all_split_varIDs)[best_varID] = 1; 
   
   return false;
 }
@@ -353,10 +354,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     
     // regularization
 
-    //std::cout << "1. size: " << all_split_varIDs.size() << std::endl;
-    
-    
-    if(std::find(split_varIDs.begin(), split_varIDs.end(), varID) != split_varIDs.end()){  
+    if((*all_split_varIDs)[varID] == 1){
       decrease = decrease;
     } else{
       if(use_depth == 1){  

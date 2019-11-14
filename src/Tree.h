@@ -45,7 +45,8 @@ public:
 
   virtual void allocateMemory() = 0;
 
-  void grow(std::vector<double>* variable_importance);
+  void grow(std::vector<double>* variable_importance, 
+            std::vector<int>* all_split_varIDs);
 
   void predict(const Data* prediction_data, bool oob_prediction);
 
@@ -160,6 +161,9 @@ protected:
   // Pointer to original data
   const Data* data;
 
+  // all_split_varIDs
+  std::vector<int>* all_split_varIDs;
+  
   // Variable importance for all variables
   std::vector<double>* variable_importance;
   ImportanceMode importance_mode;

@@ -76,11 +76,13 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed,
   this->use_depth = use_depth;
 }
 
-void Tree::grow(std::vector<double>* variable_importance) {
+void Tree::grow(std::vector<double>* variable_importance, 
+                std::vector<int>* all_split_varIDs) {
   // Allocate memory for tree growing
   allocateMemory();
 
   this->variable_importance = variable_importance;
+  this->all_split_varIDs = all_split_varIDs;
 
 // Bootstrap, dependent if weighted or not and with or without replacement
   if (!case_weights->empty()) {
