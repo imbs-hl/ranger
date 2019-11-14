@@ -472,6 +472,10 @@ void Forest::grow() {
 // Init variable importance
   variable_importance.resize(num_independent_variables, 0);
 
+// Init all_split_varIDs
+  all_split_varIDs.resize(num_independent_variables, 0);
+  
+  
 // Grow trees in multiple threads
 #ifdef OLD_WIN_R_BUILD
   // #nocov start

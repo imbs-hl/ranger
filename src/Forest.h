@@ -243,8 +243,12 @@ protected:
   std::string output_prefix;
   ImportanceMode importance_mode;
 
+  // Saving all the split_varIDs
+  std::vector<int> all_split_varIDs;
+  
   // Variable importance for all variables in forest
   std::vector<double> variable_importance;
+  
 
   // Casewise variable importance for all variables in forest
   std::vector<double> variable_importance_casewise;

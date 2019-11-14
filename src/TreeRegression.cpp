@@ -353,6 +353,9 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     
     // regularization
 
+    //std::cout << "1. size: " << all_split_varIDs.size() << std::endl;
+    
+    
     if(std::find(split_varIDs.begin(), split_varIDs.end(), varID) != split_varIDs.end()){  
       decrease = decrease;
     } else{
