@@ -118,3 +118,9 @@ test_that("Survival error without covariates", {
   expect_error(ranger(Surv(time, status) ~ ., veteran[, c("time", "status")], num.trees = 5), 
                "Error: No covariates found.")
 })
+
+test_that("Survival error for competing risk data", {
+  sobj <- Surv(veteran$time, factor(sample(1:3, nrow(veteran), replace = TRUE)))
+  expect_error(ranger(y = sobj, x = veteran[, 1:2], num.trees = 5), 
+               "Error: Competing risks not supported yet\\. Use status=1 for events and status=0 for censoring\\.")
+})
