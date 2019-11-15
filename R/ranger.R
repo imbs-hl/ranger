@@ -793,6 +793,13 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     order.snps <- FALSE
   }
   
+  ## No competing risks check
+  if (treetype == 5) {
+    if (!all(y.mat[, 2] %in% 0:1)) {
+      stop("Error: Competing risks not supported yet. Use status=1 for events and status=0 for censoring.")
+    }
+  }
+  
   ## Call Ranger
   result <- rangerCpp(treetype, x, y.mat, independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
