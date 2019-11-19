@@ -157,25 +157,19 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
       // Use memory saving method if option set
       if (memory_saving_splitting) {
         findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, 
-                                 use_depth,
-                                 coef_reg, 
-                                 use_depth, 
-                                 best_value, best_varID, best_decrease);
+                                 best_value, best_varID, best_decrease,
+                                 use_depth, coef_reg, depth);
       } else {
         // Use faster method for both cases
         double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
         if (q < Q_THRESHOLD) {
           findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, 
-                                   use_depth,
-                                   coef_reg, 
-                                   use_depth, 
-                                   best_value, best_varID, best_decrease);
+                                   best_value, best_varID, best_decrease, 
+                                   use_depth, coef_reg, depth);
         } else {
           findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, 
-                                   use_depth,
-                                   coef_reg, 
-                                   use_depth, 
-                                   best_value, best_varID, best_decrease);
+                                   best_value, best_varID, best_decrease, 
+                                   use_depth, coef_reg, depth);
         }
       }
     } else {
@@ -204,10 +198,8 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
 }
 
 void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                              uint use_depth,
-                                              std::vector<double> coef_reg,
-                                              int depth,
-    double& best_value, size_t& best_varID, double& best_decrease) {
+    double& best_value, size_t& best_varID, double& best_decrease, 
+    uint use_depth, std::vector<double> coef_reg, int depth) {
 
   // Create possible split values
   std::vector<double> possible_split_values;
@@ -224,29 +216,23 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, 
-                             use_depth, 
-                             coef_reg, 
-                             depth, 
                              best_value, best_varID, best_decrease,
-        possible_split_values, sums_right, n_right);
+        possible_split_values, sums_right, n_right, 
+        use_depth, coef_reg, depth);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node,
-                             use_depth, 
-                             coef_reg, 
-                             depth, 
                              best_value, best_varID, best_decrease,
-        possible_split_values, sums, counter);
+        possible_split_values, sums, counter, 
+        use_depth, coef_reg, depth);
   }
 }
 
 void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                              uint use_depth,
-                                              std::vector<double> coef_reg,
-                                              int depth,
     double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-    std::vector<double>& sums_right, std::vector<size_t>& n_right) {
+    std::vector<double>& sums_right, std::vector<size_t>& n_right, 
+    uint use_depth, std::vector<double> coef_reg, int depth) {
   
   int next_depth; 
   // -1 because no split possible at largest value
@@ -282,17 +268,19 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
 
+    
     // regularization
-    if(std::find(split_varIDs.begin(), split_varIDs.end(), varID) != split_varIDs.end()){
+    if((*all_split_varIDs)[varID] == 1){
       decrease = decrease;
     } else{
       if(use_depth == 1){  
         next_depth = depth + 1;
-        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
+        decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
       } else {
-        decrease = decrease * coef_reg[varID-1]; 
+        decrease = decrease * coef_reg[varID - 1]; 
       }
     }
+    
     
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -309,10 +297,8 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
 }
 
 void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                              uint use_depth,
-                                              std::vector<double> coef_reg,
-                                              int depth,
-    double& best_value, size_t& best_varID, double& best_decrease) {
+    double& best_value, size_t& best_varID, double& best_decrease, 
+    uint use_depth, std::vector<double> coef_reg, int depth) {
 
   int next_depth; 
   // Set counters to 0
@@ -353,7 +339,6 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
 
     
     // regularization
-
     if((*all_split_varIDs)[varID] == 1){
       decrease = decrease;
     } else{
@@ -945,7 +930,7 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, dou
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
   double diff; 
-  uint next_depth; 
+  int next_depth; 
   next_depth = depth + 1;
   double best_decrease = decrease; 
   
@@ -958,14 +943,11 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, dou
     }
     
     // accounting for the regularization
-    if(std::find(split_varIDs.begin(), split_varIDs.end(), best_varID) != split_varIDs.end()){
+    if((*all_split_varIDs)[best_varID] == 1){
       diff = (sum_node * sum_node / (double) num_samples_node);
       best_decrease = decrease - diff; 
-      
     } else{  
-      // bit resulting of the regularization 
       if(use_depth == 1){  
-        
         diff = ((sum_node * sum_node / (double) num_samples_node) * std::pow(coef_reg[best_varID - 1], next_depth));
         best_decrease = decrease - diff; 
       } else {
@@ -974,11 +956,9 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, dou
       }
     }
     
-    if(std::find(split_varIDs.begin(), split_varIDs.end(), best_varID) != split_varIDs.end()){
-      //diff = (sum_node * sum_node / (double) num_samples_node);
+    if((*all_split_varIDs)[best_varID] == 1){
       best_decrease = best_decrease; 
     } else{  
-      // bit resulting of the regularization 
       if(use_depth == 1){  
         best_decrease = best_decrease * std::pow(coef_reg[best_varID - 1], next_depth);
       } else {

@@ -60,21 +60,15 @@ private:
                      std::vector<double> coef_reg,
                      int depth);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                uint use_depth,
-                                std::vector<double> coef_reg,
-                                int depth,
-      double& best_value, size_t& best_varID, double& best_decrease);
+      double& best_value, size_t& best_varID, double& best_decrease, 
+      uint use_depth, std::vector<double> coef_reg, int depth);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                uint use_depth,
-                                std::vector<double> coef_reg,
-                                int depth,
       double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-      std::vector<double>& sums_right, std::vector<size_t>& n_right);
+      std::vector<double>& sums_right, std::vector<size_t>& n_right, 
+      uint use_depth, std::vector<double> coef_reg, int depth);
   void findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                uint use_depth,
-                                std::vector<double> coef_reg,
-                                int depth,
-      double& best_value, size_t& best_varID, double& best_decrease);
+      double& best_value, size_t& best_varID, double& best_decrease,
+      uint use_depth, std::vector<double> coef_reg, int depth);
   void findBestSplitValueUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
 
@@ -97,9 +91,7 @@ private:
       std::vector<double>& sums_right, std::vector<size_t>& n_right);
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease,
-                             uint use_depth,
-                             std::vector<double> coef_reg,
-                             int depth);
+                             uint use_depth, std::vector<double> coef_reg, int depth);
 
   double computePredictionMSE();
 
