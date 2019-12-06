@@ -146,7 +146,6 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
     size_t sampleID = sampleIDs[pos];
     sum_node += data->get_y(sampleID, 0);
   }
-  
 
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
@@ -176,7 +175,6 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
       findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
     }
   }
-  
 
   // Stop if no good split found
   if (best_decrease < 0) {
@@ -385,7 +383,6 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
     return;
   }
   
-
 // Number of possible splits is 2^num_levels
   size_t num_splits = (1ULL << factor_levels.size());
 

@@ -242,12 +242,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       save.memory <- FALSE
     } 
     
-    # Fix for non-formula interface
-    if(!is.null(dependent.variable.name)){
-      formula = NULL
-      status.variable.name = NULL
-    }
-    
     ## Formula interface. Use whole data frame if no formula provided and depvarname given
     if (is.null(formula)) {
       if (is.null(dependent.variable.name)) {
