@@ -86,8 +86,7 @@ double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* pred
   return computeConcordanceIndex(*data, sum_chf, oob_sampleIDs, prediction_error_casewise);
 }
 
-bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
-                                     std::vector<double> coef_reg, uint use_depth) {
+bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
   if (splitrule == MAXSTAT) {
     return findBestSplitMaxstat(nodeID, possible_split_varIDs);

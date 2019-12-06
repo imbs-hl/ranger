@@ -291,8 +291,7 @@ bool Tree::splitNode(size_t nodeID) {
   createPossibleSplitVarSubset(possible_split_varIDs);
 
   // Call subclass method, sets split_varIDs and split_values
-  bool stop = splitNodeInternal(nodeID, possible_split_varIDs, 
-                                coef_reg, use_depth);
+  bool stop = splitNodeInternal(nodeID, possible_split_varIDs);
   if (stop) {
     // Terminal node
     return true;
