@@ -16,7 +16,7 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   quantreg = FALSE, oob.error = TRUE, num.threads = NULL,
   save.memory = FALSE, verbose = TRUE, seed = NULL,
   dependent.variable.name = NULL, status.variable.name = NULL,
-  classification = NULL, x = NULL, y = NULL)
+  classification = NULL, x = NULL, y = NULL, regularization = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -90,6 +90,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
 
 \item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
+
+\item{regularization}{A list containing the gain penalisation defined as `coef.reg` (either a vector of lenght p or one value) and the `use.depth` logical argument to define if  the depth should be considered when regularizing the Random Forest.}
 }
 \value{
 Object of class \code{ranger} with elements
