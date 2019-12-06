@@ -333,28 +333,28 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   # Regularization parameters
   p <- length(independent.variable.names)
-  # Set to impurity when using regularization
-  importance <- "impurity"
   
   # Checking if regularization objects exist
   if(!is.null(regularization)){
     # Deactivation of paralellization
-    if(num.threads  > 1){
       num.threads <- 1
-    }
-    
-    if("coef.reg" %in% names(regularization)){
-      coef.reg <- regularization$coef_reg
-    } 
-    if("use.depth" %in% names(regularization)){
-      use.depth <- regularization$use_depth
-    } 
+      # Set to impurity when using regularization
+      importance <- "impurity"
+      
+      if("coef.reg" %in% names(regularization)){
+        coef.reg <- regularization$coef.reg
+      } 
+      if("use.depth" %in% names(regularization)){
+        use.depth <- regularization$use.depth
+      } else {
+        use.depth <-  0
+      }
   } else {
     coef.reg <-  rep(1, p)
     use.depth <-  0
   }
-
- 
+  
+  
   if(!is.null(coef.reg)){
     # A few checkings on the regularization coefficients
     if (max(coef.reg) > 1){
@@ -852,7 +852,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag)
+                      inbag, use.inbag, 
+                      coef.reg, use.depth)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

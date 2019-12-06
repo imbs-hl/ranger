@@ -48,20 +48,27 @@ public:
   }
 
 private:
-  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
+  bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                         std::vector<double> coef_reg, uint use_depth) override;
   void createEmptyNodeInternal() override;
 
   double computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) override;
   
   // Called by splitNodeInternal(). Sets split_varIDs and split_values.
-  bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
+  bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                     uint use_depth,
+                     std::vector<double> coef_reg,
+                     int depth);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-      double& best_value, size_t& best_varID, double& best_decrease);
+      double& best_value, size_t& best_varID, double& best_decrease, 
+      uint use_depth, std::vector<double> coef_reg, int depth);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-      std::vector<double>& sums_right, std::vector<size_t>& n_right);
+      std::vector<double>& sums_right, std::vector<size_t>& n_right, 
+      uint use_depth, std::vector<double> coef_reg, int depth);
   void findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-      double& best_value, size_t& best_varID, double& best_decrease);
+      double& best_value, size_t& best_varID, double& best_decrease,
+      uint use_depth, std::vector<double> coef_reg, int depth);
   void findBestSplitValueUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
 
@@ -83,7 +90,8 @@ private:
       size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
       std::vector<double>& sums_right, std::vector<size_t>& n_right);
 
-  void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
+  void addImpurityImportance(size_t nodeID, size_t varID, double decrease,
+                             uint use_depth, std::vector<double> coef_reg, int depth);
 
   double computePredictionMSE();
 

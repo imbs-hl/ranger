@@ -74,7 +74,9 @@ void TreeClassification::appendToFileInternal(std::ofstream& file) { // #nocov s
   // Empty on purpose
 } // #nocov end
 
-bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                                           std::vector<double> coef_reg, uint use_depth) {
+
 
   // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
@@ -105,7 +107,7 @@ bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& p
   if (splitrule == EXTRATREES) {
     stop = findBestSplitExtraTrees(nodeID, possible_split_varIDs);
   } else {
-    stop = findBestSplit(nodeID, possible_split_varIDs);
+    stop = findBestSplit(nodeID, possible_split_varIDs, coef_reg, use_depth);
   }
 
   if (stop) {
@@ -142,7 +144,9 @@ double TreeClassification::computePredictionAccuracyInternal(std::vector<double>
   return (1.0 - (double) num_missclassifications / (double) num_predictions);
 }
 
-bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs, 
+                                       std::vector<double> coef_reg, int depth) {
+
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
   size_t num_classes = class_values->size();
@@ -166,16 +170,16 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
       // Use memory saving method if option set
       if (memory_saving_splitting) {
         findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
+            best_decrease, coef_reg, use_depth);
       } else {
         // Use faster method for both cases
         double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
         if (q < Q_THRESHOLD) {
           findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-              best_decrease);
+              best_decrease, coef_reg, use_depth);
         } else {
           findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-              best_decrease);
+              best_decrease, coef_reg, use_depth);
         }
       }
     } else {
@@ -189,20 +193,23 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
     return true;
   }
 
-  // Save best values
-  split_varIDs[nodeID] = best_varID;
-  split_values[nodeID] = best_value;
-
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
+  
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+  (*all_split_varIDs)[best_varID] = 1; 
+
+
   return false;
 }
 
 void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
     const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
-    double& best_decrease) {
+    double& best_decrease, std::vector<double> coef_reg, int depth) {
 
 // Create possible split values
   std::vector<double> possible_split_values;
@@ -218,21 +225,23 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
   if (memory_saving_splitting) {
     std::vector<size_t> class_counts_right(num_splits * num_classes), n_right(num_splits);
     findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-        best_decrease, possible_split_values, class_counts_right, n_right);
+        best_decrease, possible_split_values, class_counts_right, n_right, coef_reg, use_depth);
   } else {
     std::fill_n(counter_per_class.begin(), num_splits * num_classes, 0);
     std::fill_n(counter.begin(), num_splits, 0);
     findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-        best_decrease, possible_split_values, counter_per_class, counter);
+        best_decrease, possible_split_values, counter_per_class, counter, coef_reg, use_depth);
   }
 }
 
 void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
     const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
     double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
-    std::vector<size_t>& n_right) {
+    std::vector<size_t>& n_right, std::vector<double> coef_reg, int depth) {
   const size_t num_splits = possible_split_values.size() - 1;
-
+  int next_depth; 
+  
+  
   // Count samples in right child per class and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
@@ -285,6 +294,19 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       // Decrease of impurity
       decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
     }
+    
+    // regularization
+    if((*all_split_varIDs)[varID] == 1){
+      decrease = decrease;
+    } else{
+      if(use_depth == 1){  
+        next_depth = depth + 1;
+        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
+      } else {
+        decrease = decrease * coef_reg[varID-1]; 
+      }
+    }
+    
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -302,8 +324,10 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
 
 void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes,
     const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
-    double& best_decrease) {
+    double& best_decrease, std::vector<double> coef_reg, int depth) {
 
+  
+  int next_depth; 
   // Set counters to 0
   size_t num_unique = data->getNumUniqueDataValues(varID);
   std::fill_n(counter_per_class.begin(), num_unique * num_classes, 0);
@@ -369,6 +393,18 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     }
 
+    // regularization
+    if((*all_split_varIDs)[varID] == 1){
+      decrease = decrease;
+    } else{
+      if(use_depth == 1){  
+        next_depth = depth + 1;
+        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
+      } else {
+        decrease = decrease * coef_reg[varID-1]; 
+      }
+    }
+    
     // If better than before, use this
     if (decrease > best_decrease) {
       // Find next value in this node
@@ -510,14 +546,16 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
     return true;
   }
 
-  // Save best values
-  split_varIDs[nodeID] = best_varID;
-  split_values[nodeID] = best_value;
-
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
+  
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+  (*all_split_varIDs)[best_varID] = 1; 
+
   return false;
 }
 
@@ -719,6 +757,10 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
 void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double decrease) {
 
+  double diff; 
+  int next_depth; 
+  next_depth = depth + 1;
+  
   double best_decrease = decrease;
   if (splitrule != HELLINGER) {
     size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
@@ -734,7 +776,31 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     for (size_t i = 0; i < class_counts.size(); ++i) {
       sum_node += (*class_weights)[i] * class_counts[i] * class_counts[i];
     }
-    best_decrease = decrease - sum_node / (double) num_samples_node;
+
+  // accounting for the regularization
+  if((*all_split_varIDs)[varID] == 1){
+    diff = (sum_node / (double) num_samples_node);
+    best_decrease = decrease - diff; 
+  } else{  
+    if(use_depth == 1){  
+      diff = (sum_node / (double) num_samples_node) * std::pow(coef_reg[varID - 1], next_depth);
+      best_decrease = decrease - diff; 
+    } else {
+      diff = (sum_node / (double) num_samples_node) * coef_reg[varID - 1];
+      best_decrease = decrease - diff; 
+    }
+  }
+  
+  if((*all_split_varIDs)[varID] == 1){
+    best_decrease = best_decrease; 
+  } else{  
+    if(use_depth == 1){  
+      best_decrease = best_decrease * std::pow(coef_reg[varID - 1], next_depth);
+    } else {
+      best_decrease = best_decrease  * coef_reg[varID - 1];
+    }
+  }
+  
   }
 
   // No variable importance for no split variables

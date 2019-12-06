@@ -57,7 +57,9 @@ void TreeRegression::appendToFileInternal(std::ofstream& file) { // #nocov start
 // Empty on purpose
 } // #nocov end
 
-bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                                       std::vector<double> coef_reg,
+                                       uint use_depth) {
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
 
@@ -93,7 +95,8 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   } else if (splitrule == BETA) {
     stop = findBestSplitBeta(nodeID, possible_split_varIDs);
   } else {
-    stop = findBestSplit(nodeID, possible_split_varIDs);
+    stop = findBestSplit(nodeID, possible_split_varIDs,
+                         use_depth, coef_reg, depth);
   }
 
   if (stop) {
@@ -127,7 +130,10 @@ double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* pr
   return (1.0 - sum_of_squares / (double) num_predictions);
 }
 
-bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                                   uint use_depth,
+                                   std::vector<double> coef_reg,
+                                   int depth) {
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
   double best_decrease = -1;
@@ -140,6 +146,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
     size_t sampleID = sampleIDs[pos];
     sum_node += data->get_y(sampleID, 0);
   }
+  
 
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
@@ -149,39 +156,50 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
 
       // Use memory saving method if option set
       if (memory_saving_splitting) {
-        findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+        findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, 
+                                 best_value, best_varID, best_decrease,
+                                 use_depth, coef_reg, depth);
       } else {
         // Use faster method for both cases
         double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
         if (q < Q_THRESHOLD) {
-          findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+          findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, 
+                                   best_value, best_varID, best_decrease, 
+                                   use_depth, coef_reg, depth);
         } else {
-          findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+          findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, 
+                                   best_value, best_varID, best_decrease, 
+                                   use_depth, coef_reg, depth);
         }
       }
     } else {
       findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
     }
   }
+  
 
-// Stop if no good split found
+  // Stop if no good split found
   if (best_decrease < 0) {
     return true;
   }
 
-// Save best values
+  // Compute decrease of impurity for this node and add to variable importance if needed
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+    addImpurityImportance(nodeID, best_varID, best_decrease,
+                          use_depth, coef_reg,  depth);
+  }
+
+  // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
-
-// Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
-    addImpurityImportance(nodeID, best_varID, best_decrease);
-  }
+  (*all_split_varIDs)[best_varID] = 1; 
+  
   return false;
 }
 
 void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-    double& best_value, size_t& best_varID, double& best_decrease) {
+    double& best_value, size_t& best_varID, double& best_decrease, 
+    uint use_depth, std::vector<double> coef_reg, int depth) {
 
   // Create possible split values
   std::vector<double> possible_split_values;
@@ -197,19 +215,26 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
   if (memory_saving_splitting) {
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
-    findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-        possible_split_values, sums_right, n_right);
+    findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, 
+                             best_value, best_varID, best_decrease,
+        possible_split_values, sums_right, n_right, 
+        use_depth, coef_reg, depth);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
-    findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-        possible_split_values, sums, counter);
+    findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node,
+                             best_value, best_varID, best_decrease,
+        possible_split_values, sums, counter, 
+        use_depth, coef_reg, depth);
   }
 }
 
 void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
     double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-    std::vector<double>& sums_right, std::vector<size_t>& n_right) {
+    std::vector<double>& sums_right, std::vector<size_t>& n_right, 
+    uint use_depth, std::vector<double> coef_reg, int depth) {
+  
+  int next_depth; 
   // -1 because no split possible at largest value
   const size_t num_splits = possible_split_values.size() - 1;
 
@@ -243,6 +268,20 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
 
+    
+    // regularization
+    if((*all_split_varIDs)[varID] == 1){
+      decrease = decrease;
+    } else{
+      if(use_depth == 1){  
+        next_depth = depth + 1;
+        decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
+      } else {
+        decrease = decrease * coef_reg[varID - 1]; 
+      }
+    }
+    
+    
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
@@ -258,8 +297,10 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
 }
 
 void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-    double& best_value, size_t& best_varID, double& best_decrease) {
+    double& best_value, size_t& best_varID, double& best_decrease, 
+    uint use_depth, std::vector<double> coef_reg, int depth) {
 
+  int next_depth; 
   // Set counters to 0
   size_t num_unique = data->getNumUniqueDataValues(varID);
   std::fill_n(counter.begin(), num_unique, 0);
@@ -296,6 +337,21 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     double sum_right = sum_node - sum_left;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
 
+    
+    // regularization
+    if((*all_split_varIDs)[varID] == 1){
+      decrease = decrease;
+    } else{
+      if(use_depth == 1){  
+        next_depth = depth + 1;
+        decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
+      } else {
+        decrease = decrease * coef_reg[varID - 1]; 
+      }
+    }
+    
+    
+    
     // If better than before, use this
     if (decrease > best_decrease) {
       // Find next value in this node
@@ -328,6 +384,7 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
   if (factor_levels.size() < 2) {
     return;
   }
+  
 
 // Number of possible splits is 2^num_levels
   size_t num_splits = (1ULL << factor_levels.size());
@@ -476,7 +533,8 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
 
     // Compute decrease of impurity for this node and add to variable importance if needed
     if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
-      addImpurityImportance(nodeID, best_varID, best_maxstat);
+      addImpurityImportance(nodeID, best_varID, best_maxstat,
+                            use_depth, coef_reg, depth);
     }
 
     return false;
@@ -514,14 +572,16 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
     return true;
   }
 
+  // Compute decrease of impurity for this node and add to variable importance if needed
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+    addImpurityImportance(nodeID, best_varID, best_decrease,
+                          use_depth, coef_reg, depth);
+  }
+  
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
-
-  // Compute decrease of impurity for this node and add to variable importance if needed
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
-    addImpurityImportance(nodeID, best_varID, best_decrease);
-  }
+  
   return false;
 }
 
@@ -729,7 +789,8 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
-    addImpurityImportance(nodeID, best_varID, best_decrease);
+    addImpurityImportance(nodeID, best_varID, best_decrease,
+                          use_depth, coef_reg, depth);
   }
   return false;
 }
@@ -862,25 +923,57 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
   }
 }
 
-void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double decrease) {
+void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, double decrease,
+                                           uint use_depth,
+                                           std::vector<double> coef_reg,
+                                           int depth) {
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+  double diff; 
+  int next_depth; 
+  next_depth = depth + 1;
+  double best_decrease = decrease; 
+  
 
-  double best_decrease = decrease;
   if (splitrule != MAXSTAT) {
     double sum_node = 0;
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
       sum_node += data->get_y(sampleID, 0);
     }
-    best_decrease = decrease - sum_node * sum_node / (double) num_samples_node;
+    
+    // accounting for the regularization
+    if((*all_split_varIDs)[best_varID] == 1){
+      diff = (sum_node * sum_node / (double) num_samples_node);
+      best_decrease = decrease - diff; 
+    } else{  
+      if(use_depth == 1){  
+        diff = ((sum_node * sum_node / (double) num_samples_node) * std::pow(coef_reg[best_varID - 1], next_depth));
+        best_decrease = decrease - diff; 
+      } else {
+        diff = ((sum_node * sum_node / (double) num_samples_node) * coef_reg[best_varID - 1]);
+        best_decrease = decrease - diff; 
+      }
+    }
+    
+    if((*all_split_varIDs)[best_varID] == 1){
+      best_decrease = best_decrease; 
+    } else{  
+      if(use_depth == 1){  
+        best_decrease = best_decrease * std::pow(coef_reg[best_varID - 1], next_depth);
+      } else {
+        best_decrease = best_decrease  * coef_reg[best_varID - 1];
+      }
+    }
+    
   }
+  
 
   // No variable importance for no split variables
-  size_t tempvarID = data->getUnpermutedVarID(varID);
+  size_t tempvarID = data->getUnpermutedVarID(best_varID);
 
   // Subtract if corrected importance and permuted variable, else add
-  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
+  if (importance_mode == IMP_GINI_CORRECTED && best_varID >= data->getNumCols()) {
     (*variable_importance)[tempvarID] -= best_decrease;
   } else {
     (*variable_importance)[tempvarID] += best_decrease;
