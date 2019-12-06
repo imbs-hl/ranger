@@ -268,10 +268,8 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
 
     
     // regularization
-    if((*all_split_varIDs)[varID] == 1){
-      decrease = decrease;
-    } else{
-      if(use_depth == 1){  
+    if ((*all_split_varIDs)[varID] != 1){
+      if (use_depth == 1){  
         next_depth = depth + 1;
         decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
       } else {
@@ -337,9 +335,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
 
     
     // regularization
-    if((*all_split_varIDs)[varID] == 1){
-      decrease = decrease;
-    } else{
+    if ((*all_split_varIDs)[varID] != 1){
       if(use_depth == 1){  
         next_depth = depth + 1;
         decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
@@ -953,10 +949,8 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, dou
       }
     }
     
-    if((*all_split_varIDs)[best_varID] == 1){
-      best_decrease = best_decrease; 
-    } else{  
-      if(use_depth == 1){  
+    if ((*all_split_varIDs)[best_varID] != 1){
+      if (use_depth == 1){  
         best_decrease = best_decrease * std::pow(coef_reg[best_varID - 1], next_depth);
       } else {
         best_decrease = best_decrease  * coef_reg[best_varID - 1];

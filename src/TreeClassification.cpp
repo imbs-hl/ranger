@@ -296,14 +296,12 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     }
     
     // regularization
-    if((*all_split_varIDs)[varID] == 1){
-      decrease = decrease;
-    } else{
-      if(use_depth == 1){  
+    if ((*all_split_varIDs)[varID] != 1){
+      if (use_depth == 1){  
         next_depth = depth + 1;
-        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
+        decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
       } else {
-        decrease = decrease * coef_reg[varID-1]; 
+        decrease = decrease * coef_reg[varID - 1]; 
       }
     }
     
@@ -394,14 +392,12 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
     }
 
     // regularization
-    if((*all_split_varIDs)[varID] == 1){
-      decrease = decrease;
-    } else{
-      if(use_depth == 1){  
+    if ((*all_split_varIDs)[varID] != 1){
+      if (use_depth == 1){  
         next_depth = depth + 1;
-        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
+        decrease = decrease * std::pow(coef_reg[varID - 1], next_depth);
       } else {
-        decrease = decrease * coef_reg[varID-1]; 
+        decrease = decrease * coef_reg[varID - 1]; 
       }
     }
     
@@ -791,10 +787,8 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     }
   }
   
-  if((*all_split_varIDs)[varID] == 1){
-    best_decrease = best_decrease; 
-  } else{  
-    if(use_depth == 1){  
+  if ((*all_split_varIDs)[varID] != 1){
+    if (use_depth == 1){  
       best_decrease = best_decrease * std::pow(coef_reg[varID - 1], next_depth);
     } else {
       best_decrease = best_decrease  * coef_reg[varID - 1];
