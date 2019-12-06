@@ -294,16 +294,16 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       // Decrease of impurity
       decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
     }
-    
-    // regularization
-    if((*all_split_varIDs)[varID] == 1){
-      decrease = decrease;
-    } else{
-      if(use_depth == 1){  
-        next_depth = depth + 1;
-        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
-      } else {
-        decrease = decrease * coef_reg[varID-1]; 
+
+    // Regularization
+    if (coef_reg[varID] != 1) {
+      if ((*all_split_varIDs)[varID] != 1){
+        if (use_depth == 1){  
+          next_depth = depth + 1;
+          decrease = decrease * std::pow(coef_reg[varID], next_depth);
+        } else {
+          decrease = decrease * coef_reg[varID]; 
+        }
       }
     }
     
@@ -393,15 +393,15 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     }
 
-    // regularization
-    if((*all_split_varIDs)[varID] == 1){
-      decrease = decrease;
-    } else{
-      if(use_depth == 1){  
-        next_depth = depth + 1;
-        decrease = decrease * std::pow(coef_reg[varID-1], next_depth);
-      } else {
-        decrease = decrease * coef_reg[varID-1]; 
+    // Regularization
+    if (coef_reg[varID] != 1) {
+      if ((*all_split_varIDs)[varID] != 1){
+        if (use_depth == 1){  
+          next_depth = depth + 1;
+          decrease = decrease * std::pow(coef_reg[varID], next_depth);
+        } else {
+          decrease = decrease * coef_reg[varID]; 
+        }
       }
     }
     
@@ -782,22 +782,20 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     diff = (sum_node / (double) num_samples_node);
     best_decrease = decrease - diff; 
   } else{  
-    if(use_depth == 1){  
-      diff = (sum_node / (double) num_samples_node) * std::pow(coef_reg[varID - 1], next_depth);
+    if(use_depth == 1){
+      diff = (sum_node / (double) num_samples_node) * std::pow(coef_reg[varID], next_depth);
       best_decrease = decrease - diff; 
     } else {
-      diff = (sum_node / (double) num_samples_node) * coef_reg[varID - 1];
+      diff = (sum_node / (double) num_samples_node) * coef_reg[varID];
       best_decrease = decrease - diff; 
     }
   }
   
-  if((*all_split_varIDs)[varID] == 1){
-    best_decrease = best_decrease; 
-  } else{  
-    if(use_depth == 1){  
-      best_decrease = best_decrease * std::pow(coef_reg[varID - 1], next_depth);
+  if ((*all_split_varIDs)[varID] != 1){
+    if (use_depth == 1){  
+      best_decrease = best_decrease * std::pow(coef_reg[varID], next_depth);
     } else {
-      best_decrease = best_decrease  * coef_reg[varID - 1];
+      best_decrease = best_decrease  * coef_reg[varID];
     }
   }
   

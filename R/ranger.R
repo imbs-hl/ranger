@@ -242,12 +242,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       save.memory <- FALSE
     } 
     
-    # Fix for non-formula interface
-    if(!is.null(dependent.variable.name)){
-      formula = NULL
-      status.variable.name = NULL
-    }
-    
     ## Formula interface. Use whole data frame if no formula provided and depvarname given
     if (is.null(formula)) {
       if (is.null(dependent.variable.name)) {
@@ -330,47 +324,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   independent.variable.names <- colnames(x)
-  
-  # Regularization parameters
-  p <- length(independent.variable.names)
-  
-  # Checking if regularization objects exist
-  if(!is.null(regularization)){
-    # Deactivation of paralellization
-      num.threads <- 1
-      # Set to impurity when using regularization
-      importance <- "impurity"
-      
-      if("coef.reg" %in% names(regularization)){
-        coef.reg <- regularization$coef.reg
-      } 
-      if("use.depth" %in% names(regularization)){
-        use.depth <- regularization$use.depth
-      } else {
-        use.depth <-  0
-      }
-  } else {
-    coef.reg <-  rep(1, p)
-    use.depth <-  0
-  }
-  
-  
-  if(!is.null(coef.reg)){
-    # A few checkings on the regularization coefficients
-    if (max(coef.reg) > 1){
-      stop("The regularization coefficients cannot be greater than 1.")
-    }
-    if (max(coef.reg) <= 0){
-      stop("The regularization coefficients cannot be smaller than 0.")
-    }
-    if (length(coef.reg)!= 1 && length(coef.reg)!= p){
-      stop("You must use 1 or p (the number of predictor variables) 
-      regularization coefficients.")
-    }
-    if (length(coef.reg) == 1){coef.reg = rep(coef.reg, p)}	
-  }
-  
-  
   
   ## respect.unordered.factors
   if (is.null(respect.unordered.factors)) {
@@ -561,6 +514,44 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (sample.fraction <= 0 || sample.fraction > 1) {
       stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
     }
+  }
+  
+  # Regularization parameters
+  p <- length(all.independent.variable.names)
+  
+  # Checking if regularization objects exist
+  if (!is.null(regularization)){
+    # Deactivation of paralellization
+    num.threads <- 1
+    # Set to impurity when using regularization
+    importance <- "impurity"
+    
+    if("coef.reg" %in% names(regularization)){
+      coef.reg <- regularization$coef.reg
+    } 
+    if("use.depth" %in% names(regularization)){
+      use.depth <- regularization$use.depth
+    } else {
+      use.depth <-  0
+    }
+  } else {
+    coef.reg <-  rep(1, p)
+    use.depth <-  0
+  }
+  
+  if (!is.null(coef.reg)){
+    # A few checkings on the regularization coefficients
+    if (max(coef.reg) > 1){
+      stop("The regularization coefficients cannot be greater than 1.")
+    }
+    if (max(coef.reg) <= 0){
+      stop("The regularization coefficients cannot be smaller than 0.")
+    }
+    if (length(coef.reg)!= 1 && length(coef.reg)!= p){
+      stop("You must use 1 or p (the number of predictor variables) 
+      regularization coefficients.")
+    }
+    if (length(coef.reg) == 1){coef.reg = rep(coef.reg, p)}	
   }
   
   ## Importance mode
