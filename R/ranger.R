@@ -118,6 +118,7 @@
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
 ##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
 ##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
+##' @param regularization A list containing the gain penalisation defined as `coef.reg` (either a vector of lenght p or one value) and the `use.depth` logical argument to define if  the depth should be considered when regularizing the Random Forest.
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
@@ -216,7 +217,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL, x = NULL, y = NULL) {
+                   classification = NULL, x = NULL, y = NULL, 
+                   regularization = NULL) {
   
   ## By default not in GWAS mode
   snp.data <- as.matrix(0)
@@ -239,6 +241,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       gwa.mode <- TRUE
       save.memory <- FALSE
     } 
+    
+    # Fix for non-formula interface
+    if(!is.null(dependent.variable.name)){
+      formula = NULL
+      status.variable.name = NULL
+    }
     
     ## Formula interface. Use whole data frame if no formula provided and depvarname given
     if (is.null(formula)) {
@@ -322,6 +330,47 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
 
   independent.variable.names <- colnames(x)
+  
+  # Regularization parameters
+  p <- length(independent.variable.names)
+  
+  # Checking if regularization objects exist
+  if(!is.null(regularization)){
+    # Deactivation of paralellization
+      num.threads <- 1
+      # Set to impurity when using regularization
+      importance <- "impurity"
+      
+      if("coef.reg" %in% names(regularization)){
+        coef.reg <- regularization$coef.reg
+      } 
+      if("use.depth" %in% names(regularization)){
+        use.depth <- regularization$use.depth
+      } else {
+        use.depth <-  0
+      }
+  } else {
+    coef.reg <-  rep(1, p)
+    use.depth <-  0
+  }
+  
+  
+  if(!is.null(coef.reg)){
+    # A few checkings on the regularization coefficients
+    if (max(coef.reg) > 1){
+      stop("The regularization coefficients cannot be greater than 1.")
+    }
+    if (max(coef.reg) <= 0){
+      stop("The regularization coefficients cannot be smaller than 0.")
+    }
+    if (length(coef.reg)!= 1 && length(coef.reg)!= p){
+      stop("You must use 1 or p (the number of predictor variables) 
+      regularization coefficients.")
+    }
+    if (length(coef.reg) == 1){coef.reg = rep(coef.reg, p)}	
+  }
+  
+  
   
   ## respect.unordered.factors
   if (is.null(respect.unordered.factors)) {
@@ -810,7 +859,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag)
+                      inbag, use.inbag, 
+                      coef.reg, use.depth)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

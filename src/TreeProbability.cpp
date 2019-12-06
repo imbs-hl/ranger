@@ -78,7 +78,8 @@ void TreeProbability::appendToFileInternal(std::ofstream& file) { // #nocov star
   saveVector2D(terminal_class_counts_vector, file);
 } // #nocov end
 
-bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
+bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs,
+                                        std::vector<double> coef_reg, uint use_depth) {
 
   // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
