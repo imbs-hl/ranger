@@ -306,7 +306,6 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
         }
       }
     }
-    
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -790,7 +789,7 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
       best_decrease = decrease - diff; 
     }
   }
-  
+
   if ((*all_split_varIDs)[varID] != 1){
     if (use_depth == 1){  
       best_decrease = best_decrease * std::pow(coef_reg[varID], next_depth);

@@ -33,7 +33,6 @@ void ForestRegression::loadForest(size_t num_trees,
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(
         make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
-
   }
 
   // Create thread ranges

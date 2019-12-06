@@ -248,7 +248,6 @@ protected:
   
   // Variable importance for all variables in forest
   std::vector<double> variable_importance;
-  
 
   // Casewise variable importance for all variables in forest
   std::vector<double> variable_importance_casewise;
