@@ -753,10 +753,6 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
 void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double decrease) {
 
-  double diff; 
-  int next_depth; 
-  next_depth = depth + 1;
-  
   double best_decrease = decrease;
   if (splitrule != HELLINGER) {
     size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
@@ -764,40 +760,27 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     class_counts.resize(class_values->size(), 0);
 
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
-        size_t sampleID = sampleIDs[pos];
-        uint sample_classID = (*response_classIDs)[sampleID];
-        class_counts[sample_classID]++;
+      size_t sampleID = sampleIDs[pos];
+      uint sample_classID = (*response_classIDs)[sampleID];
+      class_counts[sample_classID]++;
     }
     double sum_node = 0;
     for (size_t i = 0; i < class_counts.size(); ++i) {
       sum_node += (*class_weights)[i] * class_counts[i] * class_counts[i];
     }
 
-    std::cout << varID << " " << (*all_split_varIDs)[varID] << std::endl;
-    std::cout << "use_depth: " << use_depth << std::endl;
+    double impurity_node = (sum_node / (double) num_samples_node);
 
-  // accounting for the regularization
-  if((*all_split_varIDs)[varID] == 1){
-    diff = (sum_node / (double) num_samples_node);
-    best_decrease = decrease - diff; 
-  } else{  
-    if(use_depth == 1){
-      diff = (sum_node / (double) num_samples_node) * std::pow(coef_reg[varID], next_depth);
-      best_decrease = decrease - diff; 
-    } else {
-      diff = (sum_node / (double) num_samples_node) * coef_reg[varID];
-      best_decrease = decrease - diff; 
+    // Account for the regularization
+    if ((*all_split_varIDs)[varID] != 1) {
+      if (use_depth == 1) {
+        impurity_node *= std::pow(coef_reg[varID], depth + 1);
+      } else {
+        impurity_node *= coef_reg[varID];
+      }
     }
-  }
 
-  if ((*all_split_varIDs)[varID] != 1){
-    if (use_depth == 1){  
-      best_decrease = best_decrease * std::pow(coef_reg[varID], next_depth);
-    } else {
-      best_decrease = best_decrease  * coef_reg[varID];
-    }
-  }
-  
+    best_decrease = decrease - impurity_node;
   }
 
   // No variable importance for no split variables

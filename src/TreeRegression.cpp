@@ -897,15 +897,11 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
   }
 }
 
-void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, double decrease) {
+void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double decrease) {
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
-  double diff; 
-  int next_depth; 
-  next_depth = depth + 1;
   double best_decrease = decrease; 
   
-
   if (splitrule != MAXSTAT) {
     double sum_node = 0;
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
@@ -913,35 +909,25 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t best_varID, dou
       sum_node += data->get_y(sampleID, 0);
     }
     
-    // accounting for the regularization
-    if((*all_split_varIDs)[best_varID] == 1){
-      diff = (sum_node * sum_node / (double) num_samples_node);
-      best_decrease = decrease - diff; 
-    } else{  
-      if(use_depth == 1){
-        diff = ((sum_node * sum_node / (double) num_samples_node) * std::pow(coef_reg[best_varID], next_depth));
-        best_decrease = decrease - diff; 
-      } else {
-        diff = ((sum_node * sum_node / (double) num_samples_node) * coef_reg[best_varID]);
-        best_decrease = decrease - diff; 
-      }
-    }
+    double impurity_node = (sum_node * sum_node / (double) num_samples_node);
 
-    if ((*all_split_varIDs)[best_varID] != 1){
-      if (use_depth == 1){  
-        best_decrease = best_decrease * std::pow(coef_reg[best_varID], next_depth);
+    // Account for the regularization
+    if ((*all_split_varIDs)[varID] != 1) {
+      if (use_depth == 1) {
+        impurity_node *= std::pow(coef_reg[varID], depth + 1);
       } else {
-        best_decrease = best_decrease  * coef_reg[best_varID];
+        impurity_node *= coef_reg[varID];
       }
     }
     
+    best_decrease = decrease - impurity_node;
   }
 
   // No variable importance for no split variables
-  size_t tempvarID = data->getUnpermutedVarID(best_varID);
+  size_t tempvarID = data->getUnpermutedVarID(varID);
 
   // Subtract if corrected importance and permuted variable, else add
-  if (importance_mode == IMP_GINI_CORRECTED && best_varID >= data->getNumCols()) {
+  if (importance_mode == IMP_GINI_CORRECTED && varID >= data->getNumCols()) {
     (*variable_importance)[tempvarID] -= best_decrease;
   } else {
     (*variable_importance)[tempvarID] += best_decrease;
