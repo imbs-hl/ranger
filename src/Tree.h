@@ -41,12 +41,11 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, std::vector<double> coef_reg, uint use_depth);
+      uint max_depth, std::vector<double>* coef_reg, bool use_depth, std::vector<bool>* split_varIDs_used);
 
   virtual void allocateMemory() = 0;
 
-  void grow(std::vector<double>* variable_importance, 
-            std::vector<int>* all_split_varIDs);
+  void grow(std::vector<double>* variable_importance);
 
   void predict(const Data* prediction_data, bool oob_prediction);
 
@@ -160,8 +159,10 @@ protected:
   // Pointer to original data
   const Data* data;
 
-  // all_split_varIDs
-  std::vector<int>* all_split_varIDs;
+  // Regularization
+  std::vector<double>* coef_reg;
+  bool use_depth;
+  std::vector<bool>* split_varIDs_used;
   
   // Variable importance for all variables
   std::vector<double>* variable_importance;
@@ -181,8 +182,6 @@ protected:
   uint num_random_splits;
   uint max_depth;
   uint depth;
-  std::vector<double> coef_reg;
-  uint use_depth;
   size_t last_left_nodeID;
 };
 

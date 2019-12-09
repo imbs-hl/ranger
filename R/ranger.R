@@ -518,40 +518,41 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   # Regularization parameters
   p <- length(all.independent.variable.names)
-  
-  # Checking if regularization objects exist
-  if (!is.null(regularization)){
+  coef.reg <-  c(0, 0)
+  use.coef.reg <- FALSE
+  use.depth <-  FALSE
+  if (!is.null(regularization)) {
     # Deactivation of paralellization
-    num.threads <- 1
-    # Set to impurity when using regularization
-    importance <- "impurity"
-    
-    if("coef.reg" %in% names(regularization)){
+    if (num.threads != 1) {
+      num.threads <- 1
+      warning("Paralellization deactivated (regularization used).")
+    }
+    if ("coef.reg" %in% names(regularization)) {
       coef.reg <- regularization$coef.reg
+      use.coef.reg <- TRUE
     } 
-    if("use.depth" %in% names(regularization)){
+    if ("use.depth" %in% names(regularization)) {
       use.depth <- regularization$use.depth
     } else {
-      use.depth <-  0
+      use.depth <-  FALSE
     }
-  } else {
-    coef.reg <-  rep(1, p)
-    use.depth <-  0
-  }
+  } 
   
-  if (!is.null(coef.reg)){
+  if (use.coef.reg && !is.null(coef.reg)) {
     # A few checkings on the regularization coefficients
-    if (max(coef.reg) > 1){
+    if (max(coef.reg) > 1) {
       stop("The regularization coefficients cannot be greater than 1.")
     }
-    if (max(coef.reg) <= 0){
+    if (max(coef.reg) <= 0) {
       stop("The regularization coefficients cannot be smaller than 0.")
     }
-    if (length(coef.reg)!= 1 && length(coef.reg)!= p){
-      stop("You must use 1 or p (the number of predictor variables) 
+    if (length(coef.reg) != 1 && length(coef.reg) != p) {
+      stop("You must use 1 or p (the number of predictor variables)
       regularization coefficients.")
     }
-    if (length(coef.reg) == 1){coef.reg = rep(coef.reg, p)}	
+    if (length(coef.reg) == 1) {
+      coef.reg = rep(coef.reg, p)
+    }
   }
   
   ## Importance mode
@@ -851,7 +852,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      coef.reg, use.depth)
+                      coef.reg, use.coef.reg, use.depth)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

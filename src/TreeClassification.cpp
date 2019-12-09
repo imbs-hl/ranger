@@ -76,7 +76,6 @@ void TreeClassification::appendToFileInternal(std::ofstream& file) { // #nocov s
 
 bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-
   // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
@@ -194,12 +193,15 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
-  
+
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
-  (*all_split_varIDs)[best_varID] = 1; 
 
+  // Regularization
+  if (coef_reg->size() > 0) {
+    (*split_varIDs_used)[best_varID] = true;
+  }
 
   return false;
 }
@@ -236,9 +238,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
     std::vector<size_t>& n_right) {
   const size_t num_splits = possible_split_values.size() - 1;
-  int next_depth; 
-  
-  
+
   // Count samples in right child per class and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
@@ -293,13 +293,14 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     }
 
     // Regularization
-    if (coef_reg[varID] != 1) {
-      if ((*all_split_varIDs)[varID] != 1){
-        if (use_depth == 1){  
-          next_depth = depth + 1;
-          decrease = decrease * std::pow(coef_reg[varID], next_depth);
-        } else {
-          decrease = decrease * coef_reg[varID]; 
+    if (coef_reg->size() > 0) {
+      if ((*coef_reg)[varID] != 1) {
+        if (!(*split_varIDs_used)[varID]) {
+          if (use_depth) {
+            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
+          } else {
+            decrease = decrease * (*coef_reg)[varID];
+          }
         }
       }
     }
@@ -322,8 +323,6 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
     const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
     double& best_decrease) {
 
-  
-  int next_depth; 
   // Set counters to 0
   size_t num_unique = data->getNumUniqueDataValues(varID);
   std::fill_n(counter_per_class.begin(), num_unique * num_classes, 0);
@@ -390,17 +389,18 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
     }
 
     // Regularization
-    if (coef_reg[varID] != 1) {
-      if ((*all_split_varIDs)[varID] != 1){
-        if (use_depth == 1){  
-          next_depth = depth + 1;
-          decrease = decrease * std::pow(coef_reg[varID], next_depth);
-        } else {
-          decrease = decrease * coef_reg[varID]; 
+    if (coef_reg->size() > 0) {
+      if ((*coef_reg)[varID] != 1) {
+        if (!(*split_varIDs_used)[varID]) {
+          if (use_depth) {
+            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
+          } else {
+            decrease = decrease * (*coef_reg)[varID];
+          }
         }
       }
     }
-    
+
     // If better than before, use this
     if (decrease > best_decrease) {
       // Find next value in this node
@@ -546,11 +546,15 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
-  
+
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
-  (*all_split_varIDs)[best_varID] = 1; 
+
+  // Regularization
+  if (coef_reg->size() > 0) {
+    (*split_varIDs_used)[best_varID] = true;
+  }
 
   return false;
 }
@@ -772,11 +776,13 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     double impurity_node = (sum_node / (double) num_samples_node);
 
     // Account for the regularization
-    if ((*all_split_varIDs)[varID] != 1) {
-      if (use_depth == 1) {
-        impurity_node *= std::pow(coef_reg[varID], depth + 1);
-      } else {
-        impurity_node *= coef_reg[varID];
+    if (coef_reg->size() > 0) {
+      if (!(*split_varIDs_used)[varID]) {
+        if (use_depth) {
+          impurity_node *= std::pow((*coef_reg)[varID], depth + 1);
+        } else {
+          impurity_node *= (*coef_reg)[varID];
+        }
       }
     }
 

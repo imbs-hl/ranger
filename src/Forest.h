@@ -48,7 +48,7 @@ public:
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
       bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth,
-      std::vector<double> coef_reg, uint use_depth);
+      std::vector<double> coef_reg, bool use_depth);
   void initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, std::ostream* verbose_out, uint seed,
       uint num_threads, ImportanceMode importance_mode, uint min_node_size,
       std::vector<std::vector<double>>& split_select_weights,
@@ -57,13 +57,13 @@ public:
       std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
       bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth,
-      std::vector<double> coef_reg, uint use_depth);
+      std::vector<double> coef_reg, bool use_depth);
   void init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry, std::string output_prefix,
       uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
       bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
       bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
       double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits,
-      bool order_snps, uint max_depth, std::vector<double> coef_reg, uint use_depth);
+      bool order_snps, uint max_depth, std::vector<double> coef_reg, bool use_depth);
   virtual void initInternal() = 0;
 
   // Grow or predict
@@ -204,8 +204,6 @@ protected:
   PredictionType prediction_type;
   uint num_random_splits;
   uint max_depth;
-  std::vector<double> coef_reg;
-  uint use_depth; 
 
   // MAXSTAT splitrule
   double alpha;
@@ -243,8 +241,10 @@ protected:
   std::string output_prefix;
   ImportanceMode importance_mode;
 
-  // Saving all the split_varIDs
-  std::vector<int> all_split_varIDs;
+  // Regularization
+  std::vector<double> coef_reg;
+  bool use_depth;
+  std::vector<bool> split_varIDs_used;
   
   // Variable importance for all variables in forest
   std::vector<double> variable_importance;

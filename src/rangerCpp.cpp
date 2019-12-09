@@ -61,7 +61,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
-    std::vector<double> coef_reg, uint use_depth) {
+    std::vector<double>& coef_reg, bool use_coef_reg, bool use_depth) {
   
   Rcpp::List result;
 
@@ -84,6 +84,9 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     }
     if (!use_inbag) {
       inbag.clear();
+    }
+    if (!use_coef_reg) {
+      coef_reg.clear();
     }
 
     std::ostream* verbose_out;
