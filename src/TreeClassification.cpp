@@ -189,14 +189,14 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
     return true;
   }
 
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
-
-  // Save best values
-  split_varIDs[nodeID] = best_varID;
-  split_values[nodeID] = best_value;
 
   // Regularization
   if (coef_reg->size() > 0) {
@@ -542,14 +542,14 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
     return true;
   }
 
+  // Save best values
+  split_varIDs[nodeID] = best_varID;
+  split_values[nodeID] = best_value;
+
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
-
-  // Save best values
-  split_varIDs[nodeID] = best_varID;
-  split_values[nodeID] = best_value;
 
   // Regularization
   if (coef_reg->size() > 0) {
@@ -764,9 +764,9 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     class_counts.resize(class_values->size(), 0);
 
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
-      size_t sampleID = sampleIDs[pos];
-      uint sample_classID = (*response_classIDs)[sampleID];
-      class_counts[sample_classID]++;
+        size_t sampleID = sampleIDs[pos];
+        uint sample_classID = (*response_classIDs)[sampleID];
+        class_counts[sample_classID]++;
     }
     double sum_node = 0;
     for (size_t i = 0; i < class_counts.size(); ++i) {

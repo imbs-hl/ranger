@@ -294,8 +294,8 @@ void Forest::run(bool verbose, bool compute_oob_error) {
       computePredictionError();
     }
 
-    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW || importance_mode == IMP_PERM_RAW
-        || importance_mode == IMP_PERM_CASEWISE) {
+    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW ||
+        importance_mode == IMP_PERM_RAW || importance_mode == IMP_PERM_CASEWISE) {
       if (verbose && verbose_out) {
         *verbose_out << "Computing permutation variable importance .." << std::endl;
       }
@@ -483,7 +483,7 @@ void Forest::grow() {
   clock_t start_time = clock();
   clock_t lap_time = clock();
   for (size_t i = 0; i < num_trees; ++i) {
-    trees[i]->grow(&variable_importance, &split_varIDs_used);
+    trees[i]->grow(&variable_importance);
     progress++;
     showProgress("Growing trees..", start_time, lap_time);
   }
@@ -685,9 +685,12 @@ void Forest::computePermutationImportance() {
     if (importance_mode == IMP_PERM_CASEWISE) {
       variable_importance_casewise_threads[i].resize(num_independent_variables * num_samples, 0);
     }
-    threads.emplace_back(&Forest::computeTreePermutationImportanceInThread, this, i,
-        std::ref(variable_importance_threads[i]), std::ref(variance_threads[i]),
-        std::ref(variable_importance_casewise_threads[i]));
+    threads.emplace_back(
+          &Forest::computeTreePermutationImportanceInThread, this, i,
+          std::ref(variable_importance_threads[i]),
+          std::ref(variance_threads[i]),
+          std::ref(variable_importance_casewise_threads[i])
+        );
   }
   showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
