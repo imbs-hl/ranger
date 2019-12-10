@@ -25,7 +25,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
         DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), maxdepth(
         DEFAULT_MAXDEPTH), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix(
         "ranger_out"), probability(false), splitrule(DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(
-        true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0) {
+        true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0), usedepth(false) {
   this->argc = argc;
   this->argv = argv;
 }
@@ -33,7 +33,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hil::m:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hi:j:kl:m:o:pr:s:t:uvwy:z:";
 
 // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -61,6 +61,8 @@ int ArgumentHandler::processArguments() {
       { "file",                 required_argument,  0, 'f'},
       { "help",                 no_argument,        0, 'h'},
       { "impmeasure",           required_argument,  0, 'i'},
+      { "regcoef",              required_argument,  0, 'j'},
+      { "usedepth",             no_argument,        0, 'k'},
       { "targetpartitionsize",  required_argument,  0, 'l'},
       { "mtry",                 required_argument,  0, 'm'},
       { "outprefix",            required_argument,  0, 'o'},
@@ -266,6 +268,14 @@ int ArgumentHandler::processArguments() {
         throw std::runtime_error(
             "Illegal argument for option 'impmeasure'. Please give a positive integer. See '--help' for details.");
       }
+      break;
+
+    case 'j':
+      splitString(regcoef, optarg, ',');
+      break;
+
+    case 'k':
+      usedepth = true;
       break;
 
     case 'l':
@@ -497,6 +507,23 @@ void ArgumentHandler::checkArguments() {
   if (!splitweights.empty() && impmeasure == IMP_GINI_CORRECTED) {
     throw std::runtime_error("Corrected impurity importance not supported in combination with splitweights.");
   }
+
+  // Regularization coefficient
+  if (regcoef.size() > 0) {
+    for (auto& r : regcoef) {
+      if (r > 1) {
+        throw std::runtime_error("The regularization coefficients cannot be greater than 1.");
+      }
+      if (r <= 0) {
+        throw std::runtime_error("The regularization coefficients must be positive.");
+      }
+    }
+  }
+
+  if (nthreads != 1) {
+    std::cout << "Warning: Paralellization deactivated (regularization used)." << std::endl;
+    nthreads = 1;
+  }
 }
 
 void ArgumentHandler::displayHelp() {
@@ -623,6 +650,10 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    "
       << "--alwayssplitvars V1,V2,..    Comma separated list of variable names to be always considered for splitting."
       << std::endl;
+  std::cout << "    "
+      << "--regcoef r1,r2,..            Comma separated list of regularization coefficients (one for all variables or one for each variable)."
+      << std::endl;
+  std::cout << "    " << "--usedepth                    Use node depth for regularization." << std::endl;
   std::cout << "    " << "--skipoob                     Skip computation of OOB error." << std::endl;
   std::cout << "    " << "--nthreads N                  Set number of parallel threads to N." << std::endl;
   std::cout << "    " << "                              (Default: Number of CPUs available)" << std::endl;

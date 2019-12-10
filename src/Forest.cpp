@@ -45,7 +45,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     std::string status_variable_name, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, uint max_depth, std::vector<double> coef_reg,
+    PredictionType prediction_type, uint num_random_splits, uint max_depth, const std::vector<double>& coef_reg,
     bool use_depth) {
 
   this->verbose_out = verbose_out;
@@ -140,7 +140,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
     bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
     std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
-    uint num_random_splits, bool order_snps, uint max_depth, std::vector<double> coef_reg, bool use_depth) {
+    uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& coef_reg, bool use_depth) {
 
   this->verbose_out = verbose_out;
 
@@ -182,7 +182,7 @@ void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
     bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
     double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
-    uint max_depth, std::vector<double> coef_reg, bool use_depth) {
+    uint max_depth, const std::vector<double>& coef_reg, bool use_depth) {
 
   // Initialize data with memmode
   this->data = std::move(input_data);
@@ -268,6 +268,12 @@ void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint
 
   // Set all variables to not used
   if (coef_reg.size() > 0) {
+    if (coef_reg.size() == 1 && num_independent_variables > 1) {
+      double single_coef_reg = coef_reg[0];
+      this->coef_reg.resize(num_independent_variables, single_coef_reg);
+    } else if (coef_reg.size() != num_independent_variables) {
+      throw std::runtime_error("Use 1 or p (the number of predictor variables) regularization coefficients.");
+    }
     split_varIDs_used.resize(num_independent_variables, false);
   }
 }
