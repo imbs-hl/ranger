@@ -105,6 +105,9 @@ protected:
 
   void regularize(double& decrease, size_t varID) {
     if (regularization) {
+      if (importance_mode == IMP_GINI_CORRECTED) {
+        varID = data->getUnpermutedVarID(varID);
+      }
       if ((*regularization_factor)[varID] != 1) {
         if (!(*split_varIDs_used)[varID]) {
           if (regularization_usedepth) {
@@ -119,6 +122,9 @@ protected:
 
   void regularize_negative(double& decrease, size_t varID) {
       if (regularization) {
+        if (importance_mode == IMP_GINI_CORRECTED) {
+          varID = data->getUnpermutedVarID(varID);
+        }
         if ((*regularization_factor)[varID] != 1) {
           if (!(*split_varIDs_used)[varID]) {
             if (regularization_usedepth) {
