@@ -41,7 +41,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth);
+      uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth, std::vector<bool>* split_varIDs_used);
 
   virtual void allocateMemory() = 0;
 
@@ -103,6 +103,50 @@ protected:
 
   virtual void cleanUpInternal() = 0;
 
+  void regularize(double& decrease, size_t varID) {
+    if (regularization) {
+      if (importance_mode == IMP_GINI_CORRECTED) {
+        varID = data->getUnpermutedVarID(varID);
+      }
+      if ((*regularization_factor)[varID] != 1) {
+        if (!(*split_varIDs_used)[varID]) {
+          if (regularization_usedepth) {
+            decrease *= std::pow((*regularization_factor)[varID], depth + 1);
+          } else {
+            decrease *= (*regularization_factor)[varID];
+          }
+        }
+      }
+    }
+  }
+
+  void regularizeNegative(double& decrease, size_t varID) {
+      if (regularization) {
+        if (importance_mode == IMP_GINI_CORRECTED) {
+          varID = data->getUnpermutedVarID(varID);
+        }
+        if ((*regularization_factor)[varID] != 1) {
+          if (!(*split_varIDs_used)[varID]) {
+            if (regularization_usedepth) {
+              decrease /= std::pow((*regularization_factor)[varID], depth + 1);
+            } else {
+              decrease /= (*regularization_factor)[varID];
+            }
+          }
+        }
+      }
+    }
+
+  void saveSplitVarID(size_t varID) {
+    if (regularization) {
+      if (importance_mode == IMP_GINI_CORRECTED) {
+        (*split_varIDs_used)[data->getUnpermutedVarID(varID)] = true;
+      } else {
+        (*split_varIDs_used)[varID] = true;
+      }
+    }
+  }
+
   uint mtry;
 
   // Number of samples (all samples, not only inbag for this tree)
@@ -159,6 +203,12 @@ protected:
   // Pointer to original data
   const Data* data;
 
+  // Regularization
+  bool regularization;
+  std::vector<double>* regularization_factor;
+  bool regularization_usedepth;
+  std::vector<bool>* split_varIDs_used;
+  
   // Variable importance for all variables
   std::vector<double>* variable_importance;
   ImportanceMode importance_mode;

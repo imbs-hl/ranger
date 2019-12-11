@@ -177,6 +177,10 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
+  
+  // Regularization
+  saveSplitVarID(best_varID);
+
   return false;
 }
 
@@ -198,12 +202,12 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-        possible_split_values, sums_right, n_right);
+            possible_split_values, sums_right, n_right);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-        possible_split_values, sums, counter);
+           possible_split_values, sums, counter);
   }
 }
 
@@ -242,6 +246,9 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     double sum_right = sums_right[i];
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -295,6 +302,9 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
 
     double sum_right = sum_node - sum_left;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -370,6 +380,9 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
     // Sum of squares
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -522,6 +535,10 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
+  
+  // Regularization
+  saveSplitVarID(best_varID);
+
   return false;
 }
 
@@ -597,6 +614,9 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
     double sum_right = sums_right[i];
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -690,6 +710,9 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
 
+    // Regularization
+    regularize(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = splitID;
@@ -731,6 +754,10 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
+
+  // Regularization
+  saveSplitVarID(best_varID);
+
   return false;
 }
 
@@ -848,6 +875,9 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
       continue;
     }
 
+    // Regularization (negative values)
+    regularizeNegative(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
@@ -873,7 +903,13 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
       size_t sampleID = sampleIDs[pos];
       sum_node += data->get_y(sampleID, 0);
     }
-    best_decrease = decrease - sum_node * sum_node / (double) num_samples_node;
+    
+    double impurity_node = (sum_node * sum_node / (double) num_samples_node);
+
+    // Account for the regularization
+    regularize(impurity_node, varID);
+    
+    best_decrease = decrease - impurity_node;
   }
 
   // No variable importance for no split variables

@@ -146,6 +146,9 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
       addImpurityImportance(nodeID, best_varID, best_decrease);
     }
 
+    // Regularization
+    saveSplitVarID(best_varID);
+
     return false;
   }
 }
@@ -390,6 +393,9 @@ void TreeSurvival::findBestSplitValueLogRank(size_t nodeID, size_t varID, double
       logrank = fabs(numerator / sqrt(denominator_squared));
     }
 
+    // Regularization
+    regularize(logrank, varID);
+
     if (logrank > best_logrank) {
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
@@ -492,6 +498,9 @@ void TreeSurvival::findBestSplitValueLogRankUnordered(size_t nodeID, size_t varI
       logrank = fabs(numerator / sqrt(denominator_squared));
     }
 
+    // Regularization
+    regularize(logrank, varID);
+
     if (logrank > best_logrank) {
       best_value = splitID;
       best_varID = varID;
@@ -555,6 +564,10 @@ void TreeSurvival::findBestSplitValueAUC(size_t nodeID, size_t varID, double& be
       continue;
     } else {
       double auc = fabs((num_count[i] / 2) / num_total[i] - 0.5);
+
+      // Regularization
+      regularize(auc, varID);
+
       if (auc > best_auc) {
         best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
         best_varID = varID;
@@ -680,6 +693,9 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
       addImpurityImportance(nodeID, best_varID, best_decrease);
     }
 
+    // Regularization
+    saveSplitVarID(best_varID);
+
     return false;
   }
 }
@@ -756,6 +772,9 @@ void TreeSurvival::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, dou
     if (denominator_squared != 0) {
       logrank = fabs(numerator / sqrt(denominator_squared));
     }
+
+    // Regularization
+    regularize(logrank, varID);
 
     if (logrank > best_logrank) {
       best_value = possible_split_values[i];
@@ -881,6 +900,9 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
     if (denominator_squared != 0) {
       logrank = fabs(numerator / sqrt(denominator_squared));
     }
+
+    // Regularization
+    regularize(logrank, varID);
 
     if (logrank > best_logrank) {
       best_value = splitID;

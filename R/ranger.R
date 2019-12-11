@@ -65,6 +65,10 @@
 ##' See Nembrini et al. (2018) for details.
 ##' This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 ##'
+##' Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
+##' If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
+##' If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.
+##'
 ##' For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 ##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
 ##' Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
@@ -103,6 +107,8 @@
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
+##' @param regularization.factor Regularization factor (gain penalization), either a vector of length p or one value for all variables.
+##' @param regularization.usedepth Consider the depth in regularization. 
 ##' @param local.importance Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
@@ -193,6 +199,7 @@
 ##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
 ##'   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{https://doi.org/10.1198/106186008X344522}.
 ##'   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
+##'   \item Deng & Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. \url{https://doi.org/10.1109/IJCNN.2012.6252640}.
 ##'   }
 ##' @seealso \code{\link{predict.ranger}}
 ##' @useDynLib ranger, .registration = TRUE
@@ -210,7 +217,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
-                   local.importance = FALSE,
+                   local.importance = FALSE, 
+                   regularization.factor = 1, regularization.usedepth = FALSE,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
@@ -514,6 +522,37 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
+  # Regularization
+  if (all(regularization.factor == 1)) {
+    regularization.factor <-  c(0, 0)
+    use.regularization.factor <- FALSE
+  } else {
+    # Deactivation of paralellization
+    if (num.threads != 1) {
+      num.threads <- 1
+      warning("Paralellization deactivated (regularization used).")
+    }
+    use.regularization.factor <- TRUE
+  } 
+  
+  if (use.regularization.factor) {
+    # A few checkings on the regularization coefficients
+    if (max(regularization.factor) > 1) {
+      stop("The regularization coefficients cannot be greater than 1.")
+    }
+    if (max(regularization.factor) <= 0) {
+      stop("The regularization coefficients cannot be smaller than 0.")
+    }
+    p <- length(all.independent.variable.names)
+    if (length(regularization.factor) != 1 && length(regularization.factor) != p) {
+      stop("You must use 1 or p (the number of predictor variables)
+      regularization coefficients.")
+    }
+    if (length(regularization.factor) == 1) {
+      regularization.factor = rep(regularization.factor, p)
+    }
+  }
+  
   ## Importance mode
   if (is.null(importance) || importance == "none") {
     importance.mode <- 0
@@ -700,6 +739,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (minprop < 0 || minprop > 0.5) {
     stop("Error: Invalid value for minprop, please give a value between 0 and 0.5.")
   }
+  if (splitrule == "maxstat" & use.regularization.factor) {
+    stop("Error: Regularization cannot be used with 'maxstat' splitrule.")
+  }
 
   ## Extra trees
   if (!is.numeric(num.random.splits) || num.random.splits < 1) {
@@ -810,7 +852,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag)
+                      inbag, use.inbag, 
+                      regularization.factor, use.regularization.factor, regularization.usedepth)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

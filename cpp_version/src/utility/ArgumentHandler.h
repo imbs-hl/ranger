@@ -82,6 +82,8 @@ public:
   bool write;
   TreeType treetype;
   uint seed;
+  std::vector<double> regcoef;
+  bool usedepth;
 
 private:
   // Display messages

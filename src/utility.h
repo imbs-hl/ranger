@@ -334,12 +334,20 @@ std::string beautifyTime(uint seconds);
 size_t roundToNextMultiple(size_t value, uint multiple);
 
 /**
- * Split string in parts separated by character.
+ * Split string in string parts separated by character.
  * @param result Splitted string
  * @param input String to be splitted
  * @param split_char Char to separate parts
  */
 void splitString(std::vector<std::string>& result, const std::string& input, char split_char);
+
+/**
+ * Split string in double parts separated by character.
+ * @param result Splitted string
+ * @param input String to be splitted
+ * @param split_char Char to separate parts
+ */
+void splitString(std::vector<double>& result, const std::string& input, char split_char);
 
 /**
  * Create numbers from 0 to n_all-1, shuffle and split in two parts.

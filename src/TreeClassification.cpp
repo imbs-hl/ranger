@@ -197,6 +197,10 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
+
+  // Regularization
+  saveSplitVarID(best_varID);
+
   return false;
 }
 
@@ -286,6 +290,9 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
     }
 
+    // Regularization
+    regularize(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
@@ -368,6 +375,9 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       // Decrease of impurity
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     }
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -468,6 +478,9 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
       decrease = sum_left / (double) n_left + sum_right / (double) n_right;
     }
 
+    // Regularization
+    regularize(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = splitID;
@@ -518,6 +531,10 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
   }
+
+  // Regularization
+  saveSplitVarID(best_varID);
+
   return false;
 }
 
@@ -604,6 +621,9 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
 
     // Decrease of impurity
     double decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -708,6 +728,9 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
     // Decrease of impurity
     double decrease = sum_left / (double) n_left + sum_right / (double) n_right;
 
+    // Regularization
+    regularize(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = splitID;
@@ -734,7 +757,13 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     for (size_t i = 0; i < class_counts.size(); ++i) {
       sum_node += (*class_weights)[i] * class_counts[i] * class_counts[i];
     }
-    best_decrease = decrease - sum_node / (double) num_samples_node;
+
+    double impurity_node = (sum_node / (double) num_samples_node);
+
+    // Account for the regularization
+    regularize(impurity_node, varID);
+
+    best_decrease = decrease - impurity_node;
   }
 
   // No variable importance for no split variables

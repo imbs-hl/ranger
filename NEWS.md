@@ -1,4 +1,7 @@
 
+##### Version 0.11.8
+* Add regularization
+
 ##### Version 0.11.7
 * Add local variable importance 
 
