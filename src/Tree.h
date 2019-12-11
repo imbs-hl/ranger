@@ -108,9 +108,9 @@ protected:
       if ((*regularization_factor)[varID] != 1) {
         if (!(*split_varIDs_used)[varID]) {
           if (regularization_usedepth) {
-            decrease = decrease * std::pow((*regularization_factor)[varID], depth + 1);
+            decrease *= std::pow((*regularization_factor)[varID], depth + 1);
           } else {
-            decrease = decrease * (*regularization_factor)[varID];
+            decrease *= (*regularization_factor)[varID];
           }
         }
       }
@@ -122,9 +122,9 @@ protected:
         if ((*regularization_factor)[varID] != 1) {
           if (!(*split_varIDs_used)[varID]) {
             if (regularization_usedepth) {
-              decrease = decrease / std::pow((*regularization_factor)[varID], depth + 1);
+              decrease /= std::pow((*regularization_factor)[varID], depth + 1);
             } else {
-              decrease = decrease / (*regularization_factor)[varID];
+              decrease /= (*regularization_factor)[varID];
             }
           }
         }

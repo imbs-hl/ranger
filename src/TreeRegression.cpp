@@ -913,15 +913,7 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
     double impurity_node = (sum_node * sum_node / (double) num_samples_node);
 
     // Account for the regularization
-    if (regularization) {
-      if (!(*split_varIDs_used)[varID]) {
-        if (regularization_usedepth) {
-          impurity_node *= std::pow((*regularization_factor)[varID], depth + 1);
-        } else {
-          impurity_node *= (*regularization_factor)[varID];
-        }
-      }
-    }
+    regularize(impurity_node, varID);
     
     best_decrease = decrease - impurity_node;
   }
