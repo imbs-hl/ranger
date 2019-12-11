@@ -37,6 +37,12 @@ test_that("same results with 1 and p regularization coefficients, classification
   expect_equal(rf1$prediction.error, rf2$prediction.error)
 })
 
+test_that("Error if maxstat splitrule and regularization", {
+  expect_error(ranger(y ~ ., dat_reg, num.trees = 5, splitrule = "maxstat", num.threads = 1, 
+                      regularization = list(coef.reg = .0001, use.depth = TRUE)), 
+               "Error: Regularization cannot be used with 'maxstat' splitrule\\.")
+})
+
 # Regression
 test_that("Fewer variables used with regularization, regression", {
   rf_noreg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4)
@@ -54,17 +60,10 @@ test_that("Fewer variables used with regularization, regression extratrees", {
             get_num_splitvars(rf_noreg))
 })
 
-test_that("Fewer variables used with regularization, regression maxstat", {
-  rf_noreg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "maxstat")
-  rf_reg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "maxstat", num.threads = 1, 
-                   regularization = list(coef.reg = .0001, use.depth = TRUE))
-  expect_lt(get_num_splitvars(rf_reg), 
-            get_num_splitvars(rf_noreg))
-})
-
 test_that("Fewer variables used with regularization, regression beta", {
-  rf_noreg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta")
-  rf_reg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta", num.threads = 1, 
+  dat <- data.frame(y = rbinom(n, 1, .5), x = replicate(p, runif(n)))
+  rf_noreg <- ranger(y ~ ., dat, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta")
+  rf_reg <- ranger(y ~ ., dat, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta", num.threads = 1, 
                    regularization = list(coef.reg = .0001, use.depth = TRUE))
   expect_lt(get_num_splitvars(rf_reg), 
             get_num_splitvars(rf_noreg))
@@ -144,12 +143,3 @@ test_that("Fewer variables used with regularization, survival C", {
   expect_lt(get_num_splitvars(rf_reg), 
             get_num_splitvars(rf_noreg))
 })
-
-test_that("Fewer variables used with regularization, survival maxstat", {
-  rf_noreg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "maxstat")
-  rf_reg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "maxstat", num.threads = 1, 
-                   regularization = list(coef.reg = .0001, use.depth = TRUE))
-  expect_lt(get_num_splitvars(rf_reg), 
-            get_num_splitvars(rf_noreg))
-})
-
