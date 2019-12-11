@@ -147,7 +147,7 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
     }
 
     // Regularization
-    if (regularization_factor->size() > 0) {
+    if (regularization) {
       (*split_varIDs_used)[best_varID] = true;
     }
 
@@ -696,7 +696,7 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
     }
 
     // Regularization
-    if (regularization_factor->size() > 0) {
+    if (regularization) {
       (*split_varIDs_used)[best_varID] = true;
     }
 

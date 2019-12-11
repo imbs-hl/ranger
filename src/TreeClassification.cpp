@@ -199,7 +199,7 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Regularization
-  if (regularization_factor->size() > 0) {
+  if (regularization) {
     (*split_varIDs_used)[best_varID] = true;
   }
 
@@ -535,7 +535,7 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   }
 
   // Regularization
-  if (regularization_factor->size() > 0) {
+  if (regularization) {
     (*split_varIDs_used)[best_varID] = true;
   }
 
@@ -765,7 +765,7 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     double impurity_node = (sum_node / (double) num_samples_node);
 
     // Account for the regularization
-    if (regularization_factor->size() > 0) {
+    if (regularization) {
       if (!(*split_varIDs_used)[varID]) {
         if (regularization_usedepth) {
           impurity_node *= std::pow((*regularization_factor)[varID], depth + 1);
