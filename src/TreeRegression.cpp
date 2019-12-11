@@ -250,17 +250,7 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
 
     // Regularization
-    if (coef_reg->size() > 0) {
-      if ((*coef_reg)[varID] != 1) {
-        if (!(*split_varIDs_used)[varID]) {
-          if (use_depth) {
-            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
-          } else {
-            decrease = decrease * (*coef_reg)[varID];
-          }
-        }
-      }
-    }
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -316,17 +306,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
 
     // Regularization
-    if (coef_reg->size() > 0) {
-      if ((*coef_reg)[varID] != 1) {
-        if (!(*split_varIDs_used)[varID]) {
-          if (use_depth) {
-            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
-          } else {
-            decrease = decrease * (*coef_reg)[varID];
-          }
-        }
-      }
-    }
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -402,6 +382,9 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
     // Sum of squares
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -555,6 +538,11 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
   
+  // Regularization
+  if (coef_reg->size() > 0) {
+    (*split_varIDs_used)[best_varID] = true;
+  }
+
   return false;
 }
 
@@ -630,6 +618,9 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
     double sum_right = sums_right[i];
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -723,6 +714,9 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
 
+    // Regularization
+    regularize(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = splitID;
@@ -764,6 +758,12 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
+
+  // Regularization
+  if (coef_reg->size() > 0) {
+    (*split_varIDs_used)[best_varID] = true;
+  }
+
   return false;
 }
 
@@ -880,6 +880,9 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     if (std::isnan(decrease)) {
       continue;
     }
+
+    // Regularization (negative values)
+    regularize_negative(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {

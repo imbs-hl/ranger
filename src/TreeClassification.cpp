@@ -293,17 +293,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     }
 
     // Regularization
-    if (coef_reg->size() > 0) {
-      if ((*coef_reg)[varID] != 1) {
-        if (!(*split_varIDs_used)[varID]) {
-          if (use_depth) {
-            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
-          } else {
-            decrease = decrease * (*coef_reg)[varID];
-          }
-        }
-      }
-    }
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -389,17 +379,7 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
     }
 
     // Regularization
-    if (coef_reg->size() > 0) {
-      if ((*coef_reg)[varID] != 1) {
-        if (!(*split_varIDs_used)[varID]) {
-          if (use_depth) {
-            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
-          } else {
-            decrease = decrease * (*coef_reg)[varID];
-          }
-        }
-      }
-    }
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -499,6 +479,9 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
       // Decrease of impurity
       decrease = sum_left / (double) n_left + sum_right / (double) n_right;
     }
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
@@ -643,6 +626,9 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
     // Decrease of impurity
     double decrease = sum_left / (double) n_left + sum_right / (double) n_right[i];
 
+    // Regularization
+    regularize(decrease, varID);
+
     // If better than before, use this
     if (decrease > best_decrease) {
       best_value = possible_split_values[i];
@@ -745,6 +731,9 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
     // Decrease of impurity
     double decrease = sum_left / (double) n_left + sum_right / (double) n_right;
+
+    // Regularization
+    regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {

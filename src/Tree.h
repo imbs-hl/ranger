@@ -103,6 +103,34 @@ protected:
 
   virtual void cleanUpInternal() = 0;
 
+  void regularize(double& decrease, size_t varID) {
+    if (coef_reg->size() > 0) {
+      if ((*coef_reg)[varID] != 1) {
+        if (!(*split_varIDs_used)[varID]) {
+          if (use_depth) {
+            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
+          } else {
+            decrease = decrease * (*coef_reg)[varID];
+          }
+        }
+      }
+    }
+  }
+
+  void regularize_negative(double& decrease, size_t varID) {
+      if (coef_reg->size() > 0) {
+        if ((*coef_reg)[varID] != 1) {
+          if (!(*split_varIDs_used)[varID]) {
+            if (use_depth) {
+              decrease = decrease / std::pow((*coef_reg)[varID], depth + 1);
+            } else {
+              decrease = decrease / (*coef_reg)[varID];
+            }
+          }
+        }
+      }
+    }
+
   uint mtry;
 
   // Number of samples (all samples, not only inbag for this tree)
