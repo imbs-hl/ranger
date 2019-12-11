@@ -159,6 +159,10 @@ It is a modified version of the method by Sandri & Zuccolotto (2008), which is f
 See Nembrini et al. (2018) for details.
 This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 
+Regularization works by penalizing new variables by multiplying the splitting criterion by a factor. 
+If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
+If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.
+
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
 Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
