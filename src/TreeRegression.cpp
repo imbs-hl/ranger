@@ -179,9 +179,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   }
   
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }
@@ -539,9 +537,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   }
   
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }
@@ -760,9 +756,7 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }
@@ -882,7 +876,7 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     }
 
     // Regularization (negative values)
-    regularize_negative(decrease, varID);
+    regularizeNegative(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {

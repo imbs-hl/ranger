@@ -199,9 +199,7 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }
@@ -535,9 +533,7 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   }
 
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }

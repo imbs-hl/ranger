@@ -199,9 +199,7 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   }
 
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }
@@ -536,9 +534,7 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   }
 
   // Regularization
-  if (regularization) {
-    (*split_varIDs_used)[best_varID] = true;
-  }
+  saveSplitVarID(best_varID);
 
   return false;
 }

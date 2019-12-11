@@ -120,7 +120,7 @@ protected:
     }
   }
 
-  void regularize_negative(double& decrease, size_t varID) {
+  void regularizeNegative(double& decrease, size_t varID) {
       if (regularization) {
         if (importance_mode == IMP_GINI_CORRECTED) {
           varID = data->getUnpermutedVarID(varID);
@@ -136,6 +136,16 @@ protected:
         }
       }
     }
+
+  void saveSplitVarID(size_t varID) {
+    if (regularization) {
+      if (importance_mode == IMP_GINI_CORRECTED) {
+        (*split_varIDs_used)[data->getUnpermutedVarID(varID)] = true;
+      } else {
+        (*split_varIDs_used)[varID] = true;
+      }
+    }
+  }
 
   uint mtry;
 
