@@ -41,7 +41,7 @@ importance <- function(x, ...)  UseMethod("importance")
 ##' @aliases importance
 ##' @export 
 importance.ranger <- function(x, ...) {
-  if (class(x) != "ranger") {
+  if (!inherits(x, "ranger")) {
     stop("Object ist no ranger object.")
   }
   if (is.null(x$variable.importance) || length(x$variable.importance) < 1) {
@@ -96,7 +96,7 @@ importance.ranger <- function(x, ...) {
 ##' @export 
 importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutations = 100, formula = NULL, data = NULL, ...) {
   method <- match.arg(method)
-  if (class(x) != "ranger" & class(x) != "holdoutRF") {
+  if (!inherits(x, c("ranger", "holdoutRF"))) {
     stop("Object is no ranger or holdoutRF object.")
   }
   if (x$importance.mode == "none" || is.null(x$variable.importance) || length(x$variable.importance) < 1) {
@@ -107,7 +107,7 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     if (x$importance.mode == "impurity") {
       stop("Impurity variable importance found. Please use (hold-out) permutation importance or corrected impurity importance to use this method.")
     }
-    if (class(x) != "holdoutRF" && x$importance.mode == "permutation") {
+    if (!inherits(x, "holdoutRF") && x$importance.mode == "permutation") {
       warning("Permutation variable importance found, inaccurate p-values. Please use hold-out permutation importance or corrected impurity importance to use this method.")
     }
     if (x$treetype != "Classification") {
@@ -131,7 +131,7 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
       warning("Only few negative importance values found, inaccurate p-values. Consider the 'altmann' approach.")
     }
   } else if (method == "altmann") {
-    if (class(x) != "ranger") {
+    if (!inherits(x, "ranger")) {
       stop("Altmann method not available for holdoutRF objects.")
     }
     if (is.null(formula) || is.null(data)) {

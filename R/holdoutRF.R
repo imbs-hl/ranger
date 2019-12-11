@@ -49,7 +49,7 @@ holdoutRF <- function(...) {
   }
   
   ## Split data
-  if ("gwaa.data" %in% class(data)) {
+  if (inherits(data, "gwaa.data")) {
     n <- nrow(data@phdata) 
   } else {
     n <- nrow(data)

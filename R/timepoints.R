@@ -40,7 +40,7 @@ timepoints <- function(x, ...)  UseMethod("timepoints")
 ##' @author Marvin N. Wright
 ##' @export
 timepoints.ranger.prediction <- function(x, ...) {
-  if (class(x) != "ranger.prediction") {
+  if (!inherits(x, "ranger.prediction")) {
     stop("Object ist no ranger.prediction object.")
   }
   if (x$treetype != "Survival") {
@@ -64,7 +64,7 @@ timepoints.ranger.prediction <- function(x, ...) {
 ##' @aliases timepoints
 ##' @export
 timepoints.ranger <- function(x, ...) {
-  if (class(x) != "ranger") {
+  if (!inherits(x, "ranger")) {
     stop("Object ist no ranger object.")
   }
   if (x$treetype != "Survival") {

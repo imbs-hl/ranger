@@ -76,7 +76,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   verbose = TRUE, inbag.counts = NULL, ...) {
 
   ## GenABEL GWA data
-  if ("gwaa.data" %in% class(data)) {
+  if (inherits(data, "gwaa.data")) {
     snp.names <- snp.names(data)
     snp.data <- data@gtdata@gtps@.Data
     data <- data@phdata[, -1, drop = FALSE]
@@ -87,7 +87,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Check forest argument
-  if (class(object) != "ranger.forest") {
+  if (!inherits(object, "ranger.forest")) {
     stop("Error: Invalid class of input object.")
   } else {
     forest <- object
@@ -250,7 +250,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   regularization.usedepth <- FALSE
   
   ## Use sparse matrix
-  if ("dgCMatrix" %in% class(x)) {
+  if (inherits(x, "dgCMatrix")) {
     sparse.x <- x
     x <- matrix(c(0, 0))
     use.sparse.data <- TRUE
