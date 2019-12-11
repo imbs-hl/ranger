@@ -34,7 +34,7 @@ Forest::Forest() :
         false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction( { 1 }), holdout(
         false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(
         DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data { }, overall_prediction_error(
-    NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), use_depth(false), progress(0) {
+    NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), regularization_usedepth(false), progress(0) {
 }
 
 // #nocov start
@@ -45,8 +45,8 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     std::string status_variable_name, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, uint max_depth, const std::vector<double>& coef_reg,
-    bool use_depth) {
+    PredictionType prediction_type, uint num_random_splits, uint max_depth, const std::vector<double>& regularization_factor,
+    bool regularization_usedepth) {
 
   this->verbose_out = verbose_out;
 
@@ -82,7 +82,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   init(memory_mode, loadDataFromFile(input_file), mtry, output_prefix, num_trees, seed, num_threads, importance_mode,
       min_node_size, prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting,
       splitrule, predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type, num_random_splits,
-      false, max_depth, coef_reg, use_depth);
+      false, max_depth, regularization_factor, regularization_usedepth);
 
   if (prediction_mode) {
     loadFromFile(load_forest_filename);
@@ -140,7 +140,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
     bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
     std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
-    uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& coef_reg, bool use_depth) {
+    uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth) {
 
   this->verbose_out = verbose_out;
 
@@ -148,7 +148,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
   init(MEM_DOUBLE, std::move(input_data), mtry, "", num_trees, seed, num_threads, importance_mode, min_node_size,
       prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting, splitrule,
       predict_all, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, order_snps, max_depth,
-      coef_reg, use_depth);
+      regularization_factor, regularization_usedepth);
 
   // Set variables to be always considered for splitting
   if (!always_split_variable_names.empty()) {
@@ -182,7 +182,7 @@ void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
     bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
     double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
-    uint max_depth, const std::vector<double>& coef_reg, bool use_depth) {
+    uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth) {
 
   // Initialize data with memmode
   this->data = std::move(input_data);
@@ -226,8 +226,8 @@ void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint
   this->prediction_type = prediction_type;
   this->num_random_splits = num_random_splits;
   this->max_depth = max_depth;
-  this->coef_reg = coef_reg;
-  this->use_depth = use_depth;
+  this->regularization_factor = regularization_factor;
+  this->regularization_usedepth = regularization_usedepth;
 
   // Set number of samples and variables
   num_samples = data->getNumRows();
@@ -266,14 +266,16 @@ void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint
     data->orderSnpLevels((importance_mode == IMP_GINI_CORRECTED));
   }
 
-  // Set all variables to not used
-  if (coef_reg.size() > 0) {
-    if (coef_reg.size() == 1 && num_independent_variables > 1) {
-      double single_coef_reg = coef_reg[0];
-      this->coef_reg.resize(num_independent_variables, single_coef_reg);
-    } else if (coef_reg.size() != num_independent_variables) {
-      throw std::runtime_error("Use 1 or p (the number of predictor variables) regularization coefficients.");
+  // Regularization
+  if (regularization_factor.size() > 0) {
+    if (regularization_factor.size() == 1 && num_independent_variables > 1) {
+      double single_regularization_factor = regularization_factor[0];
+      this->regularization_factor.resize(num_independent_variables, single_regularization_factor);
+    } else if (regularization_factor.size() != num_independent_variables) {
+      throw std::runtime_error("Use 1 or p (the number of predictor variables) regularization factors.");
     }
+
+    // Set all variables to not used
     split_varIDs_used.resize(num_independent_variables, false);
   }
 }
@@ -476,7 +478,7 @@ void Forest::grow() {
     trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs, &split_select_varIDs,
         tree_split_select_weights, importance_mode, min_node_size, sample_with_replacement, memory_saving_splitting,
         splitrule, &case_weights, tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, holdout,
-        num_random_splits, max_depth, &coef_reg, use_depth, &split_varIDs_used);
+        num_random_splits, max_depth, &regularization_factor, regularization_usedepth, &split_varIDs_used);
   }
 
 // Init variable importance

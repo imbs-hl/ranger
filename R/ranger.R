@@ -103,6 +103,8 @@
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
+##' @param regularization.factor Regularization factor (gain penalization), either a vector of length p or one value for all variables.
+##' @param regularization.usedepth Consider the depth in regularization. 
 ##' @param local.importance Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
@@ -118,7 +120,6 @@
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
 ##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
 ##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
-##' @param regularization A list containing the gain penalisation defined as `coef.reg` (either a vector of lenght p or one value) and the `use.depth` logical argument to define if  the depth should be considered when regularizing the Random Forest.
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
@@ -211,14 +212,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
-                   local.importance = FALSE,
+                   local.importance = FALSE, 
+                   regularization.factor = 1, regularization.usedepth = FALSE,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL, x = NULL, y = NULL, 
-                   regularization = NULL) {
+                   classification = NULL, x = NULL, y = NULL) {
   
   ## By default not in GWAS mode
   snp.data <- as.matrix(0)
@@ -516,42 +517,34 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
-  # Regularization parameters
-  p <- length(all.independent.variable.names)
-  coef.reg <-  c(0, 0)
-  use.coef.reg <- FALSE
-  use.depth <-  FALSE
-  if (!is.null(regularization)) {
+  # Regularization
+  if (all(regularization.factor == 1)) {
+    regularization.factor <-  c(0, 0)
+    use.regularization.factor <- FALSE
+  } else {
     # Deactivation of paralellization
     if (num.threads != 1) {
       num.threads <- 1
       warning("Paralellization deactivated (regularization used).")
     }
-    if ("coef.reg" %in% names(regularization)) {
-      coef.reg <- regularization$coef.reg
-      use.coef.reg <- TRUE
-    } 
-    if ("use.depth" %in% names(regularization)) {
-      use.depth <- regularization$use.depth
-    } else {
-      use.depth <-  FALSE
-    }
+    use.regularization.factor <- TRUE
   } 
   
-  if (use.coef.reg && !is.null(coef.reg)) {
+  if (use.regularization.factor) {
     # A few checkings on the regularization coefficients
-    if (max(coef.reg) > 1) {
+    if (max(regularization.factor) > 1) {
       stop("The regularization coefficients cannot be greater than 1.")
     }
-    if (max(coef.reg) <= 0) {
+    if (max(regularization.factor) <= 0) {
       stop("The regularization coefficients cannot be smaller than 0.")
     }
-    if (length(coef.reg) != 1 && length(coef.reg) != p) {
+    p <- length(all.independent.variable.names)
+    if (length(regularization.factor) != 1 && length(regularization.factor) != p) {
       stop("You must use 1 or p (the number of predictor variables)
       regularization coefficients.")
     }
-    if (length(coef.reg) == 1) {
-      coef.reg = rep(coef.reg, p)
+    if (length(regularization.factor) == 1) {
+      regularization.factor = rep(regularization.factor, p)
     }
   }
   
@@ -741,7 +734,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (minprop < 0 || minprop > 0.5) {
     stop("Error: Invalid value for minprop, please give a value between 0 and 0.5.")
   }
-  if (splitrule == "maxstat" & use.coef.reg) {
+  if (splitrule == "maxstat" & use.regularization.factor) {
     stop("Error: Regularization cannot be used with 'maxstat' splitrule.")
   }
 
@@ -855,7 +848,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      coef.reg, use.coef.reg, use.depth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

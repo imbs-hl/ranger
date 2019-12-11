@@ -41,7 +41,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, std::vector<double>* coef_reg, bool use_depth, std::vector<bool>* split_varIDs_used);
+      uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth, std::vector<bool>* split_varIDs_used);
 
   virtual void allocateMemory() = 0;
 
@@ -104,13 +104,13 @@ protected:
   virtual void cleanUpInternal() = 0;
 
   void regularize(double& decrease, size_t varID) {
-    if (coef_reg->size() > 0) {
-      if ((*coef_reg)[varID] != 1) {
+    if (regularization) {
+      if ((*regularization_factor)[varID] != 1) {
         if (!(*split_varIDs_used)[varID]) {
-          if (use_depth) {
-            decrease = decrease * std::pow((*coef_reg)[varID], depth + 1);
+          if (regularization_usedepth) {
+            decrease = decrease * std::pow((*regularization_factor)[varID], depth + 1);
           } else {
-            decrease = decrease * (*coef_reg)[varID];
+            decrease = decrease * (*regularization_factor)[varID];
           }
         }
       }
@@ -118,13 +118,13 @@ protected:
   }
 
   void regularize_negative(double& decrease, size_t varID) {
-      if (coef_reg->size() > 0) {
-        if ((*coef_reg)[varID] != 1) {
+      if (regularization) {
+        if ((*regularization_factor)[varID] != 1) {
           if (!(*split_varIDs_used)[varID]) {
-            if (use_depth) {
-              decrease = decrease / std::pow((*coef_reg)[varID], depth + 1);
+            if (regularization_usedepth) {
+              decrease = decrease / std::pow((*regularization_factor)[varID], depth + 1);
             } else {
-              decrease = decrease / (*coef_reg)[varID];
+              decrease = decrease / (*regularization_factor)[varID];
             }
           }
         }
@@ -188,8 +188,9 @@ protected:
   const Data* data;
 
   // Regularization
-  std::vector<double>* coef_reg;
-  bool use_depth;
+  bool regularization;
+  std::vector<double>* regularization_factor;
+  bool regularization_usedepth;
   std::vector<bool>* split_varIDs_used;
   
   // Variable importance for all variables

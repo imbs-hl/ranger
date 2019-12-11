@@ -12,11 +12,12 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, local.importance = FALSE,
+  regularization.factor = 1, regularization.usedepth = FALSE,
   keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
   quantreg = FALSE, oob.error = TRUE, num.threads = NULL,
   save.memory = FALSE, verbose = TRUE, seed = NULL,
   dependent.variable.name = NULL, status.variable.name = NULL,
-  classification = NULL, x = NULL, y = NULL, regularization = NULL)
+  classification = NULL, x = NULL, y = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -63,6 +64,10 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{local.importance}{Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.}
 
+\item{regularization.factor}{Regularization factor (gain penalization), either a vector of length p or one value for all variables.}
+
+\item{regularization.usedepth}{Consider the depth in regularization.}
+
 \item{keep.inbag}{Save how often observations are in-bag in each tree.}
 
 \item{inbag}{Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.}
@@ -90,8 +95,6 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
 
 \item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
-
-\item{regularization}{A list containing the gain penalisation defined as `coef.reg` (either a vector of lenght p or one value) and the `use.depth` logical argument to define if  the depth should be considered when regularizing the Random Forest.}
 }
 \value{
 Object of class \code{ranger} with elements

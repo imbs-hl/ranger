@@ -179,7 +179,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   }
   
   // Regularization
-  if (coef_reg->size() > 0) {
+  if (regularization_factor->size() > 0) {
     (*split_varIDs_used)[best_varID] = true;
   }
 
@@ -539,7 +539,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   }
   
   // Regularization
-  if (coef_reg->size() > 0) {
+  if (regularization_factor->size() > 0) {
     (*split_varIDs_used)[best_varID] = true;
   }
 
@@ -760,7 +760,7 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Regularization
-  if (coef_reg->size() > 0) {
+  if (regularization_factor->size() > 0) {
     (*split_varIDs_used)[best_varID] = true;
   }
 
@@ -913,12 +913,12 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
     double impurity_node = (sum_node * sum_node / (double) num_samples_node);
 
     // Account for the regularization
-    if (coef_reg->size() > 0) {
+    if (regularization_factor->size() > 0) {
       if (!(*split_varIDs_used)[varID]) {
-        if (use_depth) {
-          impurity_node *= std::pow((*coef_reg)[varID], depth + 1);
+        if (regularization_usedepth) {
+          impurity_node *= std::pow((*regularization_factor)[varID], depth + 1);
         } else {
-          impurity_node *= (*coef_reg)[varID];
+          impurity_node *= (*regularization_factor)[varID];
         }
       }
     }
