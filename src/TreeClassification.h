@@ -61,8 +61,8 @@ private:
       double& best_decrease);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, size_t num_classes,
       const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
-      double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& class_counts_right,
-      std::vector<size_t>& n_right);
+      double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& counter_per_class,
+      std::vector<size_t>& counter);
   void findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes,
       const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
       double& best_decrease);

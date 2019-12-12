@@ -196,8 +196,7 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     return;
   }
 
-  // -1 because no split possible at largest value
-  const size_t num_splits = possible_split_values.size() - 1;
+  const size_t num_splits = possible_split_values.size();
   if (memory_saving_splitting) {
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
@@ -213,45 +212,46 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
 
 void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
     double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-    std::vector<double>& sums_right, std::vector<size_t>& n_right) {
-  // -1 because no split possible at largest value
-  const size_t num_splits = possible_split_values.size() - 1;
+    std::vector<double>& sums, std::vector<size_t>& counter) {
 
-  // Sum in right child and possbile split
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get_x(sampleID, varID);
-    double response = data->get_y(sampleID, 0);
+    size_t idx = std::lower_bound(possible_split_values.begin(), possible_split_values.end(),
+        data->get_x(sampleID, varID)) - possible_split_values.begin();
 
-    // Count samples until split_value reached
-    for (size_t i = 0; i < num_splits; ++i) {
-      if (value > possible_split_values[i]) {
-        ++n_right[i];
-        sums_right[i] += response;
-      } else {
-        break;
-      }
-    }
+    sums[idx] += data->get_y(sampleID, 0);
+    ++counter[idx];
   }
 
-  // Compute decrease of impurity for each possible split
-  for (size_t i = 0; i < num_splits; ++i) {
+  size_t n_left = 0;
+  double sum_left = 0;
 
-    // Stop if one child empty
-    size_t n_left = num_samples_node - n_right[i];
-    if (n_left == 0 || n_right[i] == 0) {
+  // Compute decrease of impurity for each split
+  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
+
+    // Stop if nothing here
+    if (counter[i] == 0) {
       continue;
     }
 
-    double sum_right = sums_right[i];
-    double sum_left = sum_node - sum_right;
-    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right[i];
+    n_left += counter[i];
+    sum_left += sums[i];
+
+    // Stop if right child empty
+    size_t n_right = num_samples_node - n_left;
+    if (n_right == 0) {
+      break;
+    }
+
+    double sum_right = sum_node - sum_left;
+    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
 
     // Regularization
     regularize(decrease, varID);
 
     // If better than before, use this
     if (decrease > best_decrease) {
+      // Use mid-point split
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
