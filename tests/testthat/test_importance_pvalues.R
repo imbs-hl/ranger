@@ -53,10 +53,9 @@ test_that("Importance p-values Janitza: error if Gini importance", {
 
 test_that("Importance p-values Janitza: error if no unimportant variables", {
   # Error only when all importance values positive
-  if (all(rf_p0$variable.importance > 0)) {
-    expect_warning(expect_error(
-      importance_pvalues(rf_p0, method = "janitza")))
-  }
+  skip_if(any(rf_p0$variable.importance <= 0))
+
+  expect_warning(expect_error(importance_pvalues(rf_p0, method = "janitza")))
 })
 
 test_that("Importance p-values Janitza: warning for regression", {
