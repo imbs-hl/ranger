@@ -72,7 +72,7 @@ private:
       double& best_value, size_t& best_varID, double& best_decrease);
   void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-      std::vector<double>& sums, std::vector<size_t>& counter);
+      std::vector<double>& sums_right, std::vector<size_t>& n_right);
   void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
 
