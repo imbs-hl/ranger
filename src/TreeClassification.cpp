@@ -601,7 +601,7 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
   std::vector<size_t> class_counts_left(num_classes);
 
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
+  for (size_t i = 0; i < possible_split_values.size(); ++i) {
 
     // Stop if nothing here
     if (counter[i] == 0) {

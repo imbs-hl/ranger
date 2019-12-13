@@ -597,7 +597,7 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
   double sum_left = 0;
 
    // Compute decrease of impurity for each split
-  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
+  for (size_t i = 0; i < possible_split_values.size(); ++i) {
 
     // Stop if nothing here
     if (counter[i] == 0) {
