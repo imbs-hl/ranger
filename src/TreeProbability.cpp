@@ -593,8 +593,10 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
     size_t idx = std::lower_bound(possible_split_values.begin(), possible_split_values.end(),
         data->get_x(sampleID, varID)) - possible_split_values.begin();
 
-    ++counter_per_class[idx * num_classes + sample_classID];
-    ++counter[idx];
+    if (idx < counter.size()) {
+      ++counter_per_class[idx * num_classes + sample_classID];
+      ++counter[idx];
+    }
   }
 
   size_t n_left = 0;
@@ -616,36 +618,19 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
       break;
     }
 
-    double decrease;
-    if (splitrule == HELLINGER) {
-      for (size_t j = 0; j < num_classes; ++j) {
-        class_counts_left[j] += counter_per_class[i * num_classes + j];
-      }
+    // Sum of squares
+    double sum_left = 0;
+    double sum_right = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      class_counts_left[j] += counter_per_class[i * num_classes + j];
+      size_t class_count_right = class_counts[j] - class_counts_left[j];
 
-      // TPR is number of outcome 1s in one node / total number of 1s
-      // FPR is number of outcome 0s in one node / total number of 0s
-      double tpr = (double) (class_counts[1] - class_counts_left[1]) / (double) class_counts[1];
-      double fpr = (double) (class_counts[0] - class_counts_left[0]) / (double) class_counts[0];
-
-      // Decrease of impurity
-      double a1 = sqrt(tpr) - sqrt(fpr);
-      double a2 = sqrt(1 - tpr) - sqrt(1 - fpr);
-      decrease = sqrt(a1 * a1 + a2 * a2);
-    } else {
-      // Sum of squares
-      double sum_left = 0;
-      double sum_right = 0;
-      for (size_t j = 0; j < num_classes; ++j) {
-        class_counts_left[j] += counter_per_class[i * num_classes + j];
-        size_t class_count_right = class_counts[j] - class_counts_left[j];
-
-        sum_left += (*class_weights)[j] * class_counts_left[j] * class_counts_left[j];
-        sum_right += (*class_weights)[j] * class_count_right * class_count_right;
-      }
-
-      // Decrease of impurity
-      decrease = sum_right / (double) n_right + sum_left / (double) n_left;
+      sum_left += (*class_weights)[j] * class_counts_left[j] * class_counts_left[j];
+      sum_right += (*class_weights)[j] * class_count_right * class_count_right;
     }
+
+    // Decrease of impurity
+    double decrease = sum_right / (double) n_right + sum_left / (double) n_left;
 
     // Regularization
     regularize(decrease, varID);
