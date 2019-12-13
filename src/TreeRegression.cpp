@@ -589,8 +589,10 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
     size_t idx = std::lower_bound(possible_split_values.begin(), possible_split_values.end(),
         data->get_x(sampleID, varID)) - possible_split_values.begin();
 
-    sums[idx] += data->get_y(sampleID, 0);
-    ++counter[idx];
+    if (idx < counter.size()) {
+      sums[idx] += data->get_y(sampleID, 0);
+      ++counter[idx];
+    }
   }
 
   size_t n_left = 0;
