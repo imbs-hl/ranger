@@ -1,4 +1,7 @@
 
+##### Version 0.12.0
+* New CRAN version
+
 ##### Version 0.11.8
 * Add regularization
 * Faster computation (in some cases)
