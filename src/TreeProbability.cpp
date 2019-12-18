@@ -674,7 +674,7 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
 
     // Draw random subsets, sample all partitions with equal probability
     if (indices_in_node.size() > 1) {
-      size_t num_partitions = (2 << (indices_in_node.size() - 1)) - 2; // 2^n-2 (don't allow full or empty)
+      size_t num_partitions = (2ULL << (indices_in_node.size() - 1ULL)) - 2ULL; // 2^n-2 (don't allow full or empty)
       std::uniform_int_distribution<size_t> udist(1, num_partitions);
       size_t splitID_in_node = udist(random_number_generator);
       for (size_t j = 0; j < indices_in_node.size(); ++j) {
@@ -684,7 +684,7 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
       }
     }
     if (indices_out_node.size() > 1) {
-      size_t num_partitions = (2 << (indices_out_node.size() - 1)) - 1; // 2^n-1 (allow full or empty)
+      size_t num_partitions = (2ULL << (indices_out_node.size() - 1ULL)) - 1ULL; // 2^n-1 (allow full or empty)
       std::uniform_int_distribution<size_t> udist(0, num_partitions);
       size_t splitID_out_node = udist(random_number_generator);
       for (size_t j = 0; j < indices_out_node.size(); ++j) {
