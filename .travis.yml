@@ -1,6 +1,7 @@
 language: r
 cache: packages
 warnings_are_errors: true
+r_check_revdep: true
 r:
   - oldrel
   - release
