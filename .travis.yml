@@ -8,9 +8,34 @@ r:
   
 r_github_packages:
   - r-lib/covr
+  
+env:
+  - BOOTSTRAP_LATEX="1"
+  - BOOTSTRAP_LATEX="1" R_CHECK_REVDEP="1" # checks reverse depends
 
-after_success:
-  - Rscript -e 'covr::coveralls()'
+# Create a build matrix that will test a regular check
+# and also check the reverse dependencies
+matrix:
+  # http://docs.travis-ci.com/user/build-configuration/#Fast-finishing
+  # allows the build to "pass" when the non-failure-able builds are done
+  fast_finish: true
+
+  # http://docs.travis-ci.com/user/build-configuration/#Rows-That-are-Allowed-To-Fail
+  allow_failures:
+    # allows the revdep build to fail and still "pass" within travis
+    - env: BOOTSTRAP_LATEX="1" R_CHECK_REVDEP="1"
+
+
+before_install:
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
+install:
+  - ./travis-tool.sh install_deps
+script: ./travis-tool.sh run_tests
+
+after_failure:
+  - ./travis-tool.sh dump_logs
 
 notifications:
   email:
