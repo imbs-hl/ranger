@@ -1,6 +1,7 @@
 
 ##### Version 0.11.8
 * Add regularization
+* Faster computation (in some cases)
 
 ##### Version 0.11.7
 * Add local variable importance 
