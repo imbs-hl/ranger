@@ -79,6 +79,9 @@ treeInfo <- function(object, tree = 1) {
   if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try with the same version the forest was grown.")
   }
+  if (!is.null(forest$dependent.varID)) {
+    forest <- convert.pre.xy(forest, trees = tree)
+  }
   if (tree > forest$num.trees) {
     stop("Error: Requesting tree ", tree, ", but forest has only ", forest$num.trees, " trees.")
   }

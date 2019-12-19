@@ -4,20 +4,46 @@
 \alias{ranger}
 \title{Ranger}
 \usage{
-ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
-  importance = "none", write.forest = TRUE, probability = FALSE,
-  min.node.size = NULL, max.depth = NULL, replace = TRUE,
-  sample.fraction = ifelse(replace, 1, 0.632), case.weights = NULL,
-  class.weights = NULL, splitrule = NULL, num.random.splits = 1,
-  alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
-  always.split.variables = NULL, respect.unordered.factors = NULL,
-  scale.permutation.importance = FALSE, local.importance = FALSE,
-  regularization.factor = 1, regularization.usedepth = FALSE,
-  keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
-  quantreg = FALSE, oob.error = TRUE, num.threads = NULL,
-  save.memory = FALSE, verbose = TRUE, seed = NULL,
-  dependent.variable.name = NULL, status.variable.name = NULL,
-  classification = NULL, x = NULL, y = NULL)
+ranger(
+  formula = NULL,
+  data = NULL,
+  num.trees = 500,
+  mtry = NULL,
+  importance = "none",
+  write.forest = TRUE,
+  probability = FALSE,
+  min.node.size = NULL,
+  max.depth = NULL,
+  replace = TRUE,
+  sample.fraction = ifelse(replace, 1, 0.632),
+  case.weights = NULL,
+  class.weights = NULL,
+  splitrule = NULL,
+  num.random.splits = 1,
+  alpha = 0.5,
+  minprop = 0.1,
+  split.select.weights = NULL,
+  always.split.variables = NULL,
+  respect.unordered.factors = NULL,
+  scale.permutation.importance = FALSE,
+  local.importance = FALSE,
+  regularization.factor = 1,
+  regularization.usedepth = FALSE,
+  keep.inbag = FALSE,
+  inbag = NULL,
+  holdout = FALSE,
+  quantreg = FALSE,
+  oob.error = TRUE,
+  num.threads = NULL,
+  save.memory = FALSE,
+  verbose = TRUE,
+  seed = NULL,
+  dependent.variable.name = NULL,
+  status.variable.name = NULL,
+  classification = NULL,
+  x = NULL,
+  y = NULL
+)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -152,7 +178,7 @@ For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-pa
 For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
 For multiclass classification the factor levels are ordered by the first principal component of the weighted covariance matrix of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available).
 The use of 'order' is recommended, as it computationally fast and can handle an unlimited number of factor levels. 
-Note that the factors are only reordered once and not again in each split.
+Note that the factors are only reordered once and not again in each split. 
 
 The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
 It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
@@ -166,7 +192,7 @@ If regularization is used, multithreading is deactivated because all trees need 
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
 Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
-Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing.
+Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing. 
 
 For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
 See the Examples section below for a demonstration using \code{Plink} data.
