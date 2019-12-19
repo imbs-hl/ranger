@@ -72,3 +72,25 @@ largest.quantile <- function(formula) {
   ## Return ordered levels
   names(sort(quantiles))
 }
+
+# Convert ranger object from version <0.11.5 (without x/y interface)
+convert.pre.xy <- function(forest, trees = 1:forest$num.trees) {
+  if (is.null(forest$status.varID)) {
+    # Not survival
+    for (i in 1:forest$num.trees) {
+      idx <- forest$split.varIDs[[i]] > forest$dependent.varID
+      forest$split.varIDs[[i]][idx] <- forest$split.varIDs[[i]][idx] - 1
+    }
+  } else {
+    # Survival
+    for (i in 1:forest$num.trees) {
+      idx1 <- forest$split.varIDs[[i]] > forest$dependent.varID
+      idx2 <- forest$split.varIDs[[i]] > forest$status.varID
+      forest$split.varIDs[[i]][idx1] <- forest$split.varIDs[[i]][idx1] - 1
+      forest$split.varIDs[[i]][idx2] <- forest$split.varIDs[[i]][idx2] - 1
+    }
+  }
+  return(forest)
+}
+
+

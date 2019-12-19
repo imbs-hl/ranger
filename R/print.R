@@ -49,7 +49,7 @@ print.ranger <- function(x, ...) {
   if (x$treetype == "Survival") {
     cat("Number of unique death times:    ", length(x$unique.death.times), "\n")
   }
-  if (x$splitrule == "extratrees") {
+  if (!is.null(x$splitrule) && x$splitrule == "extratrees" && !is.null(x$num.random.splits)) {
     cat("Number of random splits:         ", x$num.random.splits, "\n")
   }
   if (x$treetype == "Classification") {

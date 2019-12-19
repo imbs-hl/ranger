@@ -107,7 +107,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
   }
   if (!is.null(forest$dependent.varID)) {
-    stop("Error: Invalid forest object. Is the forest grown in ranger version <0.11.5? Try to predict with the same version the forest was grown.")
+    warning("Forest grown in ranger version <0.11.5, converting ...")
+    forest <- convert.pre.xy(forest)
   }
   
   ## Prediction type
