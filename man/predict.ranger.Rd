@@ -4,10 +4,20 @@
 \alias{predict.ranger}
 \title{Ranger prediction}
 \usage{
-\method{predict}{ranger}(object, data = NULL, predict.all = FALSE,
-  num.trees = object$num.trees, type = "response",
-  se.method = "infjack", quantiles = c(0.1, 0.5, 0.9), what = NULL,
-  seed = NULL, num.threads = NULL, verbose = TRUE, ...)
+\method{predict}{ranger}(
+  object,
+  data = NULL,
+  predict.all = FALSE,
+  num.trees = object$num.trees,
+  type = "response",
+  se.method = "infjack",
+  quantiles = c(0.1, 0.5, 0.9),
+  what = NULL,
+  seed = NULL,
+  num.threads = NULL,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{Ranger \code{ranger} object.}
