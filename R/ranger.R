@@ -971,24 +971,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     ## Prepare out-of-bag quantile regression
     if(!is.null(result$inbag.counts)) {
       inbag.counts <- simplify2array(result$inbag.counts)
-      random.node.values.oob <- 0 * terminal.nodes
-      random.node.values.oob[inbag.counts > 0] <- NA
-      
-      ## For each tree and observation select one random obs in the same node (not the same obs)
-      for (tree in 1:num.trees){
-        is.oob <- inbag.counts[, tree] == 0
-        num.oob <- sum(is.oob)
-        
-        if (num.oob != 0) {
-          oob.obs <- which(is.oob)
-          oob.nodes <- terminal.nodes[oob.obs, tree]
-          for (j in 1:num.oob) {
-            idx <- terminal.nodes[, tree] == oob.nodes[j]
-            idx[oob.obs[j]] <- FALSE
-            random.node.values.oob[oob.obs[j], tree] <- save.sample(y[idx], size = 1)
-          }
-        }
-      }
+      random.node.values.oob <- randomObsNode(terminal.nodes, y, inbag.counts)
       
       ## Check num.trees
       minoob <- min(rowSums(inbag.counts == 0))

@@ -38,4 +38,37 @@ Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector r
   return result;
 }
 
+// Get random other obs. in same terminal node
+//[[Rcpp::export]]
+Rcpp::NumericMatrix randomObsNode(Rcpp::IntegerMatrix groups, Rcpp::NumericVector y, Rcpp::IntegerMatrix inbag_counts) {
+  Rcpp::NumericMatrix result(groups.nrow(), groups.ncol());
+  
+  // Loop through trees
+  for (size_t i = 0; i < groups.ncol(); ++i) {
+    // Loop through observations
+    for (size_t j = 0; j < groups.nrow(); ++j) {
+      result(j, i) = NA_REAL;
+      
+      if (inbag_counts(j, i) > 0) {
+        continue;
+      }
+      
+      // Search for other observations with same group
+      Rcpp::IntegerVector others;
+      for (size_t k = 0; k < groups.nrow(); ++k) {
+        if (j != k) {
+          if (groups(j, i) == groups(k, i)) {
+            others.push_back(k);
+          }
+        }
+      }
+      
+      // Randomly select one
+      if (others.size() > 0) {
+        result(j, i) = y(Rcpp::sample(others, 1, false)[0]);
+      }
+    }
+  }
+  return result;
+}
 
