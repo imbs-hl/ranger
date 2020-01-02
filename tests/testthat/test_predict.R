@@ -116,6 +116,14 @@ test_that("predict.all works for single observation", {
   expect_equal(dim(pred$predictions), c(1, rf$num.trees))
 })
 
+test_that("predict.all factor probabilities in correct order", {
+  rf <- ranger(Species ~ ., iris[c(51:100, 101:150, 1:50), ], probability = TRUE, num.trees = 5)
+  pred_all <- rowMeans(predict(rf, iris, predict.all = TRUE)$predictions[139,,])
+  pred_mean <- predict(rf, iris, predict.all = FALSE)$predictions[139,]
+  
+  expect_equal(pred_all, pred_mean, tolerance = .001)
+})
+
 test_that("Warning if predicting with corrected impurity importance", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, importance = "impurity_corrected")
   expect_warning(predict(rf, iris))
