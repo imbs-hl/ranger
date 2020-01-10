@@ -66,17 +66,17 @@ void ForestSurvival::initInternal() {
   }
 
   // Create unique timepoints
-  std::set<double> unique_timepoint_set;
-  for (size_t i = 0; i < num_samples; ++i) {
-    unique_timepoint_set.insert(data->get_y(i, 0));
-  }
-  unique_timepoints.reserve(unique_timepoint_set.size());
-  for (auto& t : unique_timepoint_set) {
-    unique_timepoints.push_back(t);
-  }
-
-  // Create response_timepointIDs
   if (!prediction_mode) {
+    std::set<double> unique_timepoint_set;
+    for (size_t i = 0; i < num_samples; ++i) {
+      unique_timepoint_set.insert(data->get_y(i, 0));
+    }
+    unique_timepoints.reserve(unique_timepoint_set.size());
+    for (auto& t : unique_timepoint_set) {
+      unique_timepoints.push_back(t);
+    }
+
+    // Create response_timepointIDs
     for (size_t i = 0; i < num_samples; ++i) {
       double value = data->get_y(i, 0);
 
