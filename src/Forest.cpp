@@ -475,7 +475,7 @@ void Forest::grow() {
       tree_manual_inbag = &manual_inbag[0];
     }
 
-    trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs, &split_select_varIDs,
+    trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs,
         tree_split_select_weights, importance_mode, min_node_size, sample_with_replacement, memory_saving_splitting,
         splitrule, &case_weights, tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, holdout,
         num_random_splits, max_depth, &regularization_factor, regularization_usedepth, &split_varIDs_used);
@@ -965,7 +965,6 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     this->split_select_weights.clear();
     this->split_select_weights.resize(num_trees, std::vector<double>(num_weights));
   }
-  this->split_select_varIDs.resize(num_weights);
   deterministic_varIDs.reserve(num_weights);
 
   // Split up in deterministic and weighted variables, ignore zero weights
@@ -984,7 +983,6 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
         if (weight == 1) {
           deterministic_varIDs.push_back(j);
         } else if (weight < 1 && weight > 0) {
-          this->split_select_varIDs[j] = j;
           this->split_select_weights[i][j] = weight;
         } else if (weight == 0) {
           ++num_zero_weights;
@@ -1005,10 +1003,6 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     if (importance_mode == IMP_GINI_CORRECTED) {
       std::vector<double>* sw = &(this->split_select_weights[i]);
       std::copy_n(sw->begin(), num_independent_variables, sw->begin() + num_independent_variables);
-
-      for (size_t k = 0; k < num_independent_variables; ++k) {
-        split_select_varIDs[num_independent_variables + k] = num_independent_variables + k;
-      }
 
       size_t num_deterministic_varIDs = deterministic_varIDs.size();
       for (size_t k = 0; k < num_deterministic_varIDs; ++k) {
