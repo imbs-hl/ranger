@@ -24,3 +24,14 @@ test_that("always split variables work", {
   expect_silent(ranger(dependent.variable.name = "Species", data = iris, num.trees = 10, 
                        always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
 })
+
+test_that("Tree-wise split select weights work with 0s", {
+  num.trees <- 5
+  weights <- replicate(num.trees, sample(c(0, 0, 0.5, 0.5)), simplify = FALSE)
+  rf <- ranger(Species ~ ., iris, mtry = 2, num.trees = num.trees, 
+               split.select.weights = weights)
+  selected_correctly <- sapply(1:num.trees, function(i) {
+    all(treeInfo(rf, i)[,"splitvarID"] %in% c(which(weights[[i]] > 0) - 1, NA))
+  })
+  expect_true(all(selected_correctly))
+})
