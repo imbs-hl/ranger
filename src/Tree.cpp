@@ -19,10 +19,10 @@ namespace ranger {
 Tree::Tree() :
     mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_weights(0), case_weights(
         0), manual_inbag(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(
-        false), split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
+        false), split_varIDs_used(0), bootstrap_ts(DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(
+        DEFAULT_PERIOD), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), bootstrap_ts(
-        DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD), depth(0), last_left_nodeID(
+        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
         0) {
 }
 
@@ -31,10 +31,10 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
     mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_weights(0), case_weights(
         0), manual_inbag(0), split_varIDs(split_varIDs), split_values(split_values), child_nodeIDs(child_nodeIDs), oob_sampleIDs(
         0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false), split_varIDs_used(
-        0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(
+        0), bootstrap_ts(DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD), variable_importance(
+        0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(
         0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), bootstrap_ts(
-        DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD), depth(0), last_left_nodeID(
+        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
         0) {
 }
 
@@ -43,7 +43,7 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
     double minprop, bool holdout, uint num_random_splits, uint max_depth, std::vector<double>* regularization_factor,
-    bool regularization_usedepth, BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period, 
+    bool regularization_usedepth, BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period,
     std::vector<bool>* split_varIDs_used) {
 
   this->data = data;
@@ -58,7 +58,14 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
 
   // Initialize random number generator and set seed
   random_number_generator.seed(seed);
-
+  
+  // Time series bootstrap
+  // bootstrap ts
+  this->bootstrap_ts = bootstrap_ts;
+  this->by_end = by_end;
+  this->block_size = block_size;
+  this->period = period;
+  
   this->deterministic_varIDs = deterministic_varIDs;
   this->split_select_weights = split_select_weights;
   this->importance_mode = importance_mode;
@@ -76,7 +83,9 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
   this->max_depth = max_depth;
   this->regularization_factor = regularization_factor;
   this->regularization_usedepth = regularization_usedepth;
+  
   this->split_varIDs_used = split_varIDs_used;
+  
 
   // Regularization
   if (regularization_factor->size() > 0) {
@@ -84,12 +93,6 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
   } else {
     regularization = false;
   }
-  // Time series bootstrap
-  // bootstrap ts
-  this->bootstrap_ts = bootstrap_ts;
-  this->by_end = by_end;
-  this->block_size = block_size;
-  this->period = period;
 }
 
 void Tree::grow(std::vector<double>* variable_importance) {
