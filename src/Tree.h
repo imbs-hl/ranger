@@ -41,6 +41,7 @@ public:
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
       uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth,
+      BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period,
       std::vector<bool>* split_varIDs_used);
 
   virtual void allocateMemory() = 0;
@@ -87,11 +88,18 @@ protected:
 
   size_t dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size_t permuted_sampleID);
   void permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t>& permutations);
-
+  void cutByBlock();
+  void permuteByBlock(std::vector<size_t>& permutations);
   virtual double computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) = 0;
   
   void bootstrap();
   void bootstrapWithoutReplacement();
+  
+  void bootstrapMovingBlock();
+  void bootstrapStationaryBlock();
+  void bootstrapCircularBlock();
+  void bootstrapNonOverlappingBlock();
+  void bootstrapSeasonalBlock();
 
   void bootstrapWeighted();
   void bootstrapWithoutReplacementWeighted();
@@ -227,6 +235,12 @@ protected:
   uint max_depth;
   uint depth;
   size_t last_left_nodeID;
+  
+  //Bootstrap time series
+  BootstrapTS bootstrap_ts;
+  bool by_end;
+  uint block_size;
+  uint period;
 };
 
 } // namespace ranger

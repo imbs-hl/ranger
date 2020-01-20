@@ -21,7 +21,8 @@ Tree::Tree() :
         0), manual_inbag(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(
         false), split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
+        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), bootstrap_ts(
+        DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD), depth(0), last_left_nodeID(
         0) {
 }
 
@@ -32,7 +33,8 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false), split_varIDs_used(
         0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(
         0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
+        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), bootstrap_ts(
+        DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD), depth(0), last_left_nodeID(
         0) {
 }
 
@@ -41,7 +43,8 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
     double minprop, bool holdout, uint num_random_splits, uint max_depth, std::vector<double>* regularization_factor,
-    bool regularization_usedepth, std::vector<bool>* split_varIDs_used) {
+    bool regularization_usedepth, BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period, 
+    std::vector<bool>* split_varIDs_used) {
 
   this->data = data;
   this->mtry = mtry;
@@ -81,6 +84,12 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
   } else {
     regularization = false;
   }
+  // Time series bootstrap
+  // bootstrap ts
+  this->bootstrap_ts = bootstrap_ts;
+  this->by_end = by_end;
+  this->block_size = block_size;
+  this->period = period;
 }
 
 void Tree::grow(std::vector<double>* variable_importance) {
@@ -89,28 +98,37 @@ void Tree::grow(std::vector<double>* variable_importance) {
 
   this->variable_importance = variable_importance;
 
-// Bootstrap, dependent if weighted or not and with or without replacement
-  if (!case_weights->empty()) {
-    if (sample_with_replacement) {
-      bootstrapWeighted();
-    } else {
-      bootstrapWithoutReplacementWeighted();
-    }
-  } else if (sample_fraction->size() > 1) {
-    if (sample_with_replacement) {
-      bootstrapClassWise();
-    } else {
-      bootstrapWithoutReplacementClassWise();
-    }
-  } else if (!manual_inbag->empty()) {
-    setManualInbag();
+  // Bootstrap, dependent if weighted or not and with or without replacement
+  if(bootstrap_ts != IID){
+    if(bootstrap_ts == MOVING) bootstrapMovingBlock();
+    if(bootstrap_ts == STATIONARY) bootstrapStationaryBlock();
+    if(bootstrap_ts == CIRCULAR) bootstrapCircularBlock();
+    if(bootstrap_ts == NONOVERLAPPING) bootstrapNonOverlappingBlock();
+    if(bootstrap_ts == SEASONAL) bootstrapSeasonalBlock();
   } else {
-    if (sample_with_replacement) {
-      bootstrap();
+    if (!case_weights->empty()) {
+      if (sample_with_replacement) {
+        bootstrapWeighted();
+      } else {
+        bootstrapWithoutReplacementWeighted();
+      }
+    } else if (sample_fraction->size() > 1) {
+      if (sample_with_replacement) {
+        bootstrapClassWise();
+      } else {
+        bootstrapWithoutReplacementClassWise();
+      }
+    } else if (!manual_inbag->empty()) {
+      setManualInbag();
     } else {
-      bootstrapWithoutReplacement();
+      if (sample_with_replacement) {
+        bootstrap();
+      } else {
+        bootstrapWithoutReplacement();
+      }
     }
   }
+  
 
   // Init start and end positions
   start_pos[0] = 0;
@@ -206,6 +224,10 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
 
   size_t num_independent_variables = data->getNumCols();
 
+  if (importance_mode == IMP_PERM_BLOCK){
+    cutByBlock();
+  }
+  
 // Compute normal prediction accuracy for each tree. Predictions already computed..
   double accuracy_normal;
   std::vector<double> prederr_normal_casewise;
@@ -217,6 +239,7 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
   } else {
     accuracy_normal = computePredictionAccuracyInternal(NULL);
   }
+  
 
   prediction_terminal_nodeIDs.clear();
   prediction_terminal_nodeIDs.resize(num_samples_oob, 0);
@@ -418,8 +441,12 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
 void Tree::permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t>& permutations) {
 
 // Permute OOB sample
-//std::vector<size_t> permutations(oob_sampleIDs);
-  std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
+  if (importance_mode == IMP_PERM_BLOCK) {
+    permuteByBlock(permutations);
+  } else {
+  // std::vector<size_t> permutations(oob_sampleIDs);
+    std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
+  }
 
 // For each sample, drop down the tree and add prediction
   for (size_t i = 0; i < num_samples_oob; ++i) {
@@ -500,6 +527,273 @@ void Tree::bootstrapWeighted() {
   }
   num_samples_oob = oob_sampleIDs.size();
 
+  if (!keep_inbag) {
+    inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
+  }
+}
+
+
+void Tree::bootstrapNonOverlappingBlock() {
+  // Use fraction (default 63.21%) of the samples
+  size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
+  size_t k = (size_t) floor((double) num_samples_inbag / block_size);
+  num_samples_inbag = (size_t) k * block_size;
+  
+  // Reserve space, reserve a little more to be save)
+  sampleIDs.reserve(num_samples_inbag);
+  oob_sampleIDs.reserve(num_samples);
+  
+  // Start with all samples OOB
+  size_t num_block = (size_t) floor((double) num_samples / block_size);
+  inbag_counts.resize(num_samples, 0);
+  
+  if (sample_with_replacement) {
+    std::uniform_int_distribution<size_t> unif_dist(0, num_block - 1);
+    
+    // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+    for (size_t s = 0; s < k; ++s) {
+      size_t draw = unif_dist(random_number_generator);
+      
+      // loop to take the selected block
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = (size_t) draw * block_size + i;
+        if (by_end) ind = num_samples - 1 - ind;
+        sampleIDs.push_back(ind);
+        ++inbag_counts[ind];
+      }
+    }
+  } else {
+    // initialise block index vector, fill it from 0 to num_block - 1
+    std::vector<size_t> index_nonoverlap(num_block);
+    std::iota(index_nonoverlap.begin(), index_nonoverlap.end(), 0);
+    
+    // shuffle the block index
+    std::shuffle(index_nonoverlap.begin(), index_nonoverlap.end(), random_number_generator);
+    index_nonoverlap.resize(k);
+    index_nonoverlap.shrink_to_fit();
+    
+    // fill the sampleIDs and inbag_counts
+    for (auto & s : index_nonoverlap) {
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = (size_t) s * block_size + i;
+        if (by_end) ind = num_samples - 1 - ind;
+        sampleIDs.push_back(ind);
+        ++inbag_counts[ind];
+      }
+    }
+  }
+  
+  // Save OOB samples
+  for (size_t s = 0; s < inbag_counts.size(); ++s) {
+    if (inbag_counts[s] == 0) {
+      oob_sampleIDs.push_back(s);
+    }
+  }
+  num_samples_oob = oob_sampleIDs.size();
+  
+  if (!keep_inbag) {
+    inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
+  }
+}
+
+// Bootstrap by block
+void Tree::bootstrapMovingBlock() {
+  // Use fraction (default 63.21%) of the samples
+  size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
+  size_t k = (size_t) floor((double) num_samples_inbag / block_size);
+  num_samples_inbag = (size_t) k * block_size;
+  
+  // Reserve space, reserve a little more to be save)
+  sampleIDs.reserve(num_samples_inbag);
+  // TODO can be optimized
+  oob_sampleIDs.reserve(num_samples);
+  
+  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size);
+  
+  // Start with all samples OOB
+  inbag_counts.resize(num_samples, 0);
+  
+  // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+  for (size_t s = 0; s < k; ++s) {
+    size_t draw = unif_dist(random_number_generator);
+    // loop to take the selected block
+    // stop when the inbag sample is full
+    for (size_t i = 0; i < block_size; ++i) {
+      // if (sampleIDs.size() < num_samples_inbag) {
+      size_t ind = (size_t) draw + i;
+      if (by_end) ind = num_samples - 1 - ind;
+      sampleIDs.push_back(ind);
+      ++inbag_counts[ind];
+      // }
+    }
+  }
+  
+  // Save OOB samples
+  for (size_t s = 0; s < inbag_counts.size(); ++s) {
+    if (inbag_counts[s] == 0) {
+      oob_sampleIDs.push_back(s);
+    }
+  }
+  num_samples_oob = oob_sampleIDs.size();
+  
+  if (!keep_inbag) {
+    inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
+  }
+}
+
+// TODO
+void Tree::bootstrapSeasonalBlock() {
+  // Use fraction (default 63.21%) of the samples
+  size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
+  size_t k = (size_t) floor((double) num_samples_inbag / block_size);
+  num_samples_inbag = (size_t) k * block_size;
+  size_t num_period = (size_t) ceil((double) num_samples / period);
+  
+  // Reserve space, reserve a little more to be save)
+  sampleIDs.reserve(num_samples_inbag);
+  oob_sampleIDs.reserve(num_samples);
+  
+  // Start with all samples OOB
+  inbag_counts.resize(num_samples, 0);
+  
+  if (sample_with_replacement) {
+    std::uniform_int_distribution<size_t> unif_dist(0, num_period - 1);
+    // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+    for (size_t s = 0; s < k; ++s) {
+      size_t draw = unif_dist(random_number_generator);
+      // loop to take the selected block
+      // stop when the inbag sample is full
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = draw * period + i;
+        if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+          sampleIDs.push_back(ind);
+          ++inbag_counts[ind];
+        }
+      }
+    }
+  } else {
+    // initialise block index vector, fill it from 0 to num_period - 1
+    std::vector<size_t> index_season(num_period);
+    std::iota(index_season.begin(), index_season.end(), 0);
+    
+    // shuffle the block index
+    std::shuffle(index_season.begin(), index_season.end(), random_number_generator);
+    index_season.resize(k);
+    index_season.shrink_to_fit();
+    
+    for (auto & s : index_season) {
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = (size_t) s * period + i;
+        if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+          sampleIDs.push_back(ind);
+          ++inbag_counts[ind];
+        }
+      }
+    }
+  }
+  
+  // Save OOB samples
+  for (size_t s = 0; s < inbag_counts.size(); ++s) {
+    if (inbag_counts[s] == 0) {
+      oob_sampleIDs.push_back(s);
+    }
+  }
+  num_samples_oob = oob_sampleIDs.size();
+  num_samples_inbag = num_samples - num_samples_oob;
+  sampleIDs.resize(num_samples_inbag);
+  sampleIDs.shrink_to_fit();
+  
+  if (!keep_inbag) {
+    inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
+  }
+}
+
+void Tree::bootstrapStationaryBlock() {
+  // Use fraction (default 63.21%) of the samples
+  size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
+  
+  // Reserve space, reserve a little more to be save)
+  sampleIDs.reserve(num_samples_inbag);
+  oob_sampleIDs.reserve(num_samples);
+  
+  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
+  // TODO the probability should be adjusted manually by user?
+  std::geometric_distribution<size_t> geom_dist(1.0 / block_size);
+  
+  // Start with all samples OOB
+  inbag_counts.resize(num_samples, 0);
+  
+  // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+  while (sampleIDs.size() < num_samples_inbag) {
+    size_t draw = unif_dist(random_number_generator);
+    size_t len = geom_dist(random_number_generator);
+    // loop to take the selected block
+    for (size_t i = 0; i < len; ++i) {
+      // same idea as circular
+      size_t ind = (size_t) (draw + i) % num_samples;
+      if (sampleIDs.size() < num_samples_inbag) {
+        sampleIDs.push_back(ind);
+        ++inbag_counts[ind];
+      }
+    }
+  }
+  
+  // Save OOB samples
+  for (size_t s = 0; s < inbag_counts.size(); ++s) {
+    if (inbag_counts[s] == 0) {
+      oob_sampleIDs.push_back(s);
+    }
+  }
+  num_samples_oob = oob_sampleIDs.size();
+  
+  if (!keep_inbag) {
+    inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
+  }
+}
+
+void Tree::bootstrapCircularBlock() {
+  // Use fraction (default 63.21%) of the samples
+  size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
+  size_t k = (size_t) floor((double) num_samples_inbag / block_size);
+  num_samples_inbag = (size_t) k * block_size;
+  
+  // Reserve space, reserve a little more to be save)
+  sampleIDs.reserve(num_samples_inbag);
+  oob_sampleIDs.reserve(num_samples);
+  
+  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
+  
+  // Start with all samples OOB
+  inbag_counts.resize(num_samples, 0);
+  
+  // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+  for (size_t s = 0; s < k; ++s) {
+    size_t draw = unif_dist(random_number_generator);
+    // loop to take the selected block
+    for (size_t i = 0; i < block_size; ++i) {
+      // if the inbag sample is not full
+      // if (sampleIDs.size() < num_samples_inbag) {
+      size_t ind = (size_t) (draw + i) % num_samples;
+      if (by_end) ind = num_samples - 1 - ind;
+      sampleIDs.push_back(ind);
+      ++inbag_counts[ind];
+      // }
+    }
+  }
+  
+  // Save OOB samples
+  for (size_t s = 0; s < inbag_counts.size(); ++s) {
+    if (inbag_counts[s] == 0) {
+      oob_sampleIDs.push_back(s);
+    }
+  }
+  num_samples_oob = oob_sampleIDs.size();
+  
   if (!keep_inbag) {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();
@@ -587,6 +881,67 @@ void Tree::setManualInbag() {
   if (!keep_inbag) {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();
+  }
+}
+
+void Tree::permuteByBlock(std::vector<size_t>& permutations) {
+  size_t block_oob_size = permutations.size();
+  size_t num_block = (size_t)  block_oob_size / block_size;
+  // initialization
+  std::vector<size_t> index_block(num_block);
+  std::iota(index_block.begin(), index_block.end(), 0);
+  
+  std::vector<size_t> permuted;
+  permuted.reserve(block_oob_size);
+  
+  if (num_block > 1) {
+    std::shuffle(index_block.begin(), index_block.end(), random_number_generator);
+    // build the permutations vector
+    size_t index_block_size = index_block.size();
+    
+    for (size_t j = 0; j < index_block_size; ++j) {
+      for (size_t m = 0; m < block_size; ++m) {
+        permuted.push_back(permutations[index_block[j] * block_size + m]);
+      }
+    }
+    permuted.shrink_to_fit();
+    permutations = permuted;
+    permuted.clear();
+  }
+}
+
+
+void Tree::cutByBlock() {
+  std::vector<size_t> oob_block;
+  oob_block.reserve(num_samples_oob);
+  std::vector<size_t> tmp_block;
+  tmp_block.reserve(block_size);
+  
+  if (num_samples_oob > 1) {
+    // build the index vector
+    size_t count = 1;
+    size_t i = 0;
+    while ((i + count) < num_samples_oob) {
+      size_t diff = oob_sampleIDs[i + count] - oob_sampleIDs[i + count - 1];
+      if (diff != 1) {
+        ++i;
+      } else {
+        tmp_block.push_back(oob_sampleIDs[i + count - 1]);
+        ++count;
+      }
+      
+      if (count == block_size) {
+        tmp_block.push_back(oob_sampleIDs[i + count - 1]);
+        oob_block.insert(oob_block.end(), tmp_block.begin(), tmp_block.end());
+        tmp_block.clear();
+        count = 1;
+        i = i + block_size;
+      }
+    }
+    oob_block.shrink_to_fit();
+    oob_sampleIDs = oob_block;
+    num_samples_oob = oob_sampleIDs.size();
+    oob_block.clear();
   }
 }
 
