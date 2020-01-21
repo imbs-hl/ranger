@@ -965,11 +965,10 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     this->split_select_weights.clear();
     this->split_select_weights.resize(num_trees, std::vector<double>(num_weights));
   }
-  deterministic_varIDs.reserve(num_weights);
 
   // Split up in deterministic and weighted variables, ignore zero weights
-  size_t num_zero_weights = 0;
   for (size_t i = 0; i < split_select_weights.size(); ++i) {
+    size_t num_zero_weights = 0;
 
     // Size should be 1 x num_independent_variables or num_trees x num_independent_variables
     if (split_select_weights[i].size() != num_independent_variables) {
@@ -979,23 +978,12 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     for (size_t j = 0; j < split_select_weights[i].size(); ++j) {
       double weight = split_select_weights[i][j];
 
-      if (i == 0) {
-        if (weight == 1) {
-          deterministic_varIDs.push_back(j);
-        } else if (weight < 1 && weight > 0) {
-          this->split_select_weights[i][j] = weight;
-        } else if (weight == 0) {
-          ++num_zero_weights;
-        } else if (weight < 0 || weight > 1) {
-          throw std::runtime_error("One or more split select weights not in range [0,1].");
-        }
-
+      if (weight == 0) {
+        ++num_zero_weights;
+      } else if (weight < 0 || weight > 1) {
+        throw std::runtime_error("One or more split select weights not in range [0,1].");
       } else {
-        if (weight < 1 && weight > 0) {
-          this->split_select_weights[i][j] = weight;
-        } else if (weight < 0 || weight > 1) {
-          throw std::runtime_error("One or more split select weights not in range [0,1].");
-        }
+        this->split_select_weights[i][j] = weight;
       }
     }
 
@@ -1003,17 +991,12 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     if (importance_mode == IMP_GINI_CORRECTED) {
       std::vector<double>* sw = &(this->split_select_weights[i]);
       std::copy_n(sw->begin(), num_independent_variables, sw->begin() + num_independent_variables);
-
-      size_t num_deterministic_varIDs = deterministic_varIDs.size();
-      for (size_t k = 0; k < num_deterministic_varIDs; ++k) {
-        deterministic_varIDs.push_back(k + num_independent_variables);
-      }
     }
-  }
 
-  if (num_weights - deterministic_varIDs.size() - num_zero_weights < mtry) {
-    throw std::runtime_error(
-        "Too many zeros or ones in split select weights. Need at least mtry variables to split at.");
+    if (num_weights - num_zero_weights < mtry) {
+      throw std::runtime_error(
+          "Too many zeros in split select weights. Need at least mtry variables to split at.");
+    }
   }
 }
 
