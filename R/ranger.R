@@ -47,8 +47,7 @@
 ##' Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
 ##' For survival all nodes contain at \code{min.node.size} samples. 
 ##' Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
-##' In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
-##' Weights do not need to sum up to 1, they will be normalized later. 
+##' In \code{split.select.weights}, weights do not need to sum up to 1, they will be normalized later. 
 ##' The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 ##' Names of the \code{split.select.weights} vector are ignored.
 ##' The usage of \code{split.select.weights} can increase the computation times for large forests.

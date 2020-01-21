@@ -9,6 +9,16 @@ test_that("split select weights work", {
   expect_error(ranger(Species ~ ., iris, num.trees = 5, split.select.weights = c(0.1, 0.2, 0.3)))
 })
 
+test_that("split select weights work with 0s and 1s", {
+  num.trees <- 5
+  weights <- replicate(num.trees, sample(c(0, 0, 1, 1)), simplify = FALSE)
+  rf <- ranger(Species ~ ., iris, num.trees = num.trees, split.select.weights = weights)
+  selected_correctly <- sapply(1:rf$num.trees, function(i) {
+    all(treeInfo(rf, i)[,"splitvarID"] %in% c(which(weights[[i]] > 0) - 1, NA))
+  })
+  expect_true(all(selected_correctly))
+})
+
 test_that("Tree-wise split select weights work", {
   num.trees <- 5
   weights <- replicate(num.trees, runif(ncol(iris)-1), simplify = FALSE)
