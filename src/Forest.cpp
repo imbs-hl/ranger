@@ -510,7 +510,7 @@ void Forest::grow() {
   std::vector<std::vector<double>> variable_importance_threads(num_threads);
 
   for (uint i = 0; i < num_threads; ++i) {
-    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+    if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED || importance_mode == IMP_GINI_OOB) {
       variable_importance_threads[i].resize(num_independent_variables, 0);
     }
     threads.emplace_back(&Forest::growTreesInThread, this, i, &(variable_importance_threads[i]));
@@ -527,7 +527,7 @@ void Forest::grow() {
 #endif
 
   // Sum thread importances
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED || importance_mode == IMP_GINI_OOB) {
     variable_importance.resize(num_independent_variables, 0);
     for (size_t i = 0; i < num_independent_variables; ++i) {
       for (uint j = 0; j < num_threads; ++j) {
@@ -540,7 +540,7 @@ void Forest::grow() {
 #endif
 
 // Divide importance by number of trees
-  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
+  if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED || importance_mode == IMP_GINI_OOB) {
     for (auto& v : variable_importance) {
       v /= num_trees;
     }

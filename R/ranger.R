@@ -559,6 +559,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 1
   } else if (importance == "impurity_corrected" || importance == "impurity_unbiased") {
     importance.mode <- 5
+  } else if (importance == "impurity_oob") {
+    importance.mode <- 7
   } else if (importance == "permutation") {
     if (local.importance) {
       importance.mode <- 6

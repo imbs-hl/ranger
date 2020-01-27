@@ -196,6 +196,8 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
+  } else if (importance_mode == IMP_GINI_OOB) {
+    addGiniOobImportance(nodeID, best_varID, best_value);
   }
 
   // Regularization
@@ -755,9 +757,9 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     class_counts.resize(class_values->size(), 0);
 
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
-        size_t sampleID = sampleIDs[pos];
-        uint sample_classID = (*response_classIDs)[sampleID];
-        class_counts[sample_classID]++;
+      size_t sampleID = sampleIDs[pos];
+      uint sample_classID = (*response_classIDs)[sampleID];
+      class_counts[sample_classID]++;
     }
     double sum_node = 0;
     for (size_t i = 0; i < class_counts.size(); ++i) {
@@ -781,6 +783,65 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
   } else {
     (*variable_importance)[tempvarID] += best_decrease;
   }
+}
+
+void TreeClassification::addGiniOobImportance(size_t nodeID, size_t varID, double split_value) {
+
+  // TODO: Hellinger
+  // TODO: Other calls here and other tree types
+
+  size_t num_classes = class_values->size();
+  size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+
+  // Inbag
+  size_t n_left_inbag = 0;
+  std::vector<size_t> class_counts_all_inbag(num_classes);
+  std::vector<size_t> class_counts_left_inbag(num_classes);
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    size_t classID = (*response_classIDs)[sampleID];
+
+    ++class_counts_all_inbag[classID];
+
+    if (data->get_x(sampleID, varID) <= split_value) {
+      ++class_counts_left_inbag[classID];
+      ++n_left_inbag;
+    }
+  }
+
+  // OOB
+  size_t n_left_oob = 0;
+  std::vector<size_t> class_counts_all_oob(num_classes);
+  std::vector<size_t> class_counts_left_oob(num_classes);
+
+  // Impurity in OOB observations
+  for (auto& sampleID : oob_sampleIDs) {
+    size_t classID = (*response_classIDs)[sampleID];
+
+    ++class_counts_all_oob[classID];
+
+    if (data->get_x(sampleID, varID) <= split_value) {
+      ++class_counts_left_oob[classID];
+      ++n_left_oob;
+    }
+  }
+
+  size_t n_right_inbag = num_samples_node - n_left_inbag;
+  double sum_left = 0;
+  double sum_right = 0;
+  double sum_all = 0;
+  for (size_t j = 0; j < num_classes; ++j) {
+    size_t class_count_right_inbag = class_counts_all_inbag[j] - class_counts_left_inbag[j];
+    size_t class_count_right_oob = class_counts_all_oob[j] - class_counts_left_oob[j];
+
+    sum_left += (*class_weights)[j] * class_counts_left_inbag[j] * class_counts_left_oob[j];
+    sum_right += (*class_weights)[j] * class_count_right_inbag * class_count_right_oob;
+    sum_all += (*class_weights)[j] * class_counts_all_inbag[j] * class_counts_all_oob[j];
+  }
+
+  // Decrease of impurity
+  double decrease = sum_right / (double) n_right_inbag + sum_left / (double) n_left_inbag - sum_all / (double) num_samples_node;
+  (*variable_importance)[varID] += decrease;
 }
 
 void TreeClassification::bootstrapClassWise() {

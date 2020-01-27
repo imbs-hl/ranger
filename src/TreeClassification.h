@@ -83,6 +83,7 @@ private:
       double& best_decrease);
 
   void addGiniImportance(size_t nodeID, size_t varID, double decrease);
+  void addGiniOobImportance(size_t nodeID, size_t varID, double split_value);
 
   void bootstrapClassWise() override;
   void bootstrapWithoutReplacementClassWise() override;
