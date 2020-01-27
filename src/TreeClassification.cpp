@@ -835,6 +835,7 @@ void TreeClassification::bootstrapWithoutReplacementClassWise() {
     shuffleAndSplitAppend(sampleIDs, oob_sampleIDs, num_samples_class, num_samples_inbag_class,
         (*sampleIDs_per_class)[i], random_number_generator);
   }
+  num_samples_oob = oob_sampleIDs.size();
 
   if (keep_inbag) {
     // All observation are 0 or 1 times inbag
