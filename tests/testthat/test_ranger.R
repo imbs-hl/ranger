@@ -66,17 +66,26 @@ test_that("Inbag counts match sample fraction, classification", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.2, 0.3, 0.4), 
                replace = TRUE, keep.inbag = TRUE)
   inbag <- do.call(cbind, rf$inbag.counts)
-  expect_equal(unique(colSums(inbag[1:50, ])), 30)
-  expect_equal(unique(colSums(inbag[51:100, ])), 45)
-  expect_equal(unique(colSums(inbag[101:150, ])), 60)
+  expect_equal(unique(colSums(inbag[iris$Species == "setosa", ])), 30)
+  expect_equal(unique(colSums(inbag[iris$Species == "versicolor", ])), 45)
+  expect_equal(unique(colSums(inbag[iris$Species == "virginica", ])), 60)
   
   ## Without replacement
   rf <- ranger(Species ~ ., iris, num.trees = 5, sample.fraction = c(0.1, 0.2, 0.3), 
                replace = FALSE, keep.inbag = TRUE)
   inbag <- do.call(cbind, rf$inbag.counts)
-  expect_equal(unique(colSums(inbag[1:50, ])), 15)
-  expect_equal(unique(colSums(inbag[51:100, ])), 30)
-  expect_equal(unique(colSums(inbag[101:150, ])), 45)
+  expect_equal(unique(colSums(inbag[iris$Species == "setosa", ])), 15)
+  expect_equal(unique(colSums(inbag[iris$Species == "versicolor", ])), 30)
+  expect_equal(unique(colSums(inbag[iris$Species == "virginica", ])), 45)
+  
+  ## Different order, without replacement
+  dat <- iris[c(51:100, 101:150, 1:50), ]
+  rf <- ranger(Species ~ ., dat, num.trees = 5, sample.fraction = c(0.1, 0.2, 0.3), 
+               replace = FALSE, keep.inbag = TRUE)
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[dat$Species == "setosa", ])), 15)
+  expect_equal(unique(colSums(inbag[dat$Species == "versicolor", ])), 30)
+  expect_equal(unique(colSums(inbag[dat$Species == "virginica", ])), 45)
 })
 
 test_that("Inbag counts match sample fraction, probability", {

@@ -515,6 +515,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (!is.null(case.weights)) {
       stop("Error: Combination of case.weights and class-wise sampling not supported.")
     }
+    # Fix order (C++ needs sample.fraction in order as classes appear in data)
+    sample.fraction <- sample.fraction[as.numeric(unique(y))]
   } else {
     if (sample.fraction <= 0 || sample.fraction > 1) {
       stop("Error: Invalid value for sample.fraction. Please give a value in (0,1] or a vector of values in [0,1].")
