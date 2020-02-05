@@ -75,10 +75,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// randomObsNode
+Rcpp::NumericMatrix randomObsNode(Rcpp::IntegerMatrix groups, Rcpp::NumericVector y, Rcpp::IntegerMatrix inbag_counts);
+RcppExport SEXP _ranger_randomObsNode(SEXP groupsSEXP, SEXP ySEXP, SEXP inbag_countsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type groups(groupsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type inbag_counts(inbag_countsSEXP);
+    rcpp_result_gen = Rcpp::wrap(randomObsNode(groups, y, inbag_counts));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ranger_rangerCpp", (DL_FUNC) &_ranger_rangerCpp, 46},
     {"_ranger_numSmaller", (DL_FUNC) &_ranger_numSmaller, 2},
+    {"_ranger_randomObsNode", (DL_FUNC) &_ranger_randomObsNode, 3},
     {NULL, NULL, 0}
 };
 
