@@ -62,14 +62,14 @@ public:
     }
     
     if (col < num_cols_no_snp) {
-      return x[col * num_rows + row];
+      return x(row, col);
     } else {
       return getSnp(row, col, col_permuted);
     }
   }
   
   double get_y(size_t row, size_t col) const override {
-    return y[col * num_rows + row];
+    return y(row, col);
   }
   
   // #nocov start 
@@ -78,11 +78,11 @@ public:
   }
   
   void set_x(size_t col, size_t row, double value, bool& error) override {
-    x[col * num_rows + row] = value;
+    x(row, col) = value;
   }
   
   void set_y(size_t col, size_t row, double value, bool& error) override {
-    y[col * num_rows + row] = value;
+    y(row, col) = value;
   }
   // #nocov end 
   

@@ -53,7 +53,7 @@ void ForestRegression::initInternal() {
   }
 
   // Error if beta splitrule used with data outside of [0,1]
-  if (splitrule == BETA) {
+  if (splitrule == BETA && !prediction_mode) {
     for (size_t i = 0; i < num_samples; ++i) {
       double y = data->get_y(i, 0);
       if (y < 0 || y > 1) {

@@ -212,17 +212,6 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
     size_t max, const std::vector<size_t>& skip, size_t num_samples);
 
 /**
- * Draw random numers without replacement and with weighted probabilites from vector of indices.
- * @param result Vector to add results to. Will not be cleaned before filling.
- * @param random_number_generator Random number generator
- * @param indices Vector with numbers to draw
- * @param num_samples Number of samples to draw
- * @param weights A weight for each element of indices
- */
-void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    const std::vector<size_t>& indices, size_t num_samples, const std::vector<double>& weights);
-
-/**
  * Draw random numers without replacement and with weighted probabilites from 0..n-1.
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
