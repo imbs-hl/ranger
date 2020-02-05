@@ -43,30 +43,46 @@ Rcpp::IntegerVector numSmaller(Rcpp::NumericVector values, Rcpp::NumericVector r
 Rcpp::NumericMatrix randomObsNode(Rcpp::IntegerMatrix groups, Rcpp::NumericVector y, Rcpp::IntegerMatrix inbag_counts) {
   Rcpp::NumericMatrix result(groups.nrow(), groups.ncol());
 
+  // Loop through trees
   for (size_t i = 0; i < groups.ncol(); ++i) {
-    // Loop through observations
-    std::vector<int> nodes;
-    std::vector<int> idx;
+    // Init result with NA
     for (size_t j = 0; j < groups.nrow(); ++j) {
       result(j, i) = NA_REAL;
-      nodes.push_back(groups(j, i));
-      idx.push_back(j);
     }
-    // sort the relevant array by nodes
-    std::sort(idx.begin(), idx.end(),
-               [&](int n1, int n2){ return nodes[n1] < nodes[n2]; });
+    
+    // Order by terminal node ID
+    std::vector<size_t> idx(groups.nrow());
+    std::iota(idx.begin(), idx.end(), 0);
+    std::sort(std::begin(idx), std::end(idx), [&](size_t j1, size_t j2) {return groups(j1, i) < groups(j2, i);});
 
-    for (int j = 0; j < idx.size();) {
-      int k = j;
-      while (k != idx.size() && nodes[idx[j]] == nodes[idx[k]]) ++k;
-      for (int l = j; l < k; ++l) {
-        if (inbag_counts(idx[l], i) > 0) continue;
-        if (k-j > 1) {
-          int rnd = l;
-          while (rnd == l) rnd = j - 1 + Rcpp::sample(k-j, 1, false)[0];
+    // Loop through change points (next node)
+    size_t j = 0;
+    while(j < idx.size()) {
+      // Find next change point
+      size_t k = j;
+      while (k < idx.size() && groups(idx[j], i) == groups(idx[k], i)) {
+        ++k;
+      }
+      
+      // If other observation in same node
+      if (k - j >= 2) {
+        // Loop through observations between change points
+        for (size_t l = j; l < k; ++l) {
+          // Only OOB observations
+          if (inbag_counts(idx[l], i) > 0) {
+            continue;
+          }
+          
+          // Select random observation in same terminal node, retry if same obs. selected
+          size_t rnd = l;
+          while (rnd == l) {
+            rnd = j - 1 + Rcpp::sample(k - j, 1, false)[0];
+          }
           result(idx[l], i) = y(idx[rnd]);
         }
       }
+
+      // Next change point
       j = k;
     }
   }
