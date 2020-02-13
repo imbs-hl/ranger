@@ -953,6 +953,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (respect.unordered.factors == "order" && ncol(x) > 0) {
       result$forest$covariate.levels <- covariate.levels
     }
+    
+    ## Selected variables as data.frame
+    result$forest$variable.selected <- t(as.data.frame(result$forest$variable.selected))
+    colnames(result$forest$variable.selected) <- all.independent.variable.names
+    rownames(result$forest$variable.selected) <- NULL
   }
   
   class(result) <- "ranger"

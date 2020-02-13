@@ -22,7 +22,7 @@ Tree::Tree() :
         false), split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
         DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
-        0) {
+        0), variable_selected(0) {
 }
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -33,7 +33,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(
         0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
         DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
-        0) {
+        0), variable_selected(0) {
 }
 
 void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
@@ -83,11 +83,12 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
   }
 }
 
-void Tree::grow(std::vector<double>* variable_importance) {
+void Tree::grow(std::vector<double>* variable_importance, std::vector<bool>* variable_selected) {
   // Allocate memory for tree growing
   allocateMemory();
 
   this->variable_importance = variable_importance;
+  this->variable_selected = variable_selected;
 
 // Bootstrap, dependent if weighted or not and with or without replacement
   if (!case_weights->empty()) {
@@ -301,6 +302,12 @@ bool Tree::splitNode(size_t nodeID) {
     // Terminal node
     return true;
   }
+
+  // Save selected variables
+  for (auto& varID : possible_split_varIDs) {
+    (*variable_selected)[data->getUnpermutedVarID(varID)] = true;
+  }
+
 
   size_t split_varID = split_varIDs[nodeID];
   double split_value = split_values[nodeID];

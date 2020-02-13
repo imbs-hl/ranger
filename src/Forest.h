@@ -125,6 +125,9 @@ public:
   size_t getNumIndependentVariables() const {
     return num_independent_variables;
   }
+  const std::vector<std::vector<bool>>& getVariableSelected() const {
+    return variable_selected;
+  }
 
   const std::vector<bool>& getIsOrderedVariable() const {
     return data->getIsOrderedVariable();
@@ -233,6 +236,9 @@ protected:
 
   // Pre-selected bootstrap samples (per tree)
   std::vector<std::vector<size_t>> manual_inbag;
+
+  // Save if variable selected for splitting in a tree
+  std::vector<std::vector<bool>> variable_selected;
 
   // Random number generator
   std::mt19937_64 random_number_generator;
