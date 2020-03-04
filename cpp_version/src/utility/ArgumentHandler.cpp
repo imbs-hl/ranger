@@ -518,11 +518,11 @@ void ArgumentHandler::checkArguments() {
         throw std::runtime_error("The regularization coefficients must be positive.");
       }
     }
-  }
 
-  if (nthreads != 1) {
-    std::cout << "Warning: Paralellization deactivated (regularization used)." << std::endl;
-    nthreads = 1;
+    if (nthreads != 1) {
+      std::cout << "Warning: Paralellization deactivated (regularization used)." << std::endl;
+      nthreads = 1;
+    }
   }
 }
 
