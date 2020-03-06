@@ -57,9 +57,20 @@ enum ImportanceMode {
   IMP_PERM_LIAW = 4,
   IMP_PERM_RAW = 3,
   IMP_GINI_CORRECTED = 5,
-  IMP_PERM_CASEWISE = 6
+  IMP_PERM_CASEWISE = 6,
+  IMP_PERM_BLOCK = 7
 };
-const uint MAX_IMP_MODE = 6;
+const uint MAX_IMP_MODE = 7;
+
+// Bootstrap mode
+enum BootstrapTS {
+  IID = 1,
+  NONOVERLAPPING = 2,
+  MOVING = 3,
+  STATIONARY = 4,
+  CIRCULAR = 5,
+  SEASONAL = 6
+};
 
 // Split mode
 enum SplitRule {
@@ -98,6 +109,10 @@ const uint DEFAULT_NUM_RANDOM_SPLITS = 1;
 
 const double DEFAULT_SAMPLE_FRACTION_REPLACE = 1;
 const double DEFAULT_SAMPLE_FRACTION_NOREPLACE = 0.632;
+
+const uint DEFAULT_BLOCK_SIZE = 10;
+const uint DEFAULT_PERIOD = 1;
+const BootstrapTS DEFAULT_BOOTSTRAPTS = IID;
 
 // Interval to print progress in seconds
 const double STATUS_INTERVAL = 30.0;

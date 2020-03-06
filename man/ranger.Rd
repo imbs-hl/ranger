@@ -42,7 +42,11 @@ ranger(
   status.variable.name = NULL,
   classification = NULL,
   x = NULL,
-  y = NULL
+  y = NULL,
+  bootstrap.ts = NULL,
+  by.end = TRUE,
+  block.size = 10,
+  period = 1
 )
 }
 \arguments{
@@ -121,6 +125,14 @@ ranger(
 \item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
 
 \item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
+
+\item{bootstrap.ts}{Bootstrapping mode : NULL for iid observations, "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks, and "seasonal" for seasonal blocks.}
+
+\item{by.end}{Logical. Build block by the end of time series or not. Default = TRUE.}
+
+\item{block.size}{Number of observations in one block only if bootstrap by block is activated (bootstrap.ts has non null value).}
+
+\item{period}{Number of steps of one period. Only for the 'seasonal' block bootstrap.}
 }
 \value{
 Object of class \code{ranger} with elements
