@@ -9,3 +9,7 @@ numSmaller <- function(values, reference) {
     .Call(`_ranger_numSmaller`, values, reference)
 }
 
+randomObsNode <- function(groups, y, inbag_counts) {
+    .Call(`_ranger_randomObsNode`, groups, y, inbag_counts)
+}
+
