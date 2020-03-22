@@ -86,7 +86,7 @@ double TreeRegression::estimate(size_t nodeID) {
 }
 
 void TreeRegression::appendToFileInternal(std::ofstream& file) { // #nocov start
-// Empty on purpose
+  // Empty on purpose
 } // #nocov end
 
 bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
@@ -143,7 +143,7 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
 }
 
 void TreeRegression::createEmptyNodeInternal() {
-// Empty on purpose
+  // Empty on purpose
 }
 
 double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
@@ -198,16 +198,16 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
     }
   }
 
-// Stop if no good split found
+  // Stop if no good split found
   if (best_decrease < 0) {
     return true;
   }
 
-// Save best values
+  // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
 
-// Compute decrease of impurity for this node and add to variable importance if needed
+  // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
@@ -364,21 +364,21 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
 void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
     double& best_value, size_t& best_varID, double& best_decrease) {
 
-// Create possible split values
+  // Create possible split values
   std::vector<double> factor_levels;
   data->getAllValues(factor_levels, sampleIDs, varID, start_pos[nodeID], end_pos[nodeID]);
 
-// Try next variable if all equal for this
+  // Try next variable if all equal for this
   if (factor_levels.size() < 2) {
     return;
   }
 
-// Number of possible splits is 2^num_levels
+  // Number of possible splits is 2^num_levels
   size_t num_splits = (1ULL << factor_levels.size());
 
-// Compute decrease of impurity for each possible split
-// Split where all left (0) or all right (1) are excluded
-// The second half of numbers is just left/right switched the first half -> Exclude second half
+  // Compute decrease of impurity for each possible split
+  // Split where all left (0) or all right (1) are excluded
+  // The second half of numbers is just left/right switched the first half -> Exclude second half
   for (size_t local_splitID = 1; local_splitID < num_splits / 2; ++local_splitID) {
 
     // Compute overall splitID by shifting local factorIDs to global positions
