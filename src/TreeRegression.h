@@ -82,10 +82,26 @@ private:
   void findBestSplitValueBeta(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node, double& best_value,
       size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
       std::vector<double>& sums_right, std::vector<size_t>& n_right);
+  
+  bool findBestSplitPoisson(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
+  void findBestSplitValuePoisson(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node, double& best_value,
+      size_t& best_varID, double& best_decrease);
+  void findBestSplitValuePoisson(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node, double& best_value,
+      size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+      std::vector<double>& sums_right, std::vector<size_t>& n_right);
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
   double computePredictionMSE();
+  
+  // Compute sum of responses in node. As in-class definition, this is inline by default.
+  double sumNodeResponse(size_t nodeID) {
+    double sum_node = 0;
+    for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+      sum_node += data->get_y(sampleIDs[pos], 0);
+    }
+    return sum_node;
+  }
 
   void cleanUpInternal() override {
     counter.clear();

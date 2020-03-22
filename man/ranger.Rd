@@ -22,6 +22,7 @@ ranger(
   num.random.splits = 1,
   alpha = 0.5,
   minprop = 0.1,
+  poisson.tau = 1,
   split.select.weights = NULL,
   always.split.variables = NULL,
   respect.unordered.factors = NULL,
@@ -72,13 +73,18 @@ ranger(
 
 \item{class.weights}{Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.}
 
-\item{splitrule}{Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
+\item{splitrule}{Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini".
+For regression "variance", "extratrees", "maxstat", "beta" or "poisson" with default "variance".
+For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
 
 \item{num.random.splits}{For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.}
 
 \item{alpha}{For "maxstat" splitrule: Significance threshold to allow splitting.}
 
 \item{minprop}{For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.}
+
+\item{poisson.tau}{For "poisson" splitrule: The coefficient of variation of the (expected) frequency is \eqn{1/\tau}.
+If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parend) / (\tau + samples(child) mean(parend))}.}
 
 \item{split.select.weights}{Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 

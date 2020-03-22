@@ -17,31 +17,32 @@
 namespace ranger {
 
 Tree::Tree() :
-    mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_weights(0), case_weights(
-        0), manual_inbag(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(
-        false), split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
-        true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
-        0) {
+    mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_weights(0),
+    case_weights(0), manual_inbag(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0),
+    regularization_factor(0), regularization_usedepth(false), split_varIDs_used(0), variable_importance(0),
+    importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(0),
+    memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP),
+    poisson_tau(DEFAULT_POISSON_TAU), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH),
+    depth(0), last_left_nodeID(0) {
 }
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values) :
-    mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_weights(0), case_weights(
-        0), manual_inbag(0), split_varIDs(split_varIDs), split_values(split_values), child_nodeIDs(child_nodeIDs), oob_sampleIDs(
-        0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false), split_varIDs_used(
-        0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(
-        0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
-        DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
-        0) {
+    mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_weights(0),
+    case_weights(0), manual_inbag(0), split_varIDs(split_varIDs), split_values(split_values), child_nodeIDs(child_nodeIDs),
+    oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false),
+    split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true),
+    sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA),
+    minprop(DEFAULT_MINPROP), poisson_tau(DEFAULT_POISSON_TAU), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS),
+    max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0) {
 }
 
 void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
     std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
-    double minprop, bool holdout, uint num_random_splits, uint max_depth, std::vector<double>* regularization_factor,
-    bool regularization_usedepth, std::vector<bool>* split_varIDs_used) {
+    double minprop, double poisson_tau, bool holdout, uint num_random_splits, uint max_depth,
+    std::vector<double>* regularization_factor, bool regularization_usedepth, std::vector<bool>* split_varIDs_used) {
 
   this->data = data;
   this->mtry = mtry;
@@ -69,6 +70,7 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
   this->holdout = holdout;
   this->alpha = alpha;
   this->minprop = minprop;
+  this->poisson_tau = poisson_tau;
   this->num_random_splits = num_random_splits;
   this->max_depth = max_depth;
   this->regularization_factor = regularization_factor;
@@ -89,7 +91,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
 
   this->variable_importance = variable_importance;
 
-// Bootstrap, dependent if weighted or not and with or without replacement
+  // Bootstrap, dependent if weighted or not and with or without replacement
   if (!case_weights->empty()) {
     if (sample_with_replacement) {
       bootstrapWeighted();
@@ -154,7 +156,7 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 
   prediction_terminal_nodeIDs.resize(num_samples_predict, 0);
 
-// For each sample start in root, drop down the tree and return final value
+  // For each sample start in root, drop down the tree and return final value
   for (size_t i = 0; i < num_samples_predict; ++i) {
     size_t sample_idx;
     if (oob_prediction) {
