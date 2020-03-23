@@ -108,7 +108,7 @@ void ForestRegression::predictInternal(size_t sample_idx) {
 
 void ForestRegression::computePredictionErrorInternal() {
 
-// For each sample sum over trees where sample is OOB
+  // For each sample sum over trees where sample is OOB
   std::vector<size_t> samples_oob_count;
   predictions = std::vector<std::vector<std::vector<double>>>(1,
       std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
@@ -123,7 +123,7 @@ void ForestRegression::computePredictionErrorInternal() {
     }
   }
 
-// MSE with predictions and true data
+  // MSE with predictions and true data
   size_t num_predictions = 0;
   overall_prediction_error = 0;
   for (size_t i = 0; i < predictions[0][0].size(); ++i) {
@@ -150,7 +150,7 @@ void ForestRegression::writeOutputInternal() {
 
 void ForestRegression::writeConfusionFile() {
 
-// Open confusion file for writing
+  // Open confusion file for writing
   std::string filename = output_prefix + ".confusion";
   std::ofstream outfile;
   outfile.open(filename, std::ios::out);
@@ -158,7 +158,7 @@ void ForestRegression::writeConfusionFile() {
     throw std::runtime_error("Could not write to confusion file: " + filename + ".");
   }
 
-// Write confusion to file
+  // Write confusion to file
   outfile << "Overall OOB prediction error (MSE): " << overall_prediction_error << std::endl;
 
   outfile.close();
@@ -168,7 +168,7 @@ void ForestRegression::writeConfusionFile() {
 
 void ForestRegression::writePredictionFile() {
 
-// Open prediction file for writing
+  // Open prediction file for writing
   std::string filename = output_prefix + ".prediction";
   std::ofstream outfile;
   outfile.open(filename, std::ios::out);
@@ -204,21 +204,21 @@ void ForestRegression::writePredictionFile() {
 
 void ForestRegression::saveToFileInternal(std::ofstream& outfile) {
 
-// Write num_variables
+  // Write num_variables
   outfile.write((char*) &num_independent_variables, sizeof(num_independent_variables));
 
-// Write treetype
+  // Write treetype
   TreeType treetype = TREE_REGRESSION;
   outfile.write((char*) &treetype, sizeof(treetype));
 }
 
 void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
 
-// Read number of variables
+  // Read number of variables
   size_t num_variables_saved;
   infile.read((char*) &num_variables_saved, sizeof(num_variables_saved));
 
-// Read treetype
+  // Read treetype
   TreeType treetype;
   infile.read((char*) &treetype, sizeof(treetype));
   if (treetype != TREE_REGRESSION) {
