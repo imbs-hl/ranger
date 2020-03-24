@@ -208,7 +208,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
     double& best_decrease) {
 
-// Create possible split values
+  // Create possible split values
   std::vector<double> possible_split_values;
   data->getAllValues(possible_split_values, sampleIDs, varID, start_pos[nodeID], end_pos[nodeID]);
 
@@ -755,9 +755,9 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
     class_counts.resize(class_values->size(), 0);
 
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
-        size_t sampleID = sampleIDs[pos];
-        uint sample_classID = (*response_classIDs)[sampleID];
-        class_counts[sample_classID]++;
+      size_t sampleID = sampleIDs[pos];
+      uint sample_classID = (*response_classIDs)[sampleID];
+      class_counts[sample_classID]++;
     }
     double sum_node = 0;
     for (size_t i = 0; i < class_counts.size(); ++i) {

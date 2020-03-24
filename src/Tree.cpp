@@ -475,7 +475,7 @@ void Tree::bootstrapWeighted() {
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
   
   std::discrete_distribution<> weighted_dist(case_weights->begin(), case_weights->end());
-  
+
   // Start with all samples OOB
   inbag_counts.resize(num_samples, 0);
   

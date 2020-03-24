@@ -42,9 +42,10 @@ void TreeRegression::allocateMemory() {
 }
 
 double TreeRegression::estimate(size_t nodeID) {
-  
+
   // Mean of responses of samples in node
   double sum_responses_in_node = sumNodeResponse(nodeID);
+
   size_t num_samples_in_node = end_pos[nodeID] - start_pos[nodeID];
   if (splitrule == POISSON && sum_responses_in_node == 0.) {
     // Poisson is not allowed to predict 0.
@@ -211,7 +212,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
-  
+
   // Regularization
   saveSplitVarID(best_varID);
 
@@ -235,12 +236,12 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-            possible_split_values, sums_right, n_right);
+        possible_split_values, sums_right, n_right);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
     findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
-           possible_split_values, sums, counter);
+        possible_split_values, sums, counter);
   }
 }
 
@@ -565,7 +566,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
-  
+
   // Regularization
   saveSplitVarID(best_varID);
 
@@ -1062,7 +1063,7 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
 
     // Account for the regularization
     regularize(impurity_node, varID);
-    
+
     best_decrease = decrease - impurity_node;
   }
 

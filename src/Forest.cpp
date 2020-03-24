@@ -307,8 +307,8 @@ void Forest::run(bool verbose, bool compute_oob_error) {
       computePredictionError();
     }
 
-    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW ||
-        importance_mode == IMP_PERM_RAW || importance_mode == IMP_PERM_CASEWISE) {
+    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW || importance_mode == IMP_PERM_RAW
+        || importance_mode == IMP_PERM_CASEWISE) {
       if (verbose && verbose_out) {
         *verbose_out << "Computing permutation variable importance .." << std::endl;
       }
@@ -613,7 +613,7 @@ void Forest::predict() {
 
 void Forest::computePredictionError() {
 
-// Predict trees in multiple threads
+  // Predict trees in multiple threads
 #ifdef OLD_WIN_R_BUILD
   // #nocov start
   progress = 0;
@@ -698,12 +698,9 @@ void Forest::computePermutationImportance() {
     if (importance_mode == IMP_PERM_CASEWISE) {
       variable_importance_casewise_threads[i].resize(num_independent_variables * num_samples, 0);
     }
-    threads.emplace_back(
-          &Forest::computeTreePermutationImportanceInThread, this, i,
-          std::ref(variable_importance_threads[i]),
-          std::ref(variance_threads[i]),
-          std::ref(variable_importance_casewise_threads[i])
-        );
+    threads.emplace_back(&Forest::computeTreePermutationImportanceInThread, this, i,
+        std::ref(variable_importance_threads[i]), std::ref(variance_threads[i]),
+        std::ref(variable_importance_casewise_threads[i]));
   }
   showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
@@ -999,8 +996,7 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     }
 
     if (num_weights - num_zero_weights < mtry) {
-      throw std::runtime_error(
-          "Too many zeros in split select weights. Need at least mtry variables to split at.");
+      throw std::runtime_error("Too many zeros in split select weights. Need at least mtry variables to split at.");
     }
   }
 }
