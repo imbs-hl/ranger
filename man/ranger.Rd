@@ -84,7 +84,7 @@ For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
 \item{minprop}{For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.}
 
 \item{poisson.tau}{For "poisson" splitrule: The coefficient of variation of the (expected) frequency is \eqn{1/\tau}.
-If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parend) / (\tau + samples(child) mean(parend))}.}
+If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parent) / (\tau + samples(child) mean(parent))}.}
 
 \item{split.select.weights}{Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 

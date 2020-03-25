@@ -84,11 +84,11 @@ private:
       std::vector<double>& sums_right, std::vector<size_t>& n_right);
   
   bool findBestSplitPoisson(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
-  void findBestSplitValuePoisson(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node, double& best_value,
-      size_t& best_varID, double& best_decrease);
-  void findBestSplitValuePoisson(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node, double& best_value,
-      size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
-      std::vector<double>& sums_right, std::vector<size_t>& n_right);
+  void findBestSplitValuePoissonSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+      double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValuePoissonSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+      double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+      std::vector<double>& sums, std::vector<size_t>& counter);
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 

@@ -933,7 +933,8 @@ bool TreeRegression::findBestSplitPoisson(size_t nodeID, std::vector<size_t>& po
   
   // For all possible split variables find best split value
   for (auto& varID : possible_split_varIDs) {
-    findBestSplitValuePoisson(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+    findBestSplitValuePoissonSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
+                                    best_decrease);
   }
   
   // Stop if no good split found
@@ -956,8 +957,8 @@ bool TreeRegression::findBestSplitPoisson(size_t nodeID, std::vector<size_t>& po
   return false;
 }
 
-void TreeRegression::findBestSplitValuePoisson(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                               double& best_value, size_t& best_varID, double& best_decrease) {
+void TreeRegression::findBestSplitValuePoissonSmallQ(size_t nodeID, size_t varID, double sum_node,
+    size_t num_samples_node, double& best_value, size_t& best_varID, double& best_decrease) {
   
   // Create possible split values
   std::vector<double> possible_split_values;
@@ -973,53 +974,53 @@ void TreeRegression::findBestSplitValuePoisson(size_t nodeID, size_t varID, doub
   if (memory_saving_splitting) {
     std::vector<double> sums_right(num_splits);
     std::vector<size_t> n_right(num_splits);
-    findBestSplitValuePoisson(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
+    findBestSplitValuePoissonSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
                               possible_split_values, sums_right, n_right);
   } else {
     std::fill_n(sums.begin(), num_splits, 0);
     std::fill_n(counter.begin(), num_splits, 0);
-    findBestSplitValuePoisson(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
+    findBestSplitValuePoissonSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease,
                               possible_split_values, sums, counter);
   }
 }
 
-void TreeRegression::findBestSplitValuePoisson(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
-                                               double& best_value, size_t& best_varID, double& best_decrease,
-                                               std::vector<double> possible_split_values,
-                                               std::vector<double>& sums_right, std::vector<size_t>& n_right) {
-  // -1 because no split possible at largest value
-  const size_t num_splits = possible_split_values.size() - 1;
-  
-  // Sum in right child and possbile split
+void TreeRegression::findBestSplitValuePoissonSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+    double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+    std::vector<double>& sums, std::vector<size_t>& counter) {
+
+  // Sum and sample count for possbile splits
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get_x(sampleID, varID);
-    double response = data->get_y(sampleID, 0);
+    size_t idx = std::lower_bound(possible_split_values.begin(), possible_split_values.end(),
+                                  data->get_x(sampleID, varID)) - possible_split_values.begin();
     
-    // Count samples until split_value reached
-    for (size_t i = 0; i < num_splits; ++i) {
-      if (value > possible_split_values[i]) {
-        ++n_right[i];
-        sums_right[i] += response;
-      } else {
-        break;
-      }
-    }
+    sums[idx] += data->get_y(sampleID, 0);
+    ++counter[idx];
   }
   
-  // Compute Poisson deviance for each possible split
-  for (size_t i = 0; i < num_splits; ++i) {
+  size_t n_left = 0;
+  double sum_left = 0;
+  
+  // Compute decrease in Poisson deviance for each possible split
+  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
     
-    // Stop if right child empty
-    size_t n_left = num_samples_node - n_right[i];
-    if (n_right[i] == 0) {
+    // Stop if nothing here
+    if (counter[i] == 0) {
       continue;
     }
     
+    n_left += counter[i];
+    sum_left += sums[i];
+    
+    // Stop if right child empty
+    size_t n_right = num_samples_node - n_left;
+    if (n_right == 0) {
+      break;
+    }
+    
     // Compute mean
-    double sum_right = sums_right[i];
-    double mean_right = sum_right / (double) n_right[i];
-    double sum_left = sum_node - sum_right;
+    double sum_right = sum_node - sum_left;
+    double mean_right = sum_right / (double) n_right;
     double mean_left = sum_left / (double) n_left;
     
     // Poisson deviance = 2 * (y_true * log(y_true/y_pred) + y_pred - y_true)
