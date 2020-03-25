@@ -105,7 +105,7 @@
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param poisson.tau For "poisson" splitrule: The coefficient of variation of the (expected) frequency is \eqn{1/\tau}.
-##'   If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parend) / (\tau + samples(child) mean(parend))}.
+##'   If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parent) / (\tau + samples(child) mean(parent))}.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 

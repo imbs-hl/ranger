@@ -62,6 +62,7 @@ double TreeRegression::estimate(size_t nodeID) {
       if (child_nodeIDs[0][i] == nodeID) {
         parent_nodeID = i;
         found = true;
+        break;
       }
     }
     if (!found) {
@@ -71,6 +72,7 @@ double TreeRegression::estimate(size_t nodeID) {
         if (child_nodeIDs[1][i] == nodeID) {
           parent_nodeID = i;
           found = true;
+          break;
         }
       }
     }

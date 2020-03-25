@@ -1,4 +1,5 @@
 library(ranger)
+context("ranger_poisson")
 
 # Generate poisson distributed outcome
 set.seed(42)
