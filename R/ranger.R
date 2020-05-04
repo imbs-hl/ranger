@@ -366,6 +366,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       } else {
         num.y <- y
       }
+      
+      ## Save non-recoded x if quantile regression
+      if (quantreg) {
+        x_orig <- x
+      }
 
       ## Recode each column
       x[recode.idx] <- lapply(x[recode.idx], function(xx) {
@@ -959,7 +964,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Prepare quantile prediction
   if (quantreg) {
-    terminal.nodes <- predict(result, x, type = "terminalNodes")$predictions + 1
+    if (respect.unordered.factors == "order" && !is.null(x_orig)) {
+      terminal.nodes <- predict(result, x_orig, type = "terminalNodes")$predictions + 1
+    } else {
+      terminal.nodes <- predict(result, x, type = "terminalNodes")$predictions + 1
+    }
+  
     n <- result$num.samples
     result$random.node.values <- matrix(nrow = max(terminal.nodes), ncol = num.trees)
     
