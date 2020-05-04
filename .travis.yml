@@ -21,6 +21,7 @@ os: linux  # different CPU architectures are only supported on Linux
 
 latex: false
 r_check_args: --no-manual --no-build-vignettes --as-cran
+pandoc: false
 
 notifications:
   email:
