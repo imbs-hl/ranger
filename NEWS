@@ -1,4 +1,8 @@
 
+##### Version 0.12.3
+* Add ... argument to ranger()
+* Bug fixes
+
 ##### Version 0.12.2
 * Bug fixes
 

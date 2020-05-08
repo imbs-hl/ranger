@@ -42,7 +42,8 @@ ranger(
   status.variable.name = NULL,
   classification = NULL,
   x = NULL,
-  y = NULL
+  y = NULL,
+  ...
 )
 }
 \arguments{
@@ -121,6 +122,8 @@ ranger(
 \item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
 
 \item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
+
+\item{...}{Further arguments passed to or from other methods (currently ignored).}
 }
 \value{
 Object of class \code{ranger} with elements

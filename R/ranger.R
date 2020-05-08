@@ -123,6 +123,7 @@
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
 ##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
 ##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
+##' @param ... Further arguments passed to or from other methods (currently ignored).
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
@@ -223,7 +224,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL, x = NULL, y = NULL) {
+                   classification = NULL, x = NULL, y = NULL, ...) {
+  
+  ## Handle ... arguments
+  if (length(list(...)) > 0) {
+    warning(paste("Unused arguments:", paste(names(list(...)), collapse = ", ")))
+  }
   
   ## By default not in GWAS mode
   snp.data <- as.matrix(0)
