@@ -88,6 +88,27 @@ double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* pred
 
 bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
+  // Stop if node is pure
+  bool pure = true;
+  double pure_time = 0;
+  double pure_status = 0;
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    double time = data->get_y(sampleID, 0);
+    double status = data->get_y(sampleID, 1);
+    if (pos != start_pos[nodeID] && (time != pure_time || status != pure_status)) {
+      pure = false;
+      break;
+    }
+    pure_time = time;
+    pure_status = status;
+  }
+  if (pure) {
+    computeDeathCounts(nodeID);
+    computeSurvival(nodeID);
+    return true;
+  }
+
   if (splitrule == MAXSTAT) {
     return findBestSplitMaxstat(nodeID, possible_split_varIDs);
   } else if (splitrule == EXTRATREES) {
