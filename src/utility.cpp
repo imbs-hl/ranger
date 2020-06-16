@@ -27,10 +27,6 @@
 
 namespace ranger {
 
-#ifndef lgamma_r
-#define lgamma_r std::lgamma_r
-#endif
-
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts) {
 
   result.reserve(num_parts + 1);
@@ -687,8 +683,8 @@ double betaLogLik(double y, double mean, double phi) {
     phi = 1 - std::numeric_limits<double>::epsilon();
   }
 
-  // Sign for gamma function, not used
-  int gamma_sign;
+  int gamma_sign; // Sign for gamma function, not used
+  using namespace std; // Because lgamma_r is sometimes in global namespace, sometimes in std
 
   return (lgamma_r(phi, &gamma_sign) - lgamma_r(mean * phi, &gamma_sign) - lgamma_r((1 - mean) * phi, &gamma_sign) + (mean * phi - 1) * log(y)
   + ((1 - mean) * phi - 1) * log(1 - y));
