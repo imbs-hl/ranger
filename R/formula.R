@@ -14,7 +14,11 @@ parse.formula <- function(formula, data, env = parent.frame()) {
   t <- terms(f, data = data)
   
   ## Get dependent var(s)
-  response <- data.frame(eval(f[[2]], envir = data, enclos = env))
+  if (is.matrix(data)) {
+    response <- data.frame(eval(f[[2]], envir = data.frame(data[, all.vars(f[[2]]), drop = FALSE]), enclos = env))
+  } else {
+    response <- data.frame(eval(f[[2]], envir = data, enclos = env))
+  }
   colnames(response) <- deparse(f[[2]])
   
   ## Get independent vars

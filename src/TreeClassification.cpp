@@ -210,7 +210,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
     double& best_decrease) {
 
-// Create possible split values
+  // Create possible split values
   std::vector<double> possible_split_values;
   data->getAllValues(possible_split_values, sampleIDs, varID, start_pos[nodeID], end_pos[nodeID]);
 
