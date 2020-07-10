@@ -837,8 +837,10 @@ void TreeClassification::addGiniOobImportance(size_t nodeID, size_t varID, doubl
   }
 
   // Decrease of impurity
-  double decrease = sum_right / (double) n_right_oob + sum_left / (double) n_left_oob - sum_all / (double) n_oob;
-  (*variable_importance)[varID] += decrease;
+  if (n_right_oob > 0 && n_left_oob > 0) {
+    double decrease = sum_right / (double) n_right_oob + sum_left / (double) n_left_oob - sum_all / (double) n_oob;
+    (*variable_importance)[varID] += decrease;
+  }
 }
 
 void TreeClassification::bootstrapClassWise() {
