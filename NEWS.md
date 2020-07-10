@@ -1,4 +1,7 @@
 
+##### Version 0.12.4
+* Add OOB impurity importance
+
 ##### Version 0.12.3
 * Add ... argument to ranger()
 * Bug fixes
