@@ -54,7 +54,7 @@ ranger(
 
 \item{mtry}{Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. Alternatively, a single argument function returning an integer, given the number of independent variables.}
 
-\item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.}
+\item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'impurity_oob', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.}
 
 \item{write.forest}{Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.}
 
@@ -183,6 +183,7 @@ The 'impurity_corrected' importance measure is unbiased in terms of the number o
 It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
 See Nembrini et al. (2018) for details.
 This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
+The 'impurity_oob' importance measure is based on a combination of inbag and out-of-bag observations and is also unbiased, see Zhou & Hooker (2019) or Loecher (2020).
 
 Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
 If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
@@ -260,6 +261,8 @@ ranger(trait ~ ., data = dat.gwaa)
   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{https://doi.org/10.1198/106186008X344522}.
   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
   \item Deng & Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. \url{https://doi.org/10.1109/IJCNN.2012.6252640}.
+  \item Zhou & Hooker (2019). Unbiased measurement of feature importance in tree-based methods. arXiv:1903.05179. \url{https://arxiv.org/abs/1903.05179}.
+  \item Loecher (2020). Unbiased variable importance for random forests. Commun Stat - Theory Methods. \url{https://doi.org/10.1080/03610926.2020.1764042}.
   }
 }
 \seealso{
