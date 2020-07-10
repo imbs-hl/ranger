@@ -538,6 +538,8 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
   // Compute gini index for this node and to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addGiniImportance(nodeID, best_varID, best_decrease);
+  } else if (importance_mode == IMP_GINI_OOB) {
+    addGiniOobImportance(nodeID, best_varID, best_value);
   }
 
   // Regularization
@@ -786,10 +788,6 @@ void TreeClassification::addGiniImportance(size_t nodeID, size_t varID, double d
 }
 
 void TreeClassification::addGiniOobImportance(size_t nodeID, size_t varID, double split_value) {
-
-  // TODO: Hellinger
-  // TODO: Other calls here and other tree types
-
   size_t num_classes = class_values->size();
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
 
