@@ -813,11 +813,8 @@ void TreeClassification::addGiniOobImportance(size_t nodeID, size_t varID, doubl
   size_t n_left_oob = 0;
   std::vector<size_t> class_counts_all_oob(num_classes);
   std::vector<size_t> class_counts_left_oob(num_classes);
-
-  // Impurity in OOB observations
   for (auto& sampleID : oob_sampleIDs) {
     size_t classID = (*response_classIDs)[sampleID];
-
     ++class_counts_all_oob[classID];
 
     if (data->get_x(sampleID, varID) <= split_value) {
@@ -825,8 +822,10 @@ void TreeClassification::addGiniOobImportance(size_t nodeID, size_t varID, doubl
       ++n_left_oob;
     }
   }
+  size_t n_oob = oob_sampleIDs.size();
+  size_t n_right_oob = n_oob - n_left_oob;
 
-  size_t n_right_inbag = num_samples_node - n_left_inbag;
+  // Impurity in OOB observations
   double sum_left = 0;
   double sum_right = 0;
   double sum_all = 0;
@@ -840,7 +839,7 @@ void TreeClassification::addGiniOobImportance(size_t nodeID, size_t varID, doubl
   }
 
   // Decrease of impurity
-  double decrease = sum_right / (double) n_right_inbag + sum_left / (double) n_left_inbag - sum_all / (double) num_samples_node;
+  double decrease = sum_right / (double) n_right_oob + sum_left / (double) n_left_oob - sum_all / (double) n_oob;
   (*variable_importance)[varID] += decrease;
 }
 
