@@ -905,6 +905,7 @@ void Forest::loadDependentVariableNamesFromFile(std::string filename) {
   }
 
   // Read dependent variable names
+  dependent_variable_names.clear();
   uint num_dependent_variables = 0;
   infile.read((char*) &num_dependent_variables, sizeof(num_dependent_variables));
   for (size_t i = 0; i < num_dependent_variables; ++i) {
