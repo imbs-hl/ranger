@@ -34,7 +34,7 @@ endif()
 ## ======================================================================================##
 include_directories(src src/utility src/Forest src/Tree)
 file(GLOB_RECURSE SOURCES src/*/*.cpp)
-file(GLOB_RECURSE HEADERS src/*/*.h)
+file(GLOB_RECURSE HEADERS ../src/*.h)
 
 ## ======================================================================================##
 ## Debug and release targets
@@ -64,6 +64,10 @@ add_library(ranger SHARED ${SOURCES})
 ## Executable
 ## ======================================================================================##
 add_executable(ranger-bin src/main.cpp)
+
+set_target_properties(ranger PROPERTIES
+        PUBLIC_HEADER "${HEADERS}"
+)
 target_link_libraries(ranger-bin ranger)
 set_target_properties(ranger-bin PROPERTIES OUTPUT_NAME ranger)
 
@@ -71,6 +75,5 @@ install(TARGETS
         ranger
         ranger-bin
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib)
-
-install(FILES ${HEADERS} DESTINATION include/ranger)
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include/ranger)
