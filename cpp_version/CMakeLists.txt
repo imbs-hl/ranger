@@ -33,7 +33,8 @@ endif()
 ## Subdirectories and source files
 ## ======================================================================================##
 include_directories(src src/utility src/Forest src/Tree)
-file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES src/*/*.cpp)
+file(GLOB_RECURSE HEADERS src/*/*.h)
 
 ## ======================================================================================##
 ## Debug and release targets
@@ -52,8 +53,24 @@ ADD_CUSTOM_TARGET(release
   COMMENT "Switch CMAKE_BUILD_TYPE to Release"
   )
 
+
+## ======================================================================================##
+## Library
+## ======================================================================================##
+
+add_library(ranger SHARED ${SOURCES})
+
 ## ======================================================================================##
 ## Executable
 ## ======================================================================================##
-add_executable(ranger ${SOURCES})
+add_executable(ranger-bin src/main.cpp)
+target_link_libraries(ranger-bin ranger)
+set_target_properties(ranger-bin PROPERTIES OUTPUT_NAME ranger)
 
+install(TARGETS
+        ranger
+        ranger-bin
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib)
+
+install(FILES ${HEADERS} DESTINATION include/ranger)
