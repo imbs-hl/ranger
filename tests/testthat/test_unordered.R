@@ -343,3 +343,11 @@ test_that("Partition splitting working for large number of levels", {
   expect_lte(max_split, n)
 })
 
+test_that("Order splitting working for quantreg forests", {
+  n <- 20
+  dt <- data.frame(x = sample(c("A", "B", "C"), n, replace = TRUE),
+                   y = rbinom(n, 1, 0.5), 
+                   stringsAsFactors = TRUE)
+  expect_silent(ranger(y ~ ., dt, num.trees = 5,
+                       quantreg = TRUE, respect.unordered.factors = 'order'))
+})

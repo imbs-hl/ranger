@@ -164,6 +164,23 @@ test_that("Prediction for probability is one probability per class, sum to 1", {
   expect_true(all(!ti.prob.formula$terminal | rowSums(ti.prob.formula[, 8:10]) == 1))
 })
 
+test_that("Prediction for probability has correct factor levels", {
+  dat <- iris[c(101:150, 1:100), ]
+  rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 5, probability = TRUE)
+  
+  # Predict
+  pred_rf <- predict(rf, dat, num.trees = 1)$predictions
+  
+  # Predict with treeInfo
+  ti <- treeInfo(rf)
+  terminal_nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  pred_ti <- as.matrix(ti[terminal_nodes + 1, grep("pred", colnames(ti))])
+  colnames(pred_ti) <- gsub("pred\\.", "", colnames(pred_ti))
+  rownames(pred_ti) <- NULL
+  
+  expect_equal(pred_rf, pred_ti)
+})
+
 ## Survival
 rf.surv.formula <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
 rf.surv.first <- ranger(dependent.variable.name = "time", status.variable.name = "status", data = veteran[, c(3:4, 1:2, 5:8)], num.trees = 5)
