@@ -299,13 +299,14 @@ bool Tree::splitNode(size_t nodeID) {
   // Call subclass method, sets split_varIDs and split_values
   bool stop = splitNodeInternal(nodeID, possible_split_varIDs);
   if (stop) {
+    selected_variables->push_back(std::vector<size_t>());
+    
     // Terminal node
     return true;
   }
 
   // Save selected variables
   selected_variables->push_back(possible_split_varIDs);
-
 
   size_t split_varID = split_varIDs[nodeID];
   double split_value = split_values[nodeID];
