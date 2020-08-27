@@ -45,7 +45,7 @@ public:
 
   virtual void allocateMemory() = 0;
 
-  void grow(std::vector<double>* variable_importance, std::vector<bool>* variable_selected);
+  void grow(std::vector<double>* variable_importance, std::vector<std::vector<size_t>>* selected_variables);
 
   void predict(const Data* prediction_data, bool oob_prediction);
 
@@ -229,7 +229,7 @@ protected:
   size_t last_left_nodeID;
 
   // Save if variable selected for splitting in a tree
-  std::vector<bool>* variable_selected;
+  std::vector<std::vector<size_t>>* selected_variables;
 };
 
 } // namespace ranger

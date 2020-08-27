@@ -484,7 +484,7 @@ void Forest::grow() {
 
   // Init variable importance and selected variables
   variable_importance.resize(num_independent_variables, 0);
-  variable_selected.resize(num_trees, std::vector<bool>(num_independent_variables));
+  selected_variables.resize(num_trees);
 
   // Grow trees in multiple threads
 #ifdef OLD_WIN_R_BUILD
@@ -493,7 +493,7 @@ void Forest::grow() {
   clock_t start_time = clock();
   clock_t lap_time = clock();
   for (size_t i = 0; i < num_trees; ++i) {
-    trees[i]->grow(&variable_importance, &(variable_selected[i]));
+    trees[i]->grow(&variable_importance, &(selected_variables[i]));
     progress++;
     showProgress("Growing trees..", start_time, lap_time);
   }
@@ -765,7 +765,7 @@ void Forest::computePermutationImportance() {
 void Forest::growTreesInThread(uint thread_idx, std::vector<double>* variable_importance) {
   if (thread_ranges.size() > thread_idx + 1) {
     for (size_t i = thread_ranges[thread_idx]; i < thread_ranges[thread_idx + 1]; ++i) {
-      trees[i]->grow(variable_importance, &(variable_selected[i]));
+      trees[i]->grow(variable_importance, &(selected_variables[i]));
 
       // Check for user interrupt
 #ifdef R_BUILD

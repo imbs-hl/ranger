@@ -247,7 +247,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       forest_object.push_back(forest->getSplitVarIDs(), "split.varIDs");
       forest_object.push_back(forest->getSplitValues(), "split.values");
       forest_object.push_back(forest->getIsOrderedVariable(), "is.ordered");
-      forest_object.push_back(forest->getVariableSelected(), "variable.selected");
+      forest_object.push_back(forest->getSelectedVariables(), "selected.variables");
 
       if (snp_data.nrow() > 1 && order_snps) {
         // Exclude permuted SNPs (if any)
