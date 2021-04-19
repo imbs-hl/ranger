@@ -7,7 +7,7 @@
 getTerminalNodeIDs(rf, dat)
 }
 \arguments{
-\item{rf}{\code{ranger} object.}
+\item{rf}{\code{rangerts} object.}
 
 \item{dat}{New dataset. Terminal node IDs for this dataset are obtained.}
 }
@@ -15,11 +15,11 @@ getTerminalNodeIDs(rf, dat)
 Matrix with terminal nodeIDs for all observations in dataset and trees.
 }
 \description{
-This function is deprecated. 
+This function is deprecated.
 Please use predict() with \code{type = "terminalNodes"} instead.
 This function calls predict() now.
 }
 \examples{
-rf <- ranger(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
+rf <- rangerts(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
 getTerminalNodeIDs(rf, iris)
 }

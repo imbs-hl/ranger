@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef TREE_H_
@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class Tree {
 public:
@@ -40,7 +40,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth, 
+      uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth,
       BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period,
       std::vector<bool>* split_varIDs_used);
 
@@ -91,10 +91,10 @@ protected:
   void cutByBlock();
   void permuteByBlock(std::vector<size_t>& permutations);
   virtual double computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) = 0;
-  
+
   void bootstrap();
   void bootstrapWithoutReplacement();
-  
+
   void bootstrapMovingBlock();
   void bootstrapStationaryBlock();
   void bootstrapCircularBlock();
@@ -215,14 +215,14 @@ protected:
   std::vector<double>* regularization_factor;
   bool regularization_usedepth;
   std::vector<bool>* split_varIDs_used;
-  
-  
+
+
   //Bootstrap time series
   BootstrapTS bootstrap_ts;
   bool by_end;
   uint block_size;
   uint period;
-  
+
   // Variable importance for all variables
   std::vector<double>* variable_importance;
   ImportanceMode importance_mode;
@@ -244,6 +244,6 @@ protected:
   size_t last_left_nodeID;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* TREE_H_ */

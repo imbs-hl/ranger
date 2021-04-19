@@ -1,6 +1,6 @@
-library(ranger)
+library(rangerts)
 library(survival)
-context("ranger_regularization")
+context("rangerts_regularization")
 
 n <- 50
 p <- 4
@@ -18,10 +18,10 @@ get_num_splitvars <- function(rf) {
 test_that("same results with 1 and p regularization coefficients, regression", {
   seed <- runif(1 , 0, .Machine$integer.max)
   set.seed(seed)
-  rf1 <- ranger(y ~ ., dat_reg, num.trees = 5, num.threads = 1, 
+  rf1 <- rangerts(y ~ ., dat_reg, num.trees = 5, num.threads = 1,
                 regularization.factor = .1)
   set.seed(seed)
-  rf2 <- ranger(y ~ ., dat_reg, num.trees = 5, num.threads = 1, 
+  rf2 <- rangerts(y ~ ., dat_reg, num.trees = 5, num.threads = 1,
                 regularization.factor = rep(.1, p))
   expect_equal(rf1$prediction.error, rf2$prediction.error)
 })
@@ -29,117 +29,117 @@ test_that("same results with 1 and p regularization coefficients, regression", {
 test_that("same results with 1 and p regularization coefficients, classification", {
   seed <- runif(1 , 0, .Machine$integer.max)
   set.seed(seed)
-  rf1 <- ranger(y ~ ., dat_class, num.trees = 5, num.threads = 1, 
+  rf1 <- rangerts(y ~ ., dat_class, num.trees = 5, num.threads = 1,
                 regularization.factor = .1)
   set.seed(seed)
-  rf2 <- ranger(y ~ ., dat_class, num.trees = 5, num.threads = 1, 
+  rf2 <- rangerts(y ~ ., dat_class, num.trees = 5, num.threads = 1,
                 regularization.factor = rep(.1, p))
   expect_equal(rf1$prediction.error, rf2$prediction.error)
 })
 
 test_that("Error if maxstat splitrule and regularization", {
-  expect_error(ranger(y ~ ., dat_reg, num.trees = 5, splitrule = "maxstat", num.threads = 1, 
-                      regularization.factor = .0001, regularization.usedepth = TRUE), 
+  expect_error(rangerts(y ~ ., dat_reg, num.trees = 5, splitrule = "maxstat", num.threads = 1,
+                      regularization.factor = .0001, regularization.usedepth = TRUE),
                "Error: Regularization cannot be used with 'maxstat' splitrule\\.")
 })
 
 # Regression
 test_that("Fewer variables used with regularization, regression", {
-  rf_noreg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4)
-  rf_reg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4)
+  rf_reg <- rangerts(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, num.threads = 1,
                   regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, regression extratrees", {
-  rf_noreg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
-  rf_reg <- ranger(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
+  rf_reg <- rangerts(y ~ ., dat_reg, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, regression beta", {
   dat <- data.frame(y = rbinom(n, 1, .5), x = replicate(p, runif(n)))
-  rf_noreg <- ranger(y ~ ., dat, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta")
-  rf_reg <- ranger(y ~ ., dat, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta", num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta")
+  rf_reg <- rangerts(y ~ ., dat, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "beta", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 # Classification
 test_that("Fewer variables used with regularization, classification", {
-  rf_noreg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4)
-  rf_reg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4)
+  rf_reg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, classification extratrees", {
-  rf_noreg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
-  rf_reg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
+  rf_reg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, classification hellinger", {
-  rf_noreg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "hellinger")
-  rf_reg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "hellinger", num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "hellinger")
+  rf_reg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "hellinger", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 # Probability
 test_that("Fewer variables used with regularization, probability", {
-  rf_noreg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE)
-  rf_reg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE)
+  rf_reg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, probability extratrees", {
-  rf_noreg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "extratrees")
-  rf_reg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "extratrees", num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "extratrees")
+  rf_reg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "extratrees", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, probability hellinger", {
-  rf_noreg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "hellinger")
-  rf_reg <- ranger(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "hellinger", num.threads = 1, 
+  rf_noreg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "hellinger")
+  rf_reg <- rangerts(y ~ ., dat_class, num.trees = 5, min.node.size = 10, mtry = 4, probability = TRUE, splitrule = "hellinger", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 # Survival
 test_that("Fewer variables used with regularization, survival", {
-  rf_noreg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4)
-  rf_reg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, num.threads = 1, 
+  rf_noreg <- rangerts(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4)
+  rf_reg <- rangerts(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, survival extratrees", {
-  rf_noreg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
-  rf_reg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1, 
+  rf_noreg <- rangerts(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
+  rf_reg <- rangerts(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })
 
 test_that("Fewer variables used with regularization, survival C", {
-  rf_noreg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "C")
-  rf_reg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "C", num.threads = 1, 
+  rf_noreg <- rangerts(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "C")
+  rf_reg <- rangerts(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "C", num.threads = 1,
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lt(get_num_splitvars(rf_reg),
             get_num_splitvars(rf_noreg))
 })

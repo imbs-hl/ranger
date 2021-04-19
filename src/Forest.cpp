@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <math.h>
@@ -26,16 +26,16 @@
 #include "DataDouble.h"
 #include "DataFloat.h"
 
-namespace ranger {
+namespace rangerts {
 
 Forest::Forest() :
     verbose_out(0), num_trees(DEFAULT_NUM_TREE), mtry(0), min_node_size(0), num_independent_variables(0), seed(0), num_samples(
         0), prediction_mode(false), memory_mode(MEM_DOUBLE), sample_with_replacement(true), memory_saving_splitting(
         false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction( { 1 }), holdout(
         false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(
-        DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data { }, 
-        overall_prediction_error(NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), regularization_usedepth(false), 
-        bootstrap_ts(DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD), 
+        DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data { },
+        overall_prediction_error(NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), regularization_usedepth(false),
+        bootstrap_ts(DEFAULT_BOOTSTRAPTS), by_end(true), block_size(DEFAULT_BLOCK_SIZE), period(DEFAULT_PERIOD),
         progress(0) {
 }
 
@@ -186,7 +186,7 @@ void Forest::init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
     bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
     double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
-    uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth, 
+    uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth,
     BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period) {
 
   // Initialize data with memmode
@@ -1111,4 +1111,4 @@ void Forest::showProgress(std::string operation, size_t max_progress) {
 }
 #endif
 
-} // namespace ranger
+} // namespace rangerts

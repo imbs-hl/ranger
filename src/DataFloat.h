@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 // Ignore in coverage report (not used in R package)
@@ -21,7 +21,7 @@
 #include "utility.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class DataFloat: public Data {
 public:
@@ -69,8 +69,7 @@ private:
   std::vector<float> y;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* DATAFLOAT_H_ */
 // #nocov end
-

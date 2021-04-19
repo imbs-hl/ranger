@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef UTILITY_H_
@@ -19,10 +19,10 @@
 #include <random>
 #include <unordered_set>
 #include <unordered_map>
-#include <cstddef> 
-#include <memory> 
-#include <type_traits> 
-#include <utility> 
+#include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 #ifdef R_BUILD
 #include <Rinternals.h>
@@ -31,7 +31,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 /**
  * Split sequence start..end in num_parts parts with sizes as equal as possible.
@@ -568,6 +568,6 @@ template<class T, class ... Args>
 typename detail::_Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
 }
-// namespace ranger
+// namespace rangerts
 
 #endif /* UTILITY_H_ */

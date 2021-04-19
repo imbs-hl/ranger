@@ -1,4 +1,4 @@
 library(testthat)
-library(ranger)
+library(rangerts)
 
-test_check("ranger")
+test_check("rangerts")

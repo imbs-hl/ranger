@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <unordered_map>
@@ -22,7 +22,7 @@
 #include "TreeClassification.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 void ForestClassification::loadForest(size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
@@ -330,4 +330,4 @@ size_t ForestClassification::getTreePredictionTerminalNodeID(size_t tree_idx, si
 
 // #nocov end
 
-}// namespace ranger
+}// namespace rangerts

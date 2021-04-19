@@ -1,7 +1,7 @@
-library(ranger)
-context("ranger_quantreg")
+library(rangerts)
+context("rangerts_quantreg")
 
-rf.quant <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE, 
+rf.quant <- rangerts(mpg ~ ., mtcars[1:26, ], quantreg = TRUE,
                    keep.inbag = TRUE, num.trees = 50)
 pred.quant <- predict(rf.quant, mtcars[27:32, ], type = "quantiles")
 
@@ -30,20 +30,20 @@ test_that("Working for single new observation", {
 
 test_that("Working for constant variables", {
   dat <- data.frame(x1 = 1, x2 = seq(1,10), y = seq(1,10))
-  rf <- ranger(y ~ ., dat, quantreg = TRUE)
+  rf <- rangerts(y ~ ., dat, quantreg = TRUE)
   expect_silent(predict(rf, dat, type = "quantiles"))
 })
 
 test_that("Error message if no regression forest", {
-  rf <- ranger(Species ~ ., iris, num.trees = 5)
-  expect_error(predict(rf, iris, type = "quantiles"), 
+  rf <- rangerts(Species ~ ., iris, num.trees = 5)
+  expect_error(predict(rf, iris, type = "quantiles"),
                "Error\\: Quantile prediction implemented only for regression outcomes\\.")
 })
 
 test_that("Error message if not grown with quantreg=TRUE", {
-  rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = FALSE, num.trees = 50)
-  expect_error(predict(rf, mtcars[27:32, ], type = "quantiles"), 
-               "Error\\: Set quantreg\\=TRUE in ranger\\(\\.\\.\\.\\) for quantile prediction\\.")
+  rf <- rangerts(mpg ~ ., mtcars[1:26, ], quantreg = FALSE, num.trees = 50)
+  expect_error(predict(rf, mtcars[27:32, ], type = "quantiles"),
+               "Error\\: Set quantreg\\=TRUE in rangerts\\(\\.\\.\\.\\) for quantile prediction\\.")
 })
 
 test_that("User specified function works as expected", {

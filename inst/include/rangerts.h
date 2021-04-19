@@ -1,2 +1,2 @@
 #include "../../src/globals.h"
-using namespace ranger;
+using namespace rangerts;

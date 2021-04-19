@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef TREESURVIVAL_H_
@@ -17,7 +17,7 @@
 #include "globals.h"
 #include "Tree.h"
 
-namespace ranger {
+namespace rangerts {
 
 class TreeSurvival: public Tree {
 public:
@@ -56,7 +56,7 @@ private:
   void createEmptyNodeInternal() override;
   void computeSurvival(size_t nodeID);
   double computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) override;
-  
+
   bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
 
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
@@ -110,6 +110,6 @@ private:
   std::vector<size_t> num_samples_at_risk;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* TREESURVIVAL_H_ */

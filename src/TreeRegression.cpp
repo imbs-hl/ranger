@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <algorithm>
@@ -19,7 +19,7 @@
 #include "TreeRegression.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 TreeRegression::TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values) :
@@ -177,7 +177,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
-  
+
   // Regularization
   saveSplitVarID(best_varID);
 
@@ -535,7 +535,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
     addImpurityImportance(nodeID, best_varID, best_decrease);
   }
-  
+
   // Regularization
   saveSplitVarID(best_varID);
 
@@ -903,12 +903,12 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
       size_t sampleID = sampleIDs[pos];
       sum_node += data->get_y(sampleID, 0);
     }
-    
+
     double impurity_node = (sum_node * sum_node / (double) num_samples_node);
 
     // Account for the regularization
     regularize(impurity_node, varID);
-    
+
     best_decrease = decrease - impurity_node;
   }
 
@@ -923,4 +923,4 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
   }
 }
 
-} // namespace ranger
+} // namespace rangerts

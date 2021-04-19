@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef TREEREGRESSION_H_
@@ -17,7 +17,7 @@
 #include "globals.h"
 #include "Tree.h"
 
-namespace ranger {
+namespace rangerts {
 
 class TreeRegression: public Tree {
 public:
@@ -52,7 +52,7 @@ private:
   void createEmptyNodeInternal() override;
 
   double computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) override;
-  
+
   // Called by splitNodeInternal(). Sets split_varIDs and split_values.
   bool findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void findBestSplitValueSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
@@ -98,6 +98,6 @@ private:
   std::vector<double> sums;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* TREEREGRESSION_H_ */

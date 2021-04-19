@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <math.h>
@@ -25,7 +25,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts) {
 
@@ -236,14 +236,14 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
   // Compute concordance index
   double concordance = 0;
   double permissible = 0;
-  
+
   std::vector<double> concordance_casewise;
   std::vector<double> permissible_casewise;
   if (prediction_error_casewise) {
     concordance_casewise.resize(prediction_error_casewise->size(), 0);
     permissible_casewise.resize(prediction_error_casewise->size(), 0);
   }
-  
+
   for (size_t i = 0; i < sum_chf.size(); ++i) {
     size_t sample_i = i;
     if (!sample_IDs.empty()) {
@@ -260,7 +260,7 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       conc = 0;
       perm = 0;
     }
-    
+
     for (size_t j = i + 1; j < sum_chf.size(); ++j) {
       size_t sample_j = j;
       if (!sample_IDs.empty()) {
@@ -289,16 +289,16 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       } else {
         co = 0;
       }
-      
+
       conc += co;
       perm += 1;
-      
+
       if (prediction_error_casewise) {
         concordance_casewise[j] += co;
         permissible_casewise[j] += 1;
       }
     }
-    
+
     concordance += conc;
     permissible += perm;
     if (prediction_error_casewise) {
@@ -306,13 +306,13 @@ double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_
       permissible_casewise[i] = perm;
     }
   }
-  
+
   if (prediction_error_casewise) {
     for (size_t i = 0; i < prediction_error_casewise->size(); ++i) {
       (*prediction_error_casewise)[i] = 1 - concordance_casewise[i] / permissible_casewise[i];
     }
   }
-  
+
   return (concordance / permissible);
 }
 
@@ -687,4 +687,4 @@ double betaLogLik(double y, double mean, double phi) {
       + ((1 - mean) * phi - 1) * log(1 - y));
 }
 
-} // namespace ranger
+} // namespace rangerts

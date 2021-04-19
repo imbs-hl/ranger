@@ -1,10 +1,10 @@
-library(ranger)
+library(rangerts)
 
 test_that("LHS formula", {
-  callRanger <- function() {
+  callrangerts <- function() {
     myTransformation <- function(x) { x }
-    ranger(myTransformation(Species) ~ ., data = iris)
+    rangerts(myTransformation(Species) ~ ., data = iris)
   }
-  
-  expect_error(callRanger(), NA)
+
+  expect_error(callrangerts(), NA)
 })

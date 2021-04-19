@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <unordered_map>
@@ -19,7 +19,7 @@
 #include "utility.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 TreeClassification::TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<size_t>>* sampleIDs_per_class, std::vector<double>* class_weights) :
@@ -845,4 +845,4 @@ void TreeClassification::bootstrapWithoutReplacementClassWise() {
   }
 }
 
-} // namespace ranger
+} // namespace rangerts

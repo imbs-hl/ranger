@@ -1,12 +1,12 @@
-library(ranger)
+library(rangerts)
 library(survival)
-context("ranger_treeInfo")
+context("rangerts_treeInfo")
 
 ## Classification
-rf.class.formula <- ranger(Species ~ ., iris, num.trees = 5)
-rf.class.first <- ranger(dependent.variable.name = "Species", data = iris[, c(5, 1:4)], num.trees = 5)
-rf.class.mid <- ranger(dependent.variable.name = "Species", data = iris[, c(1:2, 5, 3:4)], num.trees = 5)
-rf.class.last <- ranger(dependent.variable.name = "Species", data = iris, num.trees = 5)
+rf.class.formula <- rangerts(Species ~ ., iris, num.trees = 5)
+rf.class.first <- rangerts(dependent.variable.name = "Species", data = iris[, c(5, 1:4)], num.trees = 5)
+rf.class.mid <- rangerts(dependent.variable.name = "Species", data = iris[, c(1:2, 5, 3:4)], num.trees = 5)
+rf.class.last <- rangerts(dependent.variable.name = "Species", data = iris, num.trees = 5)
 
 ti.class.formula <- treeInfo(rf.class.formula)
 ti.class.first <- treeInfo(rf.class.first)
@@ -25,13 +25,13 @@ test_that("Terminal nodes have only prediction, non-terminal nodes all others, c
   expect_true(all(!is.na(ti.class.first[!ti.class.first$terminal, -8])))
   expect_true(all(is.na(ti.class.first[!ti.class.first$terminal, 8])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, classification depvarname mid", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, classification depvarname mid", {
   expect_true(all(is.na(ti.class.mid[ti.class.mid$terminal, 2:6])))
   expect_true(all(!is.na(ti.class.mid[ti.class.mid$terminal, c(1, 7:8)])))
   expect_true(all(!is.na(ti.class.mid[!ti.class.mid$terminal, -8])))
   expect_true(all(is.na(ti.class.mid[!ti.class.mid$terminal, 8])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, classification depvarname last", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, classification depvarname last", {
   expect_true(all(is.na(ti.class.last[ti.class.last$terminal, 2:6])))
   expect_true(all(!is.na(ti.class.last[ti.class.last$terminal, c(1, 7:8)])))
   expect_true(all(!is.na(ti.class.last[!ti.class.last$terminal, -8])))
@@ -52,7 +52,7 @@ test_that("Prediction for classification is factor with correct levels", {
 })
 
 test_that("Prediction for matrix classification is integer with correct values", {
-  rf <- ranger(dependent.variable.name = "Species", data = data.matrix(iris), 
+  rf <- rangerts(dependent.variable.name = "Species", data = data.matrix(iris),
                num.trees = 5, classification = TRUE)
   ti <- treeInfo(rf, 1)
   expect_is(ti$prediction, "numeric")
@@ -61,14 +61,14 @@ test_that("Prediction for matrix classification is integer with correct values",
 
 ## Regression
 n <- 20
-dat <- data.frame(y = rnorm(n), 
-                  replicate(2, runif(n)), 
+dat <- data.frame(y = rnorm(n),
+                  replicate(2, runif(n)),
                   replicate(2, rbinom(n, size = 1, prob = .5)))
 
-rf.regr.formula <- ranger(y ~ ., dat, num.trees = 5)
-rf.regr.first <- ranger(dependent.variable.name = "y", data = dat, num.trees = 5)
-rf.regr.mid <- ranger(dependent.variable.name = "y", data = dat[, c(2:3, 1, 4:5)], num.trees = 5)
-rf.regr.last <- ranger(dependent.variable.name = "y", data = dat[, c(2:5, 1)], num.trees = 5)
+rf.regr.formula <- rangerts(y ~ ., dat, num.trees = 5)
+rf.regr.first <- rangerts(dependent.variable.name = "y", data = dat, num.trees = 5)
+rf.regr.mid <- rangerts(dependent.variable.name = "y", data = dat[, c(2:3, 1, 4:5)], num.trees = 5)
+rf.regr.last <- rangerts(dependent.variable.name = "y", data = dat[, c(2:5, 1)], num.trees = 5)
 
 ti.regr.formula <- treeInfo(rf.regr.formula)
 ti.regr.first <- treeInfo(rf.regr.first)
@@ -87,13 +87,13 @@ test_that("Terminal nodes have only prediction, non-terminal nodes all others, r
   expect_true(all(!is.na(ti.regr.first[!ti.regr.first$terminal, -8])))
   expect_true(all(is.na(ti.regr.first[!ti.regr.first$terminal, 8])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, regression depvarname mid", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, regression depvarname mid", {
   expect_true(all(is.na(ti.regr.mid[ti.regr.mid$terminal, 2:6])))
   expect_true(all(!is.na(ti.regr.mid[ti.regr.mid$terminal, c(1, 7:8)])))
   expect_true(all(!is.na(ti.regr.mid[!ti.regr.mid$terminal, -8])))
   expect_true(all(is.na(ti.regr.mid[!ti.regr.mid$terminal, 8])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, regression depvarname last", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, regression depvarname last", {
   expect_true(all(is.na(ti.regr.last[ti.regr.last$terminal, 2:6])))
   expect_true(all(!is.na(ti.regr.last[ti.regr.last$terminal, c(1, 7:8)])))
   expect_true(all(!is.na(ti.regr.last[!ti.regr.last$terminal, -8])))
@@ -115,10 +115,10 @@ test_that("Prediction for regression is numeric in correct range", {
 })
 
 ## Probability estimation
-rf.prob.formula <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE)
-rf.prob.first <- ranger(dependent.variable.name = "Species", data = iris[, c(5, 1:4)], num.trees = 5, probability = TRUE)
-rf.prob.mid <- ranger(dependent.variable.name = "Species", data = iris[, c(1:2, 5, 3:4)], num.trees = 5, probability = TRUE)
-rf.prob.last <- ranger(dependent.variable.name = "Species", data = iris, num.trees = 5, probability = TRUE)
+rf.prob.formula <- rangerts(Species ~ ., iris, num.trees = 5, probability = TRUE)
+rf.prob.first <- rangerts(dependent.variable.name = "Species", data = iris[, c(5, 1:4)], num.trees = 5, probability = TRUE)
+rf.prob.mid <- rangerts(dependent.variable.name = "Species", data = iris[, c(1:2, 5, 3:4)], num.trees = 5, probability = TRUE)
+rf.prob.last <- rangerts(dependent.variable.name = "Species", data = iris, num.trees = 5, probability = TRUE)
 
 ti.prob.formula <- treeInfo(rf.prob.formula)
 ti.prob.first <- treeInfo(rf.prob.first)
@@ -137,13 +137,13 @@ test_that("Terminal nodes have only prediction, non-terminal nodes all others, p
   expect_true(all(!is.na(ti.prob.first[!ti.prob.first$terminal, c(-8, -9, -10)])))
   expect_true(all(is.na(ti.prob.first[!ti.prob.first$terminal, 8:10])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, probability depvarname mid", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, probability depvarname mid", {
   expect_true(all(is.na(ti.prob.mid[ti.prob.mid$terminal, 2:6])))
   expect_true(all(!is.na(ti.prob.mid[ti.prob.mid$terminal, c(1, 7:8)])))
   expect_true(all(!is.na(ti.prob.mid[!ti.prob.mid$terminal, c(-8, -9, -10)])))
   expect_true(all(is.na(ti.prob.mid[!ti.prob.mid$terminal, 8:10])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, probability depvarname last", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, probability depvarname last", {
   expect_true(all(is.na(ti.prob.last[ti.prob.last$terminal, 2:6])))
   expect_true(all(!is.na(ti.prob.last[ti.prob.last$terminal, c(1, 7:8)])))
   expect_true(all(!is.na(ti.prob.last[!ti.prob.last$terminal, c(-8, -9, -10)])))
@@ -165,10 +165,10 @@ test_that("Prediction for probability is one probability per class, sum to 1", {
 })
 
 ## Survival
-rf.surv.formula <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
-rf.surv.first <- ranger(dependent.variable.name = "time", status.variable.name = "status", data = veteran[, c(3:4, 1:2, 5:8)], num.trees = 5)
-rf.surv.mid <- ranger(dependent.variable.name = "time", status.variable.name = "status", data = veteran, num.trees = 5)
-rf.surv.last <- ranger(dependent.variable.name = "time", status.variable.name = "status", data = veteran[, c(2, 1, 5:8, 3:4)], num.trees = 5)
+rf.surv.formula <- rangerts(Surv(time, status) ~ ., veteran, num.trees = 5)
+rf.surv.first <- rangerts(dependent.variable.name = "time", status.variable.name = "status", data = veteran[, c(3:4, 1:2, 5:8)], num.trees = 5)
+rf.surv.mid <- rangerts(dependent.variable.name = "time", status.variable.name = "status", data = veteran, num.trees = 5)
+rf.surv.last <- rangerts(dependent.variable.name = "time", status.variable.name = "status", data = veteran[, c(2, 1, 5:8, 3:4)], num.trees = 5)
 
 ti.surv.formula <- treeInfo(rf.surv.formula)
 ti.surv.first <- treeInfo(rf.surv.first)
@@ -185,12 +185,12 @@ test_that("Terminal nodes have only prediction, non-terminal nodes all others, s
   expect_true(all(!is.na(ti.surv.first[ti.surv.first$terminal, c(1, 7)])))
   expect_true(all(!is.na(ti.surv.first[!ti.surv.first$terminal, ])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, survival depvarname mid", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, survival depvarname mid", {
   expect_true(all(is.na(ti.surv.mid[ti.surv.mid$terminal, 2:6])))
   expect_true(all(!is.na(ti.surv.mid[ti.surv.mid$terminal, c(1, 7)])))
   expect_true(all(!is.na(ti.surv.mid[!ti.surv.mid$terminal, ])))
 })
-test_that("Terminal nodes have only prediction, non-terminal nodes all others, survival depvarname last", { 
+test_that("Terminal nodes have only prediction, non-terminal nodes all others, survival depvarname last", {
   expect_true(all(is.na(ti.surv.last[ti.surv.last$terminal, 2:6])))
   expect_true(all(!is.na(ti.surv.last[ti.surv.last$terminal, c(1, 7)])))
   expect_true(all(!is.na(ti.surv.last[!ti.surv.last$terminal, ])))
@@ -210,43 +210,40 @@ test_that("No prediction for Survival", {
 
 ## General
 test_that("Error if no saved forest", {
-  expect_error(treeInfo(ranger(Species ~ ., iris, write.forest = FALSE)), 
-               "Error\\: No saved forest in ranger object\\. Please set write.forest to TRUE when calling ranger\\.")
+  expect_error(treeInfo(rangerts(Species ~ ., iris, write.forest = FALSE)),
+               "Error\\: No saved forest in rangerts object\\. Please set write.forest to TRUE when calling rangerts\\.")
 })
 
 ## Unordered splitting
 test_that("Spitting value is comma separated list for partition splitting", {
   n <- 50
-  dat <- data.frame(x = sample(c("A", "B", "C", "D", "E"), n, replace = TRUE), 
-                    y = rbinom(n, 1, 0.5), 
+  dat <- data.frame(x = sample(c("A", "B", "C", "D", "E"), n, replace = TRUE),
+                    y = rbinom(n, 1, 0.5),
                     stringsAsFactors = FALSE)
-  rf.partition <- ranger(y ~ ., dat, num.trees = 5, respect.unordered.factors = "partition")
+  rf.partition <- rangerts(y ~ ., dat, num.trees = 5, respect.unordered.factors = "partition")
   ti.partition <- treeInfo(rf.partition)
-  
+
   expect_is(ti.partition$splitval, "character")
   expect_true(all(is.na(ti.partition$splitval) | grepl("^\\d+(?:,\\d+)*$", ti.partition$splitval)))
 })
 
 test_that("Spitting value is numeric for order splitting", {
   set.seed(100)
-  rf.order <- ranger(Sepal.Length ~ ., iris, num.trees = 5, respect.unordered.factors = "order")
+  rf.order <- rangerts(Sepal.Length ~ ., iris, num.trees = 5, respect.unordered.factors = "order")
   ti.order <- treeInfo(rf.order)
   expect_is(ti.order$splitval[!ti.order$terminal & ti.order$splitvarName == "Species"], "numeric")
 })
 
 test_that("treeInfo works for 31 unordered factor levels but not for 32", {
   n <- 31
-  dt <- data.frame(x = factor(1:n, ordered = FALSE),  
+  dt <- data.frame(x = factor(1:n, ordered = FALSE),
                    y = rbinom(n, 1, 0.5))
-  rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
+  rf <- rangerts(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
   expect_silent(treeInfo(rf))
-  
+
   n <- 32
-  dt <- data.frame(x = factor(1:n, ordered = FALSE),  
+  dt <- data.frame(x = factor(1:n, ordered = FALSE),
                    y = rbinom(n, 1, 0.5))
-  rf <- ranger(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
+  rf <- rangerts(y ~ ., data = dt, num.trees = 10, splitrule = "extratrees")
   expect_warning(treeInfo(rf), "Unordered splitting levels can only be shown for up to 31 levels.")
 })
-
-
-

@@ -7,7 +7,7 @@
 treeInfo(object, tree = 1)
 }
 \arguments{
-\item{object}{\code{ranger} object.}
+\item{object}{\code{rangerts} object.}
 
 \item{tree}{Number of the tree of interest.}
 }
@@ -25,24 +25,24 @@ A data.frame with the columns
   }
 }
 \description{
-Extract tree information of a \code{ranger} object.
+Extract tree information of a \code{rangerts} object.
 }
 \details{
-Node and variable ID's are 0-indexed, i.e., node 0 is the root node. 
-If the formula interface is used in the \code{ranger} call, the variable ID's are usually different to the original data used to grow the tree. 
+Node and variable ID's are 0-indexed, i.e., node 0 is the root node.
+If the formula interface is used in the \code{rangerts} call, the variable ID's are usually different to the original data used to grow the tree.
 Refer to the variable name instead to be sure.
 
-Splitting at unordered factors (nominal variables) depends on the option \code{respect.unordered.factors} in the \code{ranger} call. 
-For the "ignore" and "order" approaches, all values smaller or equal the \code{splitval} value go to the left and all values larger go to the right, as usual. 
+Splitting at unordered factors (nominal variables) depends on the option \code{respect.unordered.factors} in the \code{rangerts} call.
+For the "ignore" and "order" approaches, all values smaller or equal the \code{splitval} value go to the left and all values larger go to the right, as usual.
 However, with "order" the values correspond to the order in \code{object$forest$covariate.levels} instead of the original order (usually alphabetical).
 In the "partition" mode, the \code{splitval} values for unordered factor are comma separated lists of values, representing the factor levels (in the original order) going to the right.
 }
 \examples{
-rf <- ranger(Species ~ ., data = iris)
+rf <- rangerts(Species ~ ., data = iris)
 treeInfo(rf, 1)
 }
 \seealso{
-\code{\link{ranger}}
+\code{\link{rangerts}}
 }
 \author{
 Marvin N. Wright

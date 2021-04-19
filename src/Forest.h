@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef FOREST_H_
@@ -28,7 +28,7 @@
 #include "Tree.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class Forest {
 public:
@@ -247,13 +247,13 @@ protected:
   std::vector<double> regularization_factor;
   bool regularization_usedepth;
   std::vector<bool> split_varIDs_used;
-  
+
   // Variable importance for all variables in forest
   std::vector<double> variable_importance;
 
   // Casewise variable importance for all variables in forest
   std::vector<double> variable_importance_casewise;
-  
+
   // Time series bootstrap parameters
   BootstrapTS bootstrap_ts;
   bool by_end;
@@ -268,6 +268,6 @@ protected:
 #endif
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* FOREST_H_ */

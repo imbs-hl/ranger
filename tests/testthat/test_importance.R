@@ -1,37 +1,37 @@
 ## Tests for importance measures
 
-library(ranger)
-context("ranger_imp")
+library(rangerts)
+context("rangerts_imp")
 set.seed(123)
 
 ## Classification
-rg.imp.class <- ranger(Species ~ ., data = iris,
+rg.imp.class <- rangerts(Species ~ ., data = iris,
                        num.trees = 5, importance = "impurity")
-rg.perm.class <- ranger(Species ~ ., data = iris,
+rg.perm.class <- rangerts(Species ~ ., data = iris,
                         num.trees = 5, importance = "permutation")
-rg.scale.perm.class <- ranger(Species ~ ., data = iris, 
+rg.scale.perm.class <- rangerts(Species ~ ., data = iris,
                               num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE)
 
 ## Probability estimation
-rg.imp.prob <- ranger(Species ~ ., data = iris, 
+rg.imp.prob <- rangerts(Species ~ ., data = iris,
                       num.trees = 5, importance = "impurity", probability = TRUE)
-rg.perm.prob <- ranger(Species ~ ., data = iris, 
+rg.perm.prob <- rangerts(Species ~ ., data = iris,
                       num.trees = 5, importance = "permutation", probability = TRUE)
-rg.scale.perm.prob <- ranger(Species ~ ., data = iris, 
+rg.scale.perm.prob <- rangerts(Species ~ ., data = iris,
                              num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE, probability = TRUE)
 
 ## Regression
-rg.imp.regr <- ranger(Sepal.Length ~ ., data = iris, 
+rg.imp.regr <- rangerts(Sepal.Length ~ ., data = iris,
                       num.trees = 5, importance = "impurity")
-rg.perm.regr <- ranger(Sepal.Length ~ ., data = iris, 
+rg.perm.regr <- rangerts(Sepal.Length ~ ., data = iris,
                        num.trees = 5, importance = "permutation")
-rg.scale.perm.regr <- ranger(Sepal.Length ~ ., data = iris, 
+rg.scale.perm.regr <- rangerts(Sepal.Length ~ ., data = iris,
                              num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE)
 
 ## Survival
-rg.perm.surv <- ranger(Surv(time, status) ~ ., data = veteran, 
+rg.perm.surv <- rangerts(Surv(time, status) ~ ., data = veteran,
                        num.trees = 5, importance = "permutation")
-rg.scale.perm.surv <- ranger(Surv(time, status) ~ ., data = veteran, 
+rg.scale.perm.surv <- rangerts(Surv(time, status) ~ ., data = veteran,
                              num.trees = 5, importance = "permutation", scale.permutation.importance = TRUE)
 
 
@@ -80,31 +80,31 @@ test_that("scaled importance is larger than unscaled importance", {
 })
 
 test_that("error thrown if no importance in object", {
-  rf <- ranger(Species ~ ., data = iris, num.trees = 5)
+  rf <- rangerts(Species ~ ., data = iris, num.trees = 5)
   expect_error(importance(rf), "No variable importance found. Please use 'importance' option when growing the forest.")
 })
 
 test_that("Survival permutation importance is smaller than 1", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "permutation")
+  rf <- rangerts(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "permutation")
   expect_lt(rf$variable.importance[1], 1)
 })
 
 test_that("Survival impurity importance is larger than 1", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "impurity")
+  rf <- rangerts(Surv(time, status) ~ ., veteran, num.trees = 5, importance = "impurity")
   expect_gt(rf$variable.importance[1], 1)
 })
 
 test_that("Survival corrected impurity importance is smaller than 1", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 20, importance = "impurity_corrected")
+  rf <- rangerts(Surv(time, status) ~ ., veteran, num.trees = 20, importance = "impurity_corrected")
   expect_lt(min(abs(rf$variable.importance)), 1)
 })
 
 test_that("Gini importance non-negative with class weights", {
-  rf <- ranger(Species ~ ., data = iris, class.weights = c(.2, .3, .8),
+  rf <- rangerts(Species ~ ., data = iris, class.weights = c(.2, .3, .8),
                num.trees = 5, importance = "impurity")
   expect_true(all(rf$variable.importance >= 0))
-  
-  rf <- ranger(Species ~ ., data = iris, class.weights = c(.2, .3, .8),
+
+  rf <- rangerts(Species ~ ., data = iris, class.weights = c(.2, .3, .8),
                num.trees = 5, importance = "impurity", probability = TRUE)
   expect_true(all(rf$variable.importance >= 0))
 })

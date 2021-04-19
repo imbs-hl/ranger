@@ -1,18 +1,18 @@
 /*-------------------------------------------------------------------------------
- This file is part of Ranger.
+ This file is part of rangerts.
 
- Ranger is free software: you can redistribute it and/or modify
+ rangerts is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
- Ranger is distributed in the hope that it will be useful,
+ rangerts is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+ along with rangerts. If not, see <http://www.gnu.org/licenses/>.
 
  Written by:
 
@@ -44,11 +44,11 @@
 #include "DataSparse.h"
 #include "utility.h"
 
-using namespace ranger;
+using namespace rangerts;
 
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
-Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericMatrix& input_y,
+Rcpp::List rangertsCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericMatrix& input_y,
     std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose, uint seed, uint num_threads,
     bool write_forest, uint importance_mode_r, uint min_node_size,
     std::vector<std::vector<double>>& split_select_weights, bool use_split_select_weights,
@@ -58,12 +58,12 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, std::vector<double>& case_weights,
     bool use_case_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
-    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
-    bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
+    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x,
+    bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth,
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
     std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth,
     uint bootstrap_ts_r, bool by_end, uint block_size, uint period) {
-  
+
   Rcpp::List result;
 
   try {
@@ -107,7 +107,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       num_cols = input_x.ncol();
     }
 
-    // Initialize data 
+    // Initialize data
     if (use_sparse_data) {
       data = make_unique<DataSparse>(sparse_x, input_y, variable_names, num_rows, num_cols);
     } else {
@@ -149,11 +149,11 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     PredictionType prediction_type = (PredictionType) prediction_type_r;
     BootstrapTS bootstrap_ts = (BootstrapTS) bootstrap_ts_r;
 
-    // Init Ranger
+    // Init rangerts
     forest->initR(std::move(data), mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
-        inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
+        inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits,
         order_snps, max_depth, regularization_factor, regularization_usedepth, bootstrap_ts, by_end, block_size, period);
 
     // Load forest object if in prediction mode
@@ -195,7 +195,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       }
     }
 
-    // Run Ranger
+    // Run rangerts
     forest->run(false, oob_error);
 
     if (use_split_select_weights && importance_mode != IMP_NONE) {
@@ -255,7 +255,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
         std::vector<std::vector<size_t>> snp_order = forest->getSnpOrder();
         forest_object.push_back(std::vector<std::vector<size_t>>(snp_order.begin(), snp_order.begin() + snp_data.ncol()), "snp.order");
       }
-      
+
       if (treetype == TREE_CLASSIFICATION) {
         auto& temp = dynamic_cast<ForestClassification&>(*forest);
         forest_object.push_back(temp.getClassValues(), "class.values");
@@ -270,17 +270,16 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       }
       result.push_back(forest_object, "forest");
     }
-    
+
     if (!verbose) {
       delete verbose_out;
     }
   } catch (std::exception& e) {
     if (strcmp(e.what(), "User interrupt.") != 0) {
-      Rcpp::Rcerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
+      Rcpp::Rcerr << "Error: " << e.what() << " rangerts will EXIT now." << std::endl;
     }
     return result;
   }
 
   return result;
 }
-

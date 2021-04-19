@@ -1,45 +1,26 @@
 # -------------------------------------------------------------------------------
-#   This file is part of Ranger.
+#   This file is part of rangerts.
 #
-# Ranger is free software: you can redistribute it and/or modify
+# rangerts is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
-# Ranger is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-#
-# Written by:
-#
-#   Marvin N. Wright
-# Institut fuer Medizinische Biometrie und Statistik
-# Universitaet zu Luebeck
-# Ratzeburger Allee 160
-# 23562 Luebeck
-# Germany
-#
-# http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Prediction with new data and a saved forest from Ranger.
-##' 
-##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+##' Prediction with new data and a saved forest from rangerts.
+##'
+##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned.
 ##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap or infinitesimal jackknife for bagging is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
-##' 
-##' If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife after bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
-##' 
-##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
-##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 ##'
-##' @title Ranger prediction
-##' @param object Ranger \code{ranger.forest} object.
-##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL). 
+##' If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife after bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
+##'
+##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
+##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the rangerts object.
+##'
+##' @title rangerts prediction
+##' @param object rangerts \code{rangerts.forest} object.
+##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.
@@ -49,7 +30,7 @@
 ##' @param verbose Verbose output on or off.
 ##' @param inbag.counts Number of times the observations are in-bag in the trees.
 ##' @param ... further arguments passed to or from other methods.
-##' @return Object of class \code{ranger.prediction} with elements
+##' @return Object of class \code{rangerts.prediction} with elements
 ##'   \tabular{ll}{
 ##'       \code{predictions}    \tab Predicted classes/values (only for classification and regression)  \cr
 ##'       \code{unique.death.times} \tab Unique death times (only for survival). \cr
@@ -62,15 +43,15 @@
 ##'   }
 ##' @references
 ##' \itemize{
-##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
+##'   \item Wright, M. N. & Ziegler, A. (2017). rangerts: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
 ##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
 ##'   }
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{rangerts}}
 ##' @author Marvin N. Wright
 ##' @importFrom Matrix Matrix
 ##' @export
-predict.ranger.forest <- function(object, data, predict.all = FALSE,
-                                  num.trees = object$num.trees, 
+predict.rangerts.forest <- function(object, data, predict.all = FALSE,
+                                  num.trees = object$num.trees,
                                   type = "response", se.method = "infjack",
                                   seed = NULL, num.threads = NULL,
                                   verbose = TRUE, inbag.counts = NULL, ...) {
@@ -87,7 +68,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Check forest argument
-  if (!inherits(object, "ranger.forest")) {
+  if (!inherits(object, "rangerts.forest")) {
     stop("Error: Invalid class of input object.")
   } else {
     forest <- object
@@ -101,27 +82,27 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (forest$treetype == "Survival" && (is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
-  
-  ## Check for old ranger version
+
+  ## Check for old rangerts version
   if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
-    stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
+    stop("Error: Invalid forest object. Is the forest grown in rangerts version <0.3.9? Try to predict with the same version the forest was grown.")
   }
   if (!is.null(forest$dependent.varID)) {
-    warning("Forest grown in ranger version <0.11.5, converting ...")
+    warning("Forest grown in rangerts version <0.11.5, converting ...")
     forest <- convert.pre.xy(forest)
   }
-  
+
   ## Prediction type
   if (type == "response" || type == "se") {
     prediction.type <- 1
   } else if (type == "terminalNodes") {
     prediction.type <- 2
   } else if (type == "quantiles") {
-    stop("Error: Apply predict() to the ranger object instead of the $forest object to predict quantiles.")
+    stop("Error: Apply predict() to the rangerts object instead of the $forest object to predict quantiles.")
   } else {
     stop("Error: Invalid value for 'type'. Use 'response', 'se', 'terminalNodes', or 'quantiles'.")
   }
-  
+
   ## Type "se" only for certain tree types
   if (type == "se" && se.method == "jack" && forest$treetype != "Regression") {
     stop("Error: Jackknife standard error prediction currently only available for regression.")
@@ -133,19 +114,19 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
      stop("Error: Not a probability forest. Set probability=TRUE to use the infinitesimal jackknife standard error prediction for classification.")
    }
   }
-  
+
   ## Type "se" requires keep.inbag=TRUE
   if (type == "se" && is.null(inbag.counts)) {
-    stop("Error: No saved inbag counts in ranger object. Please set keep.inbag=TRUE when calling ranger.")
+    stop("Error: No saved inbag counts in rangerts object. Please set keep.inbag=TRUE when calling rangerts.")
   }
-  
+
   ## Set predict.all if type is "se"
   if (type == "se") {
     predict.all <- TRUE
   }
-  
+
   x <- data
-  
+
   if (sum(!(forest$independent.variable.names %in% colnames(x))) > 0) {
     stop("Error: One or more independent variables not found in data.")
   }
@@ -162,7 +143,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       x[char.columns] <- lapply(x[char.columns], factor)
     }
   }
-  
+
   ## Recode factors if forest grown 'order' mode
   if (!is.null(forest$covariate.levels) && !all(sapply(forest$covariate.levels, is.null))) {
     x <- mapply(function(xx, yy) {
@@ -253,7 +234,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   by.end <- TRUE
   block.size <- 10
   period <- 1
-  
+
   ## Use sparse matrix
   if (inherits(x, "dgCMatrix")) {
     sparse.x <- x
@@ -264,18 +245,18 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     use.sparse.data <- FALSE
     x <- data.matrix(x)
   }
-  
-  ## Call Ranger
-  result <- rangerCpp(treetype, x, y, forest$independent.variable.names, mtry,
+
+  ## Call rangerts
+  result <- rangertsCpp(treetype, x, y, forest$independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
-                      case.weights, use.case.weights, class.weights, 
-                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
+                      case.weights, use.case.weights, class.weights,
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout,
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
-                      order.snps, oob.error, max.depth, inbag, use.inbag, 
+                      order.snps, oob.error, max.depth, inbag, use.inbag,
                       regularization.factor, use.regularization.factor, regularization.usedepth,
                       bootstrap.ts.num, by.end, block.size, period)
 
@@ -299,17 +280,17 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         # Fix for single test observation
         result$predictions <- list(result$predictions)
       }
-      result$predictions <- aperm(array(unlist(result$predictions), 
-                                        dim = rev(c(length(result$predictions), 
-                                                    length(result$predictions[[1]]), 
+      result$predictions <- aperm(array(unlist(result$predictions),
+                                        dim = rev(c(length(result$predictions),
+                                                    length(result$predictions[[1]]),
                                                     length(result$predictions[[1]][[1]])))))
     }
   } else {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
-    } 
+    }
   }
-  
+
   if (type == "response") {
     if (forest$treetype == "Classification" && !is.null(forest$levels)) {
       if (!predict.all) {
@@ -333,7 +314,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
         if (is.vector(result$predictions)) {
           result$predictions <- matrix(result$predictions, nrow = 1)
         }
-        
+
         ## Set colnames and sort by levels
         if (!is.null(forest$levels)) {
           colnames(result$predictions) <- forest$levels[forest$class.values]
@@ -357,17 +338,17 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     }
 
     ## Get inbag counts, keep only observations that are OOB at least once
-    inbag.counts <- simplify2array(inbag.counts) 
+    inbag.counts <- simplify2array(inbag.counts)
     if (is.vector(inbag.counts)) {
       inbag.counts <- t(as.matrix(inbag.counts))
     }
-    inbag.counts <- inbag.counts[rowSums(inbag.counts == 0) > 0, , drop = FALSE] 
+    inbag.counts <- inbag.counts[rowSums(inbag.counts == 0) > 0, , drop = FALSE]
     n <- nrow(inbag.counts)
     oob <- inbag.counts == 0
     if (num.trees != object$num.trees) {
       oob <- oob[, 1:num.trees]
     }
-    
+
     if (all(!oob)) {
       stop("Error: No OOB observations found, consider increasing num.trees or reducing sample.fraction.")
     }
@@ -375,7 +356,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     if (se.method == "jack") {
       ## Compute Jackknife
       oob.count <- rowSums(oob)
-      jack.n <- sweep(tcrossprod(result$predictions, oob), 
+      jack.n <- sweep(tcrossprod(result$predictions, oob),
                       2, oob.count, "/", check.margin = FALSE)
       if (is.vector(jack.n)) {
         jack.n <- t(as.matrix(jack.n))
@@ -383,7 +364,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       if (any(oob.count == 0)) {
         n <- sum(oob.count > 0)
         jack.n <- jack.n[, oob.count > 0]
-      } 
+      }
       jack <- (n - 1) / n * rowSums((jack.n - yhat)^2)
       bias <- (exp(1) - 1) * n / result$num.trees^2 * rowSums((result$predictions - yhat)^2)
       jab <- pmax(jack - bias, 0)
@@ -397,19 +378,19 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
           rInfJack(x, inbag.counts)$var.hat
         })
         result$se <- sqrt(infjack)
-      } 
+      }
     } else {
       stop("Error: Unknown standard error method (se.method).")
     }
-    
+
     ## Response as predictions
     result$predictions <- yhat
-    
+
     if (forest$treetype == "Probability estimation") {
       ## Set colnames and sort by levels
       colnames(result$predictions) <- forest$levels[forest$class.values]
       result$predictions <- result$predictions[, forest$levels, drop = FALSE]
-      
+
       if (!is.matrix(result$se)) {
         result$se <- matrix(result$se, ncol = length(forest$levels))
       }
@@ -418,24 +399,24 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     }
   }
 
-  class(result) <- "ranger.prediction"
+  class(result) <- "rangerts.prediction"
   return(result)
 }
 
-##' Prediction with new data and a saved forest from Ranger.
-##' 
-##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
+##' Prediction with new data and a saved forest from rangerts.
+##'
+##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned.
 ##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap or infinitesimal jackknife for bagging is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 ##' For \code{type = 'quantiles'}, the selected quantiles for each observation are estimated. See Meinshausen (2006) for details.
-##' 
-##' If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife-after-bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
-##' 
-##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
-##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
 ##'
-##' @title Ranger prediction
-##' @param object Ranger \code{ranger} object.
+##' If \code{type = 'se'} is selected, the method to estimate the variances can be chosen with \code{se.method}. Set \code{se.method = 'jack'} for jackknife-after-bootstrap and \code{se.method = 'infjack'} for the infinitesimal jackknife for bagging.
+##'
+##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
+##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the rangerts object.
+##'
+##' @title rangerts prediction
+##' @param object rangerts \code{rangerts} object.
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
@@ -447,7 +428,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
 ##' @param ... further arguments passed to or from other methods.
-##' @return Object of class \code{ranger.prediction} with elements
+##' @return Object of class \code{rangerts.prediction} with elements
 ##'   \tabular{ll}{
 ##'       \code{predictions}    \tab Predicted classes/values (only for classification and regression)  \cr
 ##'       \code{unique.death.times} \tab Unique death times (only for survival). \cr
@@ -460,62 +441,62 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##'   }
 ##' @examples
 ##' ## Classification forest
-##' ranger(Species ~ ., data = iris)
+##' rangerts(Species ~ ., data = iris)
 ##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 ##' iris.train <- iris[train.idx, ]
 ##' iris.test <- iris[-train.idx, ]
-##' rg.iris <- ranger(Species ~ ., data = iris.train)
+##' rg.iris <- rangerts(Species ~ ., data = iris.train)
 ##' pred.iris <- predict(rg.iris, data = iris.test)
 ##' table(iris.test$Species, pred.iris$predictions)
-##' 
+##'
 ##' ## Quantile regression forest
-##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' rf <- rangerts(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
 ##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles", quantiles = c(0.1, 0.5, 0.9))
 ##' pred$predictions
-##' 
+##'
 ##' ## Quantile regression forest with user-specified function
-##' rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
-##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles", 
+##' rf <- rangerts(mpg ~ ., mtcars[1:26, ], quantreg = TRUE)
+##' pred <- predict(rf, mtcars[27:32, ], type = "quantiles",
 ##'                 what = function(x) sample(x, 10, replace = TRUE))
 ##' pred$predictions
-##' 
+##'
 ##' @references
 ##' \itemize{
-##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
+##'   \item Wright, M. N. & Ziegler, A. (2017). rangerts: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
 ##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
-##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
+##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.
 ##'   }
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{rangerts}}
 ##' @author Marvin N. Wright
 ##' @export
-predict.ranger <- function(object, data = NULL, predict.all = FALSE,
+predict.rangerts <- function(object, data = NULL, predict.all = FALSE,
                            num.trees = object$num.trees,
                            type = "response", se.method = "infjack",
-                           quantiles = c(0.1, 0.5, 0.9), 
+                           quantiles = c(0.1, 0.5, 0.9),
                            what = NULL,
                            seed = NULL, num.threads = NULL,
                            verbose = TRUE, ...) {
   forest <- object$forest
   if (is.null(forest)) {
-    stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
+    stop("Error: No saved forest in rangerts object. Please set write.forest to TRUE when calling rangerts.")
   }
   if (object$importance.mode %in% c("impurity_corrected", "impurity_unbiased")) {
     warning("Forest was grown with 'impurity_corrected' variable importance. For prediction it is advised to grow another forest without this importance setting.")
   }
-  
+
   if (type == "quantiles") {
     ## Quantile prediction
     if (object$treetype != "Regression") {
       stop("Error: Quantile prediction implemented only for regression outcomes.")
     }
     if (is.null(object$random.node.values)) {
-      stop("Error: Set quantreg=TRUE in ranger(...) for quantile prediction.")
+      stop("Error: Set quantreg=TRUE in rangerts(...) for quantile prediction.")
     }
-    
+
     if (is.null(data)) {
       ## OOB prediction
       if (is.null(object$random.node.values.oob)) {
-        stop("Error: Set keep.inbag=TRUE in ranger(...) for out-of-bag quantile prediction or provide new data in predict(...).")
+        stop("Error: Set keep.inbag=TRUE in rangerts(...) for out-of-bag quantile prediction or provide new data in predict(...).")
       }
       node.values <- object$random.node.values.oob
     } else {
@@ -526,13 +507,13 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
         node.values[, tree] <- object$random.node.values[terminal.nodes[, tree], tree]
       }
     }
-    
+
     ## Prepare results
     result <- list(num.samples = nrow(node.values),
                    treetype = object$treetype,
                    num.independent.variables = object$num.independent.variables,
                    num.trees = num.trees)
-    class(result) <- "ranger.prediction"
+    class(result) <- "rangerts.prediction"
 
     if (is.null(what)) {
       ## Compute quantiles of distribution
@@ -549,12 +530,12 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
       }
       result$predictions <- t(apply(node.values, 1, what))
     }
-   
+
     result
   } else {
     ## Non-quantile prediction
     if (is.null(data)) {
-     stop("Error: Argument 'data' is required for non-quantile prediction.") 
+     stop("Error: Argument 'data' is required for non-quantile prediction.")
     }
     predict(forest, data, predict.all, num.trees, type, se.method, seed, num.threads, verbose, object$inbag.counts, ...)
   }

@@ -1,82 +1,295 @@
-[![Travis Build Status](https://travis-ci.org/imbs-hl/ranger.svg?branch=master)](https://travis-ci.org/imbs-hl/ranger)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/imbs-hl/ranger?branch=master&svg=true)](https://ci.appveyor.com/project/mnwright/ranger)
-[![Coverage Status](https://coveralls.io/repos/github/imbs-hl/ranger/badge.svg?branch=master)](https://coveralls.io/github/imbs-hl/ranger?branch=master)
-![CRAN Downloads month](http://cranlogs.r-pkg.org/badges/ranger?color=brightgreen)
-![CRAN Downloads overall](http://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen)
-## ranger: A Fast Implementation of Random Forests
-Marvin N. Wright
+# Rangerts, a ranger package for time series
 
-### Introduction
-ranger is a fast implementation of random forests (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data. Classification, regression, and survival forests are supported. Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008). Includes implementations of extremely randomized trees (Geurts et al. 2006) and quantile regression forests (Meinshausen 2006).
+![Random forest](www/random-forest.jpg?raw=true "For fun")
+credit: https://thinkr.fr/premiers-pas-en-machine-learning-avec-r-volume-4-random-forest/
 
-ranger is written in C++, but a version for R is available, too. We recommend to use the R version. It is easy to install and use and the results are readily available for further analysis. The R version is as fast as the standalone C++ version.
+## The original package
+*ranger* (https://github.com/imbs-hl/ranger) is an open source R package on github, created and maintained by Marvin N. Wright, with a clear explanation in the article below :    
+* Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Software 77:1-17. https://doi.org/10.18637/jss.v077.i01.
 
-### Installation
-#### R version
-To install the ranger R package from CRAN, just run
+## What does rangerts do
+In the *rangerts* package, we try to get out of the comfort zone of random forest applications. We try to predict a time series, with exogenous variables.     
 
-```R
-install.packages("ranger")
-```
+The main idea of this modified version is to test the random forest algorithm using the block bootstrapping (help take time dependency of the data into account) during the period of tree growing, instead of standard resampling mode. To see whether this could help improve model's accuracy.       
 
-R version >= 3.1 is required. With recent R versions, multithreading on Windows platforms should just work. If you compile yourself, the new RTools toolchain is required.
+In order to benefit from the efficient implementation of the *ranger* package, we based on its c++ codes and we added 4 different kinds of block bootstrapping: non-overlapping blocks, moving blocks, stationary blocks, and circular blocks.        
 
+## New parameters
+All functions are the same as the *ranger* package (even the main function name :stuck_out_tongue:).    
+We added 3 parameters in the ranger function: bootstrap.ts, by.end, block.size. All these parameters are to be used **with caution** together with the parameters already included in the *ranger* original function.   
+
+* bootstrap.ts: string parameter, empty (= NULL) for iid bootstrap, or takes its value in **nonoverlapping**, **moving**, **stationary**, **circular**, and **seasonal**, by default = NULL. Some research works have demonstrated that moving or stationary might be more beneficial.    
+* by.end: boolean, by default = TRUE, build block from the end to the start of time series.     
+* block.size: the number of observations per block, by default = 10. In the **stationary** block bootstrapping mode, this parameter define the geometric law with $p = 1/block.size$.     
+* period: the number of observations per period, if **seasonal** bootstrap is selected.
+
+## Installation
 To install the development version from GitHub using `devtools`, run
-
 ```R
-devtools::install_github("imbs-hl/ranger")
+# quiet = TRUE to mask c++ compilation messages, optional
+devtools::install_github("BenjaminGoehry/BlocRF/rangerts", quiet = T)
+# to get the a default guide for the rangerts package, use
+browseVignettes("rangerts")
 ```
 
-#### Standalone C++ version
-To install the C++ version of ranger in Linux or Mac OS X you will need a compiler supporting C++11 (i.e. gcc >= 4.7 or Clang >= 3.0) and Cmake. To build start a terminal from the ranger main directory and run the following commands
 
-```bash
-cd cpp_version
-mkdir build
-cd build
-cmake ..
-make
+## Key parameters
+### Bootstrap mode selection and sample fraction
+The default bootstrapping method is the **i.i.d mode, with replacement** in the *ranger* package.    
+
+Variantes exist when changing the parameter `replace = FALSE` or give a weight vector `case.weights` over the training observations to modify the probabilities that some observations will have more chance to be selected in the bag.      
+
+Fraction of observations to sample is 1 by default for sampling with replacement and 0.632 ( ` = (exp(1)-1)/exp(1)` ) for sampling without replacement. This could be changed manuelly by the parameter `sample.fraction` in the `ranger` function.     
+
+Among all the block bootstrapping we implemented, by the nature of their design,  except *nonoverlapping* and *seasonal* (under condition), all others have replacement in the bootstrapped sample inbag.    
+
+The parameter `replace = TRUE` or `FALSE` makes no difference if you use these three block bootstrapping modes, `bootstrap.ts = "moving"`, `bootstrap.ts = "stationary"`, `bootstrap.ts = "circular"`, and `replace = FALSE` with the `bootstrap.ts = "seasonal"` can be dangerous if block.size and period are not properly chosen.     
+
+### Block size
+Our experiments have shown that this is the key parameters to be tuned. As we are treating with time series and weekly data, candidate values can be 4-5 (almost a month), or 52 (a year). Small values might be beneficial to be tested too.    
+
+We suggest train a standard ranger model then study the autocorrelation of the residuals, to get some hint on what values to take for the block size, or maybe directly study the autocorrelation of the target variable.    
+
+## Examples
+We provide an open source dataset of French weekly electricity consumption, along with several features :     
+
+* Time : observation index
+* Day : day of month
+* Month : month of year
+* Year : year
+* NumWeek : This feature goes from 0 to 1, from 1st January to 31th December, and increases linearly
+* Load : electricity consumption in MW, target variable to predict
+* Load1 : lag 1 of load
+* Temp : temperature
+* Temp1 : lag 1 of temperature
+* IPI : industrial index
+* IPI_CVS :
+
+``` R
+library(rangerts)
+# to check the function ranger function helper
+?rangerts::ranger
+
+# load consumption data in the package
+data <- rangerts::elec_data
+
+# feature engineering
+data$Time2 <- data$Time^2
+data$TempTime <- data$Time*data$Temp
+data$TempChauf <- pmin(0, data$Temp - 15)
+data$TempChaufTime <- pmin(0, data$Temp - 15) * data$Time
+
+noel <- which(abs(data$Day - 24) <= 3 & data$Month == 12)
+consoNoel = vector("numeric", length(data$Time))
+consoNoel[noel] = 1
+data$consoNoel <- consoNoel
+data$MonthF <- as.factor(data$Month)
+
+# split train and test
+df_train <- data %>%
+  dplyr::filter(Test == 0) %>%
+  dplyr::select(- Test)
+
+df_test <- data %>%
+  dplyr::filter(Test == 1) %>%
+  dplyr::select(- Test)
+
+# set general parameters
+nb_trees <- 1000
+mtry <- floor(sqrt(ncol(df_train)))
+block_size <- 52
+
+# Use case 1
+# the default ranger with bootstrap i.i.d and with replacement
+# thus the sample fraction is the default value = 1
+rf_iid_rep <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T,
+                 seed = 1, # for reproductibility
+                 keep.inbag = T) # to keep trace of in-bag samples
+# 679 observations in total
+nrow(df_train)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_iid_rep$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 429.52
+# total number of inbag samples
+purrr::map_dbl(rf_iid_rep$inbag.counts, sum) %>%
+  mean()
+# 679
+
+# Use case 2
+# the default ranger with bootstrap i.i.d and with replacement
+# thus the sample fraction = 0.632
+rf_iid <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = F,
+                 seed = 1,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_iid$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 429
+# total number of inbag samples
+purrr::map_dbl(rf_iid$inbag.counts, sum) %>%
+  mean()
+# 429
+
+# Use case 3
+# the nonoverlapping mode with replacement
+# thus the sample fraction is the default value = 1
+rf_no_rep <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1,
+                 bootstrap.ts = "nonoverlapping",
+                 block.size = block_size,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_no_rep$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 439.266
+# total number of inbag samples
+purrr::map_dbl(rf_no_rep$inbag.counts, sum) %>%
+  mean()
+# 679
+
+# Use case 4
+# the nonoverlapping mode with replacement
+# thus the sample fraction is the default value = 1
+rf_no <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = F, # in this case, every sample in-bag is taken only once
+                 seed = 1,
+                 bootstrap.ts = "nonoverlapping",
+                 block.size = block_size,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_no$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 429
+# total number of inbag samples
+purrr::map_dbl(rf_no$inbag.counts, sum) %>%
+  mean()
+# 429
+
+
+# Use case 5
+# the moving mode with replacement
+# thus the sample fraction is the default value = 1
+rf_mv <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1,
+                 bootstrap.ts = "moving",
+                 block.size = block_size,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_mv$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 430.157
+# total number of inbag samples
+purrr::map_dbl(rf_mv$inbag.counts, sum) %>%
+  mean()
+# 679
+
+# Use case 6
+# the stationary mode with replacement
+# thus the sample fraction is the default value = 1
+rf_st <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1,
+                 bootstrap.ts = "stationary",
+                 block.size = block_size,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_st$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 446.788
+
+# Use case 7
+# the circular mode with replacement
+# thus the sample fraction is the default value = 1
+rf_cr <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1,
+                 bootstrap.ts = "circular",
+                 block.size = block_size,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_cr$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 438.124
+
+# Use case 8
+# the seasonal mode with replacement
+# thus the sample fraction is the default value = 1
+rf_se <- rangerts::ranger(Load ~ ., data = df_train,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1,
+                 bootstrap.ts = "seasonal",
+                 block.size = block_size,
+                 period = 4,
+                 keep.inbag = T)
+# the average number of different observations
+# that are at least taken in-bag once in the trees
+purrr::map_int(rf_se$inbag.counts,
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 438.124
+
+# final model list
+model_list <- list(rf_iid, rf_iid_rep,
+                   rf_no, rf_no_rep,
+                   rf_mv, rf_st,
+                   rf_cr, rf_se)
+
+# compare rmse & mape
+algo_spec <- c("iid without replacement",
+               "iid with replacement",
+               "nonoverlapping without replacement",
+               "nonoverlapping with replacement",
+               "moving with replacement",
+               "stationary with replacement",
+               "circular with replacement",
+               "seasonal with replacement"
+               )
+rmse <- purrr::map_dbl(model_list,
+               ~ yardstick::rmse_vec(df_test$Load,
+                                   predict(.x, df_test)$predictions))
+cbind(algo_spec, round(rmse, 2))
+
+mape <- purrr::map_dbl(model_list,
+               ~ yardstick::mape_vec(df_test$Load,
+                                   predict(.x, df_test)$predictions))
+cbind(algo_spec, round(mape, 2))
 ```
 
-After compilation there should be an executable called "ranger" in the build directory. 
-
-To run the C++ version in Microsoft Windows please cross compile or ask for a binary.
-
-### Usage
-#### R version
-For usage of the R version see ?ranger in R. Most importantly, see the Examples section. As a first example you could try 
-
-```R  
-ranger(Species ~ ., data = iris)
-```
-
-#### Standalone C++ version
-In the C++ version type 
-
-```bash
-./ranger --help 
-```
-
-for a list of commands. First you need a training dataset in a file. This file should contain one header line with variable names and one line with variable values per sample (numeric only). Variable names must not contain any whitespace, comma or semicolon. Values can be seperated by whitespace, comma or semicolon but can not be mixed in one file. A typical call of ranger would be for example
-
-```bash
-./ranger --verbose --file data.dat --depvarname Species --treetype 1 --ntree 1000 --nthreads 4
-```
-
-If you find any bugs, or if you experience any crashes, please report to us. If you have any questions just ask, we won't bite. 
-
-Please cite our paper if you use ranger.
-
-### References
-* Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. https://doi.org/10.18637/jss.v077.i01.
-* Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. https://doi.org/10.1016/j.eswa.2016.07.018.
-* Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. https://doi.org/10.1002/sim.7212.
-* Nembrini, S., König, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. https://doi.org/10.1093/bioinformatics/bty373.
-* Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. https://doi.org/10.1023/A:1010933404324.
-* Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. https://doi.org/10.1097/JTO.0b013e318233d835.
-* Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. https://doi.org/10.3414/ME00-01-0052.
-* Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-* Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. https://doi.org/10.1007/s10994-006-6226-1.
-* Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. http://www.jmlr.org/papers/v7/meinshausen06a.html.
-* Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. https://doi.org/10.1198/106186008X344522.
-* Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. https://doi.org/10.1023/A:1009869804967.
+Good references:
+ftp://stat.ethz.ch/Research-Reports/87.pdf
+https://projecteuclid.org/download/pdf_1/euclid.aos/1176347265

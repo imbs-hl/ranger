@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <algorithm>
@@ -19,7 +19,7 @@
 #include "TreeSurvival.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 TreeSurvival::TreeSurvival(std::vector<double>* unique_timepoints, std::vector<size_t>* response_timepointIDs) :
     unique_timepoints(unique_timepoints), response_timepointIDs(response_timepointIDs), num_deaths(0), num_samples_at_risk(
@@ -925,4 +925,4 @@ void TreeSurvival::addImpurityImportance(size_t nodeID, size_t varID, double dec
   }
 }
 
-} // namespace ranger
+} // namespace rangerts

@@ -1,12 +1,12 @@
 /*-------------------------------------------------------------------------------
- This file is part of ranger.
+ This file is part of rangerts.
 
  Copyright (c) [2014-2018] [Marvin N. Wright]
 
  This software may be modified and distributed under the terms of the MIT license.
 
- Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ Please note that the C++ core of rangerts is distributed under MIT license and the
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <fstream>
@@ -18,7 +18,7 @@
 #include "Data.h"
 #include "utility.h"
 
-namespace ranger {
+namespace rangerts {
 
 Data::Data() :
     num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
@@ -219,7 +219,7 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
 
   // All values for varID (no duplicates) for given sampleIDs
   if (getUnpermutedVarID(varID) < num_cols_no_snp) {
-    
+
     all_values.reserve(end - start);
     for (size_t pos = start; pos < end; ++pos) {
       all_values.push_back(get_x(sampleIDs[pos], varID));
@@ -338,5 +338,4 @@ void Data::orderSnpLevels(bool corrected_importance) {
 }
 // #nocov end
 
-} // namespace ranger
-
+} // namespace rangerts

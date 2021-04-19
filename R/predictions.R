@@ -1,48 +1,29 @@
 # -------------------------------------------------------------------------------
-#   This file is part of Ranger.
+#   This file is part of rangerts.
 #
-# Ranger is free software: you can redistribute it and/or modify
+# rangerts is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
-# Ranger is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ranger. If not, see <http://www.gnu.org/licenses/>.
-#
-# Written by:
-#
-#   Marvin N. Wright
-# Institut fuer Medizinische Biometrie und Statistik
-# Universitaet zu Luebeck
-# Ratzeburger Allee 160
-# 23562 Luebeck
-# Germany
-#
-# http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
 ##' @export
 predictions <- function(x, ...)  UseMethod("predictions")
 
-##' Extract predictions of Ranger prediction object.
+##' Extract predictions of rangerts prediction object.
 ##'
 ##'
-##' @title Ranger predictions
-##' @param x Ranger prediction object.
+##' @title rangerts predictions
+##' @param x rangerts prediction object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Predictions: Classes for Classification forests, Numerical values for Regressions forests and the estimated survival functions for all individuals for Survival forests.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{rangerts}}
 ##' @author Marvin N. Wright
 ##' @aliases predictions
 ##' @export
-predictions.ranger.prediction <- function(x, ...) {
-  if (!inherits(x, "ranger.prediction")) {
-    stop("Object ist no ranger.prediction object.")
+predictions.rangerts.prediction <- function(x, ...) {
+  if (!inherits(x, "rangerts.prediction")) {
+    stop("Object ist no rangerts.prediction object.")
   }
   if (x$treetype == "Classification" || x$treetype == "Regression" || x$treetype == "Probability estimation") {
     if (is.null(x$predictions)) {
@@ -61,19 +42,19 @@ predictions.ranger.prediction <- function(x, ...) {
   }
 }
 
-##' Extract training data predictions of Ranger object.
+##' Extract training data predictions of rangerts object.
 ##'
 ##'
-##' @title Ranger predictions
-##' @param x Ranger object.
+##' @title rangerts predictions
+##' @param x rangerts object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Predictions: Classes for Classification forests, Numerical values for Regressions forests and the estimated survival functions for all individuals for Survival forests.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{rangerts}}
 ##' @author Marvin N. Wright
 ##' @export
-predictions.ranger<- function(x, ...) {
-  if (!inherits(x, "ranger")) {
-    stop("Object ist no ranger object.")
+predictions.rangerts<- function(x, ...) {
+  if (!inherits(x, "rangerts")) {
+    stop("Object ist no rangerts object.")
   }
   if (x$treetype == "Classification" || x$treetype == "Regression" || x$treetype == "Probability estimation") {
     if (is.null(x$predictions)) {
