@@ -1,0 +1,569 @@
+---
+title: "Random forest for dependent data - block bootstrap variants"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r message=F, warning=F}
+library(Mcomp)
+
+# # install the M4 data set package if needed
+# install.packages("https://github.com/carlanetto/M4comp2018/releases/download/0.2.0/M4comp2018_0.2.0.tar.gz", repos = NULL)
+library(M4comp2018)
+library(tidyverse)
+library(rangerts)
+```
+
+## Data set
+The data sets we use here are from two of the M-serie time series forecasting competitions: M3 and M4 data sets, wrapped in two R packages: **Mcomp** and **M4comp2018**.    
+If we take a look at the data set M3:
+```{r}
+M3
+```
+The train and test period are already split in the data set. If we take one example from the M3 data set:
+```{r}
+autoplot(M3$N0001)
+```
+      
+We note that some of the time series in M competitions are non stationary.      
+In our experiments, we only work with monthly data and quarterly data to have at least one useful feature (frequency of the series).       
+     
+```{r}
+subset(M3, "monthly")
+```
+     
+The M4 data set is organized in the same manner, but with 100000 time series and the time series have generally a longer history (more observations,  ~10e3) than the M3 (~10e2).    
+    
+## Experiment setting
+     
+For every time series, we build a standard random forest (with i.i.d assumption on observations, referred as i.i.d forest later) and two others with block bootstrap (non-overlapping and moving block bootstrap variants respectively). 
+     
+### How to fix block.size
+The key parameter **block.size** is determined automatically with the help of an autocorrelation estimation of the target time series by the `acf()` function in R. We fix a threshold which varies from 0.5 to 0.9, and take the largest lag (block.size = 2 if the largest lag is 1, otherwise this becomes an i.i.d. case). This parameter (threshold) is names as **acf coefficient** in the following sections. In addition, we specify `by.end = FALSE` and keep other parameters for the block bootstrap to default values.         
+We obtain the following results.    
+Codes of this experiment can be found here: **code here**. Here we show codes for result analysis with obtained results.
+    
+## Results at a glance
+We evaluate the performance with two metrics: the normalized RMSE and the normalized difference of MAPE with respect to the i.i.d. forest.    
+The difference in error metrics (i.i.d. - block bootstrap) are presented below. 
+     
+### M3 data set:
+     
+```{r}
+res_files <- list.files("results/")
+m3_res <- res_files[str_detect(res_files, "m3")]
+m3_res <- m3_res[!str_detect(m3_res, "blocksize")]
+m3_res <- m3_res[!str_detect(m3_res, "stat")]
+m3_res <- m3_res[!str_detect(m3_res, "bis")]
+stat_m3 <- read_rds("results/stat_m3.rds")
+
+res <- map_dfr(m3_res,  ~read_rds(paste0("results/", .x)) %>% 
+      mutate(acf_coef = str_remove(.x, ".rds"))) %>% 
+  mutate(acf_coef = 
+           as.numeric(str_sub(acf_coef, start = 4)),
+         acf_coef = as.factor(acf_coef)) %>% 
+  bind_cols(bind_rows(stat_m3, stat_m3, stat_m3, stat_m3, stat_m3)) %>% 
+  mutate(nono_ndmape = (iid_mape - nono_mape) / iid_mape,
+         mov_ndmape = (iid_mape - mov_mape) / iid_mape,
+         iid_nrmse_std = iid_rmse / std,
+         # iid_nrmse_mean = iid_rmse / mean,
+         # iid_nrmse_med = iid_rmse / median,
+         # iid_rmse_q = iid_rmse / q1_q3,
+         nono_nrmse_std = nono_rmse / std,
+         # nono_nrmse_mean = nono_rmse / mean,
+         # nono_nrmse_med = nono_rmse / median,
+         # nono_rmse_q = nono_rmse / q1_q3,
+         mov_nrmse_std = mov_rmse / std #,
+         # mov_nrmse_mean = mov_rmse / mean,
+         # mov_nrmse_med = mov_rmse / median,
+         # mov_rmse_q = mov_rmse / q1_q3
+         )
+
+coef_acf <- as.numeric(as.character(unique(res$acf_coef)))
+```
+    
+Here we use the NRMSE (normalized RMSE) and the NdMAPE (normalized difference of MAPE) as error metrics. We first look at the NRMSE:     
+    
+$NRMSE = \frac{RMSE}{\sigma(serie_{train})}$    
+    
+and $\sigma$ is the standard deviation of the training part of the series to forecast. One may choose to use other ways of normalization (examples are commented in the above R chuck), but they all show the same results.     
+    
+To compare roughly the difference between i.i.d. forest to block bootstrap forests, here are the boxplots of their difference in NRMSE and some basic statistics. The boxplots are organized by different acf coefficients.      
+    
+    
+#### Moving bootstrap
+```{r}
+ggplot(res, aes(x = freq, y = iid_nrmse_std - mov_nrmse_std, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NRMSE, iid - moving")
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(min = summary(iid_nrmse_std - mov_nrmse_std)[1],
+            q1 = summary(iid_nrmse_std - mov_nrmse_std)[2],
+            med = summary(iid_nrmse_std - mov_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - mov_nrmse_std)[4],
+            q3 = summary(iid_nrmse_std - mov_nrmse_std)[5],
+            max = summary(iid_nrmse_std - mov_nrmse_std)[6])
+```
+    
+The difference is quite centered, which indicates that the block bootstrap variants improves the forecasting result only in some of the M3 data set. We also observe an impact of the acf coefficient on the performance. Note that with a larger acf coefficient, we are more likely to have a small block.size (for example for acf coefficient = 0.9, we will have block.size = 2 in many cases and thus very close to the i.i.d. case).        
+      
+#### Non-overlapping bootstrap
+```{r}
+ggplot(res, aes(x = freq, y = iid_nrmse_std - nono_nrmse_std, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NRMSE, iid - non overlap")
+
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(min = summary(iid_nrmse_std - nono_nrmse_std)[1],
+            q1 = summary(iid_nrmse_std - nono_nrmse_std)[2],
+            med = summary(iid_nrmse_std - nono_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - nono_nrmse_std)[4],
+            q3 = summary(iid_nrmse_std - nono_nrmse_std)[5],
+            max = summary(iid_nrmse_std - nono_nrmse_std)[6])
+
+```
+    
+Generally, the moving variant outperforms the non-overlapping variant with the M3 data set. We observe gain with moving variant on monthly data.      
+     
+### Test of significance
+Next, we perform the Wilcoxon test to see if the difference in NRMSE between i.i.d. forest and the variants is significant. The alternative hypothesis is that true location shift is greater than 0 => variant better than i.i.d.      
+    
+```{r}
+
+wilcoxon_mov  <- c()
+wilcoxon_nono <- c()
+
+for (acf in coef_acf) {
+  
+  for (frequen in c("monthly", "quarterly")) {
+    
+    # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
+    res_nrmse_std <- res %>% 
+      filter(!is.infinite(iid_nrmse_std)) %>% 
+      filter(acf_coef == acf, 
+             freq == frequen)
+    
+    # cat("------------------------- Moving -------------------------\n")
+    test_mov <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
+                            y = res_nrmse_std$mov_nrmse_std, 
+                            paired = T, alternative = "greater")
+    # print(test_mov)
+    wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
+    
+    # cat("------------------------- Non-over -----------------------\n")
+    test_nono <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
+                             y = res_nrmse_std$nono_nrmse_std, 
+                             paired = T, alternative = "greater")
+    # print(test_nono)
+    wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
+    
+    # cat("----------------------------------------------------------\n")
+  }
+  
+}
+
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(iid_nrmse_std - mov_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - mov_nrmse_std)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_mov))
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(iid_nrmse_std - nono_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - nono_nrmse_std)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_nono))
+```
+     
+By the Wilcoxon test, we confirm that the gain observed with moving variant on monthly is statistically significant.     
+    
+Now we evaluate in terms of the normalized difference in MAPE where:    
+     
+$NdMAPE = \frac{\Delta (MAPE)}{MAPE_{i.i.d.}}$     
+     
+and $\Delta (MAPE) = MAPE_{i.i.d.} - MAPE_{variant}$ is the difference between the i.i.d. forest and the block bootstrap variant.     
+    
+We show the boxplots of their difference in NdMAPE and also the basic statistics:
+     
+     
+```{r}
+ggplot(res, aes(x = freq, y = mov_ndmape, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NdMAPE, iid - mov")
+
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(min = summary(mov_ndmape)[1],
+            q1 = summary(mov_ndmape)[2],
+            med = summary(mov_ndmape)[3],
+            mean = summary(mov_ndmape)[4],
+            q3 = summary(mov_ndmape)[5],
+            max = summary(mov_ndmape)[6])
+
+ggplot(res, aes(x = freq, y = nono_ndmape, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NdMAPE, iid - nono")
+
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(min = summary(nono_ndmape)[1],
+            q1 = summary(nono_ndmape)[2],
+            med = summary(nono_ndmape)[3],
+            mean = summary(nono_ndmape)[4],
+            q3 = summary(nono_ndmape)[5],
+            max = summary(nono_ndmape)[6])
+```
+    
+We have the same conclusion as the NRMSR metric. Now again, we use the Wilcoxon test to see if the difference in NdMAPE between i.i.d. forest and the variants is significant.
+    
+```{r}
+wilcoxon_mov  <- c()
+wilcoxon_nono <- c()
+
+for (acf in coef_acf) {
+  
+  for (frequen in c("monthly", "quarterly")) {
+    
+    # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
+    res_ndmape <- res %>% 
+      filter(!is.infinite(mov_ndmape)) %>% 
+      filter(acf_coef == acf, 
+             freq == frequen)
+    
+    # cat("------------------------- Moving -------------------------\n")
+    test_mov <- wilcox.test(x = res_ndmape$mov_ndmape, alternative = "greater")
+    # print(test_mov)
+    wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
+    
+    # cat("------------------------- Non-over -----------------------\n")
+    test_nono <- wilcox.test(x = res_ndmape$nono_ndmape, alternative = "greater")
+    # print(test_nono)
+    wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
+    
+    # cat("----------------------------------------------------------\n")
+  }
+  
+}
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(mov_ndmape)[3],
+            mean = summary(mov_ndmape)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_mov))
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(nono_ndmape)[3],
+            mean = summary(nono_ndmape)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_nono))
+```
+
+    
+     
+## Some additional results
+The percentage of cases where the block bootstrap variant is doing better than the i.i.d. (in terms of NdMAPE):     
+```{r}
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(percentage = sum(as.numeric(mov_ndmape > 0)) / n())
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(percentage = sum(as.numeric(nono_ndmape > 0)) / n())
+```
+
+     
+The average block size with better results:    
+     
+```{r}
+res_with_idx <- res %>%
+  nest(data = !freq) %>% 
+  mutate(data_t = lapply(data, function(x) {
+    x %>% mutate(idx = rep(1:(nrow(x) / 5), times = 5))
+  })) %>% 
+  unnest(data_t) %>% 
+  select(- data)
+
+
+blocksize_m3 <- readRDS("results/blocksize_m3.rds")
+
+res_with_idx <- res_with_idx %>% 
+  left_join(blocksize_m3 %>% 
+              mutate(acf_coef = as.factor(niveau_acf)) %>% 
+              select(- niveau_acf), 
+            by = c("acf_coef", "idx"))
+
+res_with_idx %>% 
+  mutate(better_with_mov = as.numeric(mov_nrmse_std > 0)) %>% 
+  group_by(acf_coef, better_with_mov, freq) %>% 
+  summarise(mean_block_size = mean(block_size))
+
+res_with_idx %>% 
+  mutate(better_with_nono = as.numeric(nono_nrmse_std > 0)) %>% 
+  group_by(acf_coef, better_with_nono, freq) %>% 
+  summarise(mean_block_size = mean(block_size))
+
+res_with_idx %>% 
+  mutate(better_with_mov = as.numeric(mov_ndmape > 0)) %>% 
+  group_by(acf_coef, better_with_mov, freq) %>% 
+  summarise(mean_block_size = mean(block_size))
+
+res_with_idx %>% 
+  mutate(better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
+  group_by(acf_coef, better_with_nono, freq) %>% 
+  summarise(mean_block_size = mean(block_size))
+
+```
+
+### M4 data set:
+We perform the same analysis with the M4 data set. In short, we have the same conclusion as for the M3 data set that the moving variant has better performance on monthly data.     
+    
+```{r echo=F}
+m4_res <- res_files[str_detect(res_files, "m4")]
+m4_res <- m4_res[!str_detect(m4_res, "bis")]
+m4_res <- m4_res[!str_detect(m4_res, "stat")]
+m4_res <- m4_res[!str_detect(m4_res, "blocksize")]
+stat_m4 <- read_rds("results/stat_m4.rds")
+
+res <- map_dfr(m4_res,  ~read_rds(paste0("results/", .x)) %>% 
+                 mutate(acf_coef = str_remove(.x, ".rds"))) %>% 
+  mutate(acf_coef = 
+           as.numeric(str_sub(acf_coef, start = 4)),
+         acf_coef = as.factor(acf_coef))  %>% 
+  bind_cols(bind_rows(stat_m4, stat_m4, stat_m4, stat_m4, stat_m4)) %>% 
+  mutate(nono_ndmape = (iid_mape - nono_mape) / iid_mape,
+         mov_ndmape = (iid_mape - mov_mape) / iid_mape,
+         iid_nrmse_std = iid_rmse / std,
+         nono_nrmse_std = nono_rmse / std,
+         mov_nrmse_std = mov_rmse / std)
+```
+     
+Visualization of error metric differences.    
+    
+```{r}
+ggplot(res, aes(x = freq, y = iid_nrmse_std - mov_nrmse_std, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NRMSE, iid - moving")
+
+# we show some basic statistics
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(min = summary(iid_nrmse_std - mov_nrmse_std)[1],
+            q1 = summary(iid_nrmse_std - mov_nrmse_std)[2],
+            med = summary(iid_nrmse_std - mov_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - mov_nrmse_std)[4],
+            q3 = summary(iid_nrmse_std - mov_nrmse_std)[5],
+            max = summary(iid_nrmse_std - mov_nrmse_std)[6])
+
+ggplot(res, aes(x = freq, y = iid_nrmse_std - nono_nrmse_std, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NRMSE, iid - non overlap")
+
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(min = summary(iid_nrmse_std - nono_nrmse_std)[1],
+            q1 = summary(iid_nrmse_std - nono_nrmse_std)[2],
+            med = summary(iid_nrmse_std - nono_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - nono_nrmse_std)[4],
+            q3 = summary(iid_nrmse_std - nono_nrmse_std)[5],
+            max = summary(iid_nrmse_std - nono_nrmse_std)[6])
+```
+         
+We perform the Wilcoxon test to see if the difference in NRMSE between i.i.d. forest and the variants is significant.     
+    
+```{r}
+
+wilcoxon_mov  <- c()
+wilcoxon_nono <- c()
+
+for (acf in coef_acf) {
+  
+  for (frequen in c("monthly", "quarterly")) {
+    
+    # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
+    res_nrmse_std <- res %>% 
+      filter(!is.infinite(iid_nrmse_std)) %>% 
+      filter(acf_coef == acf, 
+             freq == frequen)
+    
+    # cat("------------------------- Moving -------------------------\n")
+    test_mov <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
+                            y = res_nrmse_std$mov_nrmse_std, 
+                            paired = T, alternative = "greater")
+    # print(test_mov)
+    wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
+    
+    # cat("------------------------- Non-over -----------------------\n")
+    test_nono <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
+                             y = res_nrmse_std$nono_nrmse_std, 
+                             paired = T, alternative = "greater")
+    # print(test_nono)
+    wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
+    
+    # cat("----------------------------------------------------------\n")
+  }
+  
+}
+
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(iid_nrmse_std - mov_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - mov_nrmse_std)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_mov))
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(iid_nrmse_std - nono_nrmse_std)[3],
+            mean = summary(iid_nrmse_std - nono_nrmse_std)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_nono))
+```
+
+     
+     
+We show the boxplots of their difference in NdMAPE and also the basic statistics:
+     
+```{r}
+ggplot(res, aes(x = freq, y = mov_ndmape, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NdMAPE, iid - mov")
+
+
+res %>% 
+  group_by(freq) %>% 
+  summarise(min = summary(mov_ndmape)[1],
+            q1 = summary(mov_ndmape)[2],
+            med = summary(mov_ndmape)[3],
+            mean = summary(mov_ndmape)[4],
+            q3 = summary(mov_ndmape)[5],
+            max = summary(mov_ndmape)[6])
+
+ggplot(res, aes(x = freq, y = nono_ndmape, color = acf_coef)) +
+  geom_boxplot() + 
+  labs(title = "difference in NdMAPE, iid - nono")
+
+
+res %>% 
+  group_by(freq) %>% 
+  summarise(min = summary(nono_ndmape)[1],
+            q1 = summary(nono_ndmape)[2],
+            med = summary(nono_ndmape)[3],
+            mean = summary(nono_ndmape)[4],
+            q3 = summary(nono_ndmape)[5],
+            max = summary(nono_ndmape)[6])
+```
+    
+With the Wilcoxon test to see if the difference in NdMAPE between i.i.d. forest and the variants is significant, always with the alternative hypothesis is that true location shift is greater than 0 => variant better than i.i.d.:      
+    
+```{r}
+wilcoxon_mov  <- c()
+wilcoxon_nono <- c()
+
+for (acf in coef_acf) {
+  
+  for (frequen in c("monthly", "quarterly")) {
+    
+    # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
+    res_ndmape <- res %>% 
+      filter(!is.infinite(mov_ndmape)) %>% 
+      filter(acf_coef == acf, 
+             freq == frequen)
+    
+    # cat("------------------------- Moving -------------------------\n")
+    test_mov <- wilcox.test(x = res_ndmape$mov_ndmape, alternative = "greater")
+    # print(test_mov)
+    wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
+    
+    # cat("------------------------- Non-over -----------------------\n")
+    test_nono <- wilcox.test(x = res_ndmape$nono_ndmape, alternative = "greater")
+    # print(test_nono)
+    wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
+    
+    # cat("----------------------------------------------------------\n")
+  }
+  
+}
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(mov_ndmape)[3],
+            mean = summary(mov_ndmape)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_mov))
+
+res %>% 
+  group_by(acf_coef, freq) %>% 
+  summarise(median = summary(nono_ndmape)[3],
+            mean = summary(nono_ndmape)[4]) %>% 
+  bind_cols(tibble(p_value = wilcoxon_nono))
+```
+
+    
+     
+The percentage of cases where the block bootstrap variant is doing better than the i.i.d. (in terms of NdMAPE):     
+```{r}
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(percentage = sum(as.numeric(mov_ndmape > 0)) / n())
+
+res %>% 
+  group_by(freq, acf_coef) %>% 
+  summarise(percentage = sum(as.numeric(nono_ndmape > 0)) / n())
+```
+
+
+The average block size with better results:
+```{r}
+res_with_idx <- res %>%
+  nest(data = !freq) %>% 
+  mutate(data_t = lapply(data, function(x) {
+    x %>% mutate(idx = rep(1:(nrow(x) / 5), times = 5))
+  })) %>% 
+  unnest(data_t) %>% 
+  select(- data)
+
+blocksize_m4 <- readRDS("results/blocksize_m4.rds")
+
+res_with_idx <- res_with_idx %>% 
+  left_join(blocksize_m4 %>% 
+              mutate(acf_coef = as.factor(niveau_acf)) %>% 
+              select(- niveau_acf),
+            by = c("acf_coef", "idx"))
+
+res_with_idx %>% 
+  mutate(better_with_mov = as.numeric(mov_ndmape > 0),
+         better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
+  group_by(acf_coef, better_with_mov, freq) %>% 
+  summarise(mean_block_size = mean(block_size))
+
+res_with_idx %>% 
+  mutate(better_with_mov = as.numeric(mov_ndmape > 0),
+         better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
+  group_by(acf_coef, better_with_nono, freq) %>% 
+  summarise(mean_block_size = mean(block_size))
+
+```
+
+
+Boxplot of block size for cases where block bootstrap variant is doing better or not:
+```{r}
+res_with_idx %>% 
+  mutate(better_with_mov = as.numeric(mov_ndmape > 0),
+         better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
+ggplot(aes(x = freq, y = block_size, color = acf_coef)) +
+  geom_boxplot() + 
+  facet_grid(~better_with_mov)
+```
+

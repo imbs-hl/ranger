@@ -27,9 +27,7 @@ We added 3 parameters in the ranger function: bootstrap.ts, by.end, block.size. 
 To install the development version from GitHub using `devtools`, run
 ```R
 # quiet = TRUE to mask c++ compilation messages, optional
-devtools::install_github("BenjaminGoehry/BlocRF/rangerts", quiet = T)
-# to get the a default guide for the rangerts package, use
-browseVignettes("rangerts")
+devtools::install_github("hyanworkspace/rangerts", quiet = T)
 ```
 
 
@@ -63,14 +61,13 @@ We provide an open source dataset of French weekly electricity consumption, alon
 * Temp : temperature
 * Temp1 : lag 1 of temperature
 * IPI : industrial index
-* IPI_CVS :
 
 ``` R
 library(rangerts)
 # to check the function ranger function helper
-?rangerts::ranger
+?rangerts::rangerts
 
-# load consumption data in the package
+# load consumption data in the package ----
 data <- rangerts::elec_data
 
 # feature engineering
@@ -102,7 +99,7 @@ block_size <- 52
 # Use case 1
 # the default ranger with bootstrap i.i.d and with replacement
 # thus the sample fraction is the default value = 1
-rf_iid_rep <- rangerts::ranger(Load ~ ., data = df_train,
+rf_iid_rep <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T,
@@ -124,7 +121,7 @@ purrr::map_dbl(rf_iid_rep$inbag.counts, sum) %>%
 # Use case 2
 # the default ranger with bootstrap i.i.d and with replacement
 # thus the sample fraction = 0.632
-rf_iid <- rangerts::ranger(Load ~ ., data = df_train,
+rf_iid <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = F,
@@ -144,7 +141,7 @@ purrr::map_dbl(rf_iid$inbag.counts, sum) %>%
 # Use case 3
 # the nonoverlapping mode with replacement
 # thus the sample fraction is the default value = 1
-rf_no_rep <- rangerts::ranger(Load ~ ., data = df_train,
+rf_no_rep <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T, # default = T too
@@ -166,7 +163,7 @@ purrr::map_dbl(rf_no_rep$inbag.counts, sum) %>%
 # Use case 4
 # the nonoverlapping mode with replacement
 # thus the sample fraction is the default value = 1
-rf_no <- rangerts::ranger(Load ~ ., data = df_train,
+rf_no <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = F, # in this case, every sample in-bag is taken only once
@@ -189,7 +186,7 @@ purrr::map_dbl(rf_no$inbag.counts, sum) %>%
 # Use case 5
 # the moving mode with replacement
 # thus the sample fraction is the default value = 1
-rf_mv <- rangerts::ranger(Load ~ ., data = df_train,
+rf_mv <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T, # default = T too
@@ -211,7 +208,7 @@ purrr::map_dbl(rf_mv$inbag.counts, sum) %>%
 # Use case 6
 # the stationary mode with replacement
 # thus the sample fraction is the default value = 1
-rf_st <- rangerts::ranger(Load ~ ., data = df_train,
+rf_st <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T, # default = T too
@@ -229,7 +226,7 @@ purrr::map_int(rf_st$inbag.counts,
 # Use case 7
 # the circular mode with replacement
 # thus the sample fraction is the default value = 1
-rf_cr <- rangerts::ranger(Load ~ ., data = df_train,
+rf_cr <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T, # default = T too
@@ -247,7 +244,7 @@ purrr::map_int(rf_cr$inbag.counts,
 # Use case 8
 # the seasonal mode with replacement
 # thus the sample fraction is the default value = 1
-rf_se <- rangerts::ranger(Load ~ ., data = df_train,
+rf_se <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T, # default = T too
@@ -289,7 +286,3 @@ mape <- purrr::map_dbl(model_list,
                                    predict(.x, df_test)$predictions))
 cbind(algo_spec, round(mape, 2))
 ```
-
-Good references:
-ftp://stat.ethz.ch/Research-Reports/87.pdf
-https://projecteuclid.org/download/pdf_1/euclid.aos/1176347265

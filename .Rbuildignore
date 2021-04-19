@@ -7,3 +7,5 @@
 ^\.travis.yml$
 ^cpp\_version$
 ^appveyor\.yml$
+www/*
+benchmark_Mcomp/*
