@@ -1,12 +1,7 @@
 ---
 title: "Random forest for dependent data - block bootstrap variants"
+output: rmarkdown::github_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-```
-
 ```{r message=F, warning=F}
 library(Mcomp)
 
