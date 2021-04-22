@@ -1,7 +1,5 @@
 ---
 title: "Random forest for dependent data - block bootstrap variants"
-output:
-  html_document: default
 ---
 
 ```{r setup, include=FALSE}
