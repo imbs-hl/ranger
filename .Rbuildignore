@@ -9,3 +9,5 @@
 ^appveyor\.yml$
 www/*
 benchmark_Mcomp/*
+_site.yml
+index.Rmd
