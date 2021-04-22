@@ -1,0 +1,12 @@
+name: "Mcomp rangerts test"
+output_dir: "docs"
+navbar:
+  title: "Test with variants"
+  left:
+  - text: "Mcomp rangerts test"
+   href: index.html
+  - text: "Test with variants"
+   href: benchmark_Mcomp/test_with_Mcomp_data_sets.html
+output:
+  html_document:
+ theme: cosmo
