@@ -74,10 +74,10 @@ The key parameter **block.size** is determined automatically with the
 help of an autocorrelation estimation of the target time series by the
 `acf()` function in R. We fix a threshold which varies from 0.5 to 0.9,
 and take the largest lag (block.size = 2 if the largest lag is 1,
-otherwise this becomes an i.i.d. case). This parameter (threshold) is
-names as **acf coefficient** in the following sections. In addition, we
-specify `by.end = FALSE` and keep other parameters for the block
-bootstrap to default values.  
+otherwise this becomes an i.i.d. case) corresponding to this threshold.
+This parameter (threshold) is named as **acf coefficient** in the
+following sections. In addition, we specify `by.end = FALSE` and keep
+other parameters for the block bootstrap to default values.  
 We obtain the following results.  
 Codes of this experiment can be found here: **code here**. Here we show
 codes for result analysis with obtained results.
@@ -318,7 +318,7 @@ res %>%
     ## 10 0.9      quarterly -0.003821941 -0.02474410    1.00
 
 By the Wilcoxon test, we confirm that the gain observed with moving
-variant on monthly is statistically significant.
+variant on monthly data is statistically significant.
 
 Now we evaluate in terms of the normalized difference in MAPE where:
 
