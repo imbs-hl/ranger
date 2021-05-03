@@ -144,7 +144,6 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
     uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& regularization_factor,
     bool regularization_usedepth) {
 
-  this->memory_mode = memory_mode;
   this->verbose_out = verbose_out;
 
   // Call other init function
