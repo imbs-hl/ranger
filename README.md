@@ -1,5 +1,4 @@
 [![R-CMD-check](https://github.com/imbs-hl/ranger/workflows/R-CMD-check/badge.svg)](https://github.com/imbs-hl/ranger/actions)
-[![Codecov test coverage](https://codecov.io/gh/imbs-hl/ranger/branch/master/graph/badge.svg)](https://codecov.io/gh/imbs-hl/ranger?branch=master)
 ![CRAN Downloads month](http://cranlogs.r-pkg.org/badges/ranger?color=brightgreen)
 ![CRAN Downloads overall](http://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen)
 ## ranger: A Fast Implementation of Random Forests
