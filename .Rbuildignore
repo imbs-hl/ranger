@@ -4,7 +4,6 @@
 ^NEWS\.md$
 ^README\.md$
 ^.*\.tar.gz$
-^\.travis.yml$
 ^cpp\_version$
-^appveyor\.yml$
 ^\.github$
+^codecov\.yml$
