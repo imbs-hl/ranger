@@ -58,7 +58,7 @@ public:
       bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth,
       const std::vector<double>& regularization_factor, bool regularization_usedepth);
-  void init(MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry, std::string output_prefix,
+  void init(std::unique_ptr<Data> input_data, uint mtry, std::string output_prefix,
       uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
       bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
       bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
