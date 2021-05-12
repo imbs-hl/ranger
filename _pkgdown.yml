@@ -1,0 +1,20 @@
+	development:
+  mode: auto
+
+url: https://imbs-hl.github.io/ranger
+
+home:
+  title: A fast implementation of random forests
+  description: >
+    Some description
+
+authors:
+  Marvin N. Wright:
+    href: https://wrig.de
+
+news:
+  one_page: true
+  cran_dates: true
+  # releases:
+  # - text: "ranger 0.12.4"
+  #   href: link
