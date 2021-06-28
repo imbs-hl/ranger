@@ -45,6 +45,7 @@
 ##' @param test_data Test data of class \code{data.frame}.
 ##' @param params1 Parameters for the proximity random forest grown in the first step. 
 ##' @param params2 Parameters for the prediction random forests grown in the second step. 
+##' @param verbose Logical indicating whether or not to print computation progress.
 ##'
 ##' @return Predictions for the test dataset.
 ##'
@@ -63,7 +64,7 @@
 ##' @references
 ##'   Xu, R., Nettleton, D. & Nordman, D.J. (2014). Case-specific random forests. J Comp Graph Stat 25:49-65. \url{https://doi.org/10.1080/10618600.2014.983641}.
 ##' @export
-csrf <- function(formula, training_data, test_data, params1 = list(), params2 = list()) {
+csrf <- function(formula, training_data, test_data, params1 = list(), params2 = list(), verbose = FALSE) {
   ## Grow a random forest on the training data to obtain weights
   rf.proximity <- do.call(ranger, c(list(formula = formula, data = training_data, 
                                          write.forest = TRUE), params1))
@@ -74,6 +75,13 @@ csrf <- function(formula, training_data, test_data, params1 = list(), params2 = 
   
   ## Grow weighted RFs for test observations, predict the outcome
   predictions <- sapply(1:nrow(test_data), function(i) {
+    ## Print computation progress
+    if (isTRUE(verbose)) {
+      message("Computing case-specific prediction for test observation ", 
+              i, " of ", nrow(test_data), ". (", round(i / nrow(test_data) * 100, digits = 2), 
+              "% complete.)")  
+    }
+    
     ## Compute weights from first RF
     num.same.node <- rowSums(terminal.nodeIDs.test[i, ] == terminal.nodeIDs.train)
     weights <- num.same.node / sum(num.same.node)

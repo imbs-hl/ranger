@@ -4,7 +4,14 @@
 \alias{csrf}
 \title{Case-specific random forests.}
 \usage{
-csrf(formula, training_data, test_data, params1 = list(), params2 = list())
+csrf(
+  formula,
+  training_data,
+  test_data,
+  params1 = list(),
+  params2 = list(),
+  verbose = FALSE
+)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}
@@ -16,6 +23,8 @@ csrf(formula, training_data, test_data, params1 = list(), params2 = list())
 \item{params1}{Parameters for the proximity random forest grown in the first step.}
 
 \item{params2}{Parameters for the prediction random forests grown in the second step.}
+
+\item{verbose}{Logical indicating whether or not to print computation progress.}
 }
 \value{
 Predictions for the test dataset.

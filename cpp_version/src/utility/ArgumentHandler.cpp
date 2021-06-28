@@ -461,11 +461,25 @@ void ArgumentHandler::checkArguments() {
       throw std::runtime_error("Could not read from input file: " + predict + ".");
     }
 
-    // Do not read num_variables, num_trees and is_ordered_variable
-    infile.seekg(sizeof(size_t));
+    // Do not read dependent variable names
+    uint num_dependent_variables;
+    infile.read((char*) &num_dependent_variables, sizeof(num_dependent_variables));
+    for (size_t i = 0; i < num_dependent_variables; ++i) {
+      size_t length;
+      infile.read((char*) &length, sizeof(size_t));
+      infile.ignore(length);
+    }
+
+    // Do not read num_trees
+    infile.ignore(sizeof(size_t));
+
+    // Do not read is_ordered_variable
     size_t length;
     infile.read((char*) &length, sizeof(length));
-    infile.seekg(4 * sizeof(size_t) + length * sizeof(bool));
+    infile.ignore(length * sizeof(bool));
+
+    // Do not read number of variables
+    infile.ignore(sizeof(size_t));
 
     // Get treetype
     infile.read((char*) &treetype, sizeof(treetype));
