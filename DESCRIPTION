@@ -20,6 +20,6 @@ Suggests:
     survival,
     testthat
 Encoding: UTF-8
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 URL: https://github.com/imbs-hl/ranger
 BugReports: https://github.com/imbs-hl/ranger/issues
