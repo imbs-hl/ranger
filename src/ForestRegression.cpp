@@ -61,6 +61,21 @@ void ForestRegression::initInternal() {
       }
     }
   }
+  
+  // Error if poisson splitrule used with negative data
+  if (splitrule == POISSON && !prediction_mode) {
+    double y_sum = 0;
+    for (size_t i = 0; i < num_samples; ++i) {
+      double y = data->get_y(i, 0);
+      y_sum += y;
+      if (y < 0) {
+        throw std::runtime_error("Poisson splitrule applicable to regression data with non-positive outcome (y>=0 and sum(y)>0) only.");
+      }
+    }
+    if (y_sum <= 0) {
+      throw std::runtime_error("Poisson splitrule applicable to regression data with non-positive outcome (y>=0 and sum(y)>0) only.");
+    }
+  }
 
   // Sort data if memory saving mode
   if (!memory_saving_splitting) {

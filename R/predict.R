@@ -233,6 +233,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   splitrule <- 1
   alpha <- 0
   minprop <- 0
+  poisson.tau <- 1
   case.weights <- c(0, 0)
   use.case.weights <- FALSE
   class.weights <- c(0, 0)
@@ -269,7 +270,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                       case.weights, use.case.weights, class.weights, 
-                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, poisson.tau, holdout, 
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth)
