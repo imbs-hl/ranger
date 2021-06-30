@@ -16,6 +16,10 @@ object).}
 \item{which.trees}{Vector giving the indices of the trees to remove.}
 
 \item{...}{Additional (optional) arguments. (Currently ignored.)}
+
+\item{warn}{Logical indicating whether or not to warn users that some of the 
+standard output of a typical \code{\link{ranger}} object or no longer 
+available after deforestation. Default is \code{TRUE}.}
 }
 \value{
 An object of class \code{"deforest.ranger"}; essentially, a 
