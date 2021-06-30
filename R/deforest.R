@@ -73,9 +73,11 @@ deforest.ranger <- function(object, which.trees = NULL, warn = TRUE, ...) {
   
   # Warn users about `predictions` and `prediction.error` components
   if (isTRUE(warn)) {
-    warning("The `predictions` and `prediction.error` components of the ",
-            "returned object are no longer correct as they correspond to the ",
-            "original forest (with all trees).", call. = FALSE)
+    warning("Many of the components of a typical \"ranger\" object are ",
+            "not available after deforestation and are instead replaced with ",
+            "`NA` (e.g., out-of-bag (OOB) predictions, variable importance ",
+            "scores (if requested), and OOB-based error metrics).", 
+            call. = FALSE)
   }
   
   # "Remove trees" by removing necessary components from `forest` object
