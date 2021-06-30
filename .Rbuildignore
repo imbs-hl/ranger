@@ -6,3 +6,6 @@
 ^.*\.tar.gz$
 ^cpp\_version$
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

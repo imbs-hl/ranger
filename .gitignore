@@ -5,3 +5,4 @@ ranger.Rcheck/
 *.Rproj
 .project
 .cproject
+docs
