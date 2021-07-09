@@ -1,15 +1,7 @@
 
-##### Version 0.12.4
-* Bug fixes
-
-##### Version 0.12.3
+##### Version 0.13
+* Faster quantile prediction
 * Add ... argument to ranger()
-* Bug fixes
-
-##### Version 0.12.2
-* Bug fixes
-
-##### Version 0.12.1
 * Bug fixes
 
 ##### Version 0.12.0
