@@ -539,10 +539,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     regularization.factor <-  c(0, 0)
     use.regularization.factor <- FALSE
   } else {
-    # Deactivation of paralellization
+    # Deactivation of parallelization
     if (num.threads != 1) {
       num.threads <- 1
-      warning("Paralellization deactivated (regularization used).")
+      warning("Parallelization deactivated (regularization used).")
     }
     use.regularization.factor <- TRUE
   } 
