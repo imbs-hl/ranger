@@ -534,7 +534,7 @@ void ArgumentHandler::checkArguments() {
     }
 
     if (nthreads != 1) {
-      std::cout << "Warning: Paralellization deactivated (regularization used)." << std::endl;
+      std::cout << "Warning: Parallelization deactivated (regularization used)." << std::endl;
       nthreads = 1;
     }
   }
