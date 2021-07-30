@@ -1,0 +1,25 @@
+development:
+  mode: auto
+
+url: https://imbs-hl.github.io/ranger
+
+home:
+  title: A fast implementation of Random Forests
+  description: >
+    A fast implementation of Random Forests, particularly suited for high
+    dimensional data. Ensembles of classification, regression, survival and
+    probability prediction trees are supported. Data from genome-wide association
+    studies can be analyzed efficiently. In addition to data frames, datasets of
+    class 'gwaa.data' (R package 'GenABEL') and 'dgCMatrix' (R package 'Matrix')
+    can be directly analyzed.
+
+authors:
+  Marvin N. Wright:
+    href: http://wrig.de
+
+news:
+  one_page: true
+  cran_dates: true
+  # releases:
+  # - text: "ranger 0.12.4"
+  #   href: link
