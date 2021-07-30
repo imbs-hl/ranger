@@ -7,3 +7,6 @@
 ^cpp\_version$
 ^\.github$
 ^revdep$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
