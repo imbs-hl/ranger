@@ -22,8 +22,8 @@ If we take a look at the data set M3:
 M3
 ```
 
-    ## M-Competition data: 3003 time series 
-    ## 
+    ## M-Competition data: 3003 time series
+    ##
     ##            Type of data
     ## Period      DEMOGRAPHIC FINANCE INDUSTRY MACRO MICRO OTHER Total
     ##   MONTHLY           111     145      334   312   474    52  1428
@@ -52,21 +52,18 @@ subset(M3, "monthly")
 ```
 
     ## M-Competition data: 1428 MONTHLY time series
-    ## 
+    ##
     ##          Type of data
     ## Period    DEMOGRAPHIC FINANCE INDUSTRY MACRO MICRO OTHER
     ##   MONTHLY         111     145      334   312   474    52
 
 The M4 data set is organized in the same manner, but with 100000 time
 series and the time series have generally a longer history (more
-observations, ~10e3) than the M3 (~10e2).
+observations, \~10e3) than the M3 (\~10e2).
 
 ## Experiment setting
 
-For every time series, we build a standard random forest (with i.i.d
-assumption on observations, referred as i.i.d forest later) and two
-others with block bootstrap (non-overlapping and moving block bootstrap
-variants respectively).
+For every time series, let us denote <img src="https://latex.codecogs.com/gif.latex?Y_t " /> the observed value at time step t. The corresponding feature matrix <img src="https://latex.codecogs.com/gif.latex?X_t=(frequency_t,time_t) " /> contains only the frequency (named as quarter, taking value in 1 to 4 for quarterly data or named as month, varying from 1 to 12 for monthly data. This feature is used to estimate the seasonality component) and time (varying from 1 to the number of observations, which is used to estimate the trend). To assess the performance of block bootstrap variants on generic time series comparing to the standard random forest algorithm, we estimate the function <img src="https://latex.codecogs.com/gif.latex?f " /> where <img src="https://latex.codecogs.com/gif.latex?Y_t=f(Xt)+\epsilon_t " /> by building a standard random forest (with i.i.d assumption on observations, referred as i.i.d forest later) and two block bootstrap variants (non-overlapping and moving block bootstrap variants respectively), while keeping all the hyper parameters the same. The only additional parameter to be fixed for the proposed block bootstrap variants is thus the block.size, and we’ll discuss how to fix it automatically just below.
 
 ### How to fix block.size
 
@@ -99,12 +96,12 @@ m3_res <- m3_res[!str_detect(m3_res, "stat")]
 m3_res <- m3_res[!str_detect(m3_res, "bis")]
 stat_m3 <- read_rds("results/stat_m3.rds")
 
-res <- map_dfr(m3_res,  ~read_rds(paste0("results/", .x)) %>% 
-      mutate(acf_coef = str_remove(.x, ".rds"))) %>% 
-  mutate(acf_coef = 
+res <- map_dfr(m3_res,  ~read_rds(paste0("results/", .x)) %>%
+      mutate(acf_coef = str_remove(.x, ".rds"))) %>%
+  mutate(acf_coef =
            as.numeric(str_sub(acf_coef, start = 4)),
-         acf_coef = as.factor(acf_coef)) %>% 
-  bind_cols(bind_rows(stat_m3, stat_m3, stat_m3, stat_m3, stat_m3)) %>% 
+         acf_coef = as.factor(acf_coef)) %>%
+  bind_cols(bind_rows(stat_m3, stat_m3, stat_m3, stat_m3, stat_m3)) %>%
   mutate(nono_ndmape = (iid_mape - nono_mape) / iid_mape,
          mov_ndmape = (iid_mape - mov_mape) / iid_mape,
          iid_nrmse_std = iid_rmse / std,
@@ -143,15 +140,15 @@ coefficients.
 
 ``` r
 ggplot(res, aes(x = freq, y = iid_nrmse_std - mov_nrmse_std, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NRMSE, iid - moving")
 ```
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(min = summary(iid_nrmse_std - mov_nrmse_std)[1],
             q1 = summary(iid_nrmse_std - mov_nrmse_std)[2],
             med = summary(iid_nrmse_std - mov_nrmse_std)[3],
@@ -189,15 +186,15 @@ case).
 
 ``` r
 ggplot(res, aes(x = freq, y = iid_nrmse_std - nono_nrmse_std, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NRMSE, iid - non overlap")
 ```
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(min = summary(iid_nrmse_std - nono_nrmse_std)[1],
             q1 = summary(iid_nrmse_std - nono_nrmse_std)[2],
             med = summary(iid_nrmse_std - nono_nrmse_std)[3],
@@ -239,39 +236,39 @@ wilcoxon_mov  <- c()
 wilcoxon_nono <- c()
 
 for (acf in coef_acf) {
-  
+
   for (frequen in c("monthly", "quarterly")) {
-    
+
     # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
-    res_nrmse_std <- res %>% 
-      filter(!is.infinite(iid_nrmse_std)) %>% 
-      filter(acf_coef == acf, 
+    res_nrmse_std <- res %>%
+      filter(!is.infinite(iid_nrmse_std)) %>%
+      filter(acf_coef == acf,
              freq == frequen)
-    
+
     # cat("------------------------- Moving -------------------------\n")
     test_mov <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
-                            y = res_nrmse_std$mov_nrmse_std, 
+                            y = res_nrmse_std$mov_nrmse_std,
                             paired = T, alternative = "greater")
     # print(test_mov)
     wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
-    
+
     # cat("------------------------- Non-over -----------------------\n")
     test_nono <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
-                             y = res_nrmse_std$nono_nrmse_std, 
+                             y = res_nrmse_std$nono_nrmse_std,
                              paired = T, alternative = "greater")
     # print(test_nono)
     wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
-    
+
     # cat("----------------------------------------------------------\n")
   }
-  
+
 }
 
 
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(iid_nrmse_std - mov_nrmse_std)[3],
-            mean = summary(iid_nrmse_std - mov_nrmse_std)[4]) %>% 
+            mean = summary(iid_nrmse_std - mov_nrmse_std)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_mov))
 ```
 
@@ -293,10 +290,10 @@ res %>%
     ## 10 0.9      quarterly -0.007164270 -0.010337412 1.00e+ 0
 
 ``` r
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(iid_nrmse_std - nono_nrmse_std)[3],
-            mean = summary(iid_nrmse_std - nono_nrmse_std)[4]) %>% 
+            mean = summary(iid_nrmse_std - nono_nrmse_std)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_nono))
 ```
 
@@ -332,15 +329,15 @@ statistics:
 
 ``` r
 ggplot(res, aes(x = freq, y = mov_ndmape, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NdMAPE, iid - mov")
 ```
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(min = summary(mov_ndmape)[1],
             q1 = summary(mov_ndmape)[2],
             med = summary(mov_ndmape)[3],
@@ -368,15 +365,15 @@ res %>%
 
 ``` r
 ggplot(res, aes(x = freq, y = nono_ndmape, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NdMAPE, iid - nono")
 ```
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(min = summary(nono_ndmape)[1],
             q1 = summary(nono_ndmape)[2],
             med = summary(nono_ndmape)[3],
@@ -390,7 +387,7 @@ res %>%
     ## # A tibble: 10 x 8
     ## # Groups:   freq [2]
     ##    freq     acf_coef min       q1         med       mean      q3        max     
-    ##    <chr>    <fct>    <table>   <table>    <table>   <table>   <table>   <table> 
+    ##    <chr>    <fct>    <table>   <table>    <table>   <table>   <table>   <table>
     ##  1 monthly  0.5      -0.60444… -0.039794… -0.01289… -0.02595… 0.000410… 0.14811…
     ##  2 monthly  0.6      -0.29558… -0.027745… -0.00900… -0.01751… 0.001612… 0.15583…
     ##  3 monthly  0.7      -0.15783… -0.020025… -0.00619… -0.01133… 0.001243… 0.14991…
@@ -411,34 +408,34 @@ wilcoxon_mov  <- c()
 wilcoxon_nono <- c()
 
 for (acf in coef_acf) {
-  
+
   for (frequen in c("monthly", "quarterly")) {
-    
+
     # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
-    res_ndmape <- res %>% 
-      filter(!is.infinite(mov_ndmape)) %>% 
-      filter(acf_coef == acf, 
+    res_ndmape <- res %>%
+      filter(!is.infinite(mov_ndmape)) %>%
+      filter(acf_coef == acf,
              freq == frequen)
-    
+
     # cat("------------------------- Moving -------------------------\n")
     test_mov <- wilcox.test(x = res_ndmape$mov_ndmape, alternative = "greater")
     # print(test_mov)
     wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
-    
+
     # cat("------------------------- Non-over -----------------------\n")
     test_nono <- wilcox.test(x = res_ndmape$nono_ndmape, alternative = "greater")
     # print(test_nono)
     wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
-    
+
     # cat("----------------------------------------------------------\n")
   }
-  
+
 }
 
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(mov_ndmape)[3],
-            mean = summary(mov_ndmape)[4]) %>% 
+            mean = summary(mov_ndmape)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_mov))
 ```
 
@@ -460,10 +457,10 @@ res %>%
     ## 10 0.9      quarterly -0.0013376597 -0.0001744466 9.87e- 1
 
 ``` r
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(nono_ndmape)[3],
-            mean = summary(nono_ndmape)[4]) %>% 
+            mean = summary(nono_ndmape)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_nono))
 ```
 
@@ -490,8 +487,8 @@ The percentage of cases where the block bootstrap variant is doing
 better than the i.i.d. (in terms of NdMAPE):
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(percentage = sum(as.numeric(mov_ndmape > 0)) / n())
 ```
 
@@ -513,8 +510,8 @@ res %>%
     ## 10 quarterly 0.9           0.446
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(percentage = sum(as.numeric(nono_ndmape > 0)) / n())
 ```
 
@@ -539,25 +536,25 @@ The average block size with better results:
 
 ``` r
 res_with_idx <- res %>%
-  nest(data = !freq) %>% 
+  nest(data = !freq) %>%
   mutate(data_t = lapply(data, function(x) {
     x %>% mutate(idx = rep(1:(nrow(x) / 5), times = 5))
-  })) %>% 
-  unnest(data_t) %>% 
+  })) %>%
+  unnest(data_t) %>%
   select(- data)
 
 
 blocksize_m3 <- readRDS("results/blocksize_m3.rds")
 
-res_with_idx <- res_with_idx %>% 
-  left_join(blocksize_m3 %>% 
-              mutate(acf_coef = as.factor(niveau_acf)) %>% 
-              select(- niveau_acf), 
+res_with_idx <- res_with_idx %>%
+  left_join(blocksize_m3 %>%
+              mutate(acf_coef = as.factor(niveau_acf)) %>%
+              select(- niveau_acf),
             by = c("acf_coef", "idx"))
 
-res_with_idx %>% 
-  mutate(better_with_mov = as.numeric(mov_nrmse_std > 0)) %>% 
-  group_by(acf_coef, better_with_mov, freq) %>% 
+res_with_idx %>%
+  mutate(better_with_mov = as.numeric(mov_nrmse_std > 0)) %>%
+  group_by(acf_coef, better_with_mov, freq) %>%
   summarise(mean_block_size = mean(block_size))
 ```
 
@@ -579,9 +576,9 @@ res_with_idx %>%
     ## 10 0.9                    1 quarterly            2.01
 
 ``` r
-res_with_idx %>% 
-  mutate(better_with_nono = as.numeric(nono_nrmse_std > 0)) %>% 
-  group_by(acf_coef, better_with_nono, freq) %>% 
+res_with_idx %>%
+  mutate(better_with_nono = as.numeric(nono_nrmse_std > 0)) %>%
+  group_by(acf_coef, better_with_nono, freq) %>%
   summarise(mean_block_size = mean(block_size))
 ```
 
@@ -603,9 +600,9 @@ res_with_idx %>%
     ## 10 0.9                     1 quarterly            2.01
 
 ``` r
-res_with_idx %>% 
-  mutate(better_with_mov = as.numeric(mov_ndmape > 0)) %>% 
-  group_by(acf_coef, better_with_mov, freq) %>% 
+res_with_idx %>%
+  mutate(better_with_mov = as.numeric(mov_ndmape > 0)) %>%
+  group_by(acf_coef, better_with_mov, freq) %>%
   summarise(mean_block_size = mean(block_size))
 ```
 
@@ -637,9 +634,9 @@ res_with_idx %>%
     ## 20 0.9                    1 quarterly            2.03
 
 ``` r
-res_with_idx %>% 
-  mutate(better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
-  group_by(acf_coef, better_with_nono, freq) %>% 
+res_with_idx %>%
+  mutate(better_with_nono = as.numeric(nono_ndmape > 0)) %>%
+  group_by(acf_coef, better_with_nono, freq) %>%
   summarise(mean_block_size = mean(block_size))
 ```
 
@@ -681,7 +678,7 @@ differences.
 
 ``` r
 ggplot(res, aes(x = freq, y = iid_nrmse_std - mov_nrmse_std, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NRMSE, iid - moving")
 ```
 
@@ -691,8 +688,8 @@ ggplot(res, aes(x = freq, y = iid_nrmse_std - mov_nrmse_std, color = acf_coef)) 
 
 ``` r
 # we show some basic statistics
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(min = summary(iid_nrmse_std - mov_nrmse_std)[1],
             q1 = summary(iid_nrmse_std - mov_nrmse_std)[2],
             med = summary(iid_nrmse_std - mov_nrmse_std)[3],
@@ -720,7 +717,7 @@ res %>%
 
 ``` r
 ggplot(res, aes(x = freq, y = iid_nrmse_std - nono_nrmse_std, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NRMSE, iid - non overlap")
 ```
 
@@ -729,8 +726,8 @@ ggplot(res, aes(x = freq, y = iid_nrmse_std - nono_nrmse_std, color = acf_coef))
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(min = summary(iid_nrmse_std - nono_nrmse_std)[1],
             q1 = summary(iid_nrmse_std - nono_nrmse_std)[2],
             med = summary(iid_nrmse_std - nono_nrmse_std)[3],
@@ -764,39 +761,39 @@ wilcoxon_mov  <- c()
 wilcoxon_nono <- c()
 
 for (acf in coef_acf) {
-  
+
   for (frequen in c("monthly", "quarterly")) {
-    
+
     # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
-    res_nrmse_std <- res %>% 
-      filter(!is.infinite(iid_nrmse_std)) %>% 
-      filter(acf_coef == acf, 
+    res_nrmse_std <- res %>%
+      filter(!is.infinite(iid_nrmse_std)) %>%
+      filter(acf_coef == acf,
              freq == frequen)
-    
+
     # cat("------------------------- Moving -------------------------\n")
     test_mov <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
-                            y = res_nrmse_std$mov_nrmse_std, 
+                            y = res_nrmse_std$mov_nrmse_std,
                             paired = T, alternative = "greater")
     # print(test_mov)
     wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
-    
+
     # cat("------------------------- Non-over -----------------------\n")
     test_nono <- wilcox.test(x = res_nrmse_std$iid_nrmse_std,
-                             y = res_nrmse_std$nono_nrmse_std, 
+                             y = res_nrmse_std$nono_nrmse_std,
                              paired = T, alternative = "greater")
     # print(test_nono)
     wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
-    
+
     # cat("----------------------------------------------------------\n")
   }
-  
+
 }
 
 
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(iid_nrmse_std - mov_nrmse_std)[3],
-            mean = summary(iid_nrmse_std - mov_nrmse_std)[4]) %>% 
+            mean = summary(iid_nrmse_std - mov_nrmse_std)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_mov))
 ```
 
@@ -818,10 +815,10 @@ res %>%
     ## 10 0.9      quarterly -0.0062401121 -0.0149967727 1   e+ 0
 
 ``` r
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(iid_nrmse_std - nono_nrmse_std)[3],
-            mean = summary(iid_nrmse_std - nono_nrmse_std)[4]) %>% 
+            mean = summary(iid_nrmse_std - nono_nrmse_std)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_nono))
 ```
 
@@ -847,15 +844,15 @@ statistics:
 
 ``` r
 ggplot(res, aes(x = freq, y = mov_ndmape, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NdMAPE, iid - mov")
 ```
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq) %>% 
+res %>%
+  group_by(freq) %>%
   summarise(min = summary(mov_ndmape)[1],
             q1 = summary(mov_ndmape)[2],
             med = summary(mov_ndmape)[3],
@@ -866,21 +863,21 @@ res %>%
 
     ## # A tibble: 2 x 7
     ##   freq      min       q1           med           mean        q3         max     
-    ##   <chr>     <table>   <table>      <table>       <table>     <table>    <table> 
+    ##   <chr>     <table>   <table>      <table>       <table>     <table>    <table>
     ## 1 monthly   -1.451220 -0.008759103  0.0001095805  0.0019931… 0.0112150… 0.74431…
     ## 2 quarterly -3.406338 -0.013345115 -0.0032913567 -0.0037675… 0.0054383… 0.76171…
 
 ``` r
 ggplot(res, aes(x = freq, y = nono_ndmape, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   labs(title = "difference in NdMAPE, iid - nono")
 ```
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
 ``` r
-res %>% 
-  group_by(freq) %>% 
+res %>%
+  group_by(freq) %>%
   summarise(min = summary(nono_ndmape)[1],
             q1 = summary(nono_ndmape)[2],
             med = summary(nono_ndmape)[3],
@@ -891,7 +888,7 @@ res %>%
 
     ## # A tibble: 2 x 7
     ##   freq      min        q1          med          mean       q3           max     
-    ##   <chr>     <table>    <table>     <table>      <table>    <table>      <table> 
+    ##   <chr>     <table>    <table>     <table>      <table>    <table>      <table>
     ## 1 monthly   -1.0062624 -0.02841666 -0.009089978 -0.017358… -0.00043971… 0.37870…
     ## 2 quarterly -0.9798121 -0.03732636 -0.014712221 -0.024834… -0.00195969… 0.49775…
 
@@ -905,34 +902,34 @@ wilcoxon_mov  <- c()
 wilcoxon_nono <- c()
 
 for (acf in coef_acf) {
-  
+
   for (frequen in c("monthly", "quarterly")) {
-    
+
     # cat("Test for results with acf_coef =", acf, frequen, "data", "\n")
-    res_ndmape <- res %>% 
-      filter(!is.infinite(mov_ndmape)) %>% 
-      filter(acf_coef == acf, 
+    res_ndmape <- res %>%
+      filter(!is.infinite(mov_ndmape)) %>%
+      filter(acf_coef == acf,
              freq == frequen)
-    
+
     # cat("------------------------- Moving -------------------------\n")
     test_mov <- wilcox.test(x = res_ndmape$mov_ndmape, alternative = "greater")
     # print(test_mov)
     wilcoxon_mov <- c(wilcoxon_mov, test_mov$p.value)
-    
+
     # cat("------------------------- Non-over -----------------------\n")
     test_nono <- wilcox.test(x = res_ndmape$nono_ndmape, alternative = "greater")
     # print(test_nono)
     wilcoxon_nono <- c(wilcoxon_nono, test_nono$p.value)
-    
+
     # cat("----------------------------------------------------------\n")
   }
-  
+
 }
 
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(mov_ndmape)[3],
-            mean = summary(mov_ndmape)[4]) %>% 
+            mean = summary(mov_ndmape)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_mov))
 ```
 
@@ -954,10 +951,10 @@ res %>%
     ## 10 0.9      quarterly -0.0013512058 -0.001077122 1   e+ 0
 
 ``` r
-res %>% 
-  group_by(acf_coef, freq) %>% 
+res %>%
+  group_by(acf_coef, freq) %>%
   summarise(median = summary(nono_ndmape)[3],
-            mean = summary(nono_ndmape)[4]) %>% 
+            mean = summary(nono_ndmape)[4]) %>%
   bind_cols(tibble(p_value = wilcoxon_nono))
 ```
 
@@ -982,8 +979,8 @@ The percentage of cases where the block bootstrap variant is doing
 better than the i.i.d. (in terms of NdMAPE):
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(percentage = sum(as.numeric(mov_ndmape > 0)) / n())
 ```
 
@@ -1005,8 +1002,8 @@ res %>%
     ## 10 quarterly 0.9           0.418
 
 ``` r
-res %>% 
-  group_by(freq, acf_coef) %>% 
+res %>%
+  group_by(freq, acf_coef) %>%
   summarise(percentage = sum(as.numeric(nono_ndmape > 0)) / n())
 ```
 
@@ -1031,25 +1028,25 @@ The average block size with better results:
 
 ``` r
 res_with_idx <- res %>%
-  nest(data = !freq) %>% 
+  nest(data = !freq) %>%
   mutate(data_t = lapply(data, function(x) {
     x %>% mutate(idx = rep(1:(nrow(x) / 5), times = 5))
-  })) %>% 
-  unnest(data_t) %>% 
+  })) %>%
+  unnest(data_t) %>%
   select(- data)
 
 blocksize_m4 <- readRDS("results/blocksize_m4.rds")
 
-res_with_idx <- res_with_idx %>% 
-  left_join(blocksize_m4 %>% 
-              mutate(acf_coef = as.factor(niveau_acf)) %>% 
+res_with_idx <- res_with_idx %>%
+  left_join(blocksize_m4 %>%
+              mutate(acf_coef = as.factor(niveau_acf)) %>%
               select(- niveau_acf),
             by = c("acf_coef", "idx"))
 
-res_with_idx %>% 
+res_with_idx %>%
   mutate(better_with_mov = as.numeric(mov_ndmape > 0),
-         better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
-  group_by(acf_coef, better_with_mov, freq) %>% 
+         better_with_nono = as.numeric(nono_ndmape > 0)) %>%
+  group_by(acf_coef, better_with_mov, freq) %>%
   summarise(mean_block_size = mean(block_size))
 ```
 
@@ -1059,13 +1056,13 @@ res_with_idx %>%
     ## # Groups:   acf_coef, better_with_mov [10]
     ##    acf_coef better_with_mov freq      mean_block_size
     ##    <fct>              <dbl> <chr>               <dbl>
-    ##  1 0.5                    0 monthly             13.3 
-    ##  2 0.5                    0 quarterly           10.5 
-    ##  3 0.5                    1 monthly             13.2 
+    ##  1 0.5                    0 monthly             13.3
+    ##  2 0.5                    0 quarterly           10.5
+    ##  3 0.5                    1 monthly             13.2
     ##  4 0.5                    1 quarterly            9.96
-    ##  5 0.6                    0 monthly             11.4 
+    ##  5 0.6                    0 monthly             11.4
     ##  6 0.6                    0 quarterly            8.40
-    ##  7 0.6                    1 monthly             11.2 
+    ##  7 0.6                    1 monthly             11.2
     ##  8 0.6                    1 quarterly            7.87
     ##  9 0.7                    0 monthly              9.11
     ## 10 0.7                    0 quarterly            6.23
@@ -1081,10 +1078,10 @@ res_with_idx %>%
     ## 20 0.9                    1 quarterly            2.45
 
 ``` r
-res_with_idx %>% 
+res_with_idx %>%
   mutate(better_with_mov = as.numeric(mov_ndmape > 0),
-         better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
-  group_by(acf_coef, better_with_nono, freq) %>% 
+         better_with_nono = as.numeric(nono_ndmape > 0)) %>%
+  group_by(acf_coef, better_with_nono, freq) %>%
   summarise(mean_block_size = mean(block_size))
 ```
 
@@ -1094,13 +1091,13 @@ res_with_idx %>%
     ## # Groups:   acf_coef, better_with_nono [10]
     ##    acf_coef better_with_nono freq      mean_block_size
     ##    <fct>               <dbl> <chr>               <dbl>
-    ##  1 0.5                     0 monthly             13.2 
-    ##  2 0.5                     0 quarterly           10.9 
-    ##  3 0.5                     1 monthly             13.6 
+    ##  1 0.5                     0 monthly             13.2
+    ##  2 0.5                     0 quarterly           10.9
+    ##  3 0.5                     1 monthly             13.6
     ##  4 0.5                     1 quarterly            7.03
-    ##  5 0.6                     0 monthly             11.2 
+    ##  5 0.6                     0 monthly             11.2
     ##  6 0.6                     0 quarterly            8.78
-    ##  7 0.6                     1 monthly             11.7 
+    ##  7 0.6                     1 monthly             11.7
     ##  8 0.6                     1 quarterly            5.40
     ##  9 0.7                     0 monthly              8.98
     ## 10 0.7                     0 quarterly            6.54
@@ -1119,11 +1116,11 @@ Boxplot of block size for cases where block bootstrap variant is doing
 better or not:
 
 ``` r
-res_with_idx %>% 
+res_with_idx %>%
   mutate(better_with_mov = as.numeric(mov_ndmape > 0),
-         better_with_nono = as.numeric(nono_ndmape > 0)) %>% 
+         better_with_nono = as.numeric(nono_ndmape > 0)) %>%
 ggplot(aes(x = freq, y = block_size, color = acf_coef)) +
-  geom_boxplot() + 
+  geom_boxplot() +
   facet_grid(~better_with_mov)
 ```
 

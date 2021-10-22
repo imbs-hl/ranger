@@ -67,7 +67,8 @@ res_m3 <- map_dfr(seq_along(ts), function(i) {
   score <- NULL
   if (this_ts$period == "QUARTERLY") {
     df <- tibble(obs = c(this_ts$x, this_ts$xx)) %>% 
-      mutate(quarter = rep(1:4, length.out = n()))
+      mutate(quarter = rep(1:4, length.out = n()),
+             time = 1:n())
     
     df_train <- df %>% slice(1:this_ts$n)
     df_test <- df %>% slice((this_ts$n+1):nrow(df))
@@ -107,7 +108,8 @@ res_m3 <- map_dfr(seq_along(ts), function(i) {
   } else if (this_ts$period == "MONTHLY") {
     
     df <- tibble(obs = c(this_ts$x, this_ts$xx)) %>% 
-      mutate(month = rep(1:12, length.out = n()))
+      mutate(month = rep(1:12, length.out = n()),
+             time = 1:n())
     
     df_train <- df %>% slice(1:this_ts$n)
     df_test <- df %>% slice((this_ts$n+1):nrow(df))
@@ -173,7 +175,8 @@ res_m4 <- map_dfr(seq_along(ts), function(i) {
   
   if (this_ts$period == "Quarterly") {
     df <- tibble(obs = c(this_ts$x, this_ts$xx)) %>% 
-      mutate(quarter = rep(1:4, length.out = n()))
+      mutate(quarter = rep(1:4, length.out = n()),
+             time = 1:n())
     
     df_train <- df %>% slice(1:this_ts$n)
     df_test <- df %>% slice((this_ts$n+1):nrow(df))
@@ -212,7 +215,8 @@ res_m4 <- map_dfr(seq_along(ts), function(i) {
   } else if (this_ts$period == "Monthly") {
     
     df <- tibble(obs = c(this_ts$x, this_ts$xx)) %>% 
-      mutate(month = rep(1:12, length.out = n()))
+      mutate(month = rep(1:12, length.out = n()),
+             time = 1:n())
     
     df_train <- df %>% slice(1:this_ts$n)
     df_test <- df %>% slice((this_ts$n+1):nrow(df))
