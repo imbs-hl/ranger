@@ -42,10 +42,8 @@ autoplot(M3$N0001)
 
 ![](test_with_Mcomp_data_sets_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-We note that some of the time series in M competitions are non
-stationary.  
-In our experiments, we only work with monthly data and quarterly data to
-have at least one useful feature (frequency of the series).
+We note that some of the time series in M competitions are non stationary.  
+In our experiments, we only work with monthly data and quarterly data where seasonality is more likely to be detected.
 
 ``` r
 subset(M3, "monthly")
@@ -57,9 +55,7 @@ subset(M3, "monthly")
     ## Period    DEMOGRAPHIC FINANCE INDUSTRY MACRO MICRO OTHER
     ##   MONTHLY         111     145      334   312   474    52
 
-The M4 data set is organized in the same manner, but with 100000 time
-series and the time series have generally a longer history (more
-observations, \~10e3) than the M3 (\~10e2).
+The M4 data set is organized in the same manner, but with 100000 time series and the time series have generally a longer history (more observations, \~10e3) than the M3 (\~10e2).
 
 ## Experiment setting
 
@@ -67,24 +63,12 @@ For every time series, let us denote <img src="https://latex.codecogs.com/gif.la
 
 ### How to fix block.size
 
-The key parameter **block.size** is determined automatically with the
-help of an autocorrelation estimation of the target time series by the
-`acf()` function in R. We fix a threshold which varies from 0.5 to 0.9,
-and take the largest lag (block.size = 2 if the largest lag is 1,
-otherwise this becomes an i.i.d. case) corresponding to this threshold.
-This parameter (threshold) is named as **acf coefficient** in the
-following sections. In addition, we specify `by.end = FALSE` and keep
-other parameters for the block bootstrap to default values.  
-We obtain the following results.  
-Codes of this experiment can be found here: **code here**. Here we show
-codes for result analysis with obtained results.
+The key parameter **block.size** is determined automatically with the help of an autocorrelation estimation of the target time series by the `acf()` function in R. We fix a threshold which varies from 0.5 to 0.9, and take the largest lag (block.size = 2 if the largest lag is 1, otherwise this becomes an i.i.d. case) corresponding to this threshold. This parameter (threshold) is named as **acf coefficient** in the following sections. In addition, we specify `by.end = FALSE` and keep other parameters for the block bootstrap to default values.  We obtain the following results.  Codes of this experiment can be found here: **code here**. Here we show codes for result analysis with obtained results.
 
 ## Results at a glance
 
-We evaluate the performance with two metrics: the normalized RMSE and
-the normalized difference of MAPE with respect to the i.i.d. forest.  
-The difference in error metrics (i.i.d. - block bootstrap) are presented
-below.
+We evaluate the performance with two metrics: the normalized RMSE and the normalized difference of MAPE with respect to the i.i.d. forest.  
+The difference in error metrics (i.i.d. - block bootstrap) are presented below.
 
 ### M3 data set:
 
