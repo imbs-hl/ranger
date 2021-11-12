@@ -245,7 +245,7 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Target node size:                 1 </span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Variable importance mode:         none </span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Splitrule:                        gini </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OOB prediction error:             5.33 % </span>
 <span class='r-in'><span class='va'>train.idx</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>/</span><span class='fl'>3</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span></span>
 <span class='r-in'><span class='va'>iris.train</span> <span class='op'>&lt;-</span> <span class='va'>iris</span><span class='op'>[</span><span class='va'>train.idx</span>, <span class='op'>]</span></span>
 <span class='r-in'><span class='va'>iris.test</span> <span class='op'>&lt;-</span> <span class='va'>iris</span><span class='op'>[</span><span class='op'>-</span><span class='va'>train.idx</span>, <span class='op'>]</span></span>
@@ -255,8 +255,8 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class='r-out co'><span class='r-pr'>#&gt;</span>             </span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>              setosa versicolor virginica</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>   setosa         14          0         0</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>   versicolor      0         12         1</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>   virginica       0          1        22</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   versicolor      0         13         1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   virginica       0          3        19</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'>## Quantile regression forest</span></span>
 <span class='r-in'><span class='va'>rf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>mpg</span> <span class='op'>~</span> <span class='va'>.</span>, <span class='va'>mtcars</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>26</span>, <span class='op'>]</span>, quantreg <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>

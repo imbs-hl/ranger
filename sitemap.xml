@@ -7,6 +7,9 @@
     <loc>https://imbs-hl.github.io/ranger/reference/csrf.html</loc>
   </url>
   <url>
+    <loc>https://imbs-hl.github.io/ranger/reference/deforest.html</loc>
+  </url>
+  <url>
     <loc>https://imbs-hl.github.io/ranger/reference/getTerminalNodeIDs.html</loc>
   </url>
   <url>
@@ -32,6 +35,9 @@
   </url>
   <url>
     <loc>https://imbs-hl.github.io/ranger/reference/predictions.ranger.prediction.html</loc>
+  </url>
+  <url>
+    <loc>https://imbs-hl.github.io/ranger/reference/print.deforest.ranger.html</loc>
   </url>
   <url>
     <loc>https://imbs-hl.github.io/ranger/reference/print.ranger.html</loc>
