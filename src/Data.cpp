@@ -68,9 +68,9 @@ bool Data::loadFromFile(std::string filename, std::vector<std::string>& dependen
   getline(input_file, header_line);
 
   // Find out if comma, semicolon or whitespace seperated and call appropriate method
-  if (header_line.find(",") != std::string::npos) {
+  if (header_line.find(',') != std::string::npos) {
     result = loadFromFileOther(input_file, header_line, dependent_variable_names, ',');
-  } else if (header_line.find(";") != std::string::npos) {
+  } else if (header_line.find(';') != std::string::npos) {
     result = loadFromFileOther(input_file, header_line, dependent_variable_names, ';');
   } else {
     result = loadFromFileWhitespace(input_file, header_line, dependent_variable_names);
