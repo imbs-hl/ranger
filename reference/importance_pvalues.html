@@ -192,419 +192,420 @@ We add 1 to the numerator and denominator to avoid zero p-values.</p>
     <p>Marvin N. Wright</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Janitza's p-values with corrected Gini importance</span>
-<span class='va'>n</span> <span class='op'>&lt;-</span> <span class='fl'>50</span>
-<span class='va'>p</span> <span class='op'>&lt;-</span> <span class='fl'>400</span>
-<span class='va'>dat</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Binomial.html'>rbinom</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='fl'>1</span>, <span class='fl'>.5</span><span class='op'>)</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>replicate</a></span><span class='op'>(</span><span class='va'>p</span>, <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>rf.sim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span>, <span class='va'>dat</span>, importance <span class='op'>=</span> <span class='st'>"impurity_corrected"</span><span class='op'>)</span>
-<span class='fu'>importance_pvalues</span><span class='op'>(</span><span class='va'>rf.sim</span>, method <span class='op'>=</span> <span class='st'>"janitza"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;         importance pvalue
-#&gt; X1    1.739314e-02 0.2900
-#&gt; X2   -5.802758e-02 0.9275
-#&gt; X3    3.112487e-02 0.1825
-#&gt; X4    2.516850e-02 0.2200
-#&gt; X5   -7.154699e-02 0.9575
-#&gt; X6    6.331910e-02 0.0600
-#&gt; X7   -2.824321e-03 0.5350
-#&gt; X8   -8.260870e-04 0.5125
-#&gt; X9   -1.198331e-02 0.6625
-#&gt; X10  -3.271249e-02 0.8350
-#&gt; X11  -4.088301e-02 0.8750
-#&gt; X12  -8.726396e-02 0.9775
-#&gt; X13  -6.163377e-03 0.5825
-#&gt; X14   3.113084e-02 0.1825
-#&gt; X15  -6.181702e-02 0.9350
-#&gt; X16   2.861375e-02 0.1975
-#&gt; X17  -1.351855e-02 0.6825
-#&gt; X18  -4.245800e-03 0.5525
-#&gt; X19  -6.896190e-03 0.5950
-#&gt; X20   2.852833e-03 0.4650
-#&gt; X21  -1.733189e-03 0.5200
-#&gt; X22   1.032361e-02 0.3650
-#&gt; X23   3.016192e-02 0.1875
-#&gt; X24  -5.537794e-02 0.9175
-#&gt; X25   3.038595e-02 0.1875
-#&gt; X26   2.297547e-02 0.2450
-#&gt; X27  -2.584977e-02 0.7850
-#&gt; X28  -5.758492e-02 0.9250
-#&gt; X29  -1.651718e-02 0.7000
-#&gt; X30   1.725084e-02 0.2975
-#&gt; X31   6.006927e-02 0.0700
-#&gt; X32  -1.321348e-01 0.9925
-#&gt; X33  -4.405873e-02 0.8825
-#&gt; X34   1.246846e-02 0.3275
-#&gt; X35   1.796920e-02 0.2775
-#&gt; X36   2.099976e-02 0.2475
-#&gt; X37   8.390212e-03 0.3900
-#&gt; X38   2.866158e-02 0.1975
-#&gt; X39  -9.949495e-03 0.6300
-#&gt; X40   5.801776e-02 0.0750
-#&gt; X41   7.362779e-02 0.0400
-#&gt; X42  -2.984754e-02 0.8075
-#&gt; X43  -1.659111e-02 0.7025
-#&gt; X44   1.671991e-03 0.4825
-#&gt; X45  -3.106569e-02 0.8175
-#&gt; X46  -4.721221e-02 0.8950
-#&gt; X47   4.885386e-02 0.0950
-#&gt; X48   1.813056e-02 0.2775
-#&gt; X49   1.016608e-01 0.0175
-#&gt; X50  -4.798774e-02 0.9025
-#&gt; X51   2.191872e-02 0.2475
-#&gt; X52   3.662187e-02 0.1500
-#&gt; X53   2.758412e-02 0.2075
-#&gt; X54  -3.011425e-02 0.8125
-#&gt; X55   1.235294e-02 0.3300
-#&gt; X56   6.969501e-03 0.4050
-#&gt; X57  -5.870505e-03 0.5750
-#&gt; X58  -4.077289e-02 0.8700
-#&gt; X59  -1.152222e-02 0.6550
-#&gt; X60  -6.131204e-03 0.5800
-#&gt; X61   8.583005e-03 0.3875
-#&gt; X62  -1.976935e-01 1.0000
-#&gt; X63   6.549913e-03 0.4125
-#&gt; X64   3.400000e-03 0.4625
-#&gt; X65  -4.354571e-02 0.8800
-#&gt; X66  -6.301845e-02 0.9400
-#&gt; X67   6.932471e-02 0.0525
-#&gt; X68   5.558615e-02 0.0825
-#&gt; X69  -1.726710e-02 0.7075
-#&gt; X70   1.081519e-02 0.3525
-#&gt; X71  -6.854890e-03 0.5900
-#&gt; X72  -3.202853e-02 0.8275
-#&gt; X73  -3.840000e-03 0.5475
-#&gt; X74  -1.966108e-02 0.7350
-#&gt; X75   3.270295e-02 0.1675
-#&gt; X76  -2.353576e-02 0.7650
-#&gt; X77  -7.005449e-02 0.9525
-#&gt; X78   3.203695e-02 0.1725
-#&gt; X79   1.182109e-02 0.3400
-#&gt; X80  -2.626670e-02 0.7900
-#&gt; X81  -2.469828e-02 0.7775
-#&gt; X82  -1.374912e-03 0.5175
-#&gt; X83   2.263690e-02 0.2450
-#&gt; X84   1.612063e-02 0.3025
-#&gt; X85   1.614807e-01 0.0050
-#&gt; X86  -7.947476e-03 0.6025
-#&gt; X87  -3.377523e-02 0.8425
-#&gt; X88   4.758571e-02 0.1000
-#&gt; X89  -3.804278e-02 0.8600
-#&gt; X90  -7.933816e-02 0.9675
-#&gt; X91  -1.208335e-02 0.6650
-#&gt; X92  -3.522486e-02 0.8450
-#&gt; X93  -1.030196e-02 0.6325
-#&gt; X94  -6.077432e-02 0.9325
-#&gt; X95  -5.460219e-02 0.9125
-#&gt; X96  -3.350157e-02 0.8375
-#&gt; X97  -1.069532e-03 0.5150
-#&gt; X98   1.745032e-02 0.2900
-#&gt; X99   2.214398e-02 0.2475
-#&gt; X100  4.615385e-03 0.4375
-#&gt; X101 -7.802427e-02 0.9650
-#&gt; X102 -2.556639e-03 0.5300
-#&gt; X103  1.144016e-02 0.3500
-#&gt; X104  1.743796e-02 0.2900
-#&gt; X105 -5.600169e-03 0.5700
-#&gt; X106  1.035456e-02 0.3625
-#&gt; X107  1.082869e-02 0.3525
-#&gt; X108 -2.600553e-02 0.7875
-#&gt; X109 -2.629400e-05 0.5025
-#&gt; X110  8.204191e-02 0.0325
-#&gt; X111  3.618466e-02 0.1525
-#&gt; X112  6.224062e-02 0.0650
-#&gt; X113 -7.212648e-03 0.5975
-#&gt; X114 -1.781094e-02 0.7175
-#&gt; X115  1.768879e-02 0.2875
-#&gt; X116  3.885572e-02 0.1375
-#&gt; X117 -8.234978e-02 0.9725
-#&gt; X118  7.105097e-04 0.4900
-#&gt; X119  2.796385e-03 0.4675
-#&gt; X120 -6.861053e-03 0.5925
-#&gt; X121 -6.959903e-02 0.9500
-#&gt; X122 -1.825488e-03 0.5225
-#&gt; X123 -1.761806e-02 0.7125
-#&gt; X124 -3.369886e-02 0.8400
-#&gt; X125  4.325640e-03 0.4475
-#&gt; X126  1.851744e-02 0.2775
-#&gt; X127 -6.040776e-03 0.5775
-#&gt; X128 -6.926091e-02 0.9475
-#&gt; X129  1.241723e-01 0.0125
-#&gt; X130  1.332206e-02 0.3200
-#&gt; X131  1.030043e-01 0.0175
-#&gt; X132 -1.881439e-02 0.7250
-#&gt; X133 -3.614981e-02 0.8475
-#&gt; X134 -3.667866e-02 0.8525
-#&gt; X135  2.885094e-02 0.1975
-#&gt; X136  6.935674e-02 0.0525
-#&gt; X137 -2.782969e-02 0.7950
-#&gt; X138  6.574953e-03 0.4125
-#&gt; X139  3.067298e-03 0.4650
-#&gt; X140  1.581419e-02 0.3025
-#&gt; X141 -3.816036e-02 0.8625
-#&gt; X142  4.786858e-03 0.4375
-#&gt; X143  1.184750e-02 0.3400
-#&gt; X144 -2.075755e-02 0.7500
-#&gt; X145  1.149711e-02 0.3500
-#&gt; X146  4.506347e-03 0.4425
-#&gt; X147 -3.712700e-02 0.8575
-#&gt; X148  3.826618e-02 0.1375
-#&gt; X149  2.016979e-02 0.2600
-#&gt; X150  3.676818e-03 0.4625
-#&gt; X151  1.896331e-03 0.4775
-#&gt; X152 -4.057513e-03 0.5500
-#&gt; X153  8.504394e-02 0.0275
-#&gt; X154  4.474716e-03 0.4450
-#&gt; X155  2.250599e-03 0.4775
-#&gt; X156  6.117095e-02 0.0675
-#&gt; X157 -4.571590e-03 0.5625
-#&gt; X158  2.794656e-02 0.2050
-#&gt; X159  9.810138e-03 0.3775
-#&gt; X160 -1.474059e-02 0.6925
-#&gt; X161  2.737437e-02 0.2100
-#&gt; X162  1.814658e-02 0.2775
-#&gt; X163 -2.050809e-02 0.7475
-#&gt; X164 -3.750000e-03 0.5425
-#&gt; X165  2.641760e-05 0.4975
-#&gt; X166  1.023674e-01 0.0175
-#&gt; X167 -2.451262e-03 0.5275
-#&gt; X168 -5.192405e-02 0.9100
-#&gt; X169 -5.546998e-03 0.5675
-#&gt; X170  1.688884e-02 0.2975
-#&gt; X171 -1.885317e-02 0.7300
-#&gt; X172 -4.462284e-02 0.8850
-#&gt; X173 -1.788307e-02 0.7225
-#&gt; X174  2.293188e-02 0.2450
-#&gt; X175 -9.922592e-03 0.6250
-#&gt; X176 -9.924853e-03 0.6275
-#&gt; X177 -1.523589e-02 0.6975
-#&gt; X178  1.773777e-02 0.2875
-#&gt; X179  3.993457e-02 0.1350
-#&gt; X180 -2.457225e-02 0.7725
-#&gt; X181  2.645665e-04 0.4975
-#&gt; X182 -3.167181e-03 0.5375
-#&gt; X183 -5.509865e-02 0.9150
-#&gt; X184  3.233241e-02 0.1675
-#&gt; X185  1.842733e-02 0.2775
-#&gt; X186 -1.143030e-02 0.6500
-#&gt; X187  8.917666e-03 0.3875
-#&gt; X188  4.894637e-02 0.0950
-#&gt; X189 -1.781109e-01 0.9975
-#&gt; X190 -2.422617e-02 0.7700
-#&gt; X191 -3.705184e-02 0.8550
-#&gt; X192 -1.055054e-01 0.9850
-#&gt; X193  1.159878e-02 0.3450
-#&gt; X194  9.497497e-04 0.4875
-#&gt; X195 -2.036805e-02 0.7425
-#&gt; X196 -4.740274e-02 0.8975
-#&gt; X197  2.413632e-02 0.2325
-#&gt; X198  1.242053e-02 0.3275
-#&gt; X199  4.742862e-02 0.1025
-#&gt; X200 -2.467490e-02 0.7750
-#&gt; X201  7.992803e-02 0.0325
-#&gt; X202  9.670085e-03 0.3775
-#&gt; X203 -9.979998e-02 0.9825
-#&gt; X204  4.089947e-03 0.4500
-#&gt; X205  3.410018e-02 0.1575
-#&gt; X206 -1.254663e-01 0.9900
-#&gt; X207 -1.211707e-02 0.6675
-#&gt; X208 -3.840000e-03 0.5475
-#&gt; X209  5.060136e-02 0.0925
-#&gt; X210  2.064004e-02 0.2525
-#&gt; X211 -9.503446e-03 0.6200
-#&gt; X212 -1.377442e-02 0.6875
-#&gt; X213  1.346188e-02 0.3200
-#&gt; X214  8.647526e-03 0.3875
-#&gt; X215 -6.653198e-02 0.9425
-#&gt; X216 -4.700855e-04 0.5075
-#&gt; X217 -4.652274e-02 0.8900
-#&gt; X218  2.544212e-03 0.4725
-#&gt; X219  3.265971e-02 0.1675
-#&gt; X220  7.389926e-03 0.4025
-#&gt; X221 -1.032079e-02 0.6350
-#&gt; X222  4.843545e-02 0.0975
-#&gt; X223 -3.636104e-02 0.8500
-#&gt; X224 -1.312074e-02 0.6800
-#&gt; X225  6.408354e-03 0.4150
-#&gt; X226  3.309507e-03 0.4625
-#&gt; X227 -1.160654e-02 0.6575
-#&gt; X228  1.849909e-02 0.2775
-#&gt; X229  1.308008e-02 0.3225
-#&gt; X230 -2.310083e-03 0.5250
-#&gt; X231 -2.692846e-03 0.5325
-#&gt; X232  1.735931e-02 0.2900
-#&gt; X233 -2.804134e-02 0.7975
-#&gt; X234 -2.830512e-02 0.8000
-#&gt; X235 -7.174027e-02 0.9600
-#&gt; X236  4.302445e-02 0.1225
-#&gt; X237 -9.414672e-03 0.6175
-#&gt; X238  9.448408e-03 0.3825
-#&gt; X239  3.694224e-03 0.4625
-#&gt; X240 -4.505408e-04 0.5050
-#&gt; X241 -7.151208e-02 0.9550
-#&gt; X242  1.298529e-02 0.3225
-#&gt; X243 -6.839118e-02 0.9450
-#&gt; X244  2.190733e-02 0.2475
-#&gt; X245 -5.754098e-02 0.9225
-#&gt; X246 -2.312543e-02 0.7575
-#&gt; X247 -8.218170e-02 0.9700
-#&gt; X248 -1.725090e-02 0.7050
-#&gt; X249  7.055453e-03 0.4050
-#&gt; X250  7.514839e-03 0.4000
-#&gt; X251 -3.162213e-02 0.8250
-#&gt; X252  4.519636e-02 0.1150
-#&gt; X253  7.496165e-03 0.4000
-#&gt; X254 -3.208334e-02 0.8300
-#&gt; X255 -1.263477e-02 0.6750
-#&gt; X256  4.751068e-02 0.1025
-#&gt; X257  8.753723e-03 0.3875
-#&gt; X258  1.504659e-04 0.4975
-#&gt; X259 -2.244348e-02 0.7550
-#&gt; X260 -1.065601e-01 0.9875
-#&gt; X261  1.824304e-02 0.2775
-#&gt; X262  4.501152e-03 0.4425
-#&gt; X263 -1.881868e-02 0.7275
-#&gt; X264 -3.733333e-03 0.5400
-#&gt; X265 -1.777920e-02 0.7150
-#&gt; X266  3.359024e-02 0.1625
-#&gt; X267  3.822222e-03 0.4575
-#&gt; X268 -2.528311e-02 0.7825
-#&gt; X269 -4.021661e-02 0.8675
-#&gt; X270  5.166965e-02 0.0925
-#&gt; X271 -4.851728e-03 0.5650
-#&gt; X272  4.680548e-03 0.4375
-#&gt; X273  1.238153e-02 0.3275
-#&gt; X274 -7.981060e-03 0.6050
-#&gt; X275  2.070559e-02 0.2525
-#&gt; X276 -8.560890e-03 0.6125
-#&gt; X277  7.152381e-03 0.4050
-#&gt; X278 -5.831502e-03 0.5725
-#&gt; X279 -2.471168e-02 0.7800
-#&gt; X280  1.897968e-02 0.2675
-#&gt; X281  4.041959e-02 0.1325
-#&gt; X282 -9.268124e-03 0.6150
-#&gt; X283 -1.058015e-02 0.6450
-#&gt; X284  4.802857e-03 0.4375
-#&gt; X285  2.121206e-02 0.2475
-#&gt; X286 -8.505010e-02 0.9750
-#&gt; X287 -4.105845e-02 0.8775
-#&gt; X288 -5.517241e-04 0.5100
-#&gt; X289  1.555341e-02 0.3025
-#&gt; X290 -1.351058e-01 0.9950
-#&gt; X291 -2.857115e-02 0.8025
-#&gt; X292 -1.237970e-02 0.6725
-#&gt; X293 -1.286845e-02 0.6775
-#&gt; X294  1.310159e-02 0.3225
-#&gt; X295 -2.086644e-02 0.7525
-#&gt; X296  5.375405e-02 0.0900
-#&gt; X297  5.345455e-03 0.4350
-#&gt; X298 -1.151453e-02 0.6525
-#&gt; X299  5.613598e-02 0.0800
-#&gt; X300 -3.890740e-02 0.8650
-#&gt; X301 -4.571429e-03 0.5600
-#&gt; X302 -3.137857e-02 0.8225
-#&gt; X303  1.142539e-02 0.3525
-#&gt; X304  9.857875e-03 0.3775
-#&gt; X305 -1.032886e-02 0.6375
-#&gt; X306  3.465419e-02 0.1575
-#&gt; X307  2.993774e-02 0.1925
-#&gt; X308 -3.219753e-02 0.8325
-#&gt; X309 -3.118576e-02 0.8200
-#&gt; X310  7.017601e-03 0.4050
-#&gt; X311  3.293434e-02 0.1650
-#&gt; X312  1.679830e-02 0.2975
-#&gt; X313 -1.439847e-02 0.6900
-#&gt; X314 -1.735291e-02 0.7100
-#&gt; X315  7.994619e-03 0.3950
-#&gt; X316 -4.416026e-03 0.5550
-#&gt; X317 -2.328593e-02 0.7600
-#&gt; X318 -1.887745e-02 0.7325
-#&gt; X319  5.642943e-03 0.4300
-#&gt; X320 -2.358207e-02 0.7675
-#&gt; X321 -8.094872e-03 0.6075
-#&gt; X322 -1.051983e-02 0.6400
-#&gt; X323  2.756266e-03 0.4675
-#&gt; X324 -5.008637e-02 0.9075
-#&gt; X325  5.340021e-02 0.0900
-#&gt; X326  7.210719e-03 0.4050
-#&gt; X327  2.566859e-02 0.2175
-#&gt; X328  1.371031e-02 0.3150
-#&gt; X329 -7.439688e-03 0.6000
-#&gt; X330 -5.578356e-02 0.9200
-#&gt; X331 -4.756978e-02 0.9000
-#&gt; X332 -6.271682e-02 0.9375
-#&gt; X333  9.355709e-03 0.3850
-#&gt; X334  9.257462e-03 0.3875
-#&gt; X335  7.368804e-02 0.0400
-#&gt; X336  6.832928e-03 0.4125
-#&gt; X337  1.584950e-04 0.4975
-#&gt; X338 -3.042807e-02 0.8150
-#&gt; X339 -1.507710e-02 0.6950
-#&gt; X340 -1.786606e-02 0.7200
-#&gt; X341 -8.988788e-02 0.9800
-#&gt; X342 -3.004867e-02 0.8100
-#&gt; X343 -4.846038e-02 0.9050
-#&gt; X344  4.667292e-02 0.1100
-#&gt; X345  9.807047e-02 0.0200
-#&gt; X346  1.028519e-01 0.0175
-#&gt; X347  6.579400e-02 0.0600
-#&gt; X348  1.083789e-01 0.0125
-#&gt; X349  1.968651e-02 0.2650
-#&gt; X350 -2.752669e-02 0.7925
-#&gt; X351  9.746943e-02 0.0200
-#&gt; X352  6.955295e-03 0.4050
-#&gt; X353  3.136046e-02 0.1800
-#&gt; X354  3.338659e-02 0.1650
-#&gt; X355  2.162242e-02 0.2475
-#&gt; X356  8.597326e-03 0.3875
-#&gt; X357  2.818037e-02 0.2025
-#&gt; X358 -4.497627e-03 0.5575
-#&gt; X359 -1.052335e-02 0.6425
-#&gt; X360 -4.632846e-02 0.8875
-#&gt; X361 -5.921537e-02 0.9300
-#&gt; X362 -7.481680e-02 0.9625
-#&gt; X363  1.725895e-03 0.4825
-#&gt; X364  1.004313e-02 0.3700
-#&gt; X365  1.358878e-02 0.3175
-#&gt; X366 -4.698399e-02 0.8925
-#&gt; X367  2.209860e-02 0.2475
-#&gt; X368 -1.065603e-02 0.6475
-#&gt; X369  2.560798e-03 0.4700
-#&gt; X370  9.668461e-03 0.3775
-#&gt; X371 -1.370082e-02 0.6850
-#&gt; X372  8.115938e-06 0.5000
-#&gt; X373  1.340793e-03 0.4850
-#&gt; X374  5.937080e-03 0.4250
-#&gt; X375  9.219762e-02 0.0200
-#&gt; X376 -6.188619e-03 0.5850
-#&gt; X377 -1.978830e-02 0.7375
-#&gt; X378 -1.181741e-02 0.6600
-#&gt; X379  2.798258e-02 0.2050
-#&gt; X380 -1.212374e-02 0.6700
-#&gt; X381  1.570299e-02 0.3025
-#&gt; X382  3.651332e-02 0.1500
-#&gt; X383 -8.199434e-03 0.6100
-#&gt; X384  1.820031e-01 0.0025
-#&gt; X385  2.246057e-02 0.2450
-#&gt; X386 -6.416764e-03 0.5875
-#&gt; X387  2.380912e-03 0.4750
-#&gt; X388 -9.600000e-03 0.6225
-#&gt; X389 -2.902889e-02 0.8050
-#&gt; X390  4.217739e-02 0.1225
-#&gt; X391 -4.079810e-02 0.8725
-#&gt; X392  1.083047e-02 0.3525
-#&gt; X393 -2.332773e-02 0.7625
-#&gt; X394 -2.002324e-02 0.7400
-#&gt; X395 -2.045154e-02 0.7450
-#&gt; X396  4.409704e-02 0.1175
-#&gt; X397  1.751947e-02 0.2900
-#&gt; X398  1.514428e-02 0.3050
-#&gt; X399  2.492608e-02 0.2200
-#&gt; X400  5.089322e-02 0.0925</div><div class='input'>
-<span class='co'>## Permutation p-values </span>
-<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='va'>rf.iris</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>iris</span>, importance <span class='op'>=</span> <span class='st'>'permutation'</span><span class='op'>)</span>
-<span class='fu'>importance_pvalues</span><span class='op'>(</span><span class='va'>rf.iris</span>, method <span class='op'>=</span> <span class='st'>"altmann"</span>, formula <span class='op'>=</span> <span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>iris</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'>## Janitza's p-values with corrected Gini importance</span></span>
+<span class='r-in'><span class='va'>n</span> <span class='op'>&lt;-</span> <span class='fl'>50</span></span>
+<span class='r-in'><span class='va'>p</span> <span class='op'>&lt;-</span> <span class='fl'>400</span></span>
+<span class='r-in'><span class='va'>dat</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Binomial.html'>rbinom</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='fl'>1</span>, <span class='fl'>.5</span><span class='op'>)</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>replicate</a></span><span class='op'>(</span><span class='va'>p</span>, <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>rf.sim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span>, <span class='va'>dat</span>, importance <span class='op'>=</span> <span class='st'>"impurity_corrected"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>importance_pvalues</span><span class='op'>(</span><span class='va'>rf.sim</span>, method <span class='op'>=</span> <span class='st'>"janitza"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         importance pvalue</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X1    1.739314e-02 0.2900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X2   -5.802758e-02 0.9275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X3    3.112487e-02 0.1825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X4    2.516850e-02 0.2200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X5   -7.154699e-02 0.9575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X6    6.331910e-02 0.0600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X7   -2.824321e-03 0.5350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X8   -8.260870e-04 0.5125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X9   -1.198331e-02 0.6625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X10  -3.271249e-02 0.8350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X11  -4.088301e-02 0.8750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X12  -8.726396e-02 0.9775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X13  -6.163377e-03 0.5825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X14   3.113084e-02 0.1825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X15  -6.181702e-02 0.9350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X16   2.861375e-02 0.1975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X17  -1.351855e-02 0.6825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X18  -4.245800e-03 0.5525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X19  -6.896190e-03 0.5950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X20   2.852833e-03 0.4650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X21  -1.733189e-03 0.5200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X22   1.032361e-02 0.3650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X23   3.016192e-02 0.1875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X24  -5.537794e-02 0.9175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X25   3.038595e-02 0.1875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X26   2.297547e-02 0.2450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X27  -2.584977e-02 0.7850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X28  -5.758492e-02 0.9250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X29  -1.651718e-02 0.7000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X30   1.725084e-02 0.2975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X31   6.006927e-02 0.0700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X32  -1.321348e-01 0.9925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X33  -4.405873e-02 0.8825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X34   1.246846e-02 0.3275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X35   1.796920e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X36   2.099976e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X37   8.390212e-03 0.3900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X38   2.866158e-02 0.1975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X39  -9.949495e-03 0.6300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X40   5.801776e-02 0.0750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X41   7.362779e-02 0.0400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X42  -2.984754e-02 0.8075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X43  -1.659111e-02 0.7025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X44   1.671991e-03 0.4825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X45  -3.106569e-02 0.8175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X46  -4.721221e-02 0.8950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X47   4.885386e-02 0.0950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X48   1.813056e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X49   1.016608e-01 0.0175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X50  -4.798774e-02 0.9025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X51   2.191872e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X52   3.662187e-02 0.1500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X53   2.758412e-02 0.2075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X54  -3.011425e-02 0.8125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X55   1.235294e-02 0.3300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X56   6.969501e-03 0.4050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X57  -5.870505e-03 0.5750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X58  -4.077289e-02 0.8700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X59  -1.152222e-02 0.6550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X60  -6.131204e-03 0.5800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X61   8.583005e-03 0.3875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X62  -1.976935e-01 1.0000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X63   6.549913e-03 0.4125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X64   3.400000e-03 0.4625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X65  -4.354571e-02 0.8800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X66  -6.301845e-02 0.9400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X67   6.932471e-02 0.0525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X68   5.558615e-02 0.0825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X69  -1.726710e-02 0.7075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X70   1.081519e-02 0.3525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X71  -6.854890e-03 0.5900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X72  -3.202853e-02 0.8275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X73  -3.840000e-03 0.5475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X74  -1.966108e-02 0.7350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X75   3.270295e-02 0.1675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X76  -2.353576e-02 0.7650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X77  -7.005449e-02 0.9525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X78   3.203695e-02 0.1725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X79   1.182109e-02 0.3400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X80  -2.626670e-02 0.7900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X81  -2.469828e-02 0.7775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X82  -1.374912e-03 0.5175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X83   2.263690e-02 0.2450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X84   1.612063e-02 0.3025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X85   1.614807e-01 0.0050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X86  -7.947476e-03 0.6025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X87  -3.377523e-02 0.8425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X88   4.758571e-02 0.1000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X89  -3.804278e-02 0.8600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X90  -7.933816e-02 0.9675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X91  -1.208335e-02 0.6650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X92  -3.522486e-02 0.8450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X93  -1.030196e-02 0.6325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X94  -6.077432e-02 0.9325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X95  -5.460219e-02 0.9125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X96  -3.350157e-02 0.8375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X97  -1.069532e-03 0.5150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X98   1.745032e-02 0.2900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X99   2.214398e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X100  4.615385e-03 0.4375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X101 -7.802427e-02 0.9650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X102 -2.556639e-03 0.5300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X103  1.144016e-02 0.3500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X104  1.743796e-02 0.2900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X105 -5.600169e-03 0.5700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X106  1.035456e-02 0.3625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X107  1.082869e-02 0.3525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X108 -2.600553e-02 0.7875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X109 -2.629400e-05 0.5025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X110  8.204191e-02 0.0325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X111  3.618466e-02 0.1525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X112  6.224062e-02 0.0650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X113 -7.212648e-03 0.5975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X114 -1.781094e-02 0.7175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X115  1.768879e-02 0.2875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X116  3.885572e-02 0.1375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X117 -8.234978e-02 0.9725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X118  7.105097e-04 0.4900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X119  2.796385e-03 0.4675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X120 -6.861053e-03 0.5925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X121 -6.959903e-02 0.9500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X122 -1.825488e-03 0.5225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X123 -1.761806e-02 0.7125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X124 -3.369886e-02 0.8400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X125  4.325640e-03 0.4475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X126  1.851744e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X127 -6.040776e-03 0.5775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X128 -6.926091e-02 0.9475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X129  1.241723e-01 0.0125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X130  1.332206e-02 0.3200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X131  1.030043e-01 0.0175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X132 -1.881439e-02 0.7250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X133 -3.614981e-02 0.8475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X134 -3.667866e-02 0.8525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X135  2.885094e-02 0.1975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X136  6.935674e-02 0.0525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X137 -2.782969e-02 0.7950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X138  6.574953e-03 0.4125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X139  3.067298e-03 0.4650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X140  1.581419e-02 0.3025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X141 -3.816036e-02 0.8625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X142  4.786858e-03 0.4375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X143  1.184750e-02 0.3400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X144 -2.075755e-02 0.7500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X145  1.149711e-02 0.3500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X146  4.506347e-03 0.4425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X147 -3.712700e-02 0.8575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X148  3.826618e-02 0.1375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X149  2.016979e-02 0.2600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X150  3.676818e-03 0.4625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X151  1.896331e-03 0.4775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X152 -4.057513e-03 0.5500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X153  8.504394e-02 0.0275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X154  4.474716e-03 0.4450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X155  2.250599e-03 0.4775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X156  6.117095e-02 0.0675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X157 -4.571590e-03 0.5625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X158  2.794656e-02 0.2050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X159  9.810138e-03 0.3775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X160 -1.474059e-02 0.6925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X161  2.737437e-02 0.2100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X162  1.814658e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X163 -2.050809e-02 0.7475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X164 -3.750000e-03 0.5425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X165  2.641760e-05 0.4975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X166  1.023674e-01 0.0175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X167 -2.451262e-03 0.5275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X168 -5.192405e-02 0.9100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X169 -5.546998e-03 0.5675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X170  1.688884e-02 0.2975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X171 -1.885317e-02 0.7300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X172 -4.462284e-02 0.8850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X173 -1.788307e-02 0.7225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X174  2.293188e-02 0.2450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X175 -9.922592e-03 0.6250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X176 -9.924853e-03 0.6275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X177 -1.523589e-02 0.6975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X178  1.773777e-02 0.2875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X179  3.993457e-02 0.1350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X180 -2.457225e-02 0.7725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X181  2.645665e-04 0.4975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X182 -3.167181e-03 0.5375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X183 -5.509865e-02 0.9150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X184  3.233241e-02 0.1675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X185  1.842733e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X186 -1.143030e-02 0.6500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X187  8.917666e-03 0.3875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X188  4.894637e-02 0.0950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X189 -1.781109e-01 0.9975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X190 -2.422617e-02 0.7700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X191 -3.705184e-02 0.8550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X192 -1.055054e-01 0.9850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X193  1.159878e-02 0.3450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X194  9.497497e-04 0.4875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X195 -2.036805e-02 0.7425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X196 -4.740274e-02 0.8975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X197  2.413632e-02 0.2325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X198  1.242053e-02 0.3275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X199  4.742862e-02 0.1025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X200 -2.467490e-02 0.7750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X201  7.992803e-02 0.0325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X202  9.670085e-03 0.3775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X203 -9.979998e-02 0.9825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X204  4.089947e-03 0.4500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X205  3.410018e-02 0.1575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X206 -1.254663e-01 0.9900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X207 -1.211707e-02 0.6675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X208 -3.840000e-03 0.5475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X209  5.060136e-02 0.0925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X210  2.064004e-02 0.2525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X211 -9.503446e-03 0.6200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X212 -1.377442e-02 0.6875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X213  1.346188e-02 0.3200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X214  8.647526e-03 0.3875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X215 -6.653198e-02 0.9425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X216 -4.700855e-04 0.5075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X217 -4.652274e-02 0.8900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X218  2.544212e-03 0.4725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X219  3.265971e-02 0.1675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X220  7.389926e-03 0.4025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X221 -1.032079e-02 0.6350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X222  4.843545e-02 0.0975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X223 -3.636104e-02 0.8500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X224 -1.312074e-02 0.6800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X225  6.408354e-03 0.4150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X226  3.309507e-03 0.4625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X227 -1.160654e-02 0.6575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X228  1.849909e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X229  1.308008e-02 0.3225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X230 -2.310083e-03 0.5250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X231 -2.692846e-03 0.5325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X232  1.735931e-02 0.2900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X233 -2.804134e-02 0.7975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X234 -2.830512e-02 0.8000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X235 -7.174027e-02 0.9600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X236  4.302445e-02 0.1225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X237 -9.414672e-03 0.6175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X238  9.448408e-03 0.3825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X239  3.694224e-03 0.4625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X240 -4.505408e-04 0.5050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X241 -7.151208e-02 0.9550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X242  1.298529e-02 0.3225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X243 -6.839118e-02 0.9450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X244  2.190733e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X245 -5.754098e-02 0.9225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X246 -2.312543e-02 0.7575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X247 -8.218170e-02 0.9700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X248 -1.725090e-02 0.7050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X249  7.055453e-03 0.4050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X250  7.514839e-03 0.4000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X251 -3.162213e-02 0.8250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X252  4.519636e-02 0.1150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X253  7.496165e-03 0.4000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X254 -3.208334e-02 0.8300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X255 -1.263477e-02 0.6750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X256  4.751068e-02 0.1025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X257  8.753723e-03 0.3875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X258  1.504659e-04 0.4975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X259 -2.244348e-02 0.7550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X260 -1.065601e-01 0.9875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X261  1.824304e-02 0.2775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X262  4.501152e-03 0.4425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X263 -1.881868e-02 0.7275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X264 -3.733333e-03 0.5400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X265 -1.777920e-02 0.7150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X266  3.359024e-02 0.1625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X267  3.822222e-03 0.4575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X268 -2.528311e-02 0.7825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X269 -4.021661e-02 0.8675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X270  5.166965e-02 0.0925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X271 -4.851728e-03 0.5650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X272  4.680548e-03 0.4375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X273  1.238153e-02 0.3275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X274 -7.981060e-03 0.6050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X275  2.070559e-02 0.2525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X276 -8.560890e-03 0.6125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X277  7.152381e-03 0.4050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X278 -5.831502e-03 0.5725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X279 -2.471168e-02 0.7800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X280  1.897968e-02 0.2675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X281  4.041959e-02 0.1325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X282 -9.268124e-03 0.6150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X283 -1.058015e-02 0.6450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X284  4.802857e-03 0.4375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X285  2.121206e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X286 -8.505010e-02 0.9750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X287 -4.105845e-02 0.8775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X288 -5.517241e-04 0.5100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X289  1.555341e-02 0.3025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X290 -1.351058e-01 0.9950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X291 -2.857115e-02 0.8025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X292 -1.237970e-02 0.6725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X293 -1.286845e-02 0.6775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X294  1.310159e-02 0.3225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X295 -2.086644e-02 0.7525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X296  5.375405e-02 0.0900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X297  5.345455e-03 0.4350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X298 -1.151453e-02 0.6525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X299  5.613598e-02 0.0800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X300 -3.890740e-02 0.8650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X301 -4.571429e-03 0.5600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X302 -3.137857e-02 0.8225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X303  1.142539e-02 0.3525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X304  9.857875e-03 0.3775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X305 -1.032886e-02 0.6375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X306  3.465419e-02 0.1575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X307  2.993774e-02 0.1925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X308 -3.219753e-02 0.8325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X309 -3.118576e-02 0.8200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X310  7.017601e-03 0.4050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X311  3.293434e-02 0.1650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X312  1.679830e-02 0.2975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X313 -1.439847e-02 0.6900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X314 -1.735291e-02 0.7100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X315  7.994619e-03 0.3950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X316 -4.416026e-03 0.5550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X317 -2.328593e-02 0.7600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X318 -1.887745e-02 0.7325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X319  5.642943e-03 0.4300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X320 -2.358207e-02 0.7675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X321 -8.094872e-03 0.6075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X322 -1.051983e-02 0.6400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X323  2.756266e-03 0.4675</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X324 -5.008637e-02 0.9075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X325  5.340021e-02 0.0900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X326  7.210719e-03 0.4050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X327  2.566859e-02 0.2175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X328  1.371031e-02 0.3150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X329 -7.439688e-03 0.6000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X330 -5.578356e-02 0.9200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X331 -4.756978e-02 0.9000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X332 -6.271682e-02 0.9375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X333  9.355709e-03 0.3850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X334  9.257462e-03 0.3875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X335  7.368804e-02 0.0400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X336  6.832928e-03 0.4125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X337  1.584950e-04 0.4975</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X338 -3.042807e-02 0.8150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X339 -1.507710e-02 0.6950</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X340 -1.786606e-02 0.7200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X341 -8.988788e-02 0.9800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X342 -3.004867e-02 0.8100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X343 -4.846038e-02 0.9050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X344  4.667292e-02 0.1100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X345  9.807047e-02 0.0200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X346  1.028519e-01 0.0175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X347  6.579400e-02 0.0600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X348  1.083789e-01 0.0125</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X349  1.968651e-02 0.2650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X350 -2.752669e-02 0.7925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X351  9.746943e-02 0.0200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X352  6.955295e-03 0.4050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X353  3.136046e-02 0.1800</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X354  3.338659e-02 0.1650</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X355  2.162242e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X356  8.597326e-03 0.3875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X357  2.818037e-02 0.2025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X358 -4.497627e-03 0.5575</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X359 -1.052335e-02 0.6425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X360 -4.632846e-02 0.8875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X361 -5.921537e-02 0.9300</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X362 -7.481680e-02 0.9625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X363  1.725895e-03 0.4825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X364  1.004313e-02 0.3700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X365  1.358878e-02 0.3175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X366 -4.698399e-02 0.8925</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X367  2.209860e-02 0.2475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X368 -1.065603e-02 0.6475</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X369  2.560798e-03 0.4700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X370  9.668461e-03 0.3775</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X371 -1.370082e-02 0.6850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X372  8.115938e-06 0.5000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X373  1.340793e-03 0.4850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X374  5.937080e-03 0.4250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X375  9.219762e-02 0.0200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X376 -6.188619e-03 0.5850</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X377 -1.978830e-02 0.7375</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X378 -1.181741e-02 0.6600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X379  2.798258e-02 0.2050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X380 -1.212374e-02 0.6700</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X381  1.570299e-02 0.3025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X382  3.651332e-02 0.1500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X383 -8.199434e-03 0.6100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X384  1.820031e-01 0.0025</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X385  2.246057e-02 0.2450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X386 -6.416764e-03 0.5875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X387  2.380912e-03 0.4750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X388 -9.600000e-03 0.6225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X389 -2.902889e-02 0.8050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X390  4.217739e-02 0.1225</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X391 -4.079810e-02 0.8725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X392  1.083047e-02 0.3525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X393 -2.332773e-02 0.7625</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X394 -2.002324e-02 0.7400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X395 -2.045154e-02 0.7450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X396  4.409704e-02 0.1175</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X397  1.751947e-02 0.2900</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X398  1.514428e-02 0.3050</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X399  2.492608e-02 0.2200</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> X400  5.089322e-02 0.0925</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Permutation p-values </span></span>
+<span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='va'>rf.iris</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>iris</span>, importance <span class='op'>=</span> <span class='st'>'permutation'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>importance_pvalues</span><span class='op'>(</span><span class='va'>rf.iris</span>, method <span class='op'>=</span> <span class='st'>"altmann"</span>, formula <span class='op'>=</span> <span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

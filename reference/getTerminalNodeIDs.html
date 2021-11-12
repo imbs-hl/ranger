@@ -144,159 +144,161 @@ This function calls predict() now.</p>
     <p>Matrix with terminal nodeIDs for all observations in dataset and trees.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>rf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>iris</span>, num.trees <span class='op'>=</span> <span class='fl'>5</span>, write.forest <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'>getTerminalNodeIDs</span><span class='op'>(</span><span class='va'>rf</span>, <span class='va'>iris</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Function getTerminalNodeIDs() deprecated, calling predict().</span></div><div class='output co'>#&gt;        [,1] [,2] [,3] [,4] [,5]
-#&gt;   [1,]    1    1    1    1    1
-#&gt;   [2,]    1    1    1    1    1
-#&gt;   [3,]    1    1    1    1    1
-#&gt;   [4,]    1    1    1    1    1
-#&gt;   [5,]    1    1    1    1    1
-#&gt;   [6,]    1    1    1    1    1
-#&gt;   [7,]    1    1    1    1    1
-#&gt;   [8,]    1    1    1    1    1
-#&gt;   [9,]    1    1    1    1    1
-#&gt;  [10,]    1    1    1    1    1
-#&gt;  [11,]    1    1    1    1    1
-#&gt;  [12,]    1    1    1    1    1
-#&gt;  [13,]    1    1    1    1    1
-#&gt;  [14,]    1    1    1    1    1
-#&gt;  [15,]    1    1    1    1    1
-#&gt;  [16,]    1    1    1    1    1
-#&gt;  [17,]    1    1    1    1    1
-#&gt;  [18,]    1    1    1    1    1
-#&gt;  [19,]    1    1    1    1    1
-#&gt;  [20,]    1    1    1    1    1
-#&gt;  [21,]    1    1    1    1    1
-#&gt;  [22,]    1    1    1    1    1
-#&gt;  [23,]    1    1    1    1    1
-#&gt;  [24,]    1    1    1    1    1
-#&gt;  [25,]    1    1    1    1    1
-#&gt;  [26,]    1    1    1    1    1
-#&gt;  [27,]    1    1    1    1    1
-#&gt;  [28,]    1    1    1    1    1
-#&gt;  [29,]    1    1    1    1    1
-#&gt;  [30,]    1    1    1    1    1
-#&gt;  [31,]    1    1    1    1    1
-#&gt;  [32,]    1    1    1    1    1
-#&gt;  [33,]    1    1    1    1    1
-#&gt;  [34,]    1    1    1    1    1
-#&gt;  [35,]    1    1    1    1    1
-#&gt;  [36,]    1    1    1    1    1
-#&gt;  [37,]    1    1    1    1    1
-#&gt;  [38,]    1    1    1    1    1
-#&gt;  [39,]    1    1    1    1    1
-#&gt;  [40,]    1    1    1    1    1
-#&gt;  [41,]    1    1    1    1    1
-#&gt;  [42,]    1    1    1    1    1
-#&gt;  [43,]    1    1    1    1    1
-#&gt;  [44,]    1    1    1    1    1
-#&gt;  [45,]    1    1    1    1    1
-#&gt;  [46,]    1    1    1    1    1
-#&gt;  [47,]    1    1    1    1    1
-#&gt;  [48,]    1    1    1    1    1
-#&gt;  [49,]    1    1    1    1    1
-#&gt;  [50,]    1    1    1    1    1
-#&gt;  [51,]    5    5    5    5   15
-#&gt;  [52,]    5    5   10    5   15
-#&gt;  [53,]   11    5   10    5   15
-#&gt;  [54,]    5    5    5    5    7
-#&gt;  [55,]    5    5   19    5   15
-#&gt;  [56,]    5    5    5    5    7
-#&gt;  [57,]    5    5   12    5   15
-#&gt;  [58,]    5    5    5    5    7
-#&gt;  [59,]    5    5    5    5    7
-#&gt;  [60,]    5    5    5    5   13
-#&gt;  [61,]    5    5    5    5    7
-#&gt;  [62,]    5    5   10    5   13
-#&gt;  [63,]    5    5    5    5    7
-#&gt;  [64,]    5    5    5    5   13
-#&gt;  [65,]    5    5    5    5    7
-#&gt;  [66,]    5    5    5    5   15
-#&gt;  [67,]    5    5   10    5   13
-#&gt;  [68,]    5    5    5    5    7
-#&gt;  [69,]    5    5   15    5   11
-#&gt;  [70,]    5    5    5    5    7
-#&gt;  [71,]    9    9   12   12    4
-#&gt;  [72,]    5    5    5    5    7
-#&gt;  [73,]   11    5   20    5   11
-#&gt;  [74,]    5    5    5    5    7
-#&gt;  [75,]    5    5    5    5    7
-#&gt;  [76,]    5    5    5    5   15
-#&gt;  [77,]    5    5    5    5   15
-#&gt;  [78,]   14    5   22   10   15
-#&gt;  [79,]    5    5   10    5   13
-#&gt;  [80,]    5    5    5    5    7
-#&gt;  [81,]    5    5    5    5    7
-#&gt;  [82,]    5    5    5    5    7
-#&gt;  [83,]    5    5    5    5    7
-#&gt;  [84,]   13    6   14    6   13
-#&gt;  [85,]    5    5   10    5   13
-#&gt;  [86,]    5    5   12    5   13
-#&gt;  [87,]    5    5   10    5   15
-#&gt;  [88,]    5    5    5    5    7
-#&gt;  [89,]    5    5    5    5    7
-#&gt;  [90,]    5    5    5    5    7
-#&gt;  [91,]    5    5    5    5    7
-#&gt;  [92,]    5    5    5    5   13
-#&gt;  [93,]    5    5    5    5    7
-#&gt;  [94,]    5    5    5    5    7
-#&gt;  [95,]    5    5    5    5    7
-#&gt;  [96,]    5    5    5    5    7
-#&gt;  [97,]    5    5    5    5    7
-#&gt;  [98,]    5    5    5    5    7
-#&gt;  [99,]    5    5    5    5    7
-#&gt; [100,]    5    5    5    5    7
-#&gt; [101,]    8   10   14    8    4
-#&gt; [102,]    8    7   14    8    4
-#&gt; [103,]    8    7   14    8    4
-#&gt; [104,]    8    7   14   10    4
-#&gt; [105,]    8    7   14    8    4
-#&gt; [106,]    8    7   14    8    4
-#&gt; [107,]    9    5   11   11   11
-#&gt; [108,]    8    7   14   10    4
-#&gt; [109,]    8    7   14   10    4
-#&gt; [110,]    8   10   14    8    4
-#&gt; [111,]    8   10   14    8    4
-#&gt; [112,]    8    7   14    8    4
-#&gt; [113,]    8    7   14    8    4
-#&gt; [114,]    8    7   17    8    4
-#&gt; [115,]    8    7   14    8    4
-#&gt; [116,]    8   10   14    8    4
-#&gt; [117,]    8    7   14   10    4
-#&gt; [118,]    8   10   14    8    4
-#&gt; [119,]    8    7   14    8    4
-#&gt; [120,]   13    5   15    6   12
-#&gt; [121,]    8   10   14    8    4
-#&gt; [122,]    8    7   17    8    4
-#&gt; [123,]    8    7   14    8    4
-#&gt; [124,]    8    7   17   10    4
-#&gt; [125,]    8   10   14    8    4
-#&gt; [126,]    8    9   14   10    4
-#&gt; [127,]   10    7   11   10    4
-#&gt; [128,]    8    7   21   10    4
-#&gt; [129,]    8    7   14    8    4
-#&gt; [130,]   14    6   14    6    6
-#&gt; [131,]    8    7   14    8    4
-#&gt; [132,]    8   10   14    8    4
-#&gt; [133,]    8    7   14    8    4
-#&gt; [134,]   13    6   20    6   16
-#&gt; [135,]   13    6    5    6   12
-#&gt; [136,]    8    7   14    8    4
-#&gt; [137,]    8   10   14    8    4
-#&gt; [138,]    8    7   14   10    4
-#&gt; [139,]    9    7   11   11    4
-#&gt; [140,]    8    7   14    8    4
-#&gt; [141,]    8    7   14    8    4
-#&gt; [142,]    8    7   14    8    4
-#&gt; [143,]    8    7   14    8    4
-#&gt; [144,]    8   10   14    8    4
-#&gt; [145,]    8   10   14    8    4
-#&gt; [146,]    8    7   14    8    4
-#&gt; [147,]    8    7   17    8    4
-#&gt; [148,]    8    7   14    8    4
-#&gt; [149,]    8   10   14    8    4
-#&gt; [150,]    8    7   14   11    4</div></pre>
+    <pre class="examples"><span class='r-in'><span class='va'>rf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='ranger.html'>ranger</a></span><span class='op'>(</span><span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>iris</span>, num.trees <span class='op'>=</span> <span class='fl'>5</span>, write.forest <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>getTerminalNodeIDs</span><span class='op'>(</span><span class='va'>rf</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Function getTerminalNodeIDs() deprecated, calling predict().</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        [,1] [,2] [,3] [,4] [,5]</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [1,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [2,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [3,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [4,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [5,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [6,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [7,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [8,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [9,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [10,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [11,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [12,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [13,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [14,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [15,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [16,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [17,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [18,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [19,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [20,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [21,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [22,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [23,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [24,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [25,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [26,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [27,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [28,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [29,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [30,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [31,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [32,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [33,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [34,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [35,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [36,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [37,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [39,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [40,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [41,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [42,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [43,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [44,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [45,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [46,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [47,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [48,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [49,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [50,]    1    1    1    1    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [51,]    5    5    5    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [52,]    5    5   10    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [53,]   11    5   10    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [54,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [55,]    5    5   19    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [56,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [57,]    5    5   12    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [58,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [59,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [60,]    5    5    5    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [61,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [62,]    5    5   10    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [63,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [64,]    5    5    5    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [65,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [66,]    5    5    5    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [67,]    5    5   10    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [68,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [69,]    5    5   15    5   11</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [70,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [71,]    9    9   12   12    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [72,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [73,]   11    5   20    5   11</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [74,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [76,]    5    5    5    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [77,]    5    5    5    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [78,]   14    5   22   10   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [79,]    5    5   10    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [80,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [81,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [82,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [83,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [84,]   13    6   14    6   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [85,]    5    5   10    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [86,]    5    5   12    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [87,]    5    5   10    5   15</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [88,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [89,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [90,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [91,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [92,]    5    5    5    5   13</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [93,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [94,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [95,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [96,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [97,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [98,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [99,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [100,]    5    5    5    5    7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [101,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [102,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [103,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [104,]    8    7   14   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [105,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [106,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [107,]    9    5   11   11   11</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [108,]    8    7   14   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [109,]    8    7   14   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [110,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [111,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [112,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [113,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [114,]    8    7   17    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [115,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [116,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [117,]    8    7   14   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [118,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [119,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [120,]   13    5   15    6   12</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [121,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [122,]    8    7   17    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [123,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [124,]    8    7   17   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [125,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [126,]    8    9   14   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [127,]   10    7   11   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [128,]    8    7   21   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [129,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [130,]   14    6   14    6    6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [131,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [132,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [133,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [134,]   13    6   20    6   16</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [135,]   13    6    5    6   12</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [136,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [137,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [138,]    8    7   14   10    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [139,]    9    7   11   11    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [140,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [141,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [142,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [143,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [144,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [145,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [146,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [147,]    8    7   17    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [148,]    8    7   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [149,]    8   10   14    8    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [150,]    8    7   14   11    4</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

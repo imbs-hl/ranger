@@ -180,26 +180,27 @@ Instead of using equal probabilities, the cases are weighted according to their 
     <p>Marvin N. Wright</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Split in training and test data</span>
-<span class='va'>train.idx</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>/</span><span class='fl'>3</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>iris.train</span> <span class='op'>&lt;-</span> <span class='va'>iris</span><span class='op'>[</span><span class='va'>train.idx</span>, <span class='op'>]</span>
-<span class='va'>iris.test</span> <span class='op'>&lt;-</span> <span class='va'>iris</span><span class='op'>[</span><span class='op'>-</span><span class='va'>train.idx</span>, <span class='op'>]</span>
-
-<span class='co'>## Run case-specific RF</span>
-<span class='fu'>csrf</span><span class='op'>(</span><span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, training_data <span class='op'>=</span> <span class='va'>iris.train</span>, test_data <span class='op'>=</span> <span class='va'>iris.test</span>, 
-     params1 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>50</span>, mtry <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>, 
-     params2 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;  [1] setosa     setosa     setosa     setosa     setosa     setosa    
-#&gt;  [7] setosa     setosa     setosa     setosa     setosa     virginica 
-#&gt; [13] versicolor versicolor versicolor versicolor versicolor virginica 
-#&gt; [19] versicolor versicolor versicolor virginica  versicolor versicolor
-#&gt; [25] versicolor versicolor versicolor versicolor virginica  versicolor
-#&gt; [31] versicolor virginica  virginica  virginica  virginica  virginica 
-#&gt; [37] virginica  virginica  versicolor virginica  virginica  virginica 
-#&gt; [43] versicolor virginica  virginica  virginica  virginica  virginica 
-#&gt; [49] virginica  virginica 
-#&gt; Levels: setosa versicolor virginica</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'>## Split in training and test data</span></span>
+<span class='r-in'><span class='va'>train.idx</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>/</span><span class='fl'>3</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>iris.train</span> <span class='op'>&lt;-</span> <span class='va'>iris</span><span class='op'>[</span><span class='va'>train.idx</span>, <span class='op'>]</span></span>
+<span class='r-in'><span class='va'>iris.test</span> <span class='op'>&lt;-</span> <span class='va'>iris</span><span class='op'>[</span><span class='op'>-</span><span class='va'>train.idx</span>, <span class='op'>]</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Run case-specific RF</span></span>
+<span class='r-in'><span class='fu'>csrf</span><span class='op'>(</span><span class='va'>Species</span> <span class='op'>~</span> <span class='va'>.</span>, training_data <span class='op'>=</span> <span class='va'>iris.train</span>, test_data <span class='op'>=</span> <span class='va'>iris.test</span>, </span>
+<span class='r-in'>     params1 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>50</span>, mtry <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>, </span>
+<span class='r-in'>     params2 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [1] setosa     setosa     setosa     setosa     setosa     setosa    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [7] setosa     setosa     setosa     setosa     setosa     virginica </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [13] versicolor versicolor versicolor versicolor versicolor virginica </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [19] versicolor versicolor versicolor virginica  versicolor versicolor</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [25] versicolor versicolor versicolor versicolor virginica  versicolor</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [31] versicolor virginica  virginica  virginica  virginica  virginica </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [37] virginica  virginica  versicolor virginica  virginica  virginica </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [43] versicolor virginica  virginica  virginica  virginica  virginica </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [49] virginica  virginica </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Levels: setosa versicolor virginica</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
