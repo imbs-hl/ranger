@@ -102,7 +102,7 @@ rf_iid_rep <- rangerts::rangerts(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = T,
-                 seed = 1 # for reproductibility)
+                 seed = 1) # for reproductibility)
 
 
 # Moving block bootstrap ----
