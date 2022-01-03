@@ -580,6 +580,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       importance.mode <- 3
     }
+  } else if (importance == 'sobolMDA'){
+      importance.mode <- 7
   } else {
     stop("Error: Unknown importance mode.")
   }

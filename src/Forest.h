@@ -107,6 +107,7 @@ public:
   const std::vector<double>& getVariableImportanceCasewise() const {
     return variable_importance_casewise;
   }
+  std::vector<double> computeSobolMDA();
   double getOverallPredictionError() const {
     return overall_prediction_error;
   }
@@ -155,6 +156,11 @@ protected:
   virtual void computePredictionErrorInternal() = 0;
 
   void computePermutationImportance();
+  
+  // SobolMDA methods
+  double computeVarianceY();
+  std::vector<double> computeProjectedVariance();
+  std::vector<std::vector<double>> predictProjectedForest();
 
   // Multithreading methods for growing/prediction/importance, called by each thread
   void growTreesInThread(uint thread_idx, std::vector<double>* variable_importance);

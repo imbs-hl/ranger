@@ -138,9 +138,12 @@ void Tree::grow(std::vector<double>* variable_importance) {
   }
 
   // Delete sampleID vector to save memory
-  sampleIDs.clear();
-  sampleIDs.shrink_to_fit();
+  if (importance_mode != IMP_SOBOL_MDA){
+    sampleIDs.clear();
+    sampleIDs.shrink_to_fit();
+  }
   cleanUpInternal();
+  
 }
 
 void Tree::predict(const Data* prediction_data, bool oob_prediction) {
@@ -250,6 +253,211 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
       forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
     }
   }
+}
+
+// Compute predictions of projected trees for all input variables.
+std::vector<std::vector<double>> Tree::predictProjectedTree() {
+  
+  // Initialize variables.
+  size_t p = data->getNumCols(); // Set p as the number of input variables.
+  // The vectors nodeIDs_samplesIDs_inb and nodeIDs_samplesIDs_oob are of size p, and respectively store the in-bag and out-of-bag sampleIDs of the projected partitions.
+  // The j-th component of these two vectors stores the projected partitions of the tree at all levels when the splits on variable j are ignored (i.e., observations are sent to both children nodes).
+  // Each projected partition is a map: the key is a list of nodeIDs, and the value is the list of the sampleIDs falling simultaneously in all nodes of the key.
+  std::vector<std::map<std::vector<size_t>, std::vector<size_t>>> nodeIDs_samplesIDs_inb(p); 
+  std::vector<std::map<std::vector<size_t>, std::vector<size_t>>> nodeIDs_samplesIDs_oob(p);
+  std::map<size_t, std::vector<size_t>> leaves_variables; // Lists of variables used in the sequence of splits to reach each terminal leave.
+  std::map<size_t, std::vector<size_t>> leaves_sampleIDs; // Lists of sampleIDs falling in each terminal leave.
+  
+  // Deduplication of in-bag sample to speed up computations.
+  std::vector<size_t> sampleIDs_unique; // Deduplicated sampleIDs.
+  std::map<size_t, size_t> sampleIDs_count; // Number of repetitions of each observation of sampleIDs_unique in sampleIDs.
+  for (auto & i : sampleIDs){
+    std::pair<std::map<size_t, size_t>::iterator, bool> itIDs = sampleIDs_count.insert(std::pair<size_t, size_t> (i, 1));
+    if (!itIDs.second){
+      itIDs.first->second += 1;
+    }else{
+      sampleIDs_unique.push_back(i);
+    }
+  }
+  
+  // Drop observations in the projected partitions. First consider in-bag sample (s = 0), and then the out-of-bag sample (s = 1).
+  for (size_t s = 0; s <= 1; ++s){
+    std::vector<size_t> sampleIDs_temp;
+    if (s == 0){
+      sampleIDs_temp = sampleIDs_unique; // Deduplicated in-bag sample.
+    } else {
+      sampleIDs_temp = oob_sampleIDs; // Out-of-bag sample.
+    }
+    // Loop through all observations of the considered sample.
+    for (auto & i : sampleIDs_temp) {
+      std::vector<size_t> split_variables; // Track the list of variables involved in the splits of the previous tree levels.
+      bool is_terminal = false; // Track whether terminal leave is reached.
+      size_t nodeIDorigin = 0; // nodeIDorigin is the nodeID where observation i falls at each level of the original tree. Initialized here at the root node.
+      // Loop through the tree levels, and stop when observation i has reached the terminal leave of the original tree.
+      while (!is_terminal){
+        if (child_nodeIDs[0][nodeIDorigin] == 0 && child_nodeIDs[1][nodeIDorigin] == 0) {
+          is_terminal = true; // If nodeIDorigin is a terminal leave, break the loop through the levels of the original tree.
+        }else{
+          std::vector<size_t> nodeIDtemp; // Store the list of nodeIDs at each level when observation i is dropped down the projected tree.
+          nodeIDtemp.push_back(nodeIDorigin);
+          size_t varIDorigin = split_varIDs[nodeIDorigin]; // varIDorigin is the splitting variable at nodeIDorigin.
+          nodeIDorigin = getChildID(i, nodeIDorigin, varIDorigin); // Update nodeIDorigin as the child node where observation i falls at the next level of the original tree.
+          // If varIDorigin is NOT already involved in the nodes hit by observation i at the previous tree levels, 
+          // then compute the projected cell where observation i falls, by ignoring all splits using varIDorigin down the tree, otherwise send observation i to the next level of the original tree.
+          if (find(split_variables.begin(), split_variables.end(), varIDorigin) == split_variables.end()){
+            split_variables.push_back(varIDorigin); // Add varIDorigin to the list of variables already met by observation i at the previous tree levels.
+            std::vector<size_t> nodeIDnext; // List of inner nodeIDs of the next tree level where observation i falls.
+            std::vector<size_t> nodeIDpred; // List of terminal nodeIDs where observation i falls.
+            std::vector<size_t> nodeIDpredtemp = nodeIDtemp; // Store projected cell of the previous level of the projected tree.
+            bool next_level = true;
+            // Loop through the remaining tree levels, ignoring all splits using varIDorigin, i.e.,
+            // observation i is sent to both children nodes when a split on varIDorigin is hit, and then, observation i ends up in multiple terminal leaves.
+            while (next_level) {
+              for (auto & nodeID : nodeIDtemp){
+                if (child_nodeIDs[0][nodeID] == 0 && child_nodeIDs[1][nodeID] == 0) {
+                  nodeIDpred.push_back(nodeID);
+                }else{
+                  size_t split_varID = split_varIDs[nodeID];
+                  if (split_varID != varIDorigin){
+                    // Move to child node if splitting variable is NOT varIDorigin.
+                    nodeIDnext.push_back(getChildID(i, nodeID, split_varID));
+                  }else{
+                    // Move to both left and right children nodes if splitting variable is varIDorigin.
+                    nodeIDnext.push_back(child_nodeIDs[0][nodeID]);
+                    nodeIDnext.push_back(child_nodeIDs[1][nodeID]);
+                  }
+                }
+              }
+              // Store observation i in the projected partition of the current tree level.
+              if (s == 0){
+                // In-bag observation case.
+                if (nodeIDnext.size() > 0 || nodeIDtemp == std::vector<size_t> {0}){
+                  std::vector<size_t> nodeIDlevel = nodeIDpred; // nodeIDlevel is the list of nodeIDs defining the projected cell at the current tree level.
+                  nodeIDlevel.insert(nodeIDlevel.end(), nodeIDnext.begin(), nodeIDnext.end()); // Assemble nodeIDs of terminal leaves and inner nodes in nodeIDlevel.
+                  std::pair<std::map<std::vector<size_t>, std::vector<size_t>>::iterator, bool> it_bool;
+                  // Insert the list of nodeIDs defining the projected cell at the current tree level (nodeIDlevel) and the associated sampleIDs.
+                  it_bool = nodeIDs_samplesIDs_inb[varIDorigin].insert(std::pair<std::vector<size_t>, std::vector<size_t>> (nodeIDlevel, {i}));
+                  if (!it_bool.second){
+                    it_bool.first->second.push_back(i);
+                  }
+                }
+                nodeIDtemp = nodeIDnext;
+                nodeIDnext = {};
+                next_level = nodeIDtemp.size() > 0;
+              }else{
+                // Out-of-bag observation case.
+                std::vector<size_t> nodeIDlevel = nodeIDpred;
+                nodeIDlevel.insert(nodeIDlevel.end(), nodeIDnext.begin(), nodeIDnext.end()); // Assemble nodeIDs of terminal leaves and inner nodes.
+                // Check whether the projected cell exists in the pre-computed in-bag projected partition. 
+                std::map<std::vector<size_t>, std::vector<size_t>>::iterator it = nodeIDs_samplesIDs_inb[varIDorigin].find(nodeIDlevel);
+                if (it == nodeIDs_samplesIDs_inb[varIDorigin].end() || nodeIDnext.size() == 0){
+                  // If the projected cell is NOT in the in-bag projected partition or the projected cell is empty, 
+                  // set the projected cell of the previous tree level (nodeIDpredtemp) as the terminal projected leave.
+                  next_level = false;
+                  std::pair<std::map<std::vector<size_t>, std::vector<size_t>>::iterator, bool> it_bool;
+                  it_bool = nodeIDs_samplesIDs_oob[varIDorigin].insert(std::pair<std::vector<size_t>, std::vector<size_t>> (nodeIDpredtemp, {i}));
+                  if (!it_bool.second){
+                    it_bool.first->second.push_back(i);
+                  }
+                }else{
+                  // If the projected cell is in the in-bag projected partition and not empty, keep splitting.
+                  nodeIDpredtemp = nodeIDlevel;
+                  nodeIDtemp = nodeIDnext;
+                  nodeIDnext = {};
+                }
+              }
+            }
+          }
+        }
+      }
+      // For out-of-bag observations, store terminal leave information.
+      if (s == 1){
+        // Store list of variables used in the sequence of splits.
+        leaves_variables.insert(std::pair<size_t, std::vector<size_t>> (nodeIDorigin, split_variables));
+        std::pair<std::map<size_t, std::vector<size_t>>::iterator, bool> it_leaves;
+        // Store oob sampleIDs in terminal leaves.
+        it_leaves = leaves_sampleIDs.insert(std::pair<size_t, std::vector<size_t>> (nodeIDorigin, {i}));
+        if (!it_leaves.second){
+          it_leaves.first->second.push_back(i);
+        }
+      }
+    }
+  }
+  
+  // Generate out-of-bag predictions from the obtained projected partitions.
+  int nsample = data->getNumRows(); // Sample size.
+  std::vector<std::vector<double>> predictions_oob; // Out-of-bag projected tree predictions for all input variables.
+  std::map<std::vector<size_t>, double> nodeIDs_response;
+  std::pair<std::map<std::vector<size_t>, double>::iterator, bool> it_response;
+  for (size_t j = 0; j < p; ++j){
+    std::vector<double> predictions_varID(nsample, 0); // Out-of-bag projected tree predictions when variable varID is ignored.
+    for (std::map<std::vector<size_t>, std::vector<size_t>>::iterator it = nodeIDs_samplesIDs_oob[j].begin(); it != nodeIDs_samplesIDs_oob[j].end(); ++it){
+      double response;
+      std::vector<size_t> nodeIDs = it->first;
+      it_response = nodeIDs_response.insert(std::pair<std::vector<size_t>, double> (nodeIDs, 0));
+      // Compute projected cell output at its first occurence, using in-bag data.
+      if (it_response.second){
+        std::vector<size_t> sampleIDs_inb = nodeIDs_samplesIDs_inb[j][nodeIDs];
+        response = 0;
+        size_t inb_size = 0;
+        for (auto & i : sampleIDs_inb){
+          size_t size_temp = sampleIDs_count[i];
+          response += data->get_y(i, 0)*size_temp;
+          inb_size += size_temp;
+        }
+        response = response/inb_size;
+        it_response.first->second = response;
+      }else{
+        response = it_response.first->second;
+      }
+      // Assign projected cell output to all oob observations falling in this projected cell.
+      for (auto & i : it->second){
+        predictions_varID[i] = response;
+      }
+    }
+    predictions_oob.push_back(predictions_varID);
+  }
+  // For all variables not involved in the splits of the original tree path of a given observation, the projected prediction is given by the original tree.
+  for (std::map<size_t, std::vector<size_t>>::iterator it = leaves_variables.begin(); it != leaves_variables.end(); ++it){
+    double response = split_values[it->first];
+    for (size_t j = 0; j < p; ++j){
+      if (find(it->second.begin(), it->second.end(), j) == it->second.end()){
+        for (auto & i : leaves_sampleIDs[it->first]){
+          predictions_oob[j][i] = response;
+        }
+      }
+    }
+  }
+  
+  return(predictions_oob);
+  
+}
+
+// Return child nodeID.
+size_t Tree::getChildID(size_t i, size_t nodeID, size_t split_varID){
+  size_t childID;
+  double value = data->get_x(i, split_varID);
+  if (data->isOrderedVariable(split_varID)) {
+    if (value <= split_values[nodeID]) {
+      // Move to left child.
+      childID = child_nodeIDs[0][nodeID];
+    } else {
+      // Move to right child.
+      childID = child_nodeIDs[1][nodeID];
+    }
+  } else {
+    size_t factorID = floor(value) - 1;
+    size_t splitID = floor(split_values[nodeID]);
+    // Left if 0 found at position factorID.
+    if (!(splitID & (1ULL << factorID))) {
+      // Move to left child.
+      childID = child_nodeIDs[0][nodeID];
+    } else {
+      // Move to right child.
+      childID = child_nodeIDs[1][nodeID];
+    }
+  }
+  return(childID);
 }
 
 // #nocov start
