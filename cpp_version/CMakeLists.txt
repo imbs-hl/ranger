@@ -17,17 +17,8 @@ endif()
 ## ======================================================================================##
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 
-## ======================================================================================##
-## In Clang phtread flag only for compiler, not for linker. For
-## windows use static linking
-## ======================================================================================##
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS -pthread)
-elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -static")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-endif()
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 ## ======================================================================================##
 ## Subdirectories and source files
@@ -56,4 +47,4 @@ ADD_CUSTOM_TARGET(release
 ## Executable
 ## ======================================================================================##
 add_executable(ranger ${SOURCES})
-
+target_link_libraries(ranger Threads::Threads)
