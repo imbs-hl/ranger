@@ -20,6 +20,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -39,12 +41,6 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="reference/index.html">Reference</a>
 </li>
 <li>
@@ -53,7 +49,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/imbs-hl/ranger/">
+  <a href="https://github.com/imbs-hl/ranger/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -71,34 +67,30 @@
       </header><div class="row">
   <div class="contents col-md-9">
 
-
-<div id="ranger-a-fast-implementation-of-random-forests" class="section level2">
-<h2 class="hasAnchor">
-<a href="#ranger-a-fast-implementation-of-random-forests" class="anchor"></a>ranger: A Fast Implementation of Random Forests</h2>
-<p>Marvin N. Wright</p>
-<div id="introduction" class="section level3">
-<h3 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h3>
+<p><a href="https://github.com/imbs-hl/ranger/actions" class="external-link"><img src="https://github.com/imbs-hl/ranger/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <img src="http://cranlogs.r-pkg.org/badges/ranger?color=brightgreen" alt="CRAN Downloads month"><img src="http://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen" alt="CRAN Downloads overall"> ## ranger: A Fast Implementation of Random Forests Marvin N. Wright</p>
+<div class="section level3">
+<h3 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h3>
 <p>ranger is a fast implementation of random forests (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data. Classification, regression, and survival forests are supported. Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008). Includes implementations of extremely randomized trees (Geurts et al. 2006) and quantile regression forests (Meinshausen 2006).</p>
 <p>ranger is written in C++, but a version for R is available, too. We recommend to use the R version. It is easy to install and use and the results are readily available for further analysis. The R version is as fast as the standalone C++ version.</p>
 </div>
-<div id="installation" class="section level3">
-<h3 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h3>
-<div id="r-version" class="section level4">
-<h4 class="hasAnchor">
-<a href="#r-version" class="anchor"></a>R version</h4>
+<div class="section level3">
+<h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h3>
+<div class="section level4">
+<h4 id="r-version">R version<a class="anchor" aria-label="anchor" href="#r-version"></a>
+</h4>
 <p>To install the ranger R package from CRAN, just run</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span></code></pre></div>
 <p>R version &gt;= 3.1 is required. With recent R versions, multithreading on Windows platforms should just work. If you compile yourself, the new RTools toolchain is required.</p>
 <p>To install the development version from GitHub using <code>devtools</code>, run</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"imbs-hl/ranger"</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="standalone-c-version" class="section level4">
-<h4 class="hasAnchor">
-<a href="#standalone-c-version" class="anchor"></a>Standalone C++ version</h4>
+<div class="section level4">
+<h4 id="standalone-c-version">Standalone C++ version<a class="anchor" aria-label="anchor" href="#standalone-c-version"></a>
+</h4>
 <p>To install the C++ version of ranger in Linux or Mac OS X you will need a compiler supporting C++11 (i.e. gcc &gt;= 4.7 or Clang &gt;= 3.0) and Cmake. To build start a terminal from the ranger main directory and run the following commands</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="bu">cd</span> cpp_version</span>
 <span id="cb3-2"><a href="#cb3-2"></a><span class="fu">mkdir</span> build</span>
@@ -109,19 +101,19 @@
 <p>To run the C++ version in Microsoft Windows please cross compile or ask for a binary.</p>
 </div>
 </div>
-<div id="usage" class="section level3">
-<h3 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h3>
-<div id="r-version-1" class="section level4">
-<h4 class="hasAnchor">
-<a href="#r-version-1" class="anchor"></a>R version</h4>
+<div class="section level3">
+<h3 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h3>
+<div class="section level4">
+<h4 id="r-version-1">R version<a class="anchor" aria-label="anchor" href="#r-version-1"></a>
+</h4>
 <p>For usage of the R version see ?ranger in R. Most importantly, see the Examples section. As a first example you could try</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/ranger.html">ranger</a></span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="standalone-c-version-1" class="section level4">
-<h4 class="hasAnchor">
-<a href="#standalone-c-version-1" class="anchor"></a>Standalone C++ version</h4>
+<div class="section level4">
+<h4 id="standalone-c-version-1">Standalone C++ version<a class="anchor" aria-label="anchor" href="#standalone-c-version-1"></a>
+</h4>
 <p>In the C++ version type</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">./ranger</span> --help </span></code></pre></div>
 <p>for a list of commands. First you need a training dataset in a file. This file should contain one header line with variable names and one line with variable values per sample (numeric only). Variable names must not contain any whitespace, comma or semicolon. Values can be seperated by whitespace, comma or semicolon but can not be mixed in one file. A typical call of ranger would be for example</p>
@@ -130,76 +122,74 @@
 <p>Please cite our paper if you use ranger.</p>
 </div>
 </div>
-<div id="references" class="section level3">
-<h3 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h3>
+<div class="section level3">
+<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h3>
 <ul>
-<li>Wright, M. N. &amp; Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. <a href="https://doi.org/10.18637/jss.v077.i01" class="uri">https://doi.org/10.18637/jss.v077.i01</a>.</li>
-<li>Schmid, M., Wright, M. N. &amp; Ziegler, A. (2016). On the use of Harrell’s C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. <a href="https://doi.org/10.1016/j.eswa.2016.07.018" class="uri">https://doi.org/10.1016/j.eswa.2016.07.018</a>.</li>
-<li>Wright, M. N., Dankowski, T. &amp; Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. <a href="https://doi.org/10.1002/sim.7212" class="uri">https://doi.org/10.1002/sim.7212</a>.</li>
-<li>Nembrini, S., König, I. R. &amp; Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. <a href="https://doi.org/10.1093/bioinformatics/bty373" class="uri">https://doi.org/10.1093/bioinformatics/bty373</a>.</li>
-<li>Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. <a href="https://doi.org/10.1023/A:1010933404324" class="uri">https://doi.org/10.1023/A:1010933404324</a>.</li>
-<li>Ishwaran, H., Kogalur, U. B., Blackstone, E. H., &amp; Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. <a href="https://doi.org/10.1097/JTO.0b013e318233d835" class="uri">https://doi.org/10.1097/JTO.0b013e318233d835</a>.</li>
-<li>Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., &amp; Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. <a href="https://doi.org/10.3414/ME00-01-0052" class="uri">https://doi.org/10.3414/ME00-01-0052</a>.</li>
+<li>Wright, M. N. &amp; Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. <a href="https://doi.org/10.18637/jss.v077.i01" class="external-link uri">https://doi.org/10.18637/jss.v077.i01</a>.</li>
+<li>Schmid, M., Wright, M. N. &amp; Ziegler, A. (2016). On the use of Harrell’s C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. <a href="https://doi.org/10.1016/j.eswa.2016.07.018" class="external-link uri">https://doi.org/10.1016/j.eswa.2016.07.018</a>.</li>
+<li>Wright, M. N., Dankowski, T. &amp; Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. <a href="https://doi.org/10.1002/sim.7212" class="external-link uri">https://doi.org/10.1002/sim.7212</a>.</li>
+<li>Nembrini, S., König, I. R. &amp; Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. <a href="https://doi.org/10.1093/bioinformatics/bty373" class="external-link uri">https://doi.org/10.1093/bioinformatics/bty373</a>.</li>
+<li>Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. <a href="https://doi.org/10.1023/A:1010933404324" class="external-link uri">https://doi.org/10.1023/A:1010933404324</a>.</li>
+<li>Ishwaran, H., Kogalur, U. B., Blackstone, E. H., &amp; Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. <a href="https://doi.org/10.1097/JTO.0b013e318233d835" class="external-link uri">https://doi.org/10.1097/JTO.0b013e318233d835</a>.</li>
+<li>Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., &amp; Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. <a href="https://doi.org/10.3414/ME00-01-0052" class="external-link uri">https://doi.org/10.3414/ME00-01-0052</a>.</li>
 <li>Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.</li>
-<li>Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. <a href="https://doi.org/10.1007/s10994-006-6226-1" class="uri">https://doi.org/10.1007/s10994-006-6226-1</a>.</li>
-<li>Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. <a href="http://www.jmlr.org/papers/v7/meinshausen06a.html" class="uri">http://www.jmlr.org/papers/v7/meinshausen06a.html</a>.</li>
-<li>Sandri, M. &amp; Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. <a href="https://doi.org/10.1198/106186008X344522" class="uri">https://doi.org/10.1198/106186008X344522</a>.</li>
-<li>Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. <a href="https://doi.org/10.1023/A:1009869804967" class="uri">https://doi.org/10.1023/A:1009869804967</a>.</li>
+<li>Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. <a href="https://doi.org/10.1007/s10994-006-6226-1" class="external-link uri">https://doi.org/10.1007/s10994-006-6226-1</a>.</li>
+<li>Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. <a href="http://www.jmlr.org/papers/v7/meinshausen06a.html" class="external-link uri">http://www.jmlr.org/papers/v7/meinshausen06a.html</a>.</li>
+<li>Sandri, M. &amp; Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. <a href="https://doi.org/10.1198/106186008X344522" class="external-link uri">https://doi.org/10.1198/106186008X344522</a>.</li>
+<li>Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. <a href="https://doi.org/10.1023/A:1009869804967" class="external-link uri">https://doi.org/10.1023/A:1009869804967</a>.</li>
 </ul>
-</div>
 </div>
 
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=ranger">https://​cloud.r-project.org/​package=ranger</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/imbs-hl/ranger/">https://​github.com/​imbs-hl/​ranger/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/imbs-hl/ranger/issues">https://​github.com/​imbs-hl/​ranger/​issues</a>
-</li>
-</ul>
-</div>
-<div class="license">
-<h2>License</h2>
-<ul class="list-unstyled">
-<li><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a></li>
-</ul>
-</div>
-<div class="citation">
-<h2>Citation</h2>
-<ul class="list-unstyled">
-<li><a href="authors.html">Citing ranger</a></li>
-</ul>
-</div>
-<div class="developers">
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>
-<a href="http://wrig.de">Marvin N. Wright</a> <br><small class="roles"> Maintainer </small>  </li>
+<li><a href="https://cloud.r-project.org/package=ranger" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/imbs-hl/ranger/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/imbs-hl/ranger/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="license">
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/imbs-hl/ranger/actions"><img src="https://github.com/imbs-hl/ranger/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing ranger</a></li>
+</ul>
 </div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>
+<a href="http://wrig.de" class="external-link">Marvin N. Wright</a> <br><small class="roles"> Maintainer </small>  </li>
+</ul>
+</div>
+
+
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="http://wrig.de">Marvin N. Wright</a>.</p>
+  <p></p>
+<p>Developed by <a href="http://wrig.de" class="external-link">Marvin N. Wright</a>.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -207,6 +197,8 @@
 
   
 
+
+  
 
   </body>
 </html>
