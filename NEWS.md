@@ -1,4 +1,11 @@
 
+# ranger 0.13.2
+* Add deforest() function to remove trees from ensemble
+* Fix cross compiling for Windows
+
+# ranger 0.13.1
+* Fix https URLs
+
 # ranger 0.13.0
 * New CRAN version
 
