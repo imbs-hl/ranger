@@ -1,4 +1,7 @@
 
+# ranger 0.13.3
+* Faster permutation variable importance for high dimensional data (thanks to Roman Hornung)
+
 # ranger 0.13.2
 * Add deforest() function to remove trees from ensemble
 * Fix cross compiling for Windows

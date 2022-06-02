@@ -227,27 +227,40 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
   // Randomly permute for all independent variables
   for (size_t i = 0; i < num_independent_variables; ++i) {
 
-    // Permute and compute prediction accuracy again for this permutation and save difference
-    permuteAndPredictOobSamples(i, permutations);
-    double accuracy_permuted;
-    if (importance_mode == IMP_PERM_CASEWISE) {
-      accuracy_permuted = computePredictionAccuracyInternal(&prederr_shuf_casewise);
-      for (size_t j = 0; j < num_samples_oob; ++j) {
-        size_t pos = i * num_samples + oob_sampleIDs[j];
-        forest_importance_casewise[pos] += prederr_shuf_casewise[j] - prederr_normal_casewise[j];
+    // Check whether the i-th variable is used in the
+	  // tree:
+    bool isused = false;
+    for (size_t j = 0; j < split_varIDs.size(); ++j) {
+      if (split_varIDs[j] == i) {
+        isused = true;
+        break;
       }
-    } else {
-      accuracy_permuted = computePredictionAccuracyInternal(NULL);
     }
-
-    double accuracy_difference = accuracy_normal - accuracy_permuted;
-    forest_importance[i] += accuracy_difference;
-
-    // Compute variance
-    if (importance_mode == IMP_PERM_BREIMAN) {
-      forest_variance[i] += accuracy_difference * accuracy_difference;
-    } else if (importance_mode == IMP_PERM_LIAW) {
-      forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
+     
+	 // Only do permutations if the variable is used in the tree, otherwise variable importance is 0
+    if (isused) {
+      // Permute and compute prediction accuracy again for this permutation and save difference
+      permuteAndPredictOobSamples(i, permutations);
+      double accuracy_permuted;
+      if (importance_mode == IMP_PERM_CASEWISE) {
+        accuracy_permuted = computePredictionAccuracyInternal(&prederr_shuf_casewise);
+        for (size_t j = 0; j < num_samples_oob; ++j) {
+          size_t pos = i * num_samples + oob_sampleIDs[j];
+          forest_importance_casewise[pos] += prederr_shuf_casewise[j] - prederr_normal_casewise[j];
+        }
+      } else {
+        accuracy_permuted = computePredictionAccuracyInternal(NULL);
+      }
+  
+      double accuracy_difference = accuracy_normal - accuracy_permuted;
+      forest_importance[i] += accuracy_difference;
+  
+      // Compute variance
+      if (importance_mode == IMP_PERM_BREIMAN) {
+        forest_variance[i] += accuracy_difference * accuracy_difference;
+      } else if (importance_mode == IMP_PERM_LIAW) {
+        forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
+      }
     }
   }
 }
