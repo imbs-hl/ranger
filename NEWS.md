@@ -1,4 +1,7 @@
 
+# ranger 0.13.4
+* Allow split.select.weights and always.split.variables together
+
 # ranger 0.13.3
 * Faster permutation variable importance for high dimensional data (thanks to Roman Hornung)
 

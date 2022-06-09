@@ -50,6 +50,7 @@
 ##' In \code{split.select.weights}, weights do not need to sum up to 1, they will be normalized later. 
 ##' The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 ##' Names of the \code{split.select.weights} vector are ignored.
+##' Weights assigned by \code{split.select.weights} to variables in \code{always.split.variables} are ignored. 
 ##' The usage of \code{split.select.weights} can increase the computation times for large forests.
 ##'
 ##' Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
@@ -102,7 +103,7 @@
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
-##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
+##' @param split.select.weights Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
@@ -666,10 +667,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     use.always.split.variables <- FALSE
   } else {
     use.always.split.variables <- TRUE
-  }
-  
-  if (use.split.select.weights && use.always.split.variables) {
-    stop("Error: Please use only one option of split.select.weights and always.split.variables.")
   }
   
   ## Splitting rule

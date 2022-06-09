@@ -81,7 +81,7 @@ ranger(
 
 \item{minprop}{For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.}
 
-\item{split.select.weights}{Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
+\item{split.select.weights}{Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 
 \item{always.split.variables}{Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.}
 
@@ -173,6 +173,7 @@ Variables selected with \code{always.split.variables} are tried additionally to 
 In \code{split.select.weights}, weights do not need to sum up to 1, they will be normalized later. 
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 Names of the \code{split.select.weights} vector are ignored.
+Weights assigned by \code{split.select.weights} to variables in \code{always.split.variables} are ignored. 
 The usage of \code{split.select.weights} can increase the computation times for large forests.
 
 Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 

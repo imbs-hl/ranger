@@ -964,6 +964,12 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     this->split_select_weights.clear();
     this->split_select_weights.resize(num_trees, std::vector<double>(num_weights));
   }
+  
+  // Deterministic varIDs 
+  std::vector<bool> is_deterministic(num_weights, false);
+  for (size_t i = 0; i < deterministic_varIDs.size(); ++i) {
+    is_deterministic[i] = true;
+  }
 
   // Split up in deterministic and weighted variables, ignore zero weights
   for (size_t i = 0; i < split_select_weights.size(); ++i) {
@@ -977,7 +983,7 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
     for (size_t j = 0; j < split_select_weights[i].size(); ++j) {
       double weight = split_select_weights[i][j];
 
-      if (weight == 0) {
+      if (weight == 0 || is_deterministic[j]) {
         ++num_zero_weights;
       } else if (weight < 0 || weight > 1) {
         throw std::runtime_error("One or more split select weights not in range [0,1].");
