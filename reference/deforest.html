@@ -31,7 +31,7 @@ https://github.com/imbs-hl/ranger/issues/568.'><!-- mathjax --><script src="http
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.4</span>
       </span>
     </div>
 
@@ -92,18 +92,27 @@ hence the purpose of this function. A complete example using
     <dl><dt>object</dt>
 <dd><p>A fitted random forest (e.g., a <code><a href="ranger.html">ranger</a></code>
 object).</p></dd>
+
+
 <dt>which.trees</dt>
 <dd><p>Vector giving the indices of the trees to remove.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional (optional) arguments. (Currently ignored.)</p></dd>
+
+
 <dt>warn</dt>
 <dd><p>Logical indicating whether or not to warn users that some of the 
 standard output of a typical <code><a href="ranger.html">ranger</a></code> object or no longer 
 available after deforestation. Default is <code>TRUE</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>"deforest.ranger"</code>; essentially, a 
+    
+
+<p>An object of class <code>"deforest.ranger"</code>; essentially, a 
 <code><a href="ranger.html">ranger</a></code> object with certain components replaced with 
 <code>NA</code>s (e.g., out-of-bag (OOB) predictions, variable importance scores 
 (if requested), and OOB-based error metrics).</p>
@@ -163,7 +172,7 @@ Technical report, Stanford University, Department of Statistics.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

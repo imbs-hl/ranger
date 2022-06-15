@@ -18,7 +18,7 @@ Instead of using equal probabilities, the cases are weighted according to their 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.4</span>
       </span>
     </div>
 
@@ -69,20 +69,33 @@ Instead of using equal probabilities, the cases are weighted according to their 
     <h2>Arguments</h2>
     <dl><dt>formula</dt>
 <dd><p>Object of class <code>formula</code> or <code>character</code> describing the model to fit.</p></dd>
+
+
 <dt>training_data</dt>
 <dd><p>Training data of class <code>data.frame</code>.</p></dd>
+
+
 <dt>test_data</dt>
 <dd><p>Test data of class <code>data.frame</code>.</p></dd>
+
+
 <dt>params1</dt>
 <dd><p>Parameters for the proximity random forest grown in the first step.</p></dd>
+
+
 <dt>params2</dt>
 <dd><p>Parameters for the prediction random forests grown in the second step.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Logical indicating whether or not to print computation progress.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Predictions for the test dataset.</p>
+    
+
+<p>Predictions for the test dataset.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -115,12 +128,12 @@ Instead of using equal probabilities, the cases are weighted according to their 
 <span class="r-in">     params2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>num.trees <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] setosa     setosa     setosa     setosa     setosa     setosa    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] setosa     setosa     setosa     setosa     setosa     setosa    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] versicolor versicolor versicolor versicolor versicolor versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] versicolor versicolor versicolor versicolor versicolor versicolor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] setosa     setosa     setosa     setosa     setosa     setosa    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] setosa     setosa     setosa     versicolor versicolor versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [25] versicolor versicolor versicolor versicolor versicolor versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] versicolor versicolor virginica  virginica  virginica  virginica </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] virginica  virginica  virginica  virginica  virginica  virginica </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] virginica  virginica  virginica  virginica  virginica  virginica </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] versicolor versicolor versicolor versicolor versicolor versicolor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [37] versicolor virginica  virginica  virginica  virginica  virginica </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [43] virginica  virginica  virginica  versicolor virginica  virginica </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [49] virginica  virginica </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: setosa versicolor virginica</span>
 <span class="r-in"></span>
@@ -138,7 +151,7 @@ Instead of using equal probabilities, the cases are weighted according to their 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

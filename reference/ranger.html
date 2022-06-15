@@ -20,7 +20,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.4</span>
       </span>
     </div>
 
@@ -106,124 +106,222 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
     <h2>Arguments</h2>
     <dl><dt>formula</dt>
 <dd><p>Object of class <code>formula</code> or <code>character</code> describing the model to fit. Interaction terms supported only for numerical variables.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>Training data of class <code>data.frame</code>, <code>matrix</code>, <code>dgCMatrix</code> (Matrix) or <code>gwaa.data</code> (GenABEL).</p></dd>
+
+
 <dt>num.trees</dt>
 <dd><p>Number of trees.</p></dd>
+
+
 <dt>mtry</dt>
 <dd><p>Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. Alternatively, a single argument function returning an integer, given the number of independent variables.</p></dd>
+
+
 <dt>importance</dt>
 <dd><p>Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see <code>splitrule</code>) for survival.</p></dd>
+
+
 <dt>write.forest</dt>
 <dd><p>Save <code>ranger.forest</code> object, required for prediction. Set to <code>FALSE</code> to reduce memory usage if no prediction intended.</p></dd>
+
+
 <dt>probability</dt>
 <dd><p>Grow a probability forest as in Malley et al. (2012).</p></dd>
+
+
 <dt>min.node.size</dt>
 <dd><p>Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.</p></dd>
+
+
 <dt>max.depth</dt>
 <dd><p>Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).</p></dd>
+
+
 <dt>replace</dt>
 <dd><p>Sample with replacement.</p></dd>
+
+
 <dt>sample.fraction</dt>
 <dd><p>Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values.</p></dd>
+
+
 <dt>case.weights</dt>
 <dd><p>Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.</p></dd>
+
+
 <dt>class.weights</dt>
 <dd><p>Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.</p></dd>
+
+
 <dt>splitrule</dt>
 <dd><p>Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".</p></dd>
+
+
 <dt>num.random.splits</dt>
 <dd><p>For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.</p></dd>
+
+
 <dt>alpha</dt>
 <dd><p>For "maxstat" splitrule: Significance threshold to allow splitting.</p></dd>
+
+
 <dt>minprop</dt>
 <dd><p>For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.</p></dd>
+
+
 <dt>split.select.weights</dt>
-<dd><p>Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.</p></dd>
+<dd><p>Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.</p></dd>
+
+
 <dt>always.split.variables</dt>
 <dd><p>Character vector with variable names to be always selected in addition to the <code>mtry</code> variables tried for splitting.</p></dd>
+
+
 <dt>respect.unordered.factors</dt>
 <dd><p>Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.</p></dd>
+
+
 <dt>scale.permutation.importance</dt>
 <dd><p>Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.</p></dd>
+
+
 <dt>local.importance</dt>
 <dd><p>Calculate and return local importance values as in (Breiman 2001). Only applicable if <code>importance</code> is set to 'permutation'.</p></dd>
+
+
 <dt>regularization.factor</dt>
 <dd><p>Regularization factor (gain penalization), either a vector of length p or one value for all variables.</p></dd>
+
+
 <dt>regularization.usedepth</dt>
 <dd><p>Consider the depth in regularization.</p></dd>
+
+
 <dt>keep.inbag</dt>
 <dd><p>Save how often observations are in-bag in each tree.</p></dd>
+
+
 <dt>inbag</dt>
 <dd><p>Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.</p></dd>
+
+
 <dt>holdout</dt>
 <dd><p>Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.</p></dd>
+
+
 <dt>quantreg</dt>
 <dd><p>Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set <code>keep.inbag = TRUE</code> to prepare out-of-bag quantile prediction.</p></dd>
+
+
 <dt>oob.error</dt>
 <dd><p>Compute OOB prediction error. Set to <code>FALSE</code> to save computation time, e.g. for large survival forests.</p></dd>
+
+
 <dt>num.threads</dt>
 <dd><p>Number of threads. Default is number of CPUs available.</p></dd>
+
+
 <dt>save.memory</dt>
 <dd><p>Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Show computation status and estimated runtime.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>Random seed. Default is <code>NULL</code>, which generates the seed from <code>R</code>. Set to <code>0</code> to ignore the <code>R</code> seed.</p></dd>
+
+
 <dt>dependent.variable.name</dt>
 <dd><p>Name of dependent variable, needed if no formula given. For survival forests this is the time variable.</p></dd>
+
+
 <dt>status.variable.name</dt>
 <dd><p>Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.</p></dd>
+
+
 <dt>classification</dt>
 <dd><p>Set to <code>TRUE</code> to grow a classification forest. Only needed if the data is a matrix or the response numeric.</p></dd>
+
+
 <dt>x</dt>
 <dd><p>Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code> object or a matrix with time and status.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Further arguments passed to or from other methods (currently ignored).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Object of class <code>ranger</code> with elements</p>
+    
+
+<p>Object of class <code>ranger</code> with elements</p>
 <dl><dt><code>forest</code></dt>
 <dd><p>Saved forest (If write.forest set to TRUE). Note that the variable IDs in the <code>split.varIDs</code> object do not necessarily represent the column number in R.</p></dd>
-<dt><code>predictions</code></dt>
+
+  <dt><code>predictions</code></dt>
 <dd><p>Predicted classes/values, based on out of bag samples (classification and regression only).</p></dd>
-<dt><code>variable.importance</code></dt>
+
+  <dt><code>variable.importance</code></dt>
 <dd><p>Variable importance for each independent variable.</p></dd>
-<dt><code>variable.importance.local</code></dt>
+
+  <dt><code>variable.importance.local</code></dt>
 <dd><p>Variable importance for each independent variable and each sample, if <code>local.importance</code> is set to TRUE and <code>importance</code> is set to 'permutation'.</p></dd>
-<dt><code>prediction.error</code></dt>
+
+  <dt><code>prediction.error</code></dt>
 <dd><p>Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.</p></dd>
-<dt><code>r.squared</code></dt>
+
+  <dt><code>r.squared</code></dt>
 <dd><p>R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.</p></dd>
-<dt><code>confusion.matrix</code></dt>
+
+  <dt><code>confusion.matrix</code></dt>
 <dd><p>Contingency table for classes and predictions based on out of bag samples (classification only).</p></dd>
-<dt><code>unique.death.times</code></dt>
+
+  <dt><code>unique.death.times</code></dt>
 <dd><p>Unique death times (survival only).</p></dd>
-<dt><code>chf</code></dt>
+
+  <dt><code>chf</code></dt>
 <dd><p>Estimated cumulative hazard function for each sample (survival only).</p></dd>
-<dt><code>survival</code></dt>
+
+  <dt><code>survival</code></dt>
 <dd><p>Estimated survival function for each sample (survival only).</p></dd>
-<dt><code>call</code></dt>
+
+  <dt><code>call</code></dt>
 <dd><p>Function call.</p></dd>
-<dt><code>num.trees</code></dt>
+
+  <dt><code>num.trees</code></dt>
 <dd><p>Number of trees.</p></dd>
-<dt><code>num.independent.variables</code></dt>
+
+  <dt><code>num.independent.variables</code></dt>
 <dd><p>Number of independent variables.</p></dd>
-<dt><code>mtry</code></dt>
+
+  <dt><code>mtry</code></dt>
 <dd><p>Value of mtry used.</p></dd>
-<dt><code>min.node.size</code></dt>
+
+  <dt><code>min.node.size</code></dt>
 <dd><p>Value of minimal node size used.</p></dd>
-<dt><code>treetype</code></dt>
+
+  <dt><code>treetype</code></dt>
 <dd><p>Type of forest/tree. classification, regression or survival.</p></dd>
-<dt><code>importance.mode</code></dt>
+
+  <dt><code>importance.mode</code></dt>
 <dd><p>Importance mode used.</p></dd>
-<dt><code>num.samples</code></dt>
+
+  <dt><code>num.samples</code></dt>
 <dd><p>Number of samples.</p></dd>
-<dt><code>inbag.counts</code></dt>
+
+  <dt><code>inbag.counts</code></dt>
 <dd><p>Number of times the observations are in-bag in the trees.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -244,6 +342,7 @@ Variables selected with <code>always.split.variables</code> are tried additional
 In <code>split.select.weights</code>, weights do not need to sum up to 1, they will be normalized later. 
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 Names of the <code>split.select.weights</code> vector are ignored.
+Weights assigned by <code>split.select.weights</code> to variables in <code>always.split.variables</code> are ignored. 
 The usage of <code>split.select.weights</code> can increase the computation times for large forests.</p>
 <p>Unordered factor covariates can be handled in 3 different ways by using <code>respect.unordered.factors</code>: 
 For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
@@ -325,7 +424,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Prediction</span></span>
 <span class="r-in"><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span>
@@ -336,9 +435,9 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         15          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         13         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          2        19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         17          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         16         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          0        16</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Quantile regression forest</span></span>
 <span class="r-in"><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -347,16 +446,16 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.3          27.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          10.4          14.3          19.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          27.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5          21.0          22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          21.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Variable importance</span></span>
 <span class="r-in"><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">rg.iris</span><span class="op">$</span><span class="va">variable.importance</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length  Sepal.Width Petal.Length  Petal.Width </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    10.209901     2.176941    42.367154    44.466376 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8.521839     2.247467    43.750396    44.764832 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Survival forest</span></span>
 <span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
@@ -380,7 +479,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"><span class="fu">ranger</span><span class="op">(</span>y <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">5</span><span class="op">]</span>, x <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="op">-</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -395,7 +494,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             5.33 % </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"><span class="co">## Use GenABEL interface to read Plink data into R and grow a classification forest</span></span>
@@ -421,7 +520,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

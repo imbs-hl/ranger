@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.4</span>
       </span>
     </div>
 
@@ -74,32 +74,59 @@
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>Ranger <code>ranger</code> object.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>New test data of class <code>data.frame</code> or <code>gwaa.data</code> (GenABEL).</p></dd>
+
+
 <dt>predict.all</dt>
 <dd><p>Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).</p></dd>
+
+
 <dt>num.trees</dt>
 <dd><p>Number of trees used for prediction. The first <code>num.trees</code> in the forest are used.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.</p></dd>
+
+
 <dt>se.method</dt>
 <dd><p>Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.</p></dd>
+
+
 <dt>quantiles</dt>
 <dd><p>Vector of quantiles for quantile prediction. Set <code>type = 'quantiles'</code> to use.</p></dd>
+
+
 <dt>what</dt>
 <dd><p>User specified function for quantile prediction used instead of <code>quantile</code>. Must return numeric vector, see examples.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>Random seed. Default is <code>NULL</code>, which generates the seed from <code>R</code>. Set to <code>0</code> to ignore the <code>R</code> seed. The seed is used in case of ties in classification mode.</p></dd>
+
+
 <dt>num.threads</dt>
 <dd><p>Number of threads. Default is number of CPUs available.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Verbose output on or off.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further arguments passed to or from other methods.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Object of class <code>ranger.prediction</code> with elements</p><table class="table table"><tr><td><code>predictions</code></td><td>Predicted classes/values (only for classification and regression)</td></tr><tr><td><code>unique.death.times</code></td><td>Unique death times (only for survival).</td></tr><tr><td><code>chf</code></td><td>Estimated cumulative hazard function for each sample (only for survival).</td></tr><tr><td><code>survival</code></td><td>Estimated survival function for each sample (only for survival).</td></tr><tr><td><code>num.trees</code></td><td>Number of trees.</td></tr><tr><td><code>num.independent.variables</code></td><td>Number of independent variables.</td></tr><tr><td><code>treetype</code></td><td>Type of forest/tree. Classification, regression or survival.</td></tr><tr><td><code>num.samples</code></td><td>Number of samples.</td></tr></table></div>
+    
+
+<p>Object of class <code>ranger.prediction</code> with elements</p>
+<p></p>
+<table class="table table"><tr><td><code>predictions</code></td><td>Predicted classes/values (only for classification and regression)</td></tr><tr><td><code>unique.death.times</code></td><td>Unique death times (only for survival).</td></tr><tr><td><code>chf</code></td><td>Estimated cumulative hazard function for each sample (only for survival).</td></tr><tr><td><code>survival</code></td><td>Estimated survival function for each sample (only for survival).</td></tr><tr><td><code>num.trees</code></td><td>Number of trees.</td></tr><tr><td><code>num.independent.variables</code></td><td>Number of independent variables.</td></tr><tr><td><code>treetype</code></td><td>Type of forest/tree. Classification, regression or survival.</td></tr><tr><td><code>num.samples</code></td><td>Number of samples.</td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
     <p>For <code>type = 'response'</code> (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
@@ -144,7 +171,7 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
 <span class="r-in"><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">iris.train</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">train.idx</span>, <span class="op">]</span></span>
 <span class="r-in"><span class="va">iris.test</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">train.idx</span>, <span class="op">]</span></span>
@@ -155,17 +182,17 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         16          0         0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         19         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          0        14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          3        11</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Quantile regression forest</span></span>
 <span class="r-in"><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span>, quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          24.4          32.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          15.2          30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          15.2          27.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5          21.0          22.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
 <span class="r-in"></span>
@@ -175,12 +202,12 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in">                what <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 27.3 21.5 24.4 21.0 27.3 27.3 22.8 21.0 22.8  30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 21.5 30.4 22.8 22.8 33.9 17.8 33.9 27.3 33.9  21.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 21.0 17.8 14.3 16.4 18.7 22.8 15.2 15.5 32.4  13.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 13.3 21.0 21.0 21.0 21.0 21.0 22.8 21.0 21.5  21.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 17.8 13.3 13.3 17.8 14.3 14.7 14.3 14.3 14.3  21.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 13.3 27.3 21.0 24.4 17.8 21.0 33.9 21.0 22.8  22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 30.4 32.4 21.0 32.4 30.4 32.4 30.4 22.8 22.8  27.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 22.8 22.8 27.3 21.0 21.0 33.9 21.0 21.0 32.4  21.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 13.3 22.8 27.3 13.3 18.7 14.3 15.2 21.0 13.3  19.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 21.0 21.0 15.2 21.0 21.0 22.8 22.8 22.8 22.8  21.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 13.3 14.3 14.3 10.4 14.3 13.3 10.4 15.5 19.2  19.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 27.3 21.5 22.8 33.9 30.4 22.8 21.0 22.8 21.4  22.8</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
@@ -196,7 +223,7 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

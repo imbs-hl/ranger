@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.4</span>
       </span>
     </div>
 
@@ -73,30 +73,55 @@
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>Ranger <code>ranger.forest</code> object.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>New test data of class <code>data.frame</code> or <code>gwaa.data</code> (GenABEL).</p></dd>
+
+
 <dt>predict.all</dt>
 <dd><p>Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).</p></dd>
+
+
 <dt>num.trees</dt>
 <dd><p>Number of trees used for prediction. The first <code>num.trees</code> in the forest are used.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.</p></dd>
+
+
 <dt>se.method</dt>
 <dd><p>Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>Random seed. Default is <code>NULL</code>, which generates the seed from <code>R</code>. Set to <code>0</code> to ignore the <code>R</code> seed. The seed is used in case of ties in classification mode.</p></dd>
+
+
 <dt>num.threads</dt>
 <dd><p>Number of threads. Default is number of CPUs available.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Verbose output on or off.</p></dd>
+
+
 <dt>inbag.counts</dt>
 <dd><p>Number of times the observations are in-bag in the trees.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further arguments passed to or from other methods.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Object of class <code>ranger.prediction</code> with elements</p><table class="table table"><tr><td><code>predictions</code></td><td>Predicted classes/values (only for classification and regression)</td></tr><tr><td><code>unique.death.times</code></td><td>Unique death times (only for survival).</td></tr><tr><td><code>chf</code></td><td>Estimated cumulative hazard function for each sample (only for survival).</td></tr><tr><td><code>survival</code></td><td>Estimated survival function for each sample (only for survival).</td></tr><tr><td><code>num.trees</code></td><td>Number of trees.</td></tr><tr><td><code>num.independent.variables</code></td><td>Number of independent variables.</td></tr><tr><td><code>treetype</code></td><td>Type of forest/tree. Classification, regression or survival.</td></tr><tr><td><code>num.samples</code></td><td>Number of samples.</td></tr></table></div>
+    
+
+<p>Object of class <code>ranger.prediction</code> with elements</p>
+<p></p>
+<table class="table table"><tr><td><code>predictions</code></td><td>Predicted classes/values (only for classification and regression)</td></tr><tr><td><code>unique.death.times</code></td><td>Unique death times (only for survival).</td></tr><tr><td><code>chf</code></td><td>Estimated cumulative hazard function for each sample (only for survival).</td></tr><tr><td><code>survival</code></td><td>Estimated survival function for each sample (only for survival).</td></tr><tr><td><code>num.trees</code></td><td>Number of trees.</td></tr><tr><td><code>num.independent.variables</code></td><td>Number of independent variables.</td></tr><tr><td><code>treetype</code></td><td>Type of forest/tree. Classification, regression or survival.</td></tr><tr><td><code>num.samples</code></td><td>Number of samples.</td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
     <p>For <code>type = 'response'</code> (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
@@ -134,7 +159,7 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>
