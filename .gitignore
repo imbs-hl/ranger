@@ -6,3 +6,5 @@ ranger.Rcheck/
 .project
 .cproject
 docs
+ranger*.tar.gz
+ranger*.tgz

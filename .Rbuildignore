@@ -10,3 +10,6 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^ranger\.Rcheck$
+^ranger.*\.tar\.gz$
+^ranger.*\.tgz$
