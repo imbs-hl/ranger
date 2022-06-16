@@ -71,7 +71,7 @@ predictions.ranger.prediction <- function(x, ...) {
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
 ##' @export
-predictions.ranger<- function(x, ...) {
+predictions.ranger <- function(x, ...) {
   if (!inherits(x, "ranger")) {
     stop("Object ist no ranger object.")
   }
@@ -91,3 +91,21 @@ predictions.ranger<- function(x, ...) {
     stop("Unknown tree type.")
   }
 }
+
+##' @export
+as.data.frame.ranger.prediction <- function(x, ...) {
+  if (x$treetype == "Survival") {
+    df <- data.frame(x$survival)
+    colnames(df) <- paste0("time=", x$unique.death.times)
+  } else if (x$treetype == "Probability estimation") {
+    df <- data.frame(x$predictions)
+  } else {
+    df <- data.frame(prediction = x$predictions)
+  }
+  
+  if (!is.null(x$se)) {
+    df$se <- x$se
+  }
+  
+  df
+} 
