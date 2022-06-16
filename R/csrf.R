@@ -83,7 +83,7 @@ csrf <- function(formula, training_data, test_data, params1 = list(), params2 = 
     }
     
     ## Compute weights from first RF
-    num.same.node <- rowSums(terminal.nodeIDs.test[i, ] == terminal.nodeIDs.train)
+    num.same.node <- colSums(terminal.nodeIDs.test[i, ] == t(terminal.nodeIDs.train))
     weights <- num.same.node / sum(num.same.node)
     
     ## Grow weighted RF

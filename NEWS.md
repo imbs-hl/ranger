@@ -1,4 +1,7 @@
 
+# ranger 0.13.5
+* Fix weight calculation in case-specific RF (csrf())
+
 # ranger 0.13.4
 * Allow split.select.weights and always.split.variables together
 
