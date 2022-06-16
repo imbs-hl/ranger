@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.13.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.14.0</span>
       </span>
     </div>
 
@@ -180,9 +180,9 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         22          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         13         2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          1        12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         17          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         13         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          4        16</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Quantile regression forest</span></span>
 <span class="r-in"><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -191,7 +191,7 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          15.5          27.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          30.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
@@ -202,12 +202,12 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in">                what <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 32.4 27.3 22.8 22.8 21.4 22.8 27.3 19.2 21.0  33.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 22.8 22.8 33.9 21.0 32.4 33.9 21.0 21.0 21.4  22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 14.3 14.7 30.4 13.3 16.4 10.4 21.5 15.2 17.8  22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 21.0 14.3 21.0 22.8 27.3 24.4 22.8 19.2 13.3  21.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 15.5 21.0 14.7 10.4 17.8 19.2 21.0 14.3 10.4  14.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 24.4 21.0 19.2 32.4 17.8 21.5 32.4 19.2 22.8  21.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 21.0 27.3 27.3 27.3 22.8 22.8 21.0 27.3 22.8  22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 27.3 33.9 22.8 22.8 21.5 30.4 22.8 24.4 22.8  21.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 14.7 13.3 27.3 16.4 14.7 13.3 21.0 21.4 21.0  32.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 22.8 21.0 21.0 14.3 21.0 21.4 22.8 15.5 21.0  15.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 13.3 21.0 13.3 13.3 14.3 15.5 10.4 14.7 13.3  14.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 21.0 21.0 21.5 22.8 24.4 22.8 21.0 21.0 22.8  22.8</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
