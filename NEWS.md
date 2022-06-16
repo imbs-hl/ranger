@@ -1,4 +1,7 @@
 
+# ranger 0.14.0
+* New CRAN version
+
 # ranger 0.13.5
 * Fix weight calculation in case-specific RF (csrf())
 * Add as.data.frame() method for predictions
