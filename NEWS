@@ -1,5 +1,13 @@
 
-##### Version 0.13
+##### Version 0.14.0
+* Faster permutation variable importance for high dimensional data (thanks to Roman Hornung)
+* Add deforest() function to remove trees from ensemble
+* Allow split.select.weights and always.split.variables together
+* Add as.data.frame() method for predictions
+* Fix weight calculation in case-specific RF (csrf())
+* Fix cross compiling for Windows
+
+##### Version 0.13.0
 * Faster quantile prediction
 * Add ... argument to ranger()
 * Bug fixes
