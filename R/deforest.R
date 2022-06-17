@@ -37,7 +37,7 @@
 #' @references 
 #' Friedman, J. and Popescu, B. (2003). Importance sampled learning ensembles, 
 #' Technical report, Stanford University, Department of Statistics.
-#' \url{https://statweb.stanford.edu/~jhf/ftp/isle.pdf}.
+#' \url{https://jerryfriedman.su.domains/ftp/isle.pdf}.
 #' 
 #' @rdname deforest
 #' 
