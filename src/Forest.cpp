@@ -343,7 +343,7 @@ void Forest::writeOutput() {
       *verbose_out << std::endl;
     }
 
-    if (!split_select_weights.empty() & !split_select_weights[0].empty()) {
+    if (!split_select_weights.empty() && !split_select_weights[0].empty()) {
       if (verbose_out) {
         *verbose_out
             << "Warning: Split select weights used. Variable importance measures are only comparable for variables with equal weights."
