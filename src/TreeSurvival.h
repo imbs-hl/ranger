@@ -21,7 +21,7 @@ namespace ranger {
 
 class TreeSurvival: public Tree {
 public:
-  TreeSurvival(std::vector<double>* unique_timepoints, std::vector<size_t>* response_timepointIDs);
+  TreeSurvival(std::vector<double>* unique_timepoints, std::vector<size_t>* response_timepointIDs, size_t time_interest_index);
 
   // Create from loaded forest
   TreeSurvival(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -81,6 +81,9 @@ private:
       double& best_logrank);
   void findBestSplitValueLogRankUnordered(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
       double& best_logrank);
+  
+  void findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
+                               double& best_brier);
 
   bool findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void findBestSplitValueExtraTrees(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
@@ -108,6 +111,9 @@ private:
   // Fields to save to while tree growing
   std::vector<size_t> num_deaths;
   std::vector<size_t> num_samples_at_risk;
+  
+  // Time of interest (Brier splitting only)
+  size_t time_interest_index;
 };
 
 } // namespace ranger

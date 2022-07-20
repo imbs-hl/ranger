@@ -69,7 +69,8 @@ enum SplitRule {
   MAXSTAT = 4,
   EXTRATREES = 5,
   BETA = 6,
-  HELLINGER = 7
+  HELLINGER = 7,
+  BRIER = 8
 };
 
 // Prediction type

@@ -95,7 +95,7 @@ void ForestSurvival::initInternal() {
 void ForestSurvival::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, &response_timepointIDs));
+    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, &response_timepointIDs, time_interest_index));
   }
 }
 

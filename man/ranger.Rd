@@ -40,6 +40,7 @@ ranger(
   seed = NULL,
   dependent.variable.name = NULL,
   status.variable.name = NULL,
+  time.interest = "random",
   classification = NULL,
   x = NULL,
   y = NULL,
@@ -73,7 +74,7 @@ ranger(
 
 \item{class.weights}{Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.}
 
-\item{splitrule}{Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
+\item{splitrule}{Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C", "brier" or "maxstat" with default "logrank".}
 
 \item{num.random.splits}{For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.}
 
@@ -117,6 +118,8 @@ ranger(
 
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
 
+\item{time.interest}{For \code{splitrule = "brier"} the prediction horizon. Use \code{"random"} to randomly select the time of interest in each split.}
+
 \item{classification}{Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric.}
 
 \item{x}{Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.}
@@ -158,7 +161,7 @@ The tree type is determined by the type of the dependent variable.
 For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
 The Gini index is used as default splitting rule for classification.
 For regression, the estimated response variances or maximally selected rank statistics (Wright et al. 2016) can be used.
-For Survival the log-rank test, a C-index based splitting rule (Schmid et al. 2015) and maximally selected rank statistics (Wright et al. 2016) are available.
+For Survival the log-rank test, a C-index based splitting rule (Schmid et al. 2015), the Brier score and maximally selected rank statistics (Wright et al. 2016) are available.
 For all tree types, forests of extremely randomized trees (Geurts et al. 2006) can be grown.
 
 With the \code{probability} option and factor dependent variable a probability forest is grown.

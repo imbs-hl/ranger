@@ -35,7 +35,7 @@
 ##' For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
 ##' The Gini index is used as default splitting rule for classification.
 ##' For regression, the estimated response variances or maximally selected rank statistics (Wright et al. 2016) can be used.
-##' For Survival the log-rank test, a C-index based splitting rule (Schmid et al. 2015) and maximally selected rank statistics (Wright et al. 2016) are available.
+##' For Survival the log-rank test, a C-index based splitting rule (Schmid et al. 2015), the Brier score and maximally selected rank statistics (Wright et al. 2016) are available.
 ##' For all tree types, forests of extremely randomized trees (Geurts et al. 2006) can be grown.
 ##'
 ##' With the \code{probability} option and factor dependent variable a probability forest is grown.
@@ -99,7 +99,7 @@
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
-##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C", "brier" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
@@ -121,6 +121,7 @@
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
+##' @param time.interest For \code{splitrule = "brier"} the prediction horizon. Use \code{"random"} to randomly select the time of interest in each split.
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
 ##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
 ##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
@@ -225,6 +226,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
+                   time.interest = "random",
                    classification = NULL, x = NULL, y = NULL, ...) {
   
   ## Handle ... arguments
@@ -669,6 +671,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     use.always.split.variables <- TRUE
   }
   
+  if (time.interest == "random") {
+    time.interest <- -1
+  }
+  
   ## Splitting rule
   if (is.null(splitrule)) {
     if (treetype == 5) {
@@ -737,6 +743,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if ((is.factor(y) && nlevels(y) > 2) || (length(unique(y)) > 2)) {
       stop("Error: Hellinger splitrule only implemented for binary classification.")
     }  
+  } else if (splitrule == "brier" || splitrule == "Brier") {
+      if (treetype == 5) {
+        splitrule.num <- 8
+      } else {
+        stop("Error: Brier score splitrule applicable to survival data only.")
+      }
   } else {
     stop("Error: Unknown splitrule.")
   }
@@ -862,7 +874,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      time.interest)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

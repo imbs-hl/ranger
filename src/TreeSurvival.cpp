@@ -21,9 +21,9 @@
 
 namespace ranger {
 
-TreeSurvival::TreeSurvival(std::vector<double>* unique_timepoints, std::vector<size_t>* response_timepointIDs) :
+TreeSurvival::TreeSurvival(std::vector<double>* unique_timepoints, std::vector<size_t>* response_timepointIDs, size_t time_interest_index) :
     unique_timepoints(unique_timepoints), response_timepointIDs(response_timepointIDs), num_deaths(0), num_samples_at_risk(
-        0) {
+        0), time_interest_index(time_interest_index) {
   this->num_timepoints = unique_timepoints->size();
 }
 
@@ -145,6 +145,8 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
           findBestSplitValueLogRank(nodeID, varID, best_value, best_varID, best_decrease);
         } else if (splitrule == AUC || splitrule == AUC_IGNORE_TIES) {
           findBestSplitValueAUC(nodeID, varID, best_value, best_varID, best_decrease);
+        } else if (splitrule == BRIER) {
+          findBestSplitValueBrier(nodeID, varID, best_value, best_varID, best_decrease);
         }
       } else {
         findBestSplitValueLogRankUnordered(nodeID, varID, best_value, best_varID, best_decrease);
@@ -526,6 +528,92 @@ void TreeSurvival::findBestSplitValueLogRankUnordered(size_t nodeID, size_t varI
       best_value = splitID;
       best_varID = varID;
       best_logrank = logrank;
+    }
+  }
+}
+
+void TreeSurvival::findBestSplitValueBrier(size_t nodeID, size_t varID, double& best_value, size_t& best_varID,
+                                           double& best_brier) {
+  size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+  
+  // Create possible split values
+  std::vector<double> possible_split_values;
+  data->getAllValues(possible_split_values, sampleIDs, varID, start_pos[nodeID], end_pos[nodeID]);
+  
+  // Try next variable if all equal for this
+  if (possible_split_values.size() < 2) {
+    return;
+  }
+  
+  // -1 because no split possible at largest value
+  size_t num_splits = possible_split_values.size() - 1;
+  
+  // Initialize
+  std::vector<size_t> num_deaths_right_child(num_splits * num_timepoints);
+  std::vector<size_t> delta_samples_at_risk_right_child(num_splits * num_timepoints);
+  std::vector<size_t> num_samples_right_child(num_splits);
+  
+  // Random time of interest if requested
+  size_t node_time_interest_index = time_interest_index;
+  if (time_interest_index == 0) {
+    std::uniform_int_distribution<size_t> unif_dist(0, unique_timepoints->size());
+    node_time_interest_index = unif_dist(random_number_generator);
+  }
+  
+  computeChildDeathCounts(nodeID, varID, possible_split_values, num_samples_right_child,
+                          delta_samples_at_risk_right_child, num_deaths_right_child, num_splits);
+  
+  // Compute brier test for all possible splits and use best
+  for (size_t i = 0; i < num_splits; ++i) {
+    
+    // Stop if minimal node size reached
+    size_t num_samples_left_child = num_samples_node - num_samples_right_child[i];
+    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
+      continue;
+    }
+    
+    // Initialize total number at risk in right child with the total number of subjects in right child
+    size_t num_samples_at_risk_right_child = num_samples_right_child[i];
+    
+    double km1 = 1;
+    double km2 = 1;
+    
+    for (size_t t = 0; t < node_time_interest_index; ++t) {
+      size_t num_samples_at_risk_left_child = num_samples_at_risk[t] - num_samples_at_risk_right_child;
+      if (num_samples_at_risk[t] == 0) {
+        break;
+      }
+      if (num_samples_at_risk_right_child > 0) {
+        if (num_deaths_right_child[i * num_timepoints + t] > 0) {
+          // Kaplan-Meier in right child 
+          km1 *= (1 - (double) num_deaths_right_child[i * num_timepoints + t] / (double) num_samples_at_risk_right_child);
+        }
+      }
+      if (num_samples_at_risk_left_child > 0) {
+        size_t num_deaths_left_child = num_deaths[t] - num_deaths_right_child[i * num_timepoints + t];
+        if (num_samples_at_risk_left_child > 0) {
+          // Kaplan-Meier in left child 
+          km2 *= (1 - (double) num_deaths_left_child / (double) num_samples_at_risk_left_child);
+        }
+      }
+
+      // Reduce number of samples at risk for next timepoint
+      num_samples_at_risk_right_child -= delta_samples_at_risk_right_child[i * num_timepoints + t];
+    }
+    double brier = km1 * (1 - km1) + km2 * (1 - km2);
+    
+    // Regularization
+    regularize(brier, varID);
+    
+    if (brier < best_brier || best_brier < 0) {
+      best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
+      best_varID = varID;
+      best_brier = brier;
+      
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == possible_split_values[i + 1]) {
+        best_value = possible_split_values[i];
+      }
     }
   }
 }
