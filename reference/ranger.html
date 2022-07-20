@@ -20,7 +20,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.14.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.14.1</span>
       </span>
     </div>
 
@@ -59,47 +59,47 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ranger</span><span class="op">(</span>
-  formula <span class="op">=</span> <span class="cn">NULL</span>,
-  data <span class="op">=</span> <span class="cn">NULL</span>,
-  num.trees <span class="op">=</span> <span class="fl">500</span>,
-  mtry <span class="op">=</span> <span class="cn">NULL</span>,
-  importance <span class="op">=</span> <span class="st">"none"</span>,
-  write.forest <span class="op">=</span> <span class="cn">TRUE</span>,
-  probability <span class="op">=</span> <span class="cn">FALSE</span>,
-  min.node.size <span class="op">=</span> <span class="cn">NULL</span>,
-  max.depth <span class="op">=</span> <span class="cn">NULL</span>,
-  replace <span class="op">=</span> <span class="cn">TRUE</span>,
-  sample.fraction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">replace</span>, <span class="fl">1</span>, <span class="fl">0.632</span><span class="op">)</span>,
-  case.weights <span class="op">=</span> <span class="cn">NULL</span>,
-  class.weights <span class="op">=</span> <span class="cn">NULL</span>,
-  splitrule <span class="op">=</span> <span class="cn">NULL</span>,
-  num.random.splits <span class="op">=</span> <span class="fl">1</span>,
-  alpha <span class="op">=</span> <span class="fl">0.5</span>,
-  minprop <span class="op">=</span> <span class="fl">0.1</span>,
-  split.select.weights <span class="op">=</span> <span class="cn">NULL</span>,
-  always.split.variables <span class="op">=</span> <span class="cn">NULL</span>,
-  respect.unordered.factors <span class="op">=</span> <span class="cn">NULL</span>,
-  scale.permutation.importance <span class="op">=</span> <span class="cn">FALSE</span>,
-  local.importance <span class="op">=</span> <span class="cn">FALSE</span>,
-  regularization.factor <span class="op">=</span> <span class="fl">1</span>,
-  regularization.usedepth <span class="op">=</span> <span class="cn">FALSE</span>,
-  keep.inbag <span class="op">=</span> <span class="cn">FALSE</span>,
-  inbag <span class="op">=</span> <span class="cn">NULL</span>,
-  holdout <span class="op">=</span> <span class="cn">FALSE</span>,
-  quantreg <span class="op">=</span> <span class="cn">FALSE</span>,
-  oob.error <span class="op">=</span> <span class="cn">TRUE</span>,
-  num.threads <span class="op">=</span> <span class="cn">NULL</span>,
-  save.memory <span class="op">=</span> <span class="cn">FALSE</span>,
-  verbose <span class="op">=</span> <span class="cn">TRUE</span>,
-  seed <span class="op">=</span> <span class="cn">NULL</span>,
-  dependent.variable.name <span class="op">=</span> <span class="cn">NULL</span>,
-  status.variable.name <span class="op">=</span> <span class="cn">NULL</span>,
-  classification <span class="op">=</span> <span class="cn">NULL</span>,
-  x <span class="op">=</span> <span class="cn">NULL</span>,
-  y <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ranger</span><span class="op">(</span></span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num.trees <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  mtry <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  importance <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  write.forest <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  probability <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  min.node.size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max.depth <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  sample.fraction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">replace</span>, <span class="fl">1</span>, <span class="fl">0.632</span><span class="op">)</span>,</span>
+<span>  case.weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  class.weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  splitrule <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num.random.splits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  minprop <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  split.select.weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  always.split.variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  respect.unordered.factors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale.permutation.importance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  local.importance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  regularization.factor <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  regularization.usedepth <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  keep.inbag <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  inbag <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  holdout <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  quantreg <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  oob.error <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  num.threads <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  save.memory <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dependent.variable.name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  status.variable.name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  classification <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  x <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -409,8 +409,8 @@ If you compile yourself, the new RTools toolchain is required.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Classification forest with default settings</span></span>
-<span class="r-in"><span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Classification forest with default settings</span></span></span>
+<span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -424,48 +424,48 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Prediction</span></span>
-<span class="r-in"><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">iris.train</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">train.idx</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="va">iris.test</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">train.idx</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris.train</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pred.iris</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rg.iris</span>, data <span class="op">=</span> <span class="va">iris.test</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Prediction</span></span></span>
+<span class="r-in"><span><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">iris.train</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">train.idx</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">iris.test</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">train.idx</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris.train</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pred.iris</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rg.iris</span>, data <span class="op">=</span> <span class="va">iris.test</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         20          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         14         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          4        12</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Quantile regression forest</span></span>
-<span class="r-in"><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         17          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         18         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          1        14</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Quantile regression forest</span></span></span>
+<span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          23.6          32.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          16.4          30.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5          21.0          22.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Variable importance</span></span>
-<span class="r-in"><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">rg.iris</span><span class="op">$</span><span class="va">variable.importance</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Variable importance</span></span></span>
+<span class="r-in"><span><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rg.iris</span><span class="op">$</span><span class="va">variable.importance</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length  Sepal.Width Petal.Length  Petal.Width </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     8.728958     2.085315    42.826136    45.585921 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Survival forest</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    10.151545     2.104136    43.851381    43.146298 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Survival forest</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: survival</span>
-<span class="r-in"><span class="va">rg.veteran</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">veteran</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rg.veteran</span><span class="op">$</span><span class="va">unique.death.times</span>, <span class="va">rg.veteran</span><span class="op">$</span><span class="va">survival</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">rg.veteran</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">veteran</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rg.veteran</span><span class="op">$</span><span class="va">unique.death.times</span>, <span class="va">rg.veteran</span><span class="op">$</span><span class="va">survival</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ranger-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Alternative interfaces (same results)</span></span>
-<span class="r-in"><span class="fu">ranger</span><span class="op">(</span>dependent.variable.name <span class="op">=</span> <span class="st">"Species"</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Alternative interfaces (same results)</span></span></span>
+<span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span>dependent.variable.name <span class="op">=</span> <span class="st">"Species"</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -479,8 +479,8 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
-<span class="r-in"><span class="fu">ranger</span><span class="op">(</span>y <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">5</span><span class="op">]</span>, x <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="op">-</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span>y <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">5</span><span class="op">]</span>, x <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="op">-</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -494,18 +494,18 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co">## Use GenABEL interface to read Plink data into R and grow a classification forest</span></span>
-<span class="r-in"><span class="co">## The ped and map files are not included</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GenABEL</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">convert.snp.ped</span><span class="op">(</span><span class="st">"data.ped"</span>, <span class="st">"data.map"</span>, <span class="st">"data.raw"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">dat.gwaa</span> <span class="op">&lt;-</span> <span class="fu">load.gwaa.data</span><span class="op">(</span><span class="st">"data.pheno"</span>, <span class="st">"data.raw"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">phdata</span><span class="op">(</span><span class="va">dat.gwaa</span><span class="op">)</span><span class="op">$</span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu">phdata</span><span class="op">(</span><span class="va">dat.gwaa</span><span class="op">)</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">ranger</span><span class="op">(</span><span class="va">trait</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">dat.gwaa</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co">## Use GenABEL interface to read Plink data into R and grow a classification forest</span></span></span>
+<span class="r-in"><span><span class="co">## The ped and map files are not included</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GenABEL</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">convert.snp.ped</span><span class="op">(</span><span class="st">"data.ped"</span>, <span class="st">"data.map"</span>, <span class="st">"data.raw"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dat.gwaa</span> <span class="op">&lt;-</span> <span class="fu">load.gwaa.data</span><span class="op">(</span><span class="st">"data.pheno"</span>, <span class="st">"data.raw"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">phdata</span><span class="op">(</span><span class="va">dat.gwaa</span><span class="op">)</span><span class="op">$</span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu">phdata</span><span class="op">(</span><span class="va">dat.gwaa</span><span class="op">)</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span><span class="va">trait</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">dat.gwaa</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -520,7 +520,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ranger</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.14.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.14.1</span>
       </span>
     </div>
 
@@ -53,7 +53,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">treeInfo</span><span class="op">(</span><span class="va">object</span>, tree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">treeInfo</span><span class="op">(</span><span class="va">object</span>, tree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -92,56 +92,40 @@ In the "partition" mode, the <code>splitval</code> values for unordered factor a
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">treeInfo</span><span class="op">(</span><span class="va">rf</span>, <span class="fl">1</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">treeInfo</span><span class="op">(</span><span class="va">rf</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    nodeID leftChild rightChild splitvarID splitvarName splitval terminal</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0         1          2          3  Petal.Width     0.80    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0         1          2          2 Petal.Length     2.45    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       1        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       2         3          4          3  Petal.Width     1.65    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       3         5          6          2 Petal.Length     5.35    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       4         7          8          2 Petal.Length     4.85    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       5         9         10          1  Sepal.Width     2.25    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7       6        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8       7        11         12          3  Petal.Width     1.75    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9       8        13         14          2 Petal.Length     5.05    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10      9        15         16          3  Petal.Width     1.25    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       2         3          4          2 Petal.Length     4.85    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       3         5          6          3  Petal.Width     1.65    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       4         7          8          3  Petal.Width     1.70    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       5        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7       6         9         10          1  Sepal.Width     3.10    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8       7        11         12          2 Petal.Length     5.35    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9       8        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10      9        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11     10        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12     11        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13     12        17         18          0 Sepal.Length     6.05    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14     13        19         20          0 Sepal.Length     6.50    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12     11        13         14          2 Petal.Length     5.05    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13     12        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14     13        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15     14        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16     15        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17     16        21         22          2 Petal.Length     4.75    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18     17        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19     18        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20     19        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21     20        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22     21        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23     22        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    prediction</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      setosa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  versicolor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10       &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12  virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13       &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14       &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17       &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19  virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20  virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12       &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 versicolor</span>
 </code></pre></div>
     </div>
   </div>
@@ -156,7 +140,7 @@ In the "partition" mode, the <code>splitval</code> values for unordered factor a
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
