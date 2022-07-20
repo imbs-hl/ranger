@@ -51,6 +51,90 @@ test_that("Prediction for classification is factor with correct levels", {
   expect_equal(levels(ti.class.formula$prediction), levels(iris$Species))
 })
 
+test_that("Prediction for classification is same as class prediction", {
+  dat <- iris[sample(nrow(iris)), ]
+  rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 1, 
+               replace = FALSE, sample.fraction = 1)
+  pred_class <- predict(rf, dat)$predictions
+  nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  ti <- treeInfo(rf, 1)
+  pred_ti <- sapply(nodes, function(x) {
+    ti[ti$nodeID == x, "prediction"]
+  })
+  expect_equal(pred_ti, pred_class)
+})
+
+test_that("Prediction for classification is same as class prediction, new factor", {
+  dat <- iris[sample(nrow(iris)), ]
+  dat$Species <- factor(dat$Species, levels = sample(levels(dat$Species)))
+  rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 1, 
+               replace = FALSE, sample.fraction = 1)
+  pred_class <- predict(rf, dat)$predictions
+  nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  ti <- treeInfo(rf, 1)
+  pred_ti <- sapply(nodes, function(x) {
+    ti[ti$nodeID == x, "prediction"]
+  })
+  expect_equal(pred_ti, pred_class)
+})
+
+test_that("Prediction for classification is same as class prediction, unused factor levels", {
+  dat <- iris[c(101:150, 51:100), ]
+  expect_warning(rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 1, 
+    replace = FALSE, sample.fraction = 1))
+  pred_class <- predict(rf, dat)$predictions
+  nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  ti <- treeInfo(rf, 1)
+  pred_ti <- sapply(nodes, function(x) {
+    ti[ti$nodeID == x, "prediction"]
+  })
+  expect_equal(pred_ti, pred_class)
+})
+
+test_that("Prediction for probability is same as probability prediction", {
+  dat <- iris[sample(nrow(iris)), ]
+  rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 1, 
+               sample.fraction = 1, replace = FALSE, probability = TRUE)
+  ti <- treeInfo(rf)
+  pred_prob <- predict(rf, dat)$predictions
+  nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  pred_ti <- t(sapply(nodes, function(x) {
+    as.matrix(ti[ti$nodeID == x, 8:10])
+  }))
+  colnames(pred_ti) <- gsub("pred\\.", "", colnames(ti)[8:10])
+  expect_equal(pred_prob, pred_ti)
+})
+
+test_that("Prediction for probability is same as probability prediction, new factor", {
+  dat <- iris[sample(nrow(iris)), ]
+  dat$Species <- factor(dat$Species, levels = sample(levels(dat$Species)))
+  rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 1, 
+               sample.fraction = 1, replace = FALSE, probability = TRUE)
+  ti <- treeInfo(rf)
+  pred_prob <- predict(rf, dat)$predictions
+  nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  pred_ti <- t(sapply(nodes, function(x) {
+    as.matrix(ti[ti$nodeID == x, 8:10])
+  }))
+  colnames(pred_ti) <- gsub("pred\\.", "", colnames(ti)[8:10])
+  expect_equal(pred_prob, pred_ti)
+})
+
+test_that("Prediction for probability is same as probability prediction, unused factor levels", {
+  dat <- iris[c(101:150, 51:100), ]
+  dat$Species <- factor(dat$Species, levels = sample(levels(dat$Species)))
+  expect_warning(rf <- ranger(dependent.variable.name = "Species", data = dat, num.trees = 1, 
+    sample.fraction = 1, replace = FALSE, probability = TRUE))
+  ti <- treeInfo(rf)
+  pred_prob <- predict(rf, dat)$predictions
+  nodes <- predict(rf, dat, type = "terminalNodes")$predictions[, 1]
+  pred_ti <- t(sapply(nodes, function(x) {
+    as.matrix(ti[ti$nodeID == x, 8:9])
+  }))
+  colnames(pred_ti) <- gsub("pred\\.", "", colnames(ti)[8:9])
+  expect_equal(pred_prob, pred_ti)
+})
+
 test_that("Prediction for matrix classification is integer with correct values", {
   rf <- ranger(dependent.variable.name = "Species", data = data.matrix(iris), 
                num.trees = 5, classification = TRUE)
