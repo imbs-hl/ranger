@@ -354,6 +354,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Recode characters as factors and recode factors if 'order' mode
+  covariate.levels <- NULL
   if (!is.matrix(x) && !inherits(x, "Matrix") && ncol(x) > 0) {
     character.idx <- sapply(x, is.character)
     
@@ -408,13 +409,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
         ## Return reordered factor
         factor(xx, levels = levels.ordered, ordered = TRUE, exclude = NULL)
       })
-      
-      ## Save levels
-      covariate.levels <- lapply(x, levels)
     } else {
       ## Recode characters only
       x[character.idx] <- lapply(x[character.idx], factor)
     }
+    
+    ## Save levels
+    if (any(sapply(x, is.factor))) {
+      covariate.levels <- lapply(x, levels)
+    } 
   }
   
   ## If gwa mode, add snp variable names
@@ -957,8 +960,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     result$forest$treetype <- result$treetype
     class(result$forest) <- "ranger.forest"
     
-    ## In 'ordered' mode, save covariate levels
-    if (respect.unordered.factors == "order" && ncol(x) > 0) {
+    ## Save covariate levels
+    if (!is.null(covariate.levels)) {
       result$forest$covariate.levels <- covariate.levels
     }
   }
