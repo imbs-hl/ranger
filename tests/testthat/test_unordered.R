@@ -13,7 +13,7 @@ test_that("Old parameters still work", {
   rf.true <- ranger(y ~ ., data = dt, num.trees = 5, write.forest = TRUE, 
                     respect.unordered.factors = TRUE)
   
-  expect_null(rf.false$forest$covariate.levels)
+  expect_equal(rf.false$forest$covariate.levels$x, levels(factor(dt$x)))
   expect_equal(length(rf.true$forest$covariate.levels), 1)
 })
 
