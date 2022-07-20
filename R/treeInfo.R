@@ -120,16 +120,16 @@ treeInfo <- function(object, tree = 1) {
     result$prediction <- forest$split.values[[tree]]
     result$prediction[!result$terminal] <- NA
     if (!is.null(forest$levels)) {
-      result$prediction <- factor(result$prediction, levels = forest$class.values, labels = forest$levels)
+      result$prediction <- integer.to.factor(result$prediction, labels = forest$levels)
     }
   } else if (forest$treetype == "Regression") {
     result$prediction <- forest$split.values[[tree]]
     result$prediction[!result$terminal] <- NA
   } else if (forest$treetype == "Probability estimation") {
-    predictions <- matrix(nrow = nrow(result), ncol = length(forest$levels))
+    predictions <- matrix(nrow = nrow(result), ncol = length(forest$class.values))
     predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
     colnames(predictions) <- forest$levels[forest$class.values]
-    predictions <- predictions[, forest$levels, drop = FALSE]
+    predictions <- predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
     colnames(predictions) <- paste0("pred.", colnames(predictions))
     result <- data.frame(result, predictions)
   } else if (forest$treetype == "Survival") {
