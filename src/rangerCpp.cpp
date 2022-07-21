@@ -61,7 +61,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
-    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth) {
+    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth, 
+    bool treewise_importance) {
   
   Rcpp::List result;
 
@@ -152,7 +153,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
         importance_mode, min_node_size, split_select_weights, always_split_variable_names,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
-        order_snps, max_depth, regularization_factor, regularization_usedepth);
+        order_snps, max_depth, regularization_factor, regularization_usedepth, treewise_importance);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {
@@ -227,9 +228,13 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       result.push_back(forest->getMtry(), "mtry");
       result.push_back(forest->getMinNodeSize(), "min.node.size");
       if (importance_mode != IMP_NONE) {
-        result.push_back(forest->getVariableImportance(), "variable.importance");
-        if (importance_mode == IMP_PERM_CASEWISE) {
-          result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.local");
+        if (treewise_importance) {
+          result.push_back(forest->getVariableImportanceTreewise(), "variable.importance");
+        } else {
+          result.push_back(forest->getVariableImportance(), "variable.importance");
+          if (importance_mode == IMP_PERM_CASEWISE) {
+            result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.local");
+          }
         }
       }
       result.push_back(forest->getOverallPredictionError(), "prediction.error");

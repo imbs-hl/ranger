@@ -1,4 +1,7 @@
 
+# ranger 0.14.2
+* Add tree-wise variable importance
+
 # ranger 0.14.1
 * URL fix for CRAN
 
