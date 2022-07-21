@@ -108,3 +108,45 @@ test_that("Gini importance non-negative with class weights", {
                num.trees = 5, importance = "impurity", probability = TRUE)
   expect_true(all(rf$variable.importance >= 0))
 })
+
+test_that("Tree-wise importance has correct dimensions", {
+  rf <- ranger(Species ~ ., data = iris, num.trees = 5,
+               importance = "impurity", treewise.importance = TRUE)
+  expect_equal(dim(rf$variable.importance), c(rf$num.trees, rf$num.independent.variables))
+
+  rf <- ranger(Species ~ ., data = iris, num.trees = 5,
+               importance = "impurity_corrected", treewise.importance = TRUE)
+  expect_equal(dim(rf$variable.importance), c(rf$num.trees, rf$num.independent.variables))
+
+  rf <- ranger(Species ~ ., data = iris, num.trees = 5,
+               importance = "permutation", treewise.importance = TRUE)
+  expect_equal(dim(rf$variable.importance), c(rf$num.trees, rf$num.independent.variables))
+})
+
+test_that("Mean of tree-wise importance is the same as standard importance", {
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., data = iris, num.trees = 5,
+                importance = "impurity", treewise.importance = FALSE)
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., data = iris, num.trees = 5,
+                importance = "impurity", treewise.importance = TRUE)
+  expect_equal(rf1$variable.importance, colMeans(rf2$variable.importance))
+  
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., data = iris, num.trees = 5,
+                importance = "impurity_corrected", treewise.importance = FALSE)
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., data = iris, num.trees = 5,
+                importance = "impurity_corrected", treewise.importance = TRUE)
+  expect_equal(rf1$variable.importance, colMeans(rf2$variable.importance))
+  
+  set.seed(42)
+  rf1 <- ranger(Species ~ ., data = iris, num.trees = 5,
+                importance = "permutation", treewise.importance = FALSE)
+  set.seed(42)
+  rf2 <- ranger(Species ~ ., data = iris, num.trees = 5,
+                importance = "permutation", treewise.importance = TRUE)
+  expect_equal(rf1$variable.importance, colMeans(rf2$variable.importance))
+})
+
+
