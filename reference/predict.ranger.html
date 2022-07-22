@@ -171,7 +171,7 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
 <span class="r-in"><span><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">iris.train</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">train.idx</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">iris.test</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">train.idx</span>, <span class="op">]</span></span></span>
@@ -180,18 +180,18 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         20          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         12         2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          2        14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         19          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         18         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          0        12</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Quantile regression forest</span></span></span>
 <span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span>, quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0         24.40          33.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0         22.80          33.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0         22.80          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3         18.25          30.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3         17.55          27.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5         21.00          22.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3         14.30          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0         22.80          32.4</span>
@@ -202,12 +202,12 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in"><span>                what <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 22.8 21.5 27.3 22.8 21.5 27.3 30.4 22.8 30.4  19.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 22.8 22.8 30.4 27.3 22.8 22.8 21.5 27.3 30.4  33.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 21.0 27.3 22.8 21.0 33.9 14.3 19.2 21.0 13.3  32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 21.0 21.0 21.0 21.0 15.2 21.4 17.8 21.0 21.4  22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 13.3 14.3 14.3 13.3 14.3 14.7 13.3 18.7 14.3  14.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 22.8 33.9 21.0 27.3 22.8 22.8 21.0 22.8 22.8  30.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 17.8 24.4 21.0 33.9 21.5 27.3 21.5 33.9 33.9  27.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 21.5 21.0 22.8 27.3 21.0 24.4 22.8 27.3 21.0  33.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 13.3 13.3 27.3 14.3 14.3 13.3 21.0 27.3 27.3  13.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 17.3 14.3 21.0 18.7 22.8 21.0 14.3 19.2 22.8  21.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 14.7 19.2 13.3 14.3 14.3 13.3 21.0 13.3 15.2  10.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 21.5 21.0 22.8 17.8 22.8 27.3 33.9 21.5 22.8  33.9</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
