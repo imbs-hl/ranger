@@ -1,0 +1,128 @@
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ main, master ]
+
+name: cpp-build-and-test
+
+jobs:
+  test-linux-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-20.04
+            compiler: gcc-7
+          - os: ubuntu-20.04
+            compiler: gcc-8
+          - os: ubuntu-20.04
+            compiler: gcc-9
+          - os: ubuntu-20.04
+            compiler: gcc-10
+          - os: ubuntu-22.04
+            compiler: gcc-11
+          - os: ubuntu-22.04
+            compiler: gcc-12
+          - os: ubuntu-20.04
+            compiler: clang-7
+          - os: ubuntu-20.04
+            compiler: clang-8
+          - os: ubuntu-20.04
+            compiler: clang-9
+          - os: ubuntu-20.04
+            compiler: clang-10
+          - os: ubuntu-22.04
+            compiler: clang-11
+          - os: ubuntu-22.04
+            compiler: clang-12
+          - os: ubuntu-22.04
+            compiler: clang-13
+          - os: ubuntu-22.04
+            compiler: clang-14
+          - os: macos-latest
+            compiler: gcc-9
+          - os: macos-latest
+            compiler: gcc-10
+          - os: macos-latest
+            compiler: gcc-11
+          - os: macos-latest
+            compiler: clang-latest
+          - os: windows-latest
+            compiler: gcc-6.4.0
+          - os: windows-latest
+            compiler: gcc-7.3.0
+          - os: windows-latest
+            compiler: gcc-8.5.0
+          - os: windows-latest
+            compiler: gcc-9.4.0
+          - os: windows-latest
+            compiler: gcc-10.3.0
+          - os: windows-latest
+            compiler: gcc-11.2.0
+          - os: windows-latest
+            compiler: clang-12.0.1
+          - os: windows-latest
+            compiler: clang-13.0.1
+          - os: windows-latest
+            compiler: clang-14.0.5
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.compiler }})
+
+    steps:
+      # setup
+      - name: Get minimum cmake version
+        uses: lukka/get-cmake@v3.18.3
+      - name: Install compiler
+        id: install_cc
+        uses: rlalik/setup-cpp-compiler@v1.1
+        with:
+          compiler: ${{ matrix.config.compiler }}
+      - name: Check compiler
+        shell: bash
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: |
+          $CC --version
+          $CXX --version
+
+      # checkout
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # configure and compile ranger
+      - name: ranger -- Configure CMake
+        id: configure
+        working-directory: cpp_version
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: cmake -G Ninja -B build .
+      - name: ranger -- Compile
+        id: compile
+        working-directory: cpp_version/build
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: cmake --build .
+
+      # configure, compile and run tests
+      - name: Tests -- Configure CMake
+        id: configure_tests
+        working-directory: cpp_version/test
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: cmake -G Ninja -B build .
+      - name: Tests -- Compile
+        id: compile_tests
+        working-directory: cpp_version/test/build
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: cmake --build . --target runUnitTests
+      - name: Tests -- Run
+        id: run_tests
+        working-directory: cpp_version/test/build
+        run: ctest

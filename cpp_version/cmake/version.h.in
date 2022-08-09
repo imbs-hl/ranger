@@ -1,0 +1,3 @@
+#ifndef RANGER_VERSION
+#define RANGER_VERSION "@PROJECT_VERSION@"
+#endif
