@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.2)
 
 project(ranger)
 
+include (GNUInstallDirs)
+
 ## ======================================================================================##
 ## Check for C++14. For GCC this is >=4.7
 ## ======================================================================================##
@@ -54,6 +56,11 @@ file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
 option(BUILD_SHARED_LIBS "shared/static lib" OFF)
 add_library(ranger ${SOURCES})
 target_include_directories(ranger PUBLIC src/utility src/Forest src/Tree src)
+install(TARGETS ranger RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+                       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+file(GLOB_RECURSE HEADERS src/*.h)
+install (FILES ${HEADERS} DESTINATION include/ranger)
 
 ## ======================================================================================##
 ## Executable
@@ -61,3 +68,4 @@ target_include_directories(ranger PUBLIC src/utility src/Forest src/Tree src)
 add_executable(ranger-cli src/main.cpp)
 set_target_properties(ranger-cli PROPERTIES OUTPUT_NAME ranger)
 target_link_libraries(ranger-cli ranger)
+install(TARGETS ranger-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
