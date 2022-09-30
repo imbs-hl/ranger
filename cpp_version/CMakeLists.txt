@@ -24,13 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
 ## In Clang phtread flag only for compiler, not for linker. For
 ## windows use static linking
 ## ======================================================================================##
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS -pthread)
-elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -static")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-endif()
+find_package (Threads)
 
 ## ======================================================================================##
 ## Debug and release targets
@@ -55,6 +49,9 @@ ADD_CUSTOM_TARGET(release
 file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
 option(BUILD_SHARED_LIBS "shared/static lib" OFF)
 add_library(ranger ${SOURCES})
+if (Threads_FOUND)
+  target_link_libraries(ranger ${CMAKE_THREAD_LIBS_INIT})
+endif ()
 target_include_directories(ranger PUBLIC src/utility src/Forest src/Tree src)
 install(TARGETS ranger RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
                        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
