@@ -66,3 +66,9 @@ add_executable(ranger-cli src/main.cpp)
 set_target_properties(ranger-cli PROPERTIES OUTPUT_NAME ranger)
 target_link_libraries(ranger-cli ranger)
 install(TARGETS ranger-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+## ======================================================================================##
+## Test
+## ======================================================================================##
+enable_testing()
+add_test(NAME cli_help COMMAND ranger-cli --help)
