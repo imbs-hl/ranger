@@ -31,12 +31,6 @@ else()
 endif()
 
 ## ======================================================================================##
-## Subdirectories and source files
-## ======================================================================================##
-include_directories(src src/utility src/Forest src/Tree)
-file(GLOB_RECURSE SOURCES src/*.cpp)
-
-## ======================================================================================##
 ## Debug and release targets
 ## ======================================================================================##
 if(NOT CMAKE_BUILD_TYPE)
@@ -54,7 +48,16 @@ ADD_CUSTOM_TARGET(release
   )
 
 ## ======================================================================================##
+## Library
+## ======================================================================================##
+file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
+option(BUILD_SHARED_LIBS "shared/static lib" OFF)
+add_library(ranger ${SOURCES})
+target_include_directories(ranger PUBLIC src/utility src/Forest src/Tree src)
+
+## ======================================================================================##
 ## Executable
 ## ======================================================================================##
-add_executable(ranger ${SOURCES})
-
+add_executable(ranger-cli src/main.cpp)
+set_target_properties(ranger-cli PROPERTIES OUTPUT_NAME ranger)
+target_link_libraries(ranger-cli ranger)
