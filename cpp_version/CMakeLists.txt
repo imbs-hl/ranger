@@ -47,8 +47,14 @@ ADD_CUSTOM_TARGET(release
 ## Library
 ## ======================================================================================##
 file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
+if (MSVC)
+  list(APPEND SOURCES src/getopt/getopt.c)
+endif ()
 option(BUILD_SHARED_LIBS "shared/static lib" OFF)
 add_library(ranger ${SOURCES})
+if (MSVC)
+  target_include_directories(ranger PUBLIC src/getopt)
+endif ()
 if (Threads_FOUND)
   target_link_libraries(ranger ${CMAKE_THREAD_LIBS_INIT})
 endif ()
