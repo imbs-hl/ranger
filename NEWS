@@ -1,4 +1,7 @@
 
+##### Version 0.14.2
+* Add min.bucket parameter to restrict terminal node size
+
 ##### Version 0.14.0
 * Faster permutation variable importance for high dimensional data (thanks to Roman Hornung)
 * Add deforest() function to remove trees from ensemble

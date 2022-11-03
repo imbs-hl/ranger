@@ -1,4 +1,7 @@
 
+# ranger 0.14.2
+* Add min.bucket parameter to restrict terminal node size
+
 # ranger 0.14.1
 * URL fix for CRAN
 

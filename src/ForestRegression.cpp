@@ -52,6 +52,11 @@ void ForestRegression::initInternal() {
     min_node_size = DEFAULT_MIN_NODE_SIZE_REGRESSION;
   }
 
+  // Set minimal bucket size
+  if (min_bucket == 0) {
+    min_bucket = DEFAULT_MIN_BUCKET;
+  }
+
   // Error if beta splitrule used with data outside of [0,1]
   if (splitrule == BETA && !prediction_mode) {
     for (size_t i = 0; i < num_samples; ++i) {
