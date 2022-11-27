@@ -63,11 +63,11 @@ bool Data::loadFromFile(std::string filename, std::vector<std::string>& dependen
   input_file.close();
   input_file.open(filename);
 
-  // Check if comma, semicolon or whitespace seperated
+  // Check if comma, semicolon or whitespace separated
   std::string header_line;
   getline(input_file, header_line);
 
-  // Find out if comma, semicolon or whitespace seperated and call appropriate method
+  // Find out if comma, semicolon or whitespace separated and call appropriate method
   if (header_line.find(',') != std::string::npos) {
     result = loadFromFileOther(input_file, header_line, dependent_variable_names, ',');
   } else if (header_line.find(';') != std::string::npos) {
@@ -150,7 +150,7 @@ bool Data::loadFromFileWhitespace(std::ifstream& input_file, std::string header_
 }
 
 bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
-    std::vector<std::string>& dependent_variable_names, char seperator) {
+    std::vector<std::string>& dependent_variable_names, char separator) {
 
   size_t num_dependent_variables = dependent_variable_names.size();
   std::vector<size_t> dependent_varIDs;
@@ -160,7 +160,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
   std::string header_token;
   std::stringstream header_line_stream(header_line);
   size_t col = 0;
-  while (getline(header_line_stream, header_token, seperator)) {
+  while (getline(header_line_stream, header_token, separator)) {
     bool is_dependent_var = false;
     for (size_t i = 0; i < dependent_variable_names.size(); ++i) {
       if (header_token == dependent_variable_names[i]) {
@@ -187,7 +187,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
     double token;
     std::stringstream line_stream(line);
     size_t column = 0;
-    while (getline(line_stream, token_string, seperator)) {
+    while (getline(line_stream, token_string, separator)) {
       std::stringstream token_stream(token_string);
       readFromStream(token_stream, token);
 
