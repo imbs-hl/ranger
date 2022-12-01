@@ -55,7 +55,7 @@ In the C++ version type
 ./ranger --help 
 ```
 
-for a list of commands. First you need a training dataset in a file. This file should contain one header line with variable names and one line with variable values per sample (numeric only). Variable names must not contain any whitespace, comma or semicolon. Values can be seperated by whitespace, comma or semicolon but can not be mixed in one file. A typical call of ranger would be for example
+for a list of commands. First you need a training dataset in a file. This file should contain one header line with variable names and one line with variable values per sample (numeric only). Variable names must not contain any whitespace, comma or semicolon. Values can be separated by whitespace, comma or semicolon but can not be mixed in one file. A typical call of ranger would be for example
 
 ```bash
 ./ranger --verbose --file data.dat --depvarname Species --treetype 1 --ntree 1000 --nthreads 4
