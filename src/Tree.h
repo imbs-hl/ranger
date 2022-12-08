@@ -16,6 +16,7 @@
 #include <random>
 #include <iostream>
 #include <stdexcept>
+#include <map>
 
 #include "globals.h"
 #include "Data.h"
@@ -51,6 +52,10 @@ public:
 
   void computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance,
       std::vector<double>& forest_importance_casewise);
+  
+  std::vector<std::vector<double>> predictProjectedTree();
+  
+  size_t getChildID(size_t i, size_t nodeID, size_t split_varID);
 
   void appendToFile(std::ofstream& file);
   virtual void appendToFileInternal(std::ofstream& file) = 0;

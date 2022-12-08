@@ -57,7 +57,8 @@ enum ImportanceMode {
   IMP_PERM_LIAW = 4,
   IMP_PERM_RAW = 3,
   IMP_GINI_CORRECTED = 5,
-  IMP_PERM_CASEWISE = 6
+  IMP_PERM_CASEWISE = 6,
+  IMP_SOBOL_MDA = 7
 };
 const uint MAX_IMP_MODE = 6;
 

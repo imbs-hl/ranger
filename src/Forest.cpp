@@ -760,6 +760,80 @@ void Forest::computePermutationImportance() {
   }
 }
 
+// Compute the Sobol-MDA importance measures. 
+std::vector<double> Forest::computeSobolMDA(){
+  // Compute output variance.
+  double varY = computeVarianceY();
+  // Compute the output unexplained variances of the projected forests.
+  std::vector<double> SMDA = computeProjectedVariance();
+  // Subtract the unexplained variance of the original forest, and normalize with the output variance.
+  for (size_t j = 0; j < num_independent_variables; j++){
+    SMDA[j] = (SMDA[j] - overall_prediction_error)/varY;
+  }
+  return(SMDA);
+}
+
+// Compute output variance.
+double Forest::computeVarianceY(){
+  std::vector<double> y;
+  for (size_t i = 0; i < num_samples; ++i) {
+    y.push_back(data->get_y(i, 0));
+  }
+  double meanY = std::accumulate(y.begin(), y.end(), 0.0);
+  meanY = meanY/num_samples;
+  double varY = 0;
+  for (auto & z : y){
+    varY += (z - meanY)*(z - meanY);
+  }
+  varY = varY/(num_samples-1);
+  return(varY);
+}
+
+// Compute the output unexplained variances of the projected forests.
+std::vector<double> Forest::computeProjectedVariance(){
+  // Compute projected forest predictions.
+  std::vector<std::vector<double>> forest_predictions = predictProjectedForest();
+  // Compute the output unexplained variances associated with these projected predictions.
+  std::vector<double> projected_variances(num_independent_variables, 0);
+  for (size_t i = 0; i < num_samples; ++i) {
+    double y = data->get_y(i, 0);
+    for (size_t j = 0; j < num_independent_variables; ++j){
+      projected_variances[j] += (y - forest_predictions[j][i])*(y - forest_predictions[j][i]);
+    }
+  }
+  for (size_t j = 0; j < num_independent_variables; ++j){
+    projected_variances[j] = projected_variances[j]/num_samples;
+  }
+  return(projected_variances);
+}
+
+// Compute projected forest predictions.
+std::vector<std::vector<double>> Forest::predictProjectedForest(){
+  std::vector<std::vector<double>> forest_predictions_oob(num_independent_variables, std::vector<double> (num_samples, 0));
+  std::vector<double> num_oob(num_samples, 0);
+  for (size_t i = 0; i < num_trees; ++i) {
+    // Compute projected tree predictions for all input variables.
+    std::vector<std::vector<double>> tree_predictions = trees[i] -> predictProjectedTree();
+    for (size_t j = 0; j < num_independent_variables; ++j){
+      for (size_t i = 0; i < num_samples; ++i) {
+        forest_predictions_oob[j][i] += tree_predictions[j][i]; // Sum predictions of all trees.
+      }
+    }
+    // Compute the number of trees used for each oob observation prediction.
+    std::vector<size_t> oob_sampleIDs = trees[i] -> getOobSampleIDs();
+    for (auto & i : oob_sampleIDs){
+      num_oob[i] += 1;
+    }
+  }
+  // Recover average tree predictions by normalizing with the number of trees involved in each case.
+  for (size_t j = 0; j < num_independent_variables; ++j){
+    for (size_t i = 0; i < num_samples; ++i) {
+      forest_predictions_oob[j][i] = forest_predictions_oob[j][i]/num_oob[i]; 
+    }
+  }
+  return(forest_predictions_oob);
+}
+
 #ifndef OLD_WIN_R_BUILD
 void Forest::growTreesInThread(uint thread_idx, std::vector<double>* variable_importance) {
   if (thread_ranges.size() > thread_idx + 1) {

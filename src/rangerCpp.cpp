@@ -227,9 +227,13 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       result.push_back(forest->getMtry(), "mtry");
       result.push_back(forest->getMinNodeSize(), "min.node.size");
       if (importance_mode != IMP_NONE) {
-        result.push_back(forest->getVariableImportance(), "variable.importance");
-        if (importance_mode == IMP_PERM_CASEWISE) {
-          result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.local");
+        if (importance_mode == IMP_SOBOL_MDA && treetype == TREE_REGRESSION){
+          result.push_back(forest->computeSobolMDA(), "variable.importance");
+        }else{
+          result.push_back(forest->getVariableImportance(), "variable.importance");
+          if (importance_mode == IMP_PERM_CASEWISE) {
+            result.push_back(forest->getVariableImportanceCasewise(), "variable.importance.local");
+          }
         }
       }
       result.push_back(forest->getOverallPredictionError(), "prediction.error");
