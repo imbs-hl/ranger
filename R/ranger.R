@@ -110,6 +110,7 @@
 ##' @param regularization.factor Regularization factor (gain penalization), either a vector of length p or one value for all variables.
 ##' @param regularization.usedepth Consider the depth in regularization. 
 ##' @param local.importance Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.
+##' @param treewise.importance Return tree-wise variable importance, i.e. do not average over all trees but return a matrix.
 ##' @param keep.inbag Save how often observations are in-bag in each tree. 
 ##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
@@ -218,7 +219,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
-                   local.importance = FALSE, 
+                   local.importance = FALSE, treewise.importance = FALSE,
                    regularization.factor = 1, regularization.usedepth = FALSE,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, oob.error = TRUE,
@@ -578,8 +579,14 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     importance.mode <- 5
   } else if (importance == "permutation") {
     if (local.importance) {
+      if (treewise.importance) {
+        stop("Combination of tree-wise and local importance not yet implemented.")
+      }
       importance.mode <- 6
     } else if (scale.permutation.importance) {
+      if (treewise.importance) {
+        stop("Cannot scale tree-wise importance values.")
+      }
       importance.mode <- 2
     } else {
       importance.mode <- 3
@@ -865,7 +872,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      treewise.importance)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -873,20 +881,26 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   ## Prepare results
   if (importance.mode != 0) {
-    names(result$variable.importance) <- all.independent.variable.names
-    
-    if (importance.mode == 6) {
-      # process casewise vimp
-      result$variable.importance.local <-
-        matrix(
-          result$variable.importance.local,
-          byrow = FALSE,
-          ncol = length(all.independent.variable.names),
-          dimnames = list(
-            rownames(data),
-            all.independent.variable.names
+    if (treewise.importance) {
+      result$variable.importance <- do.call(rbind, result$variable.importance)
+      colnames(result$variable.importance) <- all.independent.variable.names
+      rownames(result$variable.importance) <- paste("Tree", 1:nrow(result$variable.importance))
+    } else {
+      names(result$variable.importance) <- all.independent.variable.names
+      
+      if (importance.mode == 6) {
+        # process casewise vimp
+        result$variable.importance.local <-
+          matrix(
+            result$variable.importance.local,
+            byrow = FALSE,
+            ncol = length(all.independent.variable.names),
+            dimnames = list(
+              rownames(data),
+              all.independent.variable.names
+            )
           )
-        )
+      }
     }
   }
 

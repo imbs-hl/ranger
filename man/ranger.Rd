@@ -27,6 +27,7 @@ ranger(
   respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE,
   local.importance = FALSE,
+  treewise.importance = FALSE,
   regularization.factor = 1,
   regularization.usedepth = FALSE,
   keep.inbag = FALSE,
@@ -90,6 +91,8 @@ ranger(
 \item{scale.permutation.importance}{Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.}
 
 \item{local.importance}{Calculate and return local importance values as in (Breiman 2001). Only applicable if \code{importance} is set to 'permutation'.}
+
+\item{treewise.importance}{Return tree-wise variable importance, i.e. do not average over all trees but return a matrix.}
 
 \item{regularization.factor}{Regularization factor (gain penalization), either a vector of length p or one value for all variables.}
 
