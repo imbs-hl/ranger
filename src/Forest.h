@@ -17,12 +17,10 @@
 #include <random>
 #include <ctime>
 #include <memory>
-#ifndef OLD_WIN_R_BUILD
 #include <thread>
 #include <chrono>
 #include <mutex>
 #include <condition_variable>
-#endif
 
 #include "globals.h"
 #include "Tree.h"
@@ -176,11 +174,7 @@ protected:
   void setAlwaysSplitVariables(const std::vector<std::string>& always_split_variable_names);
 
   // Show progress every few seconds
-#ifdef OLD_WIN_R_BUILD
-  void showProgress(std::string operation, clock_t start_time, clock_t& lap_time);
-#else
   void showProgress(std::string operation, size_t max_progress);
-#endif
 
   // Verbose output stream, cout if verbose==true, logfile if not
   std::ostream* verbose_out;
@@ -212,10 +206,8 @@ protected:
   // Multithreading
   uint num_threads;
   std::vector<uint> thread_ranges;
-#ifndef OLD_WIN_R_BUILD
   std::mutex mutex;
   std::condition_variable condition_variable;
-#endif
 
   std::vector<std::unique_ptr<Tree>> trees;
   std::unique_ptr<Data> data;

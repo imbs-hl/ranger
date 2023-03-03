@@ -9,3 +9,4 @@ docs
 ranger*.tar.gz
 ranger*.tgz
 revdep/*
+.vscode
