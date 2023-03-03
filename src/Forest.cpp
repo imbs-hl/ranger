@@ -888,8 +888,8 @@ void Forest::setSplitWeightVector(std::vector<std::vector<double>>& split_select
   
   // Deterministic varIDs 
   std::vector<bool> is_deterministic(num_weights, false);
-  for (size_t i = 0; i < deterministic_varIDs.size(); ++i) {
-    is_deterministic[i] = true;
+  for (auto it = deterministic_varIDs.cbegin(); it != deterministic_varIDs.cend(); ++it) {
+    is_deterministic[*it] = true;
   }
 
   // Split up in deterministic and weighted variables, ignore zero weights
