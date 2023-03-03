@@ -58,6 +58,11 @@ void ForestClassification::initInternal() {
     min_node_size = DEFAULT_MIN_NODE_SIZE_CLASSIFICATION;
   }
 
+  // Set minimal bucket size
+  if (min_bucket == 0) {
+    min_bucket = DEFAULT_MIN_BUCKET;
+  }
+
   // Create class_values and response_classIDs
   if (!prediction_mode) {
     for (size_t i = 0; i < num_samples; ++i) {

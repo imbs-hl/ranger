@@ -141,26 +141,30 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
     sum_node += data->get_y(sampleID, 0);
   }
 
-  // For all possible split variables
-  for (auto& varID : possible_split_varIDs) {
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * min_bucket) {
 
-    // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if (data->isOrderedVariable(varID)) {
+    // For all possible split variables
+    for (auto& varID : possible_split_varIDs) {
 
-      // Use memory saving method if option set
-      if (memory_saving_splitting) {
-        findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-      } else {
-        // Use faster method for both cases
-        double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-        if (q < Q_THRESHOLD) {
+      // Find best split value, if ordered consider all values as split values, else all 2-partitions
+      if (data->isOrderedVariable(varID)) {
+
+        // Use memory saving method if option set
+        if (memory_saving_splitting) {
           findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
         } else {
-          findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+          // Use faster method for both cases
+          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+          if (q < Q_THRESHOLD) {
+            findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+          } else {
+            findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+          }
         }
+      } else {
+        findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
       }
-    } else {
-      findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
     }
   }
 
@@ -243,6 +247,11 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
       break;
     }
 
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
+
     double sum_right = sum_node - sum_left;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
 
@@ -298,6 +307,11 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     size_t n_right = num_samples_node - n_left;
     if (n_right == 0) {
       break;
+    }
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
     }
 
     double sum_right = sum_node - sum_left;
@@ -376,6 +390,11 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
       }
     }
     size_t n_left = num_samples_node - n_right;
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
 
     // Sum of squares
     double sum_left = sum_node - sum_right;
@@ -510,15 +529,19 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
     sum_node += data->get_y(sampleID, 0);
   }
 
-  // For all possible split variables
-  for (auto& varID : possible_split_varIDs) {
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * min_bucket) {
+  
+    // For all possible split variables
+    for (auto& varID : possible_split_varIDs) {
 
-    // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if (data->isOrderedVariable(varID)) {
-      findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-    } else {
-      findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
-          best_decrease);
+      // Find best split value, if ordered consider all values as split values, else all 2-partitions
+      if (data->isOrderedVariable(varID)) {
+        findBestSplitValueExtraTrees(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+      } else {
+        findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
+            best_decrease);
+      }
     }
   }
 
@@ -608,6 +631,11 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
     // Stop if one child empty
     size_t n_left = num_samples_node - n_right[i];
     if (n_left == 0 || n_right[i] == 0) {
+      continue;
+    }
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right[i] < min_bucket) {
       continue;
     }
 
@@ -706,6 +734,11 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
     }
     size_t n_left = num_samples_node - n_right;
 
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
+
     // Sum of squares
     double sum_left = sum_node - sum_right;
     double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
@@ -736,9 +769,13 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
     sum_node += data->get_y(sampleID, 0);
   }
 
-  // For all possible split variables find best split value
-  for (auto& varID : possible_split_varIDs) {
-    findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * min_bucket) {
+
+    // For all possible split variables find best split value
+    for (auto& varID : possible_split_varIDs) {
+      findBestSplitValueBeta(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+    }
   }
 
   // Stop if no good split found
@@ -817,6 +854,11 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     // Stop if one child too small
     size_t n_left = num_samples_node - n_right[i];
     if (n_left < 2 || n_right[i] < 2) {
+      continue;
+    }
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right[i] < min_bucket) {
       continue;
     }
 

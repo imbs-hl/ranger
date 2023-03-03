@@ -65,6 +65,11 @@ void ForestSurvival::initInternal() {
     min_node_size = DEFAULT_MIN_NODE_SIZE_SURVIVAL;
   }
 
+  // Set minimal bucket size
+  if (min_bucket == 0) {
+    min_bucket = DEFAULT_MIN_BUCKET_SURVIVAL;
+  }
+
   // Create unique timepoints
   if (!prediction_mode) {
     std::set<double> unique_timepoint_set;

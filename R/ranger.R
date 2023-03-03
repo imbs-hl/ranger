@@ -44,8 +44,8 @@
 ##' In contrast to other implementations, each tree returns a probability estimate and these estimates are averaged for the forest probability estimate.
 ##' For details see Malley et al. (2012).
 ##'
-##' Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
-##' For survival all nodes contain at \code{min.node.size} samples. 
+##' Note that nodes with size smaller than \code{min.node.size} can occur because \code{min.node.size} is the minimal node size \emph{to split at}, as in original Random Forests.
+##' To restrict the size of terminal nodes, set \code{min.bucket}. 
 ##' Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
 ##' In \code{split.select.weights}, weights do not need to sum up to 1, they will be normalized later. 
 ##' The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
@@ -93,7 +93,8 @@
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
-##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
+##' @param min.node.size Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
+##' @param min.bucket Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types. 
 ##' @param max.depth Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
@@ -211,8 +212,8 @@
 ##' @export
 ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
-                   min.node.size = NULL, max.depth = NULL, replace = TRUE, 
-                   sample.fraction = ifelse(replace, 1, 0.632), 
+                   min.node.size = NULL, min.bucket = NULL, max.depth = NULL, 
+                   replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632), 
                    case.weights = NULL, class.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
@@ -490,11 +491,18 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Invalid value for num.threads")
   }
   
-  ## Minumum node size
+  ## Minimum node size
   if (is.null(min.node.size)) {
     min.node.size <- 0
   } else if (!is.numeric(min.node.size) || min.node.size < 0) {
     stop("Error: Invalid value for min.node.size")
+  }
+
+  ## Minimum bucket size
+  if (is.null(min.bucket)) {
+    min.bucket <- 0
+  } else if (!is.numeric(min.bucket) || min.bucket < 0) {
+    stop("Error: Invalid value for min.bucket")
   }
   
   ## Tree depth
@@ -857,7 +865,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Call Ranger
   result <- rangerCpp(treetype, x, y.mat, independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance.mode,
-                      min.node.size, split.select.weights, use.split.select.weights,
+                      min.node.size, min.bucket, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 

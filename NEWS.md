@@ -1,5 +1,6 @@
 # ranger 0.14.2
 * Switch to C++14 standard
+* Add min.bucket parameter to restrict terminal node size
 * Fix a bug with always.split.variables selecting the wrong variables
 
 # ranger 0.14.1

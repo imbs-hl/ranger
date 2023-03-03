@@ -127,14 +127,14 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
 
   computeDeathCounts(nodeID);
 
-  // Stop if maximum node size or depth reached (will check again for each child node)
+  // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     computeSurvival(nodeID);
     return true;
   }
 
   // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_node_size) {
+  if (num_samples_node >= 2 * min_bucket) {
 
     // For all possible split variables
     for (auto& varID : possible_split_varIDs) {
@@ -382,9 +382,9 @@ void TreeSurvival::findBestSplitValueLogRank(size_t nodeID, size_t varID, double
     double numerator = 0;
     double denominator_squared = 0;
 
-    // Stop if minimal node size reached
+    // Stop if minimal bucket size reached
     size_t num_samples_left_child = num_samples_node - num_samples_right_child[i];
-    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
+    if (num_samples_right_child[i] < min_bucket || num_samples_left_child < min_bucket) {
       continue;
     }
 
@@ -488,9 +488,9 @@ void TreeSurvival::findBestSplitValueLogRankUnordered(size_t nodeID, size_t varI
 
     }
 
-    // Stop if minimal node size reached
+    // Stop if minimal bucket size reached
     size_t num_samples_left_child = num_samples_node - num_samples_right_child;
-    if (num_samples_right_child < min_node_size || num_samples_left_child < min_node_size) {
+    if (num_samples_right_child < min_bucket || num_samples_left_child < min_bucket) {
       continue;
     }
 
@@ -579,9 +579,9 @@ void TreeSurvival::findBestSplitValueAUC(size_t nodeID, size_t varID, double& be
   }
 
   for (size_t i = 0; i < num_splits; ++i) {
-    // Do not consider this split point if fewer than min_node_size samples in one node
+    // Do not consider this split point if fewer than min_bucket samples in one node
     size_t num_samples_right_child = num_node_samples - num_samples_left_child[i];
-    if (num_samples_left_child[i] < min_node_size || num_samples_right_child < min_node_size) {
+    if (num_samples_left_child[i] < min_bucket || num_samples_right_child < min_bucket) {
       continue;
     } else {
       double auc = fabs((num_count[i] / 2) / num_total[i] - 0.5);
@@ -678,14 +678,14 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
 
   computeDeathCounts(nodeID);
 
-  // Stop if maximum node size or depth reached (will check again for each child node)
+  // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     computeSurvival(nodeID);
     return true;
   }
 
   // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_node_size) {
+  if (num_samples_node >= 2 * min_bucket) {
 
     // For all possible split variables
     for (auto& varID : possible_split_varIDs) {
@@ -764,7 +764,7 @@ void TreeSurvival::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, dou
 
     // Stop if minimal node size reached
     size_t num_samples_left_child = num_samples_node - num_samples_right_child[i];
-    if (num_samples_right_child[i] < min_node_size || num_samples_left_child < min_node_size) {
+    if (num_samples_right_child[i] < min_bucket || num_samples_left_child < min_bucket) {
       continue;
     }
 
@@ -893,7 +893,7 @@ void TreeSurvival::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t v
 
     // Stop if minimal node size reached
     size_t num_samples_left_child = num_samples_node - num_samples_right_child;
-    if (num_samples_right_child < min_node_size || num_samples_left_child < min_node_size) {
+    if (num_samples_right_child < min_bucket || num_samples_left_child < min_bucket) {
       continue;
     }
 

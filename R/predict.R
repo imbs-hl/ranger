@@ -219,6 +219,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   mtry <- 0
   importance <- 0
   min.node.size <- 0
+  min.bucket <- 0
   split.select.weights <- list(c(0, 0))
   use.split.select.weights <- FALSE
   always.split.variables <- c("0", "0")
@@ -264,7 +265,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Call Ranger
   result <- rangerCpp(treetype, x, y, forest$independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
-                      min.node.size, split.select.weights, use.split.select.weights,
+                      min.node.size, min.bucket, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,

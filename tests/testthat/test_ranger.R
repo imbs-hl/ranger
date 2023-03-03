@@ -348,3 +348,37 @@ test_that("mtry function error halts the ranger function", {
     ranger(Species ~ ., data = iris, mtry = function(n) stop("this is some error")), 
     "mtry function evaluation resulted in an error.")
 })
+
+test_that("min.bucket creates nodes of correct size", {
+  
+  # Size 2
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = 2, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  smallest_node <- min(sapply(1:ncol(pred), function(i) {
+    min(table(pred[inbag[, i], i]))
+  }))
+  expect_gte(smallest_node, 2)
+  
+  # Size 10
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = 10, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  smallest_node <- min(sapply(1:ncol(pred), function(i) {
+    min(table(pred[inbag[, i], i]))
+  }))
+  expect_gte(smallest_node, 10)
+  
+  # Random size
+  min.bucket <- round(runif(1, 1, 40))
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = min.bucket, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  smallest_node <- min(sapply(1:ncol(pred), function(i) {
+    min(table(pred[inbag[, i], i]))
+  }))
+  expect_gte(smallest_node, min.bucket)
+})
