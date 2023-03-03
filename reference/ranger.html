@@ -68,6 +68,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 <span>  write.forest <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  probability <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  min.node.size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  min.bucket <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max.depth <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  sample.fraction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">replace</span>, <span class="fl">1</span>, <span class="fl">0.632</span><span class="op">)</span>,</span>
@@ -133,7 +134,11 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 
 
 <dt>min.node.size</dt>
-<dd><p>Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.</p></dd>
+<dd><p>Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.</p></dd>
+
+
+<dt>min.bucket</dt>
+<dd><p>Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types.</p></dd>
 
 
 <dt>max.depth</dt>
@@ -336,8 +341,8 @@ Here, the node impurity is used for splitting, as in classification forests.
 Predictions are class probabilities for each sample.
 In contrast to other implementations, each tree returns a probability estimate and these estimates are averaged for the forest probability estimate.
 For details see Malley et al. (2012).</p>
-<p>Note that for classification and regression nodes with size smaller than <code>min.node.size</code> can occur, as in original Random Forests.
-For survival all nodes contain at <code>min.node.size</code> samples. 
+<p>Note that nodes with size smaller than <code>min.node.size</code> can occur because <code>min.node.size</code> is the minimal node size <em>to split at</em>, as in original Random Forests.
+To restrict the size of terminal nodes, set <code>min.bucket</code>. 
 Variables selected with <code>always.split.variables</code> are tried additionally to the mtry variables randomly selected.
 In <code>split.select.weights</code>, weights do not need to sum up to 1, they will be normalized later. 
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
@@ -424,7 +429,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Prediction</span></span></span>
 <span class="r-in"><span><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -435,27 +440,27 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         13          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         17         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          1        18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         25          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         16         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          0         8</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Quantile regression forest</span></span></span>
 <span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          24.4          33.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          23.6          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          18.7          30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5          21.0          22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          21.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          30.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Variable importance</span></span></span>
 <span class="r-in"><span><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rg.iris</span><span class="op">$</span><span class="va">variable.importance</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length  Sepal.Width Petal.Length  Petal.Width </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     8.886289     2.324949    41.555421    46.460859 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     9.232498     2.184364    43.463981    44.350950 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Survival forest</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -479,7 +484,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
 <span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span>y <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">5</span><span class="op">]</span>, x <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="op">-</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -494,7 +499,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## Use GenABEL interface to read Plink data into R and grow a classification forest</span></span></span>
