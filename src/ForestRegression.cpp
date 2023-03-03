@@ -32,7 +32,7 @@ void ForestRegression::loadForest(size_t num_trees,
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(
-        make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
+        std::make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
   }
 
   // Create thread ranges
@@ -71,7 +71,7 @@ void ForestRegression::initInternal() {
 void ForestRegression::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeRegression>());
+    trees.push_back(std::make_unique<TreeRegression>());
   }
 }
 
@@ -241,7 +241,7 @@ void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    trees.push_back(make_unique<TreeRegression>(child_nodeIDs, split_varIDs, split_values));
+    trees.push_back(std::make_unique<TreeRegression>(child_nodeIDs, split_varIDs, split_values));
   }
 }
 
