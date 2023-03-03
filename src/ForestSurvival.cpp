@@ -34,7 +34,7 @@ void ForestSurvival::loadForest(size_t num_trees, std::vector<std::vector<std::v
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(
-        make_unique<TreeSurvival>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
+        std::make_unique<TreeSurvival>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
             forest_chf[i], &this->unique_timepoints, &response_timepointIDs));
   }
 
@@ -100,7 +100,7 @@ void ForestSurvival::initInternal() {
 void ForestSurvival::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeSurvival>(&unique_timepoints, &response_timepointIDs));
+    trees.push_back(std::make_unique<TreeSurvival>(&unique_timepoints, &response_timepointIDs));
   }
 }
 
@@ -321,7 +321,7 @@ void ForestSurvival::loadFromFileInternal(std::ifstream& infile) {
 
     // Create tree
     trees.push_back(
-        make_unique<TreeSurvival>(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
+        std::make_unique<TreeSurvival>(child_nodeIDs, split_varIDs, split_values, chf, &unique_timepoints,
             &response_timepointIDs));
   }
 }

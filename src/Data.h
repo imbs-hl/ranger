@@ -47,7 +47,7 @@ public:
   bool loadFromFileWhitespace(std::ifstream& input_file, std::string header_line,
       std::vector<std::string>& dependent_variable_names);
   bool loadFromFileOther(std::ifstream& input_file, std::string header_line,
-      std::vector<std::string>& dependent_variable_names, char seperator);
+      std::vector<std::string>& dependent_variable_names, char separator);
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID, size_t start,
       size_t end) const;
