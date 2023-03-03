@@ -925,13 +925,13 @@ std::unique_ptr<Data> Forest::loadDataFromFile(const std::string& data_path) {
   std::unique_ptr<Data> result { };
   switch (memory_mode) {
   case MEM_DOUBLE:
-    result = make_unique<DataDouble>();
+    result = std::make_unique<DataDouble>();
     break;
   case MEM_FLOAT:
-    result = make_unique<DataFloat>();
+    result = std::make_unique<DataFloat>();
     break;
   case MEM_CHAR:
-    result = make_unique<DataChar>();
+    result = std::make_unique<DataChar>();
     break;
   }
 
