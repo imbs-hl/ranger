@@ -61,9 +61,8 @@
 ##' Note that the factors are only reordered once and not again in each split. 
 ##'
 ##' The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
-##' It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
-##' See Nembrini et al. (2018) for details.
-##' This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
+##' It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. See Nembrini et al. (2018) for details.
+##' This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}. It should not be used when making predictions since the feature permuation step reduces performance (a warning is raised when predicting on new data). 
 ##'
 ##' Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
 ##' If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
