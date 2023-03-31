@@ -1,3 +1,7 @@
+
+# ranger 0.15.0
+* New CRAN version
+
 # ranger 0.14.2
 * Switch to C++14 standard
 * Add min.bucket parameter to restrict terminal node size
