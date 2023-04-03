@@ -50,3 +50,13 @@ test_that("User specified function works as expected", {
   pred_sample <- predict(rf.quant, mtcars[27:32, ], type = "quantiles", what = function(x) sample(x, 10, replace = TRUE))
   expect_equal(dim(pred_sample$predictions), c(pred_sample$num.samples, 10))
 })
+
+test_that("Working for factor variables", {
+  expect_silent(rf <- ranger(Sepal.Length ~ ., iris, quantreg = TRUE))
+  expect_silent(predict(rf, iris, type = "quantiles"))
+})
+
+test_that("Working for unordered factor variables", {
+  expect_silent(rf <- ranger(Sepal.Length ~ ., iris, quantreg = TRUE, respect.unordered.factors = "order"))
+  expect_silent(predict(rf, iris, type = "quantiles"))
+})

@@ -164,7 +164,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Recode factors if forest grown 'order' mode
-  if (!is.null(forest$covariate.levels) && !all(sapply(forest$covariate.levels, is.null))) {
+  if (!is.null(forest$covariate.levels) && !all(sapply(forest$covariate.levels, is.null)) && !is.matrix(x)) {
     x <- mapply(function(xx, yy) {
       if(is.null(yy)) {
         xx
