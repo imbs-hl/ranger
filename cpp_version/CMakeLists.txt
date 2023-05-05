@@ -13,7 +13,11 @@ set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 ## ======================================================================================##
 ## Compiler flags
 ## ======================================================================================##
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-Wall" COMPILER_SUPPORTS_WALL)
+if (COMPILER_SUPPORTS_WALL)
+  set(CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
+endif ()
 
 ## ======================================================================================##
 ## In Clang phtread flag only for compiler, not for linker. For
