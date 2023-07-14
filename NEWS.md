@@ -1,4 +1,10 @@
 
+# ranger 0.15.2
+* Fix memory error for always.split.variables in certain settings
+
+# ranger 0.15.1
+* Fix quantile regression for factor variables in "order" mode
+
 # ranger 0.15.0
 * New CRAN version
 
