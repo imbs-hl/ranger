@@ -20,5 +20,5 @@ Suggests:
     testthat
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-URL: https://github.com/imbs-hl/ranger
+URL: http://imbs-hl.github.io/ranger/, https://github.com/imbs-hl/ranger
 BugReports: https://github.com/imbs-hl/ranger/issues
