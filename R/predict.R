@@ -516,7 +516,7 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
       node.values <- object$random.node.values.oob
     } else {
       ## New data prediction
-      terminal.nodes <- predict(object, data, type = "terminalNodes")$predictions + 1
+      terminal.nodes <- predict(object, data, num.threads = num.threads, type = "terminalNodes")$predictions + 1
       node.values <- 0 * terminal.nodes
       for (tree in 1:num.trees) {
         node.values[, tree] <- object$random.node.values[terminal.nodes[, tree], tree]
