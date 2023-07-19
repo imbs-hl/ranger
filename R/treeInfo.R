@@ -128,8 +128,12 @@ treeInfo <- function(object, tree = 1) {
   } else if (forest$treetype == "Probability estimation") {
     predictions <- matrix(nrow = nrow(result), ncol = length(forest$class.values))
     predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
-    colnames(predictions) <- forest$levels[forest$class.values]
-    predictions <- predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+    if (!is.null(forest$levels)) {
+      colnames(predictions) <- forest$levels[forest$class.values]
+      predictions <- predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+    } else {
+      colnames(predictions) <- forest$class.values
+    }
     colnames(predictions) <- paste0("pred.", colnames(predictions))
     result <- data.frame(result, predictions)
   } else if (forest$treetype == "Survival") {
