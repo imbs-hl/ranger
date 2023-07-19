@@ -1,4 +1,7 @@
 
+# ranger 0.15.3
+* Fix min bucket option in C++ version
+
 # ranger 0.15.2
 * Fix memory error for always.split.variables in certain settings
 
