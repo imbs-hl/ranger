@@ -71,6 +71,7 @@ public:
   std::string file;
   ImportanceMode impmeasure;
   uint targetpartitionsize;
+  uint minbucket;
   uint mtry;
   std::string outprefix;
   bool probability;
