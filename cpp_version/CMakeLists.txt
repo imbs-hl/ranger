@@ -47,3 +47,9 @@ ADD_CUSTOM_TARGET(release
 ## ======================================================================================##
 add_executable(ranger ${SOURCES})
 target_link_libraries(ranger Threads::Threads)
+
+## ======================================================================================##
+## Test
+## ======================================================================================##
+enable_testing()
+add_test(NAME help COMMAND ranger --help)

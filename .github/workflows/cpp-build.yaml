@@ -16,8 +16,8 @@ jobs:
         run: |
           sudo apt-get install cmake
           mkdir build && pushd build
-          cmake -DCMAKE_INSTALL_PREFIX=~/.local ../cpp_version
-          make install -j2 && ctest -j2 --output-on-failure
+          cmake ../cpp_version
+          make && ctest --output-on-failure
   macos:
     runs-on: macos-latest
     steps:
@@ -25,8 +25,8 @@ jobs:
       - name: Build
         run: |
           mkdir build && pushd build
-          cmake -DCMAKE_INSTALL_PREFIX=~/.local ../cpp_version
-          make install -j2 && ctest --output-on-failure
+          cmake ../cpp_version
+          make && ctest --output-on-failure
   windows:
     runs-on: windows-latest
     steps:
@@ -34,6 +34,6 @@ jobs:
       - name: Build
         shell: cmd
         run: |
-          cmake -DCMAKE_INSTALL_PREFIX=%cd:\=/%/install cpp_version
-          cmake --build . --config Release --target install
-          ctest -C Release --output-on-failure
+          cmake cpp_version
+          cmake --build .
+          ctest --output-on-failure
