@@ -27,13 +27,3 @@ jobs:
           mkdir build && pushd build
           cmake ../cpp_version
           make && ctest --output-on-failure
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build
-        shell: cmd
-        run: |
-          cmake cpp_version
-          cmake --build . --config Release
-          ctest -C Release --output-on-failure
