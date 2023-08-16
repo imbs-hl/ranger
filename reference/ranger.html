@@ -441,27 +441,27 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         14          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         16         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          0        20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         20          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         15         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          1        14</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Quantile regression forest</span></span></span>
 <span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0         24.40         32.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0         22.80         32.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3         15.95         27.61</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5         21.00         22.80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3         14.30         19.20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0         22.80         32.40</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Variable importance</span></span></span>
 <span class="r-in"><span><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rg.iris</span><span class="op">$</span><span class="va">variable.importance</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length  Sepal.Width Petal.Length  Petal.Width </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     9.087737     2.423500    42.470338    45.300023 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8.958155     2.615309    44.451936    43.236947 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Survival forest</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -485,7 +485,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
 <span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span>y <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">5</span><span class="op">]</span>, x <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="op">-</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -500,7 +500,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## Use GenABEL interface to read Plink data into R and grow a classification forest</span></span></span>
