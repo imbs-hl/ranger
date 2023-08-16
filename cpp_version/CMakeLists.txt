@@ -10,7 +10,11 @@ set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 ## ======================================================================================##
 ## Compiler flags
 ## ======================================================================================##
-add_compile_options(-Wall)
+include (CheckCXXCompilerFlag)
+check_cxx_compiler_flag ("-Wall" COMPILER_SUPPORTS_WALL)
+if (COMPILER_SUPPORTS_WALL)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif ()
 
 ## ======================================================================================##
 ## Threads
