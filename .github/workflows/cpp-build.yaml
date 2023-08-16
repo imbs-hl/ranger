@@ -35,5 +35,5 @@ jobs:
         shell: cmd
         run: |
           cmake cpp_version
-          cmake --build .
-          ctest --output-on-failure
+          cmake --build . --config Release
+          ctest -C Release --output-on-failure
