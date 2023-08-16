@@ -1,33 +1,23 @@
+cmake_minimum_required(VERSION 3.1)
 project(ranger)
-cmake_minimum_required(VERSION 2.0)
 
 ## ======================================================================================##
-## Check for C++14. For GCC this is >=4.7
+## Check for C++14
 ## ======================================================================================##
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-if(COMPILER_SUPPORTS_CXX14)
-  message("Compiler with C++14 support found.")
-else()
-  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler, i.e. gcc >= 5 or Clang >= 3.4.")
-endif()
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 ## ======================================================================================##
 ## Compiler flags
 ## ======================================================================================##
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
+add_compile_options(-Wall)
 
 ## ======================================================================================##
-## In Clang phtread flag only for compiler, not for linker. For
-## windows use static linking
+## Threads
 ## ======================================================================================##
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS -pthread)
-elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -static")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-endif()
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
 
 ## ======================================================================================##
 ## Subdirectories and source files
@@ -56,4 +46,10 @@ ADD_CUSTOM_TARGET(release
 ## Executable
 ## ======================================================================================##
 add_executable(ranger ${SOURCES})
+target_link_libraries(ranger Threads::Threads)
 
+## ======================================================================================##
+## Test
+## ======================================================================================##
+enable_testing()
+add_test(NAME help COMMAND ranger --help)
