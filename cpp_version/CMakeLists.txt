@@ -47,10 +47,20 @@ ADD_CUSTOM_TARGET(release
   )
 
 ## ======================================================================================##
+## Library
+## ======================================================================================##
+file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
+option(BUILD_SHARED_LIBS "shared/static lib" OFF)
+add_library(ranger ${SOURCES})
+target_include_directories(ranger PUBLIC src/utility src/Forest src/Tree src)
+target_link_libraries(ranger Threads::Threads)
+
+## ======================================================================================##
 ## Executable
 ## ======================================================================================##
-add_executable(ranger ${SOURCES})
-target_link_libraries(ranger Threads::Threads)
+add_executable(ranger-cli src/main.cpp)
+set_target_properties(ranger-cli PROPERTIES OUTPUT_NAME ranger)
+target_link_libraries(ranger-cli ranger)
 
 ## ======================================================================================##
 ## Test
