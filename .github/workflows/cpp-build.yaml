@@ -1,0 +1,39 @@
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: CPP-build
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          sudo apt-get install cmake
+          mkdir build && pushd build
+          cmake -DCMAKE_INSTALL_PREFIX=~/.local ../cpp_version
+          make install -j2 && ctest -j2 --output-on-failure
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          mkdir build && pushd build
+          cmake -DCMAKE_INSTALL_PREFIX=~/.local ../cpp_version
+          make install -j2 && ctest --output-on-failure
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        shell: cmd
+        run: |
+          cmake -DCMAKE_INSTALL_PREFIX=%cd:\=/%/install cpp_version
+          cmake --build . --config Release --target install
+          ctest -C Release --output-on-failure
