@@ -120,6 +120,7 @@
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
+##' @param na.action Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
@@ -224,7 +225,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
-                   verbose = TRUE, seed = NULL, 
+                   verbose = TRUE, seed = NULL, na.action = "na.learn",
                    dependent.variable.name = NULL, status.variable.name = NULL, 
                    classification = NULL, x = NULL, y = NULL, ...) {
   
@@ -292,13 +293,25 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Check missing values
-  if (any(is.na(x))) {
-    offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
-  }
-  if (any(is.na(y))) {
-    stop("Missing data in dependent variable.", call. = FALSE)
+  if (na.action == "na.fail") {
+    if (any(is.na(x))) {
+      offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
+      stop("Missing data in columns: ",
+           paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
+    }
+    if (any(is.na(y))) {
+      stop("Missing data in dependent variable.", call. = FALSE)
+    }
+  } else if (na.action == "na.omit") {
+    # TODO: Implement na.omit
+    stop("na.omit not implemented yet.")
+  } else if (na.action == "na.learn") {
+    # TODO: fix y
+    if (any(is.na(y))) {
+      stop("Missing data in dependent variable.", call. = FALSE)
+    }
+  } else {
+    stop("Error: Invalid value for na.action. Use 'na.learn', 'na.omit' or 'na.fail'.")
   }
   
   ## Check response levels
@@ -391,6 +404,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           ## Don't order if only one level
           levels.ordered <- levels(xx)
         } else if (inherits(y, "Surv")) {
+          # TODO: Fix missings here
           ## Use median survival if available or largest quantile available in all strata if median not available
           levels.ordered <- largest.quantile(y ~ xx)
           
@@ -398,11 +412,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           levels.missing <- setdiff(levels(xx), levels.ordered)
           levels.ordered <- c(levels.missing, levels.ordered)
         } else if (is.factor(y) & nlevels(y) > 2) {
+          # TODO: Fix missings here
           levels.ordered <- pca.order(y = y, x = xx)
         } else {
           ## Order factor levels by mean response
           means <- sapply(levels(xx), function(y) {
-            mean(num.y[xx == y])
+            mean(num.y[xx == y], na.rm = TRUE)
           })
           levels.ordered <- as.character(levels(xx)[order(means)])
         }
