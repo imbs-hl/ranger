@@ -34,6 +34,22 @@
 namespace ranger {
 
 /**
+ * Returns whether first value (a) is less than second value (b). NaN treated as Inf.
+ * @param a First value to compare
+ * @param b Second value to compare
+ */
+template<typename T>
+inline bool less_nan(const T& a, const T& b) {
+  if (std::isnan(a)) {
+    return false;
+  } else if (std::isnan(b)) {
+    return true;
+  } else {
+    return a < b;
+  }
+}
+
+/**
  * Split sequence start..end in num_parts parts with sizes as equal as possible.
  * @param result Result vector of size num_parts+1. Ranges for the parts are then result[0]..result[1]-1, result[1]..result[2]-1, ..
  * @param start minimum value

@@ -39,6 +39,7 @@ ranger(
   save.memory = FALSE,
   verbose = TRUE,
   seed = NULL,
+  na.action = "na.learn",
   dependent.variable.name = NULL,
   status.variable.name = NULL,
   classification = NULL,
@@ -115,6 +116,8 @@ ranger(
 \item{verbose}{Show computation status and estimated runtime.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
+
+\item{na.action}{Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.}
 
 \item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 

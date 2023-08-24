@@ -179,7 +179,7 @@ protected:
   // For terminal nodes the prediction value is saved here
   std::vector<double> split_values;
 
-  // Vector of left and right child node IDs, 0 for no child
+  // Vector of left and right child node IDs, 0 for no child, third value for default child
   std::vector<std::vector<size_t>> child_nodeIDs;
 
   // All sampleIDs in the tree, will be re-ordered while splitting
@@ -230,6 +230,9 @@ protected:
   uint max_depth;
   uint depth;
   size_t last_left_nodeID;
+  
+  // Should NaNs go to right child for the current split?
+  bool nan_go_right;
 };
 
 } // namespace ranger

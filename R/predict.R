@@ -103,7 +103,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Check for old ranger version
-  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
+  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) < 2 || length(forest$child.nodeIDs[[1]]) > 3) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
   }
   if (!is.null(forest$dependent.varID)) {
@@ -181,13 +181,6 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Convert to data matrix
   if (!is.matrix(x) & !inherits(x, "Matrix")) {
     x <- data.matrix(x)
-  }
-
-  ## Check missing values
-  if (any(is.na(x))) {
-    offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
 
   ## Num threads
