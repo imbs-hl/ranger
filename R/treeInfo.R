@@ -117,17 +117,35 @@ treeInfo <- function(object, tree = 1) {
   
   ## Prediction
   if (forest$treetype == "Classification") {
-    result$prediction <- forest$split.values[[tree]]
-    result$prediction[!result$terminal] <- NA
+    if (is.null(forest$num.samples.nodes)) {
+      # split.stats=FALSE
+      result$prediction <- forest$split.values[[tree]]
+      result$prediction[!result$terminal] <- NA
+    } else {
+      # split.stats=TRUE
+      result$prediction <- forest$node.predictions[[tree]]
+    }
     if (!is.null(forest$levels)) {
       result$prediction <- integer.to.factor(result$prediction, labels = forest$levels)
     }
   } else if (forest$treetype == "Regression") {
-    result$prediction <- forest$split.values[[tree]]
-    result$prediction[!result$terminal] <- NA
+    if (is.null(forest$num.samples.nodes)) {
+      # split.stats=FALSE
+      result$prediction <- forest$split.values[[tree]]
+      result$prediction[!result$terminal] <- NA
+    } else {
+      # split.stats=TRUE
+      result$prediction <- forest$node.predictions[[tree]]
+    }
   } else if (forest$treetype == "Probability estimation") {
     predictions <- matrix(nrow = nrow(result), ncol = length(forest$class.values))
-    predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
+    if (is.null(forest$num.samples.nodes)) {
+      # split.stats=FALSE
+      predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
+    } else {
+      # split.stats=TRUE
+      predictions <- do.call(rbind, forest$terminal.class.counts[[tree]])
+    }
     if (!is.null(forest$levels)) {
       colnames(predictions) <- forest$levels[forest$class.values]
       predictions <- predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
@@ -140,6 +158,11 @@ treeInfo <- function(object, tree = 1) {
     # No prediction for survival (CHF too large?)
   } else {
     stop("Error: Unknown tree type.")
+  }
+  
+  ## Node statistics
+  if (!is.null(forest$num.samples.nodes)) {
+    result$numSamples <- forest$num.samples.nodes[[tree]]
   }
   
   result
