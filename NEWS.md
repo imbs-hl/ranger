@@ -1,4 +1,7 @@
 
+# ranger 0.15.4
+* Add node.stats option to save node statistics of all nodes
+
 # ranger 0.15.3
 * Fix min bucket option in C++ version
 

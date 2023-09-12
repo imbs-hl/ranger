@@ -76,8 +76,15 @@ void TreeClassification::appendToFileInternal(std::ofstream& file) { // #nocov s
 
 bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-  // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+  
+  // Save node statistics
+  if (save_node_stats) {
+    num_samples_nodes[nodeID] = num_samples_node;
+    node_predictions[nodeID] = estimate(nodeID);
+  }
+  
+  // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     split_values[nodeID] = estimate(nodeID);
     return true;
@@ -117,7 +124,9 @@ bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& p
 }
 
 void TreeClassification::createEmptyNodeInternal() {
-  // Empty on purpose
+  if (save_node_stats) {
+    node_predictions.push_back(0);
+  }
 }
 
 double TreeClassification::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {

@@ -119,6 +119,7 @@
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
+##' @param node.stats Save node statistics. Set to \code{TRUE} to save prediction and number of observations for each node.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
@@ -224,7 +225,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
-                   verbose = TRUE, seed = NULL, 
+                   verbose = TRUE, node.stats = FALSE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
                    classification = NULL, x = NULL, y = NULL, ...) {
   
@@ -873,7 +874,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      node.stats)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
