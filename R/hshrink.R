@@ -27,10 +27,10 @@
 # -------------------------------------------------------------------------------
 
 
-#' Horizontal shrinkage
+#' Hierarchical shrinkage
 #' 
-#' Apply horizontal shrinkage to a ranger object. 
-#' Horizontal shrinkage is a regularization technique that recursively shrinks node predictions towards parent node predictions. 
+#' Apply hierarchical shrinkage to a ranger object. 
+#' Hierarchical shrinkage is a regularization technique that recursively shrinks node predictions towards parent node predictions. 
 #' For details see Agarwal et al. (2022).
 #'
 #' @param rf ranger object, created with \code{node.stats = TRUE}. 
@@ -47,7 +47,7 @@
 #' @export
 hshrink <- function(rf, lambda) {
   if (is.null(rf$forest$num.samples.nodes)) {
-    stop("Horizontal shrinkage needs node statistics, set node.stats=TRUE in ranger() call.")
+    stop("Hierarchical shrinkage needs node statistics, set node.stats=TRUE in ranger() call.")
   }
   if (lambda < 0) {
     stop("Shrinkage parameter lambda has to be non-negative.")
@@ -78,9 +78,9 @@ hshrink <- function(rf, lambda) {
       replace_class_counts(rf$forest$terminal.class.counts[[treeID]], class_freq)
     }))
   } else if (rf$treetype == "Classification") {
-    stop("To apply horizontal shrinkage to classification forests, use probability=TRUE in the ranger() call.")
+    stop("To apply hierarchical shrinkage to classification forests, use probability=TRUE in the ranger() call.")
   } else if (rf$treetype == "Survival") {
-    stop("Horizontal shrinkage not yet implemented for survival.")
+    stop("Hierarchical shrinkage not yet implemented for survival.")
   } else {
     stop("Unknown treetype.")
   }

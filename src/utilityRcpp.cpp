@@ -89,7 +89,7 @@ Rcpp::NumericMatrix randomObsNode(Rcpp::IntegerMatrix groups, Rcpp::NumericVecto
   return result;
 }
 
-// Recursive function for horizontal shrinkage (regression)
+// Recursive function for hierarchical shrinkage (regression)
 //[[Rcpp::export]]
 void hshrink_regr(Rcpp::IntegerVector& left_children, Rcpp::IntegerVector& right_children, 
                   Rcpp::IntegerVector& num_samples_nodes, Rcpp::NumericVector& node_predictions, 
@@ -117,7 +117,7 @@ void hshrink_regr(Rcpp::IntegerVector& left_children, Rcpp::IntegerVector& right
   }
 }
 
-// Recursive function for horizontal shrinkage (probability)
+// Recursive function for hierarchical shrinkage (probability)
 //[[Rcpp::export]]
 void hshrink_prob(Rcpp::IntegerVector& left_children, Rcpp::IntegerVector& right_children, 
                   Rcpp::IntegerVector& num_samples_nodes, 

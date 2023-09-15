@@ -2,7 +2,7 @@
 % Please edit documentation in R/hshrink.R
 \name{hshrink}
 \alias{hshrink}
-\title{Horizontal shrinkage}
+\title{Hierarchical shrinkage}
 \usage{
 hshrink(rf, lambda)
 }
@@ -15,8 +15,8 @@ hshrink(rf, lambda)
 The ranger object is modified in-place.
 }
 \description{
-Apply horizontal shrinkage to a ranger object. 
-Horizontal shrinkage is a regularization technique that recursively shrinks node predictions towards parent node predictions. 
+Apply hierarchical shrinkage to a ranger object. 
+Hierarchical shrinkage is a regularization technique that recursively shrinks node predictions towards parent node predictions. 
 For details see Agarwal et al. (2022).
 }
 \references{

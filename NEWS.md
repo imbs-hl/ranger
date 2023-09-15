@@ -1,7 +1,7 @@
 
 # ranger 0.15.4
 * Add node.stats option to save node statistics of all nodes
-* Add horizontal shrinkage
+* Add hierarchical shrinkage
 
 # ranger 0.15.3
 * Fix min bucket option in C++ version

@@ -4,17 +4,17 @@ library(ranger)
 context("ranger_hshrink")
 
 ## Tests
-test_that("horizontal shrinkage gives an error when node.stats=FALSE", {
+test_that("hierarchical shrinkage gives an error when node.stats=FALSE", {
   rf <- ranger(Sepal.Length ~ ., iris, num.trees = 1, node.stats = FALSE)
   expect_error(hshrink(rf, lambda = 5))
 })
 
-test_that("horizontal shrinkage does not work for hard classification", {
+test_that("hierarchical shrinkage does not work for hard classification", {
   rf <- ranger(Species ~ ., iris, num.trees = 1, node.stats = TRUE, probability = FALSE)
   expect_error(hshrink(rf, lambda = 5))
 })
 
-test_that("horizontal shrinkage with lambda=0 doesn't change leafs and prediction, regression", {
+test_that("hierarchical shrinkage with lambda=0 doesn't change leafs and prediction, regression", {
   rf <- ranger(Sepal.Length ~ ., iris, num.trees = 1, node.stats = TRUE)
   split_values_before <- rf$forest$split.values[[1]]
   pred_before <- predict(rf, iris)$predictions
@@ -25,7 +25,7 @@ test_that("horizontal shrinkage with lambda=0 doesn't change leafs and predictio
   expect_equal(pred_before, pred_after)
 })
 
-test_that("horizontal shrinkage with lambda=0 doesn't change leafs and prediction, probability", {
+test_that("hierarchical shrinkage with lambda=0 doesn't change leafs and prediction, probability", {
   rf <- ranger(Species ~ ., iris, num.trees = 1, node.stats = TRUE, probability = TRUE)
   class_freq_before <- simplify2array(rf$forest$terminal.class.counts[[1]])
   pred_before <- predict(rf, iris)$predictions
@@ -36,7 +36,7 @@ test_that("horizontal shrinkage with lambda=0 doesn't change leafs and predictio
   expect_equal(pred_before, pred_after)
 })
 
-test_that("horizontal shrinkage with lambda>0 does change leafs and prediction, regression", {
+test_that("hierarchical shrinkage with lambda>0 does change leafs and prediction, regression", {
   rf <- ranger(Sepal.Length ~ ., iris, num.trees = 1, replace = FALSE, sample.fraction = 1, node.stats = TRUE)
   split_values_before <- rf$forest$split.values[[1]]
   pred_before <- predict(rf, iris)$predictions
@@ -52,7 +52,7 @@ test_that("horizontal shrinkage with lambda>0 does change leafs and prediction, 
   
 })
 
-test_that("horizontal shrinkage with lambda>0 does change leafs and prediction, probability", {
+test_that("hierarchical shrinkage with lambda>0 does change leafs and prediction, probability", {
   rf <- ranger(Species ~ ., iris, num.trees = 1, node.stats = TRUE, probability = TRUE)
   class_freq_before <- simplify2array(rf$forest$terminal.class.counts[[1]])
   pred_before <- predict(rf, iris)$predictions
