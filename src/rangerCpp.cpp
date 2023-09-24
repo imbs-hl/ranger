@@ -25,7 +25,7 @@
  http://www.imbs-luebeck.de
  #-------------------------------------------------------------------------------*/
 
-#include <RcppEigen.h>
+#include <RcppArmadillo.h>
 #include <vector>
 #include <sstream>
 #include <memory>
@@ -46,7 +46,7 @@
 
 using namespace ranger;
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericMatrix& input_y,
     std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose, uint seed, uint num_threads,
@@ -58,7 +58,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, std::vector<double>& case_weights,
     bool use_case_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
-    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
+    uint num_random_splits, arma::sp_mat& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
     std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth) {
@@ -99,8 +99,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     size_t num_rows;
     size_t num_cols;
     if (use_sparse_data) {
-      num_rows = sparse_x.rows();
-      num_cols = sparse_x.cols();
+      num_rows = sparse_x.n_rows;
+      num_cols = sparse_x.n_cols;
     } else {
       num_rows = input_x.nrow();
       num_cols = input_x.ncol();
