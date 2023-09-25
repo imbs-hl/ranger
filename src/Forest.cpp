@@ -81,7 +81,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   init(loadDataFromFile(input_file), mtry, output_prefix, num_trees, seed, num_threads, importance_mode,
       min_node_size, min_bucket, prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting,
       splitrule, predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type, num_random_splits,
-      false, max_depth, regularization_factor, regularization_usedepth);
+      false, max_depth, regularization_factor, regularization_usedepth, false);
 
   if (prediction_mode) {
     loadFromFile(load_forest_filename);
@@ -140,7 +140,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
     std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
     uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& regularization_factor,
-    bool regularization_usedepth) {
+    bool regularization_usedepth, bool node_stats) {
 
   this->verbose_out = verbose_out;
 
@@ -148,7 +148,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
   init(std::move(input_data), mtry, "", num_trees, seed, num_threads, importance_mode, min_node_size, min_bucket,
       prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting, splitrule,
       predict_all, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, order_snps, max_depth,
-      regularization_factor, regularization_usedepth);
+      regularization_factor, regularization_usedepth, node_stats);
 
   // Set variables to be always considered for splitting
   if (!always_split_variable_names.empty()) {
@@ -182,7 +182,7 @@ void Forest::init(std::unique_ptr<Data> input_data, uint mtry, std::string outpu
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
     bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
     double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
-    uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth) {
+    uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth, bool node_stats) {
 
   // Initialize data with memmode
   this->data = std::move(input_data);
@@ -224,6 +224,7 @@ void Forest::init(std::unique_ptr<Data> input_data, uint mtry, std::string outpu
   this->max_depth = max_depth;
   this->regularization_factor = regularization_factor;
   this->regularization_usedepth = regularization_usedepth;
+  this->save_node_stats = node_stats;
 
   // Set number of samples and variables
   num_samples = data->getNumRows();
@@ -474,7 +475,7 @@ void Forest::grow() {
     trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs, tree_split_select_weights,
         importance_mode, min_node_size, min_bucket, sample_with_replacement, memory_saving_splitting, splitrule, &case_weights,
         tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, holdout, num_random_splits, max_depth,
-        &regularization_factor, regularization_usedepth, &split_varIDs_used);
+        &regularization_factor, regularization_usedepth, &split_varIDs_used, save_node_stats);
   }
 
   // Init variable importance

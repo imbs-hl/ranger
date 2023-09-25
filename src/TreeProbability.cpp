@@ -80,10 +80,19 @@ void TreeProbability::appendToFileInternal(std::ofstream& file) { // #nocov star
 
 bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-  // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
-  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  
+  // Save node statistics
+  if (save_node_stats) {
+    num_samples_nodes[nodeID] = num_samples_node;
     addToTerminalNodes(nodeID);
+  }
+  
+  // Stop if maximum node size or depth reached
+  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -100,7 +109,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
     pure_value = value;
   }
   if (pure) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -113,7 +124,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   }
 
   if (stop) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
