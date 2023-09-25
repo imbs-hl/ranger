@@ -35,7 +35,7 @@ public:
   Tree(const Tree&) = delete;
   Tree& operator=(const Tree&) = delete;
 
-  void init(const Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
+  void init(Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size, uint min_bucket,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
@@ -203,7 +203,7 @@ protected:
   std::mt19937_64 random_number_generator;
 
   // Pointer to original data
-  const Data* data;
+  Data* data;
 
   // Regularization
   bool regularization;

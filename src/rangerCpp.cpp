@@ -25,6 +25,8 @@
  http://www.imbs-luebeck.de
  #-------------------------------------------------------------------------------*/
 
+#define ARMA_WARN_LEVEL 1
+ 
 #include <RcppArmadillo.h>
 #include <vector>
 #include <sstream>
@@ -61,7 +63,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     uint num_random_splits, arma::sp_mat& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
-    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth) {
+    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth, 
+    Rcpp::NumericMatrix confounders, bool use_confounders) {
   
   Rcpp::List result;
 
@@ -88,6 +91,9 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     if (!use_regularization_factor) {
       regularization_factor.clear();
     }
+    if (!use_confounders) {
+      confounders = Rcpp::NumericMatrix();
+    }
 
     std::ostream* verbose_out;
     if (verbose) {
@@ -110,7 +116,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     if (use_sparse_data) {
       data = std::make_unique<DataSparse>(sparse_x, input_y, variable_names, num_rows, num_cols);
     } else {
-      data = std::make_unique<DataRcpp>(input_x, input_y, variable_names, num_rows, num_cols);
+      data = std::make_unique<DataRcpp>(input_x, input_y, variable_names, num_rows, num_cols, confounders);
     }
 
     // If there is snp data, add it

@@ -25,6 +25,7 @@ ranger(
   minprop = 0.1,
   split.select.weights = NULL,
   always.split.variables = NULL,
+  confounders = NULL,
   respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE,
   local.importance = FALSE,
@@ -87,6 +88,8 @@ ranger(
 \item{split.select.weights}{Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 
 \item{always.split.variables}{Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.}
+
+\item{confounders}{Confounders data.frame to adjust for in regression RF.}
 
 \item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.}
 

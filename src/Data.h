@@ -33,7 +33,7 @@ public:
 
   virtual double get_x(size_t row, size_t col) const = 0;
   virtual double get_y(size_t row, size_t col) const = 0;
-
+  
   size_t getVariableID(const std::string& variable_name) const;
 
   virtual void reserveMemory(size_t y_cols) = 0;
@@ -196,6 +196,14 @@ public:
     order_snps = true;
   }
   // #nocov end
+  
+  virtual void lm(std::vector<size_t>& sampleIDs, size_t start, size_t end) {
+    // Empty on purpose
+  }
+  
+  virtual double get_yy(size_t row, size_t col) const {
+    return get_y(row, col);
+  }
 
 protected:
   std::vector<std::string> variable_names;

@@ -1,4 +1,7 @@
 
+# ranger 0.15.4
+* Add linear model residual splitting
+
 # ranger 0.15.3
 * Fix min bucket option in C++ version
 

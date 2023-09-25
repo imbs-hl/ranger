@@ -106,6 +106,7 @@
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
+##' @param confounders Confounders data.frame to adjust for in regression RF.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
 ##' @param regularization.factor Regularization factor (gain penalization), either a vector of length p or one value for all variables.
@@ -217,6 +218,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    case.weights = NULL, class.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
+                   confounders = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
                    local.importance = FALSE, 
@@ -822,6 +824,19 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
+  ## Confounders
+  if (is.null(confounders)) {
+    confounders <- matrix(c(0, 0))
+    use.confounders <- FALSE
+  } else if (is.data.frame(confounders)) {
+    confounders <- data.matrix(confounders)
+    use.confounders <- TRUE
+  } else if (is.matrix(confounders)) {
+    use.confounders <- TRUE
+  } else {
+    stop("Error: confounders argument has to be matrix or data.frame.")
+  }
+  
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
   predict.all <- FALSE
@@ -873,7 +888,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      confounders, use.confounders)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
