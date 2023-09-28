@@ -829,9 +829,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     confounders <- matrix(c(0, 0))
     use.confounders <- FALSE
   } else if (is.data.frame(confounders)) {
-    confounders <- data.matrix(confounders)
+    confounders <- cbind(1, data.matrix(confounders))
     use.confounders <- TRUE
   } else if (is.matrix(confounders)) {
+    confounders <- cbind(1, confounders)
     use.confounders <- TRUE
   } else {
     stop("Error: confounders argument has to be matrix or data.frame.")
