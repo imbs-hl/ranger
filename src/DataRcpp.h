@@ -27,9 +27,10 @@ http://www.imbs-luebeck.de
 
 #ifndef DATARCPP_H_
 #define DATARCPP_H_
-
+ 
 #include <Rcpp.h>
-
+#include <RcppArmadillo.h>
+ 
 #include "globals.h"
 #include "utility.h"
 #include "Data.h"
@@ -39,13 +40,16 @@ namespace ranger {
 class DataRcpp: public Data {
 public:
   DataRcpp() = default;
-  DataRcpp(Rcpp::NumericMatrix& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
+  DataRcpp(Rcpp::NumericMatrix& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols, 
+           Rcpp::NumericMatrix& confounders) {
       this->x = x;
       this->y = y;
       this->variable_names = variable_names;
       this->num_rows = num_rows;
       this->num_cols = num_cols;
       this->num_cols_no_snp = num_cols;
+      this->confounders = confounders;
+      this->resid = arma::colvec(y(Rcpp::_, 0));
     }
   
   DataRcpp(const DataRcpp&) = delete;
@@ -86,9 +90,31 @@ public:
   }
   // #nocov end 
   
+  void lm(std::vector<size_t>& sampleIDs, size_t start, size_t end) override {
+    if (confounders.size() > 0) {
+      std::vector<size_t> idx;
+      idx.assign(sampleIDs.begin() + start, sampleIDs.begin() + end);
+      
+      arma::uvec ia = arma::conv_to<arma::uvec>::from(idx);
+      
+      arma::mat ca = arma::mat(confounders.begin(), confounders.nrow(),
+                               confounders.ncol(), false);
+      arma::colvec ya = arma::colvec(y(Rcpp::_, 0));
+      
+      arma::colvec coef = arma::solve(ca.rows(ia), ya(ia), arma::solve_opts::allow_ugly);
+      resid(ia) = ya(ia) - ca.rows(ia)*coef;
+    }
+  }
+  
+  double get_yy(size_t row, size_t col) const override {
+    return resid(row);
+  }
+  
 private:
   Rcpp::NumericMatrix x;
   Rcpp::NumericMatrix y;
+  arma::colvec resid;
+  Rcpp::NumericMatrix confounders;
 };
 
 } // namespace ranger

@@ -28,7 +28,7 @@
 #ifndef DATASPARSE_H_
 #define DATASPARSE_H_
 
-#include <RcppEigen.h>
+#include <RcppArmadillo.h>
 
 #include "globals.h"
 #include "utility.h"
@@ -40,7 +40,7 @@ class DataSparse: public Data {
 public:
   DataSparse() = default;
   
-  DataSparse(Eigen::SparseMatrix<double>& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows,
+  DataSparse(arma::sp_mat& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows,
       size_t num_cols);
 
   DataSparse(const DataSparse&) = delete;
@@ -54,7 +54,7 @@ public:
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
     }
-    return x.coeff(row, col);
+    return x(row, col);
   }
   
   double get_y(size_t row, size_t col) const override {
@@ -67,7 +67,7 @@ public:
   }
 
   void set_x(size_t col, size_t row, double value, bool& error) override {
-    x.coeffRef(row, col) = value;
+    x(row, col) = value;
   }
   
   void set_y(size_t col, size_t row, double value, bool& error) override {
@@ -76,7 +76,7 @@ public:
   // #nocov end 
 
 private:
-  Eigen::SparseMatrix<double> x;
+  arma::sp_mat x;
   Rcpp::NumericMatrix y;
 };
 
