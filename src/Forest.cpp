@@ -124,7 +124,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
 
   // Check if all catvars are coded in integers starting at 1
   if (!unordered_variable_names.empty()) {
-    std::string error_message = checkUnorderedVariables(*data, unordered_variable_names);
+    std::string error_message = checkUnorderedVariables(unordered_variable_names);
     if (!error_message.empty()) {
       throw std::runtime_error(error_message);
     }
@@ -988,5 +988,31 @@ void Forest::showProgress(std::string operation, size_t max_progress) {
     }
   }
 }
+
+std::string Forest::checkUnorderedVariables(const std::vector<std::string>& unordered_variable_names) { // #nocov start
+  size_t num_rows = data->getNumRows();
+  std::vector<size_t> sampleIDs(num_rows);
+  std::iota(sampleIDs.begin(), sampleIDs.end(), 0);
+  
+  // Check for all unordered variables
+  for (auto& variable_name : unordered_variable_names) {
+    size_t varID = data->getVariableID(variable_name);
+    std::vector<double> all_values;
+    data->getAllValues(all_values, sampleIDs, varID, 0, sampleIDs.size());
+    
+    // Check level count
+    size_t max_level_count = 8 * sizeof(size_t) - 1;
+    if (all_values.size() > max_level_count) {
+      return "Too many levels in unordered categorical variable " + variable_name + ". Only "
+      + uintToString(max_level_count) + " levels allowed on this system.";
+    }
+    
+    // Check positive integers
+    if (!checkPositiveIntegers(all_values)) {
+      return "Not all values in unordered categorical variable " + variable_name + " are positive integers.";
+    }
+  }
+  return "";
+} // #nocov end
 
 } // namespace ranger

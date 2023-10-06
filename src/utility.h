@@ -29,7 +29,6 @@
 #endif
 
 #include "globals.h"
-#include "Data.h"
 
 namespace ranger {
 
@@ -289,18 +288,6 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
     std::mt19937_64 random_number_generator);
 
 /**
- * Compute concordance index for given data and summed cumulative hazard function/estimate
- * @param data Reference to Data object
- * @param sum_chf Summed chf over timepoints for each sample
- * @param sample_IDs IDs of samples, for example OOB samples
- * @param prediction_error_casewise An optional output vector with casewise prediction errors.
- *   If pointer is NULL, casewise prediction errors should not be computed.
- * @return concordance index
- */
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
-    const std::vector<size_t>& sample_IDs, std::vector<double>* prediction_error_casewise);
-
-/**
  * Convert a unsigned integer to string
  * @param number Number to convert
  * @return Converted number as string
@@ -360,14 +347,6 @@ void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& secon
  */
 void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all,
     size_t n_first, const std::vector<size_t>& mapping, std::mt19937_64 random_number_generator);
-
-/**
- * Check if not too many factor levels and all values in unordered categorical variables are positive integers.
- * @param data Reference to data object
- * @param unordered_variable_names Names of unordered variables
- * @return Error message, empty if no problem occured
- */
-std::string checkUnorderedVariables(const Data& data, const std::vector<std::string>& unordered_variable_names);
 
 /**
  * Check if all values in double vector are positive integers.

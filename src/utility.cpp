@@ -23,7 +23,6 @@
 
 #include "utility.h"
 #include "globals.h"
-#include "Data.h"
 
 namespace ranger {
 
@@ -230,92 +229,6 @@ double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
   }
 }
 
-double computeConcordanceIndex(const Data& data, const std::vector<double>& sum_chf,
-    const std::vector<size_t>& sample_IDs, std::vector<double>* prediction_error_casewise) {
-
-  // Compute concordance index
-  double concordance = 0;
-  double permissible = 0;
-  
-  std::vector<double> concordance_casewise;
-  std::vector<double> permissible_casewise;
-  if (prediction_error_casewise) {
-    concordance_casewise.resize(prediction_error_casewise->size(), 0);
-    permissible_casewise.resize(prediction_error_casewise->size(), 0);
-  }
-  
-  for (size_t i = 0; i < sum_chf.size(); ++i) {
-    size_t sample_i = i;
-    if (!sample_IDs.empty()) {
-      sample_i = sample_IDs[i];
-    }
-    double time_i = data.get_y(sample_i, 0);
-    double status_i = data.get_y(sample_i, 1);
-
-    double conc, perm;
-    if (prediction_error_casewise) {
-      conc = concordance_casewise[i];
-      perm = permissible_casewise[i];
-    } else {
-      conc = 0;
-      perm = 0;
-    }
-    
-    for (size_t j = i + 1; j < sum_chf.size(); ++j) {
-      size_t sample_j = j;
-      if (!sample_IDs.empty()) {
-        sample_j = sample_IDs[j];
-      }
-      double time_j = data.get_y(sample_j, 0);
-      double status_j = data.get_y(sample_j, 1);
-
-      if (time_i < time_j && status_i == 0) {
-        continue;
-      }
-      if (time_j < time_i && status_j == 0) {
-        continue;
-      }
-      if (time_i == time_j && status_i == status_j) {
-        continue;
-      }
-
-      double co;
-      if (time_i < time_j && sum_chf[i] > sum_chf[j]) {
-        co = 1;
-      } else if (time_j < time_i && sum_chf[j] > sum_chf[i]) {
-        co = 1;
-      } else if (sum_chf[i] == sum_chf[j]) {
-        co = 0.5;
-      } else {
-        co = 0;
-      }
-      
-      conc += co;
-      perm += 1;
-      
-      if (prediction_error_casewise) {
-        concordance_casewise[j] += co;
-        permissible_casewise[j] += 1;
-      }
-    }
-    
-    concordance += conc;
-    permissible += perm;
-    if (prediction_error_casewise) {
-      concordance_casewise[i] = conc;
-      permissible_casewise[i] = perm;
-    }
-  }
-  
-  if (prediction_error_casewise) {
-    for (size_t i = 0; i < prediction_error_casewise->size(); ++i) {
-      (*prediction_error_casewise)[i] = 1 - concordance_casewise[i] / permissible_casewise[i];
-    }
-  }
-  
-  return (concordance / permissible);
-}
-
 std::string uintToString(uint number) {
 #if WIN_R_BUILD == 1
   std::stringstream temp;
@@ -440,32 +353,6 @@ void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>&
   // Resize first part
   first_part.resize(first_old_size + n_first);
 }
-
-std::string checkUnorderedVariables(const Data& data, const std::vector<std::string>& unordered_variable_names) { // #nocov start
-  size_t num_rows = data.getNumRows();
-  std::vector<size_t> sampleIDs(num_rows);
-  std::iota(sampleIDs.begin(), sampleIDs.end(), 0);
-
-  // Check for all unordered variables
-  for (auto& variable_name : unordered_variable_names) {
-    size_t varID = data.getVariableID(variable_name);
-    std::vector<double> all_values;
-    data.getAllValues(all_values, sampleIDs, varID, 0, sampleIDs.size());
-
-    // Check level count
-    size_t max_level_count = 8 * sizeof(size_t) - 1;
-    if (all_values.size() > max_level_count) {
-      return "Too many levels in unordered categorical variable " + variable_name + ". Only "
-          + uintToString(max_level_count) + " levels allowed on this system.";
-    }
-
-    // Check positive integers
-    if (!checkPositiveIntegers(all_values)) {
-      return "Not all values in unordered categorical variable " + variable_name + " are positive integers.";
-    }
-  }
-  return "";
-} // #nocov end
 
 bool checkPositiveIntegers(const std::vector<double>& all_values) { // #nocov start
   for (auto& value : all_values) {

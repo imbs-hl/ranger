@@ -178,6 +178,9 @@ protected:
 
   // Show progress every few seconds
   void showProgress(std::string operation, size_t max_progress);
+  
+ // Check if not too many factor levels and all values in unordered categorical variables are positive integers.
+  std::string checkUnorderedVariables(const std::vector<std::string>& unordered_variable_names);
 
   // Verbose output stream, cout if verbose==true, logfile if not
   std::ostream* verbose_out;

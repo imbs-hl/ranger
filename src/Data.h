@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include "globals.h"
+#include "utility.h"
 
 namespace ranger {
 
@@ -124,6 +125,9 @@ public:
   void sort();
 
   void orderSnpLevels(bool corrected_importance);
+  
+  double computeConcordanceIndex(const std::vector<double>& sum_chf, const std::vector<size_t>& sample_IDs, 
+                                 std::vector<double>* prediction_error_casewise) const;
 
   const std::vector<std::string>& getVariableNames() const {
     return variable_names;
