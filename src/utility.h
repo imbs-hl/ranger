@@ -504,6 +504,20 @@ std::stringstream& readFromStream(std::stringstream& in, double& token);
  */
 double betaLogLik(double y, double mean, double phi);
 
+/**
+ * Shuffle vector (similar to std::shuffle)
+ * @param first Iterator to first vector element
+ * @param last Iterator to last vector element
+ * @param random_number_generator Random number generator
+ * */
+template <class RandomAccessIterator, class URNG>
+void shuffle (RandomAccessIterator first, RandomAccessIterator last, URNG&& random_number_generator) {
+  for (auto i=(last-first)-1; i>0; --i) {
+    std::uniform_int_distribution<decltype(i)> d(0,i);
+    std::swap(first[i], first[d(random_number_generator)]);
+  }
+}
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {

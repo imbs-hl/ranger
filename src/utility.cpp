@@ -316,7 +316,7 @@ void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& secon
 
   // Fill with 0..n_all-1 and shuffle
   std::iota(first_part.begin(), first_part.end(), 0);
-  std::shuffle(first_part.begin(), first_part.end(), random_number_generator);
+  ranger::shuffle(first_part.begin(), first_part.end(), random_number_generator);
 
   // Copy to second part
   second_part.resize(n_all - n_first);
@@ -338,7 +338,7 @@ void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>&
 
   // Fill with 0..n_all-1 and shuffle
   std::iota(first_start_pos, first_part.end(), 0);
-  std::shuffle(first_start_pos, first_part.end(), random_number_generator);
+  ranger::shuffle(first_start_pos, first_part.end(), random_number_generator);
 
   // Mapping
   for (std::vector<size_t>::iterator j = first_start_pos; j != first_part.end(); ++j) {

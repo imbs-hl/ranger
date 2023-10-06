@@ -433,7 +433,7 @@ void Tree::permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t
 
   // Permute OOB sample
   //std::vector<size_t> permutations(oob_sampleIDs);
-  std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
+  ranger::shuffle(permutations.begin(), permutations.end(), random_number_generator);
 
   // For each sample, drop down the tree and add prediction
   for (size_t i = 0; i < num_samples_oob; ++i) {
@@ -596,7 +596,7 @@ void Tree::setManualInbag() {
   num_samples_oob = oob_sampleIDs.size();
 
   // Shuffle samples
-  std::shuffle(sampleIDs.begin(), sampleIDs.end(), random_number_generator);
+  ranger::shuffle(sampleIDs.begin(), sampleIDs.end(), random_number_generator);
 
   if (!keep_inbag) {
     inbag_counts.clear();
