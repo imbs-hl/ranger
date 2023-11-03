@@ -42,6 +42,39 @@ void ForestSurvival::loadForest(size_t num_trees, std::vector<std::vector<std::v
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
 
+void ForestSurvival::setUniqueTimepoints(const std::vector<double>& time_interest) {
+  
+  if (time_interest.empty()) {
+    // Use all observed unique time points 
+    std::set<double> unique_timepoint_set;
+    for (size_t i = 0; i < num_samples; ++i) {
+      unique_timepoint_set.insert(data->get_y(i, 0));
+    }
+    unique_timepoints.reserve(unique_timepoint_set.size());
+    for (auto& t : unique_timepoint_set) {
+      unique_timepoints.push_back(t);
+    }
+  } else {
+    // Use the supplied time points of interest
+    unique_timepoints = time_interest;
+  }
+  
+  // Create response_timepointIDs
+  for (size_t i = 0; i < num_samples; ++i) {
+    double value = data->get_y(i, 0);
+    
+    // If timepoint is already in unique_timepoints, use ID. Else create a new one.
+    uint timepointID = 0;
+    if (value > unique_timepoints[0]) {
+      timepointID = std::upper_bound(unique_timepoints.begin(), unique_timepoints.end(), value) - 1 - unique_timepoints.begin();
+    }
+    if (timepointID < 0) {
+      timepointID = 0;
+    }
+    response_timepointIDs.push_back(timepointID);
+  }
+}
+
 std::vector<std::vector<std::vector<double>>> ForestSurvival::getChf() const {
   std::vector<std::vector<std::vector<double>>> result;
   result.reserve(num_trees);
@@ -70,27 +103,6 @@ void ForestSurvival::initInternal() {
     min_bucket = DEFAULT_MIN_BUCKET_SURVIVAL;
   }
 
-  // Create unique timepoints
-  if (!prediction_mode) {
-    std::set<double> unique_timepoint_set;
-    for (size_t i = 0; i < num_samples; ++i) {
-      unique_timepoint_set.insert(data->get_y(i, 0));
-    }
-    unique_timepoints.reserve(unique_timepoint_set.size());
-    for (auto& t : unique_timepoint_set) {
-      unique_timepoints.push_back(t);
-    }
-
-    // Create response_timepointIDs
-    for (size_t i = 0; i < num_samples; ++i) {
-      double value = data->get_y(i, 0);
-
-      // If timepoint is already in unique_timepoints, use ID. Else create a new one.
-      uint timepointID = find(unique_timepoints.begin(), unique_timepoints.end(), value) - unique_timepoints.begin();
-      response_timepointIDs.push_back(timepointID);
-    }
-  }
-
   // Sort data if extratrees and not memory saving mode
   if (splitrule == EXTRATREES && !memory_saving_splitting) {
     data->sort();
@@ -98,6 +110,13 @@ void ForestSurvival::initInternal() {
 }
 
 void ForestSurvival::growInternal() {
+  
+  // If unique time points not set, use observed times
+  if (unique_timepoints.empty()) {
+    setUniqueTimepoints(std::vector<double>());
+  }
+  
+  
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(std::make_unique<TreeSurvival>(&unique_timepoints, &response_timepointIDs));

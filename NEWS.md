@@ -1,4 +1,7 @@
 
+# ranger 0.15.4
+* Add time.interest option to restrict unique survival times (faster and saves memory)
+
 # ranger 0.15.3
 * Fix min bucket option in C++ version
 
