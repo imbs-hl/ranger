@@ -838,7 +838,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       }
       # Grid over observed time points
       time <- sort(unique(y[, 1]))
-      time.interest <- time[unique(round(seq.int(1, length(time), length.out = time.interest)))]
+      if (length(time) <= time.interest) {
+        time.interest <- time
+      } else {
+        time.interest <- time[unique(round(seq.int(1, length(time), length.out = time.interest)))]
+      }
     } else {
       time.interest <- sort(unique(time.interest))
     }
