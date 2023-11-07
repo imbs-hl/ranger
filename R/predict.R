@@ -251,6 +251,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   use.regularization.factor <- FALSE
   regularization.usedepth <- FALSE
   node.stats <- FALSE
+  time.interest <- c(0, 0)
+  use.time.interest <- FALSE
   
   ## Use sparse matrix
   if (inherits(x, "dgCMatrix")) {
@@ -274,8 +276,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth,
-                      node.stats)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      node.stats, time.interest, use.time.interest)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
