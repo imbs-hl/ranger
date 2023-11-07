@@ -118,7 +118,7 @@ ranger(
 
 \item{verbose}{Show computation status and estimated runtime.}
 
-\item{node.stats}{Save node statistics. Set to \code{TRUE} to save prediction and number of observations for each node.}
+\item{node.stats}{Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
 

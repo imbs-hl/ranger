@@ -159,6 +159,13 @@ public:
     }
     return result;
   }
+  std::vector<std::vector<double>> getSplitStats() {
+    std::vector<std::vector<double>> result;
+    for (auto& tree : trees) {
+      result.push_back(tree->getSplitStats());
+    }
+    return result;
+  }
 
 protected:
   void grow();

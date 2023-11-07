@@ -390,6 +390,7 @@ void Tree::createEmptyNode() {
   
   if (save_node_stats) {
     num_samples_nodes.push_back(0);
+    split_stats.push_back(0);
   }
 
   createEmptyNodeInternal();

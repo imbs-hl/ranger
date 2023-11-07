@@ -260,6 +260,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       
       if (node_stats) {
         forest_object.push_back(forest->getNumSamplesNodes(), "num.samples.nodes");
+        forest_object.push_back(forest->getSplitStats(), "split.stats");
       }
 
       if (snp_data.nrow() > 1 && order_snps) {
