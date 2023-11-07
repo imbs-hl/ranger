@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ranger</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -178,20 +178,20 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         19          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         18         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          1        11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         21          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         15         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          2        11</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Quantile regression forest</span></span></span>
 <span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span>, quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          24.4          32.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          15.2          30.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          14.7          21.0          22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          10.4          14.3          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Quantile regression forest with user-specified function</span></span></span>
@@ -200,12 +200,12 @@ To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, 
 <span class="r-in"><span>                what <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 21.0 30.4 21.0 18.1 22.8 24.4 32.4 32.4 30.4  33.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 30.4 27.3 21.0 18.1 22.8 33.9 27.3 21.5 21.0  21.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 30.4 21.0 21.0 14.7 19.2 13.3 18.7 30.4 14.3  27.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 21.0 24.4 19.2 21.0 19.2 22.8 19.2 21.0 21.0  21.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 13.3 13.3 10.4 14.3 19.2 16.4 17.3 13.3 17.8  10.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 22.8 30.4 32.4 33.9 22.8 22.8 18.1 24.4 27.3  21.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 33.9 22.8 27.3 22.8 32.4 30.4 27.3 32.4 33.9  21.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 15.5 33.9 30.4 32.4 27.3 22.8 21.0 30.4 21.5  21.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 32.4 33.9 32.4 14.7 21.0 10.4 32.4 13.3 14.3  18.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 14.3 17.3 21.5 21.0 17.8 24.4 22.8 19.2 18.7  21.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 14.7 19.2 14.7 13.3 13.3 10.4 14.7 18.7 21.0  13.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 21.5 21.0 22.8 22.8 22.8 33.9 22.8 21.0 22.8  32.4</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
