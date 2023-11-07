@@ -126,7 +126,7 @@ test_that("Survival error for competing risk data", {
 })
 
 test_that("Right unique time points without time.interest", {
-  times <- sort(unique(veteran$time))
+  times <- sort(unique(veteran$time[veteran$status > 0]))
   
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
   expect_equal(timepoints(rf), times)
@@ -172,7 +172,7 @@ test_that("time.interest results in the right time points", {
 })
 
 test_that("If more unique time points requested then observed, use observed times", {
-  times <- sort(unique(veteran$time))
+  times <- sort(unique(veteran$time[veteran$status > 0]))
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, time.interest = 200)
   expect_equal(timepoints(rf), times)
 })
