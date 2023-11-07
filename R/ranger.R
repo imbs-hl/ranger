@@ -837,7 +837,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
         stop("Error: time.interest must be a positive integer.")
       }
       # Grid over observed time points
-      time <- sort(unique(y[, 1]))
+      nocens <- y[, 2] > 0
+      time <- sort(unique(y[nocens, 1]))
       if (length(time) <= time.interest) {
         time.interest <- time
       } else {

@@ -48,7 +48,9 @@ void ForestSurvival::setUniqueTimepoints(const std::vector<double>& time_interes
     // Use all observed unique time points 
     std::set<double> unique_timepoint_set;
     for (size_t i = 0; i < num_samples; ++i) {
-      unique_timepoint_set.insert(data->get_y(i, 0));
+      if (data->get_y(i, 1) > 0) {
+        unique_timepoint_set.insert(data->get_y(i, 0));
+      }
     }
     unique_timepoints.reserve(unique_timepoint_set.size());
     for (auto& t : unique_timepoint_set) {
@@ -65,8 +67,10 @@ void ForestSurvival::setUniqueTimepoints(const std::vector<double>& time_interes
     
     // If timepoint is already in unique_timepoints, use ID. Else create a new one.
     uint timepointID = 0;
-    if (value > unique_timepoints[0]) {
-      timepointID = std::upper_bound(unique_timepoints.begin(), unique_timepoints.end(), value) - 1 - unique_timepoints.begin();
+    if (value > unique_timepoints[unique_timepoints.size() - 1]) {
+      timepointID = unique_timepoints.size() - 1;
+    } else if (value > unique_timepoints[0]) {
+      timepointID = std::lower_bound(unique_timepoints.begin(), unique_timepoints.end(), value) - unique_timepoints.begin();
     }
     if (timepointID < 0) {
       timepointID = 0;
