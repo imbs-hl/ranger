@@ -57,7 +57,7 @@ test_that("predict works for single observations, survival", {
 
 ## Special tests for random forests for survival analysis
 test_that("unique death times in survival result is right", {
-  expect_equal(rg.surv$unique.death.times, sort(unique(veteran$time)))
+  expect_equal(rg.surv$unique.death.times, sort(unique(veteran$time[veteran$status > 0])))
 })
 
 test_that("C-index splitting works", {
