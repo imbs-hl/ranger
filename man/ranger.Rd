@@ -34,6 +34,7 @@ ranger(
   inbag = NULL,
   holdout = FALSE,
   quantreg = FALSE,
+  time.interest = NULL,
   oob.error = TRUE,
   num.threads = NULL,
   save.memory = FALSE,
@@ -105,6 +106,8 @@ ranger(
 \item{holdout}{Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.}
 
 \item{quantreg}{Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.}
+
+\item{time.interest}{Time points of interest (survival only). Can be \code{NULL} (default, use all observed time points), a vector of time points or a single number to use as many time points (grid over observed time points).}
 
 \item{oob.error}{Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.}
 

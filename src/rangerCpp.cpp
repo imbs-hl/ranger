@@ -61,7 +61,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
-    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth) {
+    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth, 
+    std::vector<double>& time_interest, bool use_time_interest) {
   
   Rcpp::List result;
 
@@ -87,6 +88,9 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     }
     if (!use_regularization_factor) {
       regularization_factor.clear();
+    }
+    if (!use_time_interest) {
+      time_interest.clear();
     }
 
     std::ostream* verbose_out;
@@ -190,6 +194,12 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       } else if (treetype == TREE_PROBABILITY && !class_weights.empty()) {
         auto& temp = dynamic_cast<ForestProbability&>(*forest);
         temp.setClassWeights(class_weights);
+      }
+      
+      // Set time points of interest
+      if (treetype == TREE_SURVIVAL && !time_interest.empty()) {
+        auto& temp = dynamic_cast<ForestSurvival&>(*forest);
+        temp.setUniqueTimepoints(time_interest);
       }
     }
 

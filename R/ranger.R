@@ -115,6 +115,7 @@
 ##' @param inbag Manually set observations per tree. List of size num.trees, containing inbag counts for each observation. Can be used for stratified sampling.
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
 ##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
+##' @param time.interest Time points of interest (survival only). Can be \code{NULL} (default, use all observed time points), a vector of time points or a single number to use as many time points (grid over observed time points).
 ##' @param oob.error Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
@@ -222,7 +223,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    local.importance = FALSE, 
                    regularization.factor = 1, regularization.usedepth = FALSE,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
-                   quantreg = FALSE, oob.error = TRUE,
+                   quantreg = FALSE, time.interest = NULL, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
@@ -822,6 +823,32 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
+  ## Time of interest
+  if (is.null(time.interest)) {
+    time.interest <- c(0, 0)
+    use.time.interest <- FALSE
+  } else {
+    use.time.interest <- TRUE
+    if (treetype != 5) {
+      stop("Error: time.interest only applicable to survival forests.")
+    }
+    if (is.numeric(time.interest) & length(time.interest) == 1) {
+      if (time.interest < 1) {
+        stop("Error: time.interest must be a positive integer.")
+      }
+      # Grid over observed time points
+      nocens <- y[, 2] > 0
+      time <- sort(unique(y[nocens, 1]))
+      if (length(time) <= time.interest) {
+        time.interest <- time
+      } else {
+        time.interest <- time[unique(round(seq.int(1, length(time), length.out = time.interest)))]
+      }
+    } else {
+      time.interest <- sort(unique(time.interest))
+    }
+  }
+  
   ## Prediction mode always false. Use predict.ranger() method.
   prediction.mode <- FALSE
   predict.all <- FALSE
@@ -873,7 +900,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      time.interest, use.time.interest)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
