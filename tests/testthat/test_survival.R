@@ -8,9 +8,9 @@ context("ranger_surv")
 rg.surv <- ranger(Surv(time, status) ~ ., data = veteran, num.trees = 10)
 
 ## Basic tests (for all random forests equal)
-test_that("survival result is of class ranger with 15 elements", {
+test_that("survival result is of class ranger with 17 elements", {
   expect_is(rg.surv, "ranger")
-  expect_equal(length(rg.surv), 15)
+  expect_equal(length(rg.surv), 17)
 })
 
 test_that("results have right number of trees", {
