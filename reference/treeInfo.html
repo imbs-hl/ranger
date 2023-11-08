@@ -93,27 +93,25 @@ In the "partition" mode, the <code>splitval</code> values for unordered factor a
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="ranger.html">ranger</a></span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">treeInfo</span><span class="op">(</span><span class="va">rf</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    nodeID leftChild rightChild splitvarID splitvarName splitval terminal</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0         1          2          3  Petal.Width     0.75    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0         1          2          3  Petal.Width     0.80    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       1        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       2         3          4          0 Sepal.Length     6.65    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       3         5          6          0 Sepal.Length     5.55    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       4         7          8          3  Petal.Width     1.55    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       2         3          4          0 Sepal.Length     5.95    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       3         5          6          3  Petal.Width     1.65    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       4         7          8          0 Sepal.Length     7.05    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6       5        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7       6         9         10          2 Petal.Length     4.95    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8       7        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9       8        11         12          0 Sepal.Length     6.75    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10      9        13         14          2 Petal.Length     4.75    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7       6         9         10          1  Sepal.Width     3.10    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8       7        11         12          3  Petal.Width     1.75    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9       8        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10      9        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11     10        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12     11        15         16          1  Sepal.Width     3.15    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12     11        13         14          2 Petal.Length     5.35    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13     12        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14     13        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15     14        17         18          1  Sepal.Width     2.65    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16     15        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14     13        15         16          1  Sepal.Width     2.25    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15     14        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16     15        17         18          2 Petal.Length     4.75    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17     16        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18     17        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19     18        19         20          1  Sepal.Width     3.10    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20     19        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21     20        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19     18        NA         NA         NA         &lt;NA&gt;       NA     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    prediction</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      setosa</span>
@@ -122,20 +120,18 @@ In the "partition" mode, the <code>splitval</code> values for unordered factor a
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10       &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8        &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12       &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13  virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15       &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14       &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15  virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16       &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17 versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18 versicolor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19       &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20  virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 versicolor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  virginica</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
