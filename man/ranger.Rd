@@ -155,6 +155,8 @@ Object of class \code{ranger} with elements
   \item{\code{importance.mode}}{Importance mode used.}
   \item{\code{num.samples}}{Number of samples.}
   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
+  \item{\code{dependent.variable.name}}{Name of the dependent variable. This is NULL when x/y interface is used.}
+  \item{\code{status.variable.name}}{Name of the status variable (survival only). This is NULL when x/y interface is used.}
 }
 \description{
 Ranger is a fast implementation of random forests (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.

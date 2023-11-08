@@ -148,6 +148,8 @@
 ##'   \item{\code{importance.mode}}{Importance mode used.}
 ##'   \item{\code{num.samples}}{Number of samples.}
 ##'   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
+##'   \item{\code{dependent.variable.name}}{Name of the dependent variable. This is NULL when x/y interface is used.}
+##'   \item{\code{status.variable.name}}{Name of the status variable (survival only). This is NULL when x/y interface is used.}
 ##' @examples
 ##' ## Classification forest with default settings
 ##' ranger(Species ~ ., data = iris)
@@ -278,6 +280,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
         stop("Error: Invalid formula.")
       }
       data.selected <- parse.formula(formula, data, env = parent.frame())
+      dependent.variable.name <- all.vars(formula)[1]
+      if (survival::is.Surv(data.selected[, 1])) {
+        status.variable.name <- all.vars(formula)[2]
+      }
       y <- data.selected[, 1]
       x <- data.selected[, -1, drop = FALSE]
     }
@@ -1002,6 +1008,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       result$forest$covariate.levels <- covariate.levels
     }
   }
+  
+  ## Dependent (and status) variable name
+  ## will be NULL only when x/y interface is used
+  result$dependent.variable.name <- dependent.variable.name
+  result$status.variable.name <- status.variable.name
   
   class(result) <- "ranger"
   
