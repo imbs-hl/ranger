@@ -280,7 +280,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 <dd><p>Saved forest (If write.forest set to TRUE). Note that the variable IDs in the <code>split.varIDs</code> object do not necessarily represent the column number in R.</p></dd>
 
   <dt><code>predictions</code></dt>
-<dd><p>Predicted classes/values, based on out of bag samples (classification and regression only).</p></dd>
+<dd><p>Predicted classes/values, based on out-of-bag samples (classification and regression only).</p></dd>
 
   <dt><code>variable.importance</code></dt>
 <dd><p>Variable importance for each independent variable.</p></dd>
@@ -289,13 +289,13 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 <dd><p>Variable importance for each independent variable and each sample, if <code>local.importance</code> is set to TRUE and <code>importance</code> is set to 'permutation'.</p></dd>
 
   <dt><code>prediction.error</code></dt>
-<dd><p>Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.</p></dd>
+<dd><p>Overall out-of-bag prediction error. For classification this is accuracy (proportion of misclassified observations), for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.</p></dd>
 
   <dt><code>r.squared</code></dt>
-<dd><p>R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.</p></dd>
+<dd><p>R squared. Also called explained variance or coefficient of determination (regression only). Computed on out-of-bag data.</p></dd>
 
   <dt><code>confusion.matrix</code></dt>
-<dd><p>Contingency table for classes and predictions based on out of bag samples (classification only).</p></dd>
+<dd><p>Contingency table for classes and predictions based on out-of-bag samples (classification only).</p></dd>
 
   <dt><code>unique.death.times</code></dt>
 <dd><p>Unique death times (survival only).</p></dd>
@@ -371,6 +371,19 @@ Note that the factors are only reordered once and not again in each split.</p>
 It is a modified version of the method by Sandri &amp; Zuccolotto (2008), which is faster and more memory efficient. See Nembrini et al. (2018) for details.
 This importance measure can be combined with the methods to estimate p-values in <code><a href="importance_pvalues.html">importance_pvalues</a></code>. 
 We recommend not to use the 'impurity_corrected' importance when making predictions since the feature permutation step might reduce predictive performance (a warning is raised when predicting on new data).</p>
+<p>Note that ranger has different default values than other packages.
+For example, our default for <code>mtry</code> is the square root of the number of variables for all tree types, whereas other packages use different values for regression.
+Also, changing one hyperparameter does not change other hyperparameters (where possible). 
+For example, <code>splitrule="extratrees"</code> uses randomized splitting but does not disable bagging as in Geurts et al. (2006).
+To disable bagging, use <code>replace = FALSE, sample.fraction = 1</code>. 
+This can also be used to grow a single decision tree without bagging and feature subsetting: <code>ranger(..., num.trees = 1, mtry = p, replace = FALSE, sample.fraction = 1)</code>, where p is the number of independent variables.</p>
+<p>While random forests are known for their robustness, default hyperparameters not always work well. 
+For example, for high dimensional data, increasing the <code>mtry</code> value and the number of trees <code>num.trees</code> is recommended. 
+For more details and recommendations, see Probst et al. (2019). 
+To find the best hyperparameters, consider hyperparameter tuning with the <code>tuneRanger</code> or <code>mlr3</code> packages.</p>
+<p>Out-of-bag prediction error is calculated as accuracy (proportion of misclassified observations) for classification, as Brier score for probability estimation, as mean squared error (MSE) for regression and as one minus Harrell's C-index for survival.
+Harrell's C-index is calculated based on the sum of the cumulative hazard function (CHF) over all timepoints, i.e., <code>rowSums(chf)</code>, where <code>chf</code> is the the out-of-bag CHF; for details, see Ishwaran et al. (2008).
+Calculation of the out-of-bag prediction error can be turned off with <code>oob.error = FALSE</code>.</p>
 <p>Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng &amp; Runger (2012) for details.  
 If <code>regularization.usedepth=TRUE</code>, \(f^d\) is used, where <em>f</em> is the regularization factor and <em>d</em> the depth of the node.
 If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.</p>
@@ -414,6 +427,8 @@ If you compile yourself, the new RTools toolchain is required.</p>
 .</p></li>
 <li><p>Deng &amp; Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. <a href="https://doi.org/10.1109/IJCNN.2012.6252640" class="external-link">doi:10.1109/IJCNN.2012.6252640</a>
 .</p></li>
+<li><p>Probst, P., Wright, M. N. &amp; Boulesteix, A-L. (2019). Hyperparameters and tuning strategies for random forest. WIREs Data Mining Knowl Discov 9:e1301.<a href="https://doi.org/10.1002/widm.1301" class="external-link">doi:10.1002/widm.1301</a>
+.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -452,27 +467,27 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">iris.test</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pred.iris</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              setosa versicolor virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         20          0         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         12         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          0        18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   setosa         19          0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   versicolor      0         13         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   virginica       0          1        17</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Quantile regression forest</span></span></span>
 <span class="r-in"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">26</span>, <span class="op">]</span>, quantreg <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">rf</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">27</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"quantiles"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pred</span><span class="op">$</span><span class="va">predictions</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      quantile= 0.1 quantile= 0.5 quantile= 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          22.8          32.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]          21.0          24.4          32.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]          21.0          22.8          32.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          16.4          30.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.2          21.0          22.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          13.3          14.3          19.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]          13.3          17.8          30.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]          15.5          21.0          22.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]          10.4          14.3          19.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]          21.0          22.8          32.4</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Variable importance</span></span></span>
 <span class="r-in"><span><span class="va">rg.iris</span> <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rg.iris</span><span class="op">$</span><span class="va">variable.importance</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length  Sepal.Width Petal.Length  Petal.Width </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     9.503903     2.355459    44.949561    42.379150 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8.870803     2.257838    42.978683    45.136374 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Survival forest</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -496,7 +511,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
 <span class="r-in"><span><span class="fu">ranger</span><span class="op">(</span>y <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">5</span><span class="op">]</span>, x <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="op">-</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ranger result</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -511,7 +526,7 @@ If you compile yourself, the new RTools toolchain is required.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## Use GenABEL interface to read Plink data into R and grow a classification forest</span></span></span>
