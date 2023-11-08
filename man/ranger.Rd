@@ -196,6 +196,18 @@ It is a modified version of the method by Sandri & Zuccolotto (2008), which is f
 This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}. 
 We recommend not to use the 'impurity_corrected' importance when making predictions since the feature permutation step might reduce predictive performance (a warning is raised when predicting on new data). 
 
+Note that ranger has different default values than other packages.
+For example, our default for \code{mtry} is the square root of the number of variables for all tree types, whereas other packages use different values for regression.
+Also, changing one hyperparameter does not change other hyperparameters (where possible). 
+For example, \code{splitrule="extratrees"} uses randomized splitting but does not disable bagging as in Geurts et al. (2006).
+To disable bagging, use \code{replace = FALSE, sample.fraction = 1}. 
+This can also be used to grow a single decision tree without bagging and feature subsetting: \code{ranger(..., num.trees = 1, mtry = p, replace = FALSE, sample.fraction = 1)}, where p is the number of independent variables.
+
+While random forests are known for their robustness, default hyperparameters not always work well. 
+For example, for high dimensional data, increasing the \code{mtry} value and the number of trees \code{num.trees} is recommended. 
+For more details and recommendations, see Probst et al. (2019). 
+To find the best hyperparameters, consider hyperparameter tuning with the \code{tuneRanger} or \code{mlr3} packages.
+
 Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
 If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
 If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.
@@ -272,6 +284,7 @@ ranger(trait ~ ., data = dat.gwaa)
   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \doi{10.1198/106186008X344522}.
   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \doi{10.1023/A:1009869804967}.
   \item Deng & Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. \doi{10.1109/IJCNN.2012.6252640}.
+  \item Probst, P., Wright, M. N. & Boulesteix, A-L. (2019). Hyperparameters and tuning strategies for random forest. WIREs Data Mining Knowl Discov 9:e1301.\doi{10.1002/widm.1301}.
   }
 }
 \seealso{
