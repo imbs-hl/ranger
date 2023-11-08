@@ -60,6 +60,12 @@ void TreeRegression::appendToFileInternal(std::ofstream& file) { // #nocov start
 bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+  
+  // Save node statistics
+  if (save_node_stats) {
+    num_samples_nodes[nodeID] = num_samples_node;
+    node_predictions[nodeID] = estimate(nodeID);
+  }
 
   // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
@@ -105,7 +111,9 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
 }
 
 void TreeRegression::createEmptyNodeInternal() {
-  // Empty on purpose
+  if (save_node_stats) {
+    node_predictions.push_back(0);
+  }
 }
 
 double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
@@ -176,6 +184,11 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -505,6 +518,11 @@ bool TreeRegression::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& po
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+    
+    // Save split statistics
+    if (save_node_stats) {
+      split_stats[nodeID] = best_maxstat;
+    }
 
     // Compute decrease of impurity for this node and add to variable importance if needed
     if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -553,6 +571,11 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -786,6 +809,11 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {

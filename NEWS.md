@@ -1,5 +1,6 @@
 
 # ranger 0.15.4
+* Add node.stats option to save node statistics of all nodes
 * Add time.interest option to restrict unique survival times (faster and saves memory)
 
 # ranger 0.15.3

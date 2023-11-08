@@ -250,6 +250,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   regularization.factor <- c(0, 0)
   use.regularization.factor <- FALSE
   regularization.usedepth <- FALSE
+  node.stats <- FALSE
   time.interest <- c(0, 0)
   use.time.interest <- FALSE
   
@@ -276,7 +277,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth, 
-                      time.interest, use.time.interest)
+                      node.stats, time.interest, use.time.interest)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

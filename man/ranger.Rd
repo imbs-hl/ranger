@@ -39,6 +39,7 @@ ranger(
   num.threads = NULL,
   save.memory = FALSE,
   verbose = TRUE,
+  node.stats = FALSE,
   seed = NULL,
   dependent.variable.name = NULL,
   status.variable.name = NULL,
@@ -116,6 +117,8 @@ ranger(
 \item{save.memory}{Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
 
 \item{verbose}{Show computation status and estimated runtime.}
+
+\item{node.stats}{Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
 

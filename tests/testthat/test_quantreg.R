@@ -2,7 +2,7 @@ library(ranger)
 context("ranger_quantreg")
 
 rf.quant <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE, 
-                   keep.inbag = TRUE, num.trees = 50)
+                   keep.inbag = TRUE, num.trees = 500)
 pred.quant <- predict(rf.quant, mtcars[27:32, ], type = "quantiles")
 
 test_that("Quantile prediction is of correct size", {
