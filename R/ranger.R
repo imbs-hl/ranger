@@ -76,6 +76,10 @@
 ##' For example, for high dimensional data, increasing the \code{mtry} value and the number of trees \code{num.trees} is recommended. 
 ##' For more details and recommendations, see Probst et al. (2019). 
 ##' To find the best hyperparameters, consider hyperparameter tuning with the \code{tuneRanger} or \code{mlr3} packages.
+##' 
+##' Out-of-bag prediction error is calculated as accuracy (proportion of misclassified observations) for classification, as Brier score for probability estimation, as mean squared error (MSE) for regression and as one minus Harrell's C-index for survival.
+##' Harrell's C-index is calculated based on the sum of the cumulative hazard function (CHF) over all timepoints, i.e., \code{rowSums(chf)}, where \code{chf} is the the out-of-bag CHF; for details, see Ishwaran et al. (2008).
+##' Calculation of the out-of-bag prediction error can be turned off with \code{oob.error = FALSE}.
 ##'
 ##' Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
 ##' If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
@@ -141,12 +145,12 @@
 ##' @param ... Further arguments passed to or from other methods (currently ignored).
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
-##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
+##'   \item{\code{predictions}}{Predicted classes/values, based on out-of-bag samples (classification and regression only).}
 ##'   \item{\code{variable.importance}}{Variable importance for each independent variable.}
 ##'   \item{\code{variable.importance.local}}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'.}
-##'   \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
-##'   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
-##'   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
+##'   \item{\code{prediction.error}}{Overall out-of-bag prediction error. For classification this is accuracy (proportion of misclassified observations), for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
+##'   \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out-of-bag data.}
+##'   \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out-of-bag samples (classification only).}
 ##'   \item{\code{unique.death.times}}{Unique death times (survival only).}
 ##'   \item{\code{chf}}{Estimated cumulative hazard function for each sample (survival only).}
 ##'   \item{\code{survival}}{Estimated survival function for each sample (survival only).}
