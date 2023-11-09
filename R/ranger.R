@@ -296,6 +296,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       if (!inherits(formula, "formula")) {
         stop("Error: Invalid formula.")
       }
+      if (ncol(data) > 10000) {
+        warning("Avoid the formula interface for high-dimensional data. If ranger is slow or you get a 'protection stack overflow' error, consider the x/y or dependent.variable.name interface (see examples).")
+      }
       data.selected <- parse.formula(formula, data, env = parent.frame())
       dependent.variable.name <- all.vars(formula)[1]
       if (survival::is.Surv(data.selected[, 1])) {
