@@ -301,7 +301,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       }
       data.selected <- parse.formula(formula, data, env = parent.frame())
       dependent.variable.name <- all.vars(formula)[1]
-      if (survival::is.Surv(data.selected[, 1])) {
+      if (inherits(data.selected[, 1], "Surv")) {
         status.variable.name <- all.vars(formula)[2]
       }
       y <- data.selected[, 1]
