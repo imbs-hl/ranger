@@ -106,6 +106,29 @@ public:
     }
   }
   
+  std::vector<double> lm_coefs(std::vector<size_t>& sampleIDs, size_t start, size_t end) override {
+    if (confounders.size() > 0) {
+      std::vector<size_t> idx;
+      idx.assign(sampleIDs.begin() + start, sampleIDs.begin() + end);
+      
+      arma::uvec ia = arma::conv_to<arma::uvec>::from(idx);
+      
+      arma::mat ca = arma::mat(confounders.begin(), confounders.nrow(),
+                               confounders.ncol(), false);
+      arma::colvec ya = arma::colvec(y(Rcpp::_, 0));
+      
+      arma::colvec coef = arma::solve(ca.rows(ia), ya(ia), arma::solve_opts::allow_ugly);
+      
+      return arma::conv_to<std::vector<double>>::from(coef);
+    } else {
+      return std::vector<double>();
+    }
+  }
+  
+  double predict(size_t row, std::vector<double> coefs) override {
+    return arma::dot(arma::vec(confounders(row, Rcpp::_)), arma::vec(coefs));
+  }
+  
   double get_yy(size_t row, size_t col) const override {
     return resid(row);
   }

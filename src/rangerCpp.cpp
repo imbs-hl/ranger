@@ -285,6 +285,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
         if (node_stats) {
           forest_object.push_back(forest->getNodePredictions(), "node.predictions");
         }
+        auto& temp = dynamic_cast<ForestRegression&>(*forest);
+        forest_object.push_back(temp.getGlmCoefs(), "glm.coefs");
       } else if (treetype == TREE_PROBABILITY) {
         auto& temp = dynamic_cast<ForestProbability&>(*forest);
         forest_object.push_back(temp.getClassValues(), "class.values");

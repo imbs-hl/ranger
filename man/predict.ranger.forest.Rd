@@ -15,6 +15,7 @@
   num.threads = NULL,
   verbose = TRUE,
   inbag.counts = NULL,
+  confounders = NULL,
   ...
 )
 }

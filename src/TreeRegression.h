@@ -46,6 +46,10 @@ public:
   size_t getPredictionTerminalNodeID(size_t sampleID) const {
     return prediction_terminal_nodeIDs[sampleID];
   }
+  
+  const std::vector<std::vector<double>>& getGlmCoefs() const {
+    return glm_coefs;
+  }
 
 private:
   bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) override;
@@ -93,6 +97,9 @@ private:
     sums.clear();
     sums.shrink_to_fit();
   }
+  
+  // GLM coefficients in terminal nodes. Empty for non-terminal nodes (except if save_node_stats).
+  std::vector<std::vector<double>> glm_coefs;
 
   std::vector<size_t> counter;
   std::vector<double> sums;

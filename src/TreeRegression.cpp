@@ -42,6 +42,8 @@ void TreeRegression::allocateMemory() {
 }
 
 double TreeRegression::estimate(size_t nodeID) {
+  
+  glm_coefs[nodeID] = data->lm_coefs(sampleIDs, start_pos[nodeID], end_pos[nodeID]);
 
   // Mean of responses of samples in node
   double sum_responses_in_node = 0;
@@ -87,6 +89,7 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   }
   if (pure) {
     split_values[nodeID] = pure_value;
+    glm_coefs[nodeID] = data->lm_coefs(sampleIDs, start_pos[nodeID], end_pos[nodeID]);
     return true;
   }
   
@@ -117,6 +120,7 @@ void TreeRegression::createEmptyNodeInternal() {
   if (save_node_stats) {
     node_predictions.push_back(0);
   }
+  glm_coefs.push_back(std::vector<double>());
 }
 
 double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* prediction_error_casewise) {
@@ -125,7 +129,15 @@ double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* pr
   double sum_of_squares = 0;
   for (size_t i = 0; i < num_predictions; ++i) {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[i];
-    double predicted_value = split_values[terminal_nodeID];
+    
+    double predicted_value;
+    if (glm_coefs[terminal_nodeID].size() > 0) {
+      // Get predicted value from glm in terminal node
+      predicted_value = data->predict(oob_sampleIDs[i], glm_coefs[terminal_nodeID]);
+    } else {
+      predicted_value = split_values[terminal_nodeID];
+    }
+
     double real_value = data->get_y(oob_sampleIDs[i], 0);
     if (predicted_value != real_value) {
       double diff = (predicted_value - real_value) * (predicted_value - real_value);

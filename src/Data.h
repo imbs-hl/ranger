@@ -201,6 +201,16 @@ public:
     // Empty on purpose
   }
   
+  virtual std::vector<double> lm_coefs(std::vector<size_t>& sampleIDs, size_t start, size_t end) {
+    // Empty on purpose
+    return std::vector<double>();
+  }
+  
+  virtual double predict(size_t row, std::vector<double> coefs) {
+    // Empty on purpose
+    return 0;
+  }
+  
   virtual double get_yy(size_t row, size_t col) const {
     return get_y(row, col);
   }

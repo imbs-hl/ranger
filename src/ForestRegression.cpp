@@ -39,6 +39,16 @@ void ForestRegression::loadForest(size_t num_trees,
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
 
+std::vector<std::vector<std::vector<double>>> ForestRegression::getGlmCoefs() const {
+  std::vector<std::vector<std::vector<double>>> result;
+  result.reserve(num_trees);
+  for (const auto& tree : trees) {
+    const auto& temp = dynamic_cast<const TreeRegression&>(*tree);
+    result.push_back(temp.getGlmCoefs());
+  }
+  return result;
+}
+
 void ForestRegression::initInternal() {
 
   // If mtry not set, use floored square root of number of independent variables

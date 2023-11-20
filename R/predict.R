@@ -73,7 +73,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
                                   type = "response", se.method = "infjack",
                                   seed = NULL, num.threads = NULL,
-                                  verbose = TRUE, inbag.counts = NULL, ...) {
+                                  verbose = TRUE, inbag.counts = NULL,
+                                  confounders = NULL, ...) {
 
   ## GenABEL GWA data
   if (inherits(data, "gwaa.data")) {
@@ -120,6 +121,31 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("Error: Apply predict() to the ranger object instead of the $forest object to predict quantiles.")
   } else {
     stop("Error: Invalid value for 'type'. Use 'response', 'se', 'terminalNodes', or 'quantiles'.")
+  }
+  
+  if (!is.null(confounders)) {
+    if (is.null(forest$glm.coefs) || length(unlist(forest$glm.coefs)) == 0) {
+      stop("For glm prediction, fit a regression RF with the confounders argument.")
+    }
+    if (is.data.frame(confounders)) {
+      confounders <- cbind(1, data.matrix(confounders))
+    } else if (is.matrix(confounders)) {
+      confounders <- cbind(1, confounders)
+    } else {
+      stop("Error: confounders argument has to be matrix or data.frame.")
+    }
+    nodes <- predict(object = object, data = data, predict.all = predict.all,
+                     num.trees = num.trees, type = "terminalNodes", se.method = se.method,
+                     seed = seed, num.threads = num.threads,
+                     verbose = verbose, inbag.counts = inbag.counts, ...)$predictions
+    
+    pred <- sapply(1:num.trees, function(i) {
+      tree_coefs <- forest$glm.coefs[[i]][nodes[, i] + 1]
+      sapply(1:length(tree_coefs), function(j) {
+        confounders[j, ] %*% tree_coefs[[j]]
+      })
+    })
+    return(pred)
   }
   
   ## Type "se" only for certain tree types
