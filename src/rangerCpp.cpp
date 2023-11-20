@@ -63,7 +63,8 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     uint num_random_splits, arma::sp_mat& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
-    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth, 
+    std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth,
+    bool node_stats, std::vector<double>& time_interest, bool use_time_interest, 
     Rcpp::NumericMatrix confounders, bool use_confounders) {
   
   Rcpp::List result;
@@ -93,6 +94,9 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     }
     if (!use_confounders) {
       confounders = Rcpp::NumericMatrix();
+    }
+    if (!use_time_interest) {
+      time_interest.clear();
     }
 
     std::ostream* verbose_out;
@@ -158,7 +162,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
         importance_mode, min_node_size, min_bucket, split_select_weights, always_split_variable_names,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
         inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
-        order_snps, max_depth, regularization_factor, regularization_usedepth);
+        order_snps, max_depth, regularization_factor, regularization_usedepth, node_stats);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {
@@ -196,6 +200,12 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       } else if (treetype == TREE_PROBABILITY && !class_weights.empty()) {
         auto& temp = dynamic_cast<ForestProbability&>(*forest);
         temp.setClassWeights(class_weights);
+      }
+      
+      // Set time points of interest
+      if (treetype == TREE_SURVIVAL && !time_interest.empty()) {
+        auto& temp = dynamic_cast<ForestSurvival&>(*forest);
+        temp.setUniqueTimepoints(time_interest);
       }
     }
 
@@ -253,6 +263,11 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       forest_object.push_back(forest->getSplitVarIDs(), "split.varIDs");
       forest_object.push_back(forest->getSplitValues(), "split.values");
       forest_object.push_back(forest->getIsOrderedVariable(), "is.ordered");
+      
+      if (node_stats) {
+        forest_object.push_back(forest->getNumSamplesNodes(), "num.samples.nodes");
+        forest_object.push_back(forest->getSplitStats(), "split.stats");
+      }
 
       if (snp_data.nrow() > 1 && order_snps) {
         // Exclude permuted SNPs (if any)
@@ -263,6 +278,13 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       if (treetype == TREE_CLASSIFICATION) {
         auto& temp = dynamic_cast<ForestClassification&>(*forest);
         forest_object.push_back(temp.getClassValues(), "class.values");
+        if (node_stats) {
+          forest_object.push_back(forest->getNodePredictions(), "node.predictions");
+        }
+      } else if (treetype == TREE_REGRESSION) {
+        if (node_stats) {
+          forest_object.push_back(forest->getNodePredictions(), "node.predictions");
+        }
       } else if (treetype == TREE_PROBABILITY) {
         auto& temp = dynamic_cast<ForestProbability&>(*forest);
         forest_object.push_back(temp.getClassValues(), "class.values");

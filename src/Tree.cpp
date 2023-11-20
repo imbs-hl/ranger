@@ -18,8 +18,9 @@ namespace ranger {
 
 Tree::Tree() :
     mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), min_bucket(0), deterministic_varIDs(0), split_select_weights(0), case_weights(
-        0), manual_inbag(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(
-        false), split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
+        0), manual_inbag(0), oob_sampleIDs(0), save_node_stats(false), num_samples_nodes(0), node_predictions(0), 
+        holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false), 
+        split_varIDs_used(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
         DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
         0) {
@@ -29,7 +30,8 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
     std::vector<double>& split_values) :
     mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), min_bucket(0), deterministic_varIDs(0), split_select_weights(0), case_weights(
         0), manual_inbag(0), split_varIDs(split_varIDs), split_values(split_values), child_nodeIDs(child_nodeIDs), oob_sampleIDs(
-        0), holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false), split_varIDs_used(
+        0), save_node_stats(false), num_samples_nodes(0), node_predictions(0), 
+        holdout(false), keep_inbag(false), data(0), regularization_factor(0), regularization_usedepth(false), split_varIDs_used(
         0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(
         0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
         DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
@@ -41,12 +43,13 @@ void Tree::init(Data* data, uint mtry, size_t num_samples, uint seed, std::vecto
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
     double minprop, bool holdout, uint num_random_splits, uint max_depth, std::vector<double>* regularization_factor,
-    bool regularization_usedepth, std::vector<bool>* split_varIDs_used) {
+    bool regularization_usedepth, std::vector<bool>* split_varIDs_used, bool save_node_stats) {
 
   this->data = data;
   this->mtry = mtry;
   this->num_samples = num_samples;
   this->memory_saving_splitting = memory_saving_splitting;
+  this->save_node_stats = save_node_stats;
 
   // Create root node, assign bootstrap sample and oob samples
   child_nodeIDs.push_back(std::vector<size_t>());
@@ -384,6 +387,11 @@ void Tree::createEmptyNode() {
   child_nodeIDs[1].push_back(0);
   start_pos.push_back(0);
   end_pos.push_back(0);
+  
+  if (save_node_stats) {
+    num_samples_nodes.push_back(0);
+    split_stats.push_back(0);
+  }
 
   createEmptyNodeInternal();
 }
