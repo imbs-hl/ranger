@@ -128,7 +128,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
       stop("For glm prediction, fit a regression RF with the confounders argument.")
     }
     if (is.data.frame(confounders)) {
-      confounders <- cbind(1, data.matrix(confounders))
+      confounders <- model.matrix( ~ ., confounders)
     } else if (is.matrix(confounders)) {
       confounders <- cbind(1, confounders)
     } else {

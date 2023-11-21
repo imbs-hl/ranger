@@ -101,7 +101,7 @@ public:
                                confounders.ncol(), false);
       arma::colvec ya = arma::colvec(y(Rcpp::_, 0));
       
-      arma::colvec coef = arma::solve(ca.rows(ia), ya(ia), arma::solve_opts::allow_ugly);
+      arma::colvec coef = arma::solve(ca.rows(ia), ya(ia));
       resid(ia) = ya(ia) - ca.rows(ia)*coef;
     }
   }
@@ -117,7 +117,7 @@ public:
                                confounders.ncol(), false);
       arma::colvec ya = arma::colvec(y(Rcpp::_, 0));
       
-      arma::colvec coef = arma::solve(ca.rows(ia), ya(ia), arma::solve_opts::allow_ugly);
+      arma::colvec coef = arma::solve(ca.rows(ia), ya(ia));
       
       return arma::conv_to<std::vector<double>>::from(coef);
     } else {
