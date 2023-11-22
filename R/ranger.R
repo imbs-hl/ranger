@@ -659,7 +659,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (length(inbag) != num.trees) {
       stop("Error: Size of inbag list not equal to number of trees.")
     }
-    if (any(sapply(inbags, length) != nrow(x))) {
+    if (any(sapply(inbag, length) != nrow(x))) {
       stop("Error: Size of at least one element in inbag not equal to number of samples.")
     }
   } else {
