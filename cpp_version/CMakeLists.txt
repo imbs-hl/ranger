@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 project(ranger)
+include (GNUInstallDirs)
 
 ## ======================================================================================##
 ## Check for C++14
@@ -10,7 +11,11 @@ set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 ## ======================================================================================##
 ## Compiler flags
 ## ======================================================================================##
-add_compile_options(-Wall)
+include (CheckCXXCompilerFlag)
+check_cxx_compiler_flag ("-Wall" COMPILER_SUPPORTS_WALL)
+if (COMPILER_SUPPORTS_WALL)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif ()
 
 ## ======================================================================================##
 ## Threads
@@ -43,10 +48,32 @@ ADD_CUSTOM_TARGET(release
   )
 
 ## ======================================================================================##
+## Library
+## ======================================================================================##
+file(GLOB_RECURSE SOURCES src/utility/*.cpp src/Forest/*.cpp src/Tree/*.cpp)
+if (MSVC)
+  list(APPEND SOURCES src/getopt/getopt.c)
+endif ()
+option(BUILD_SHARED_LIBS "shared/static lib" OFF)
+add_library(ranger ${SOURCES})
+target_include_directories(ranger PUBLIC src/utility src/Forest src/Tree src)
+if (MSVC)
+  target_include_directories(ranger PRIVATE src/getopt)
+endif ()
+target_link_libraries(ranger Threads::Threads)
+install(TARGETS ranger RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+                       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+file(GLOB_RECURSE HEADERS src/*.h)
+install (FILES ${HEADERS} DESTINATION include/ranger)
+
+## ======================================================================================##
 ## Executable
 ## ======================================================================================##
-add_executable(ranger ${SOURCES})
-target_link_libraries(ranger Threads::Threads)
+add_executable(ranger-cli src/main.cpp)
+set_target_properties(ranger-cli PROPERTIES OUTPUT_NAME ranger)
+target_link_libraries(ranger-cli ranger)
+install(TARGETS ranger-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 ## ======================================================================================##
 ## Test
