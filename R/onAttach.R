@@ -15,7 +15,7 @@
   } else if (!is.null(threads_option2)) {
     thread_string <- paste(threads_option2, "threads as set by options(Ncpus = N). Can be overwritten with num.threads.")
   } else {
-    thread_string <- "2 threads (default). Change with num.threads in ranger() and predict(), options(ranger.num.threads = N) or environment variable R_RANGER_NUM_THREADS."
+    thread_string <- "2 threads (default). Change with num.threads in ranger() and predict(), options(Ncpus = N), options(ranger.num.threads = N) or environment variable R_RANGER_NUM_THREADS."
   }
   
   packageStartupMessage(paste("ranger", packageVersion("ranger"), "using", thread_string))
