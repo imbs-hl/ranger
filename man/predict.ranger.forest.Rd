@@ -33,7 +33,7 @@
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
-\item{num.threads}{Number of threads. Default is number of CPUs available.}
+\item{num.threads}{Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).}
 
 \item{verbose}{Verbose output on or off.}
 
@@ -66,6 +66,9 @@ If \code{type = 'se'} is selected, the method to estimate the variances can be c
 
 For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+
+By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 }
 \references{
 \itemize{
