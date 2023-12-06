@@ -514,7 +514,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Num threads
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
-    num.threads = 0
+    num.threads <- as.integer(Sys.getenv("R_RANGER_NUM_THREADS", getOption("ranger.num.threads", 2L)))
   } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
