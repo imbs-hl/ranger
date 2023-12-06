@@ -112,7 +112,7 @@ ranger(
 
 \item{oob.error}{Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.}
 
-\item{num.threads}{Number of threads. Default is 2 if not set by options/environment variables (see below).}
+\item{num.threads}{Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).}
 
 \item{save.memory}{Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
 

@@ -48,7 +48,7 @@
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.
 ##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
-##' @param num.threads Number of threads. Default is 2 if not set by options/environment variables (see below).
+##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param verbose Verbose output on or off.
 ##' @param inbag.counts Number of times the observations are in-bag in the trees.
 ##' @param ... further arguments passed to or from other methods.
@@ -450,7 +450,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param quantiles Vector of quantiles for quantile prediction. Set \code{type = 'quantiles'} to use.
 ##' @param what User specified function for quantile prediction used instead of \code{quantile}. Must return numeric vector, see examples.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
-##' @param num.threads Number of threads. Default is 2 if not set by options/environment variables (see below).
+##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param verbose Verbose output on or off.
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements

@@ -38,7 +38,7 @@
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.}
 
-\item{num.threads}{Number of threads. Default is 2 if not set by options/environment variables (see below).}
+\item{num.threads}{Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).}
 
 \item{verbose}{Verbose output on or off.}
 
