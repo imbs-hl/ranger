@@ -28,11 +28,11 @@ namespace ranger {
 
 Forest::Forest() :
     verbose_out(0), num_trees(DEFAULT_NUM_TREE), mtry(0), min_node_size(0), min_bucket(0), num_independent_variables(0), seed(0), num_samples(
-        0), prediction_mode(false), memory_mode(MEM_DOUBLE), sample_with_replacement(true), memory_saving_splitting(
-        false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction( { 1 }), holdout(
-        false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(
-        DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data { }, overall_prediction_error(
-    NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), regularization_usedepth(false), progress(0) {
+      0), prediction_mode(false), memory_mode(MEM_DOUBLE), sample_with_replacement(true), memory_saving_splitting(
+      false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction( { 1 }), holdout(
+      false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(
+      DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), poisson_tau(DEFAULT_POISSON_TAU), num_threads(DEFAULT_NUM_THREADS), data { },
+      overall_prediction_error(NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), regularization_usedepth(false), progress(0) {
 }
 
 // #nocov start
@@ -42,8 +42,8 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     std::string split_select_weights_file, const std::vector<std::string>& always_split_variable_names,
     std::string status_variable_name, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-    std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, uint max_depth,
+    std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
+    double poisson_tau, bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth,
     const std::vector<double>& regularization_factor, bool regularization_usedepth) {
 
   this->memory_mode = memory_mode;
@@ -80,7 +80,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
   // Call other init function
   init(loadDataFromFile(input_file), mtry, output_prefix, num_trees, seed, num_threads, importance_mode,
       min_node_size, min_bucket, prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting,
-      splitrule, predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type, num_random_splits,
+      splitrule, predict_all, sample_fraction_vector, alpha, minprop, poisson_tau, holdout, prediction_type, num_random_splits,
       false, max_depth, regularization_factor, regularization_usedepth, false);
 
   if (prediction_mode) {
@@ -138,7 +138,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
     bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
     std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
-    std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
+    std::vector<double>& sample_fraction, double alpha, double minprop, double poisson_tau, bool holdout, PredictionType prediction_type,
     uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& regularization_factor,
     bool regularization_usedepth, bool node_stats) {
 
@@ -147,7 +147,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
   // Call other init function
   init(std::move(input_data), mtry, "", num_trees, seed, num_threads, importance_mode, min_node_size, min_bucket,
       prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting, splitrule,
-      predict_all, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, order_snps, max_depth,
+      predict_all, sample_fraction, alpha, minprop, poisson_tau, holdout, prediction_type, num_random_splits, order_snps, max_depth,
       regularization_factor, regularization_usedepth, node_stats);
 
   // Set variables to be always considered for splitting
@@ -181,7 +181,7 @@ void Forest::init(std::unique_ptr<Data> input_data, uint mtry, std::string outpu
     uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size, uint min_bucket,
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
     bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
-    double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
+    double alpha, double minprop, double poisson_tau, bool holdout, PredictionType prediction_type, uint num_random_splits, bool order_snps,
     uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth, bool node_stats) {
 
   // Initialize data with memmode
@@ -219,6 +219,7 @@ void Forest::init(std::unique_ptr<Data> input_data, uint mtry, std::string outpu
   this->holdout = holdout;
   this->alpha = alpha;
   this->minprop = minprop;
+  this->poisson_tau = poisson_tau;
   this->prediction_type = prediction_type;
   this->num_random_splits = num_random_splits;
   this->max_depth = max_depth;
@@ -474,7 +475,7 @@ void Forest::grow() {
 
     trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs, tree_split_select_weights,
         importance_mode, min_node_size, min_bucket, sample_with_replacement, memory_saving_splitting, splitrule, &case_weights,
-        tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, holdout, num_random_splits, max_depth,
+        tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, poisson_tau, holdout, num_random_splits, max_depth,
         &regularization_factor, regularization_usedepth, &split_varIDs_used, save_node_stats);
   }
 
