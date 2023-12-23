@@ -1,0 +1,29 @@
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: CPP-build
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          sudo apt-get install cmake
+          mkdir build && pushd build
+          cmake ../cpp_version
+          make && ctest --output-on-failure
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          mkdir build && pushd build
+          cmake ../cpp_version
+          make && ctest --output-on-failure

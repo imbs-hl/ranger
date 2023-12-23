@@ -18,15 +18,6 @@ namespace ranger {
 #define M_PI 3.14159265358979323846
 #endif
 
-// Old/new Win build
-#ifdef WIN_R_BUILD
-  #if __cplusplus < 201103L
-    #define OLD_WIN_R_BUILD
-  #else
-    #define NEW_WIN_R_BUILD
-  #endif
-#endif
-
 typedef unsigned int uint;
 
 // Tree types, probability is not selected by ID
@@ -88,6 +79,8 @@ const uint DEFAULT_MIN_NODE_SIZE_CLASSIFICATION = 1;
 const uint DEFAULT_MIN_NODE_SIZE_REGRESSION = 5;
 const uint DEFAULT_MIN_NODE_SIZE_SURVIVAL = 3;
 const uint DEFAULT_MIN_NODE_SIZE_PROBABILITY = 10;
+const uint DEFAULT_MIN_BUCKET = 1;
+const uint DEFAULT_MIN_BUCKET_SURVIVAL = 3;
 
 const SplitRule DEFAULT_SPLITRULE = LOGRANK;
 const double DEFAULT_ALPHA = 0.5;

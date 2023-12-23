@@ -2,7 +2,7 @@ library(ranger)
 context("ranger_quantreg")
 
 rf.quant <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE, 
-                   keep.inbag = TRUE, num.trees = 100, seed = 0)
+                   keep.inbag = TRUE, num.trees = 500)
 pred.quant <- predict(rf.quant, mtcars[27:32, ], type = "quantiles")
 
 test_that("Quantile prediction is of correct size", {
@@ -49,4 +49,14 @@ test_that("Error message if not grown with quantreg=TRUE", {
 test_that("User specified function works as expected", {
   pred_sample <- predict(rf.quant, mtcars[27:32, ], type = "quantiles", what = function(x) sample(x, 10, replace = TRUE))
   expect_equal(dim(pred_sample$predictions), c(pred_sample$num.samples, 10))
+})
+
+test_that("Working for factor variables", {
+  expect_silent(rf <- ranger(Sepal.Length ~ ., iris, quantreg = TRUE))
+  expect_silent(predict(rf, iris, type = "quantiles"))
+})
+
+test_that("Working for unordered factor variables", {
+  expect_silent(rf <- ranger(Sepal.Length ~ ., iris, quantreg = TRUE, respect.unordered.factors = "order"))
+  expect_silent(predict(rf, iris, type = "quantiles"))
 })

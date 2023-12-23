@@ -102,7 +102,7 @@ private:
   size_t num_timepoints;
   const std::vector<size_t>* response_timepointIDs;
 
-  // For all terminal nodes CHF for all unique timepoints. For other nodes empty vector.
+  // For all terminal nodes CHF for all unique timepoints. For other nodes empty vector (except if save_node_stats).
   std::vector<std::vector<double>> chf;
 
   // Fields to save to while tree growing

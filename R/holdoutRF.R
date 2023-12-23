@@ -36,7 +36,7 @@
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
 ##' @references
-##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{https://doi.org/10.1007/s11634-016-0276-4}. \cr
+##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \doi{10.1007/s11634-016-0276-4}. \cr
 ##' @export 
 holdoutRF <- function(...) {
   

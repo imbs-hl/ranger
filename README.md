@@ -1,6 +1,4 @@
-[![Travis Build Status](https://travis-ci.org/imbs-hl/ranger.svg?branch=master)](https://travis-ci.org/imbs-hl/ranger)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/imbs-hl/ranger?branch=master&svg=true)](https://ci.appveyor.com/project/mnwright/ranger)
-[![Coverage Status](https://coveralls.io/repos/github/imbs-hl/ranger/badge.svg?branch=master)](https://coveralls.io/github/imbs-hl/ranger?branch=master)
+[![R-CMD-check](https://github.com/imbs-hl/ranger/workflows/R-CMD-check/badge.svg)](https://github.com/imbs-hl/ranger/actions)
 ![CRAN Downloads month](http://cranlogs.r-pkg.org/badges/ranger?color=brightgreen)
 ![CRAN Downloads overall](http://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen)
 ## ranger: A Fast Implementation of Random Forests
@@ -28,7 +26,7 @@ devtools::install_github("imbs-hl/ranger")
 ```
 
 #### Standalone C++ version
-To install the C++ version of ranger in Linux or Mac OS X you will need a compiler supporting C++11 (i.e. gcc >= 4.7 or Clang >= 3.0) and Cmake. To build start a terminal from the ranger main directory and run the following commands
+To install the C++ version of ranger in Linux or Mac OS X you will need a compiler supporting C++14 (i.e. gcc >= 5 or Clang >= 3.4) and Cmake. To build start a terminal from the ranger main directory and run the following commands
 
 ```bash
 cd cpp_version
@@ -57,7 +55,7 @@ In the C++ version type
 ./ranger --help 
 ```
 
-for a list of commands. First you need a training dataset in a file. This file should contain one header line with variable names and one line with variable values per sample (numeric only). Variable names must not contain any whitespace, comma or semicolon. Values can be seperated by whitespace, comma or semicolon but can not be mixed in one file. A typical call of ranger would be for example
+for a list of commands. First you need a training dataset in a file. This file should contain one header line with variable names and one line with variable values per sample (numeric only). Variable names must not contain any whitespace, comma or semicolon. Values can be separated by whitespace, comma or semicolon but can not be mixed in one file. A typical call of ranger would be for example
 
 ```bash
 ./ranger --verbose --file data.dat --depvarname Species --treetype 1 --ntree 1000 --nthreads 4

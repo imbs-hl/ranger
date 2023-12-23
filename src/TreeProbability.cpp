@@ -80,10 +80,19 @@ void TreeProbability::appendToFileInternal(std::ofstream& file) { // #nocov star
 
 bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-  // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
-  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  
+  // Save node statistics
+  if (save_node_stats) {
+    num_samples_nodes[nodeID] = num_samples_node;
     addToTerminalNodes(nodeID);
+  }
+  
+  // Stop if maximum node size or depth reached
+  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -100,7 +109,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
     pure_value = value;
   }
   if (pure) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -113,7 +124,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   }
 
   if (stop) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -158,29 +171,33 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
     ++class_counts[sample_classID];
   }
 
-  // For all possible split variables
-  for (auto& varID : possible_split_varIDs) {
-    // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if (data->isOrderedVariable(varID)) {
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * min_bucket) {
 
-      // Use memory saving method if option set
-      if (memory_saving_splitting) {
-        findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
-      } else {
-        // Use faster method for both cases
-        double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-        if (q < Q_THRESHOLD) {
+    // For all possible split variables
+    for (auto& varID : possible_split_varIDs) {
+      // Find best split value, if ordered consider all values as split values, else all 2-partitions
+      if (data->isOrderedVariable(varID)) {
+
+        // Use memory saving method if option set
+        if (memory_saving_splitting) {
           findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
               best_decrease);
         } else {
-          findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-              best_decrease);
+          // Use faster method for both cases
+          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+          if (q < Q_THRESHOLD) {
+            findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+                best_decrease);
+          } else {
+            findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+                best_decrease);
+          }
         }
+      } else {
+        findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+            best_decrease);
       }
-    } else {
-      findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-          best_decrease);
     }
   }
 
@@ -192,6 +209,11 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -262,6 +284,11 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
     size_t n_right = num_samples_node - n_left;
     if (n_right == 0) {
       break;
+    }
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
     }
 
     double decrease;
@@ -349,6 +376,11 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
     size_t n_right = num_samples_node - n_left;
     if (n_right == 0) {
       break;
+    }
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
     }
 
     double decrease;
@@ -457,6 +489,11 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
     }
     size_t n_left = num_samples_node - n_right;
 
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
+
     double decrease;
     if (splitrule == HELLINGER) {
       // TPR is number of outcome 1s in one node / total number of 1s
@@ -512,15 +549,19 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
     ++class_counts[sample_classID];
   }
 
-  // For all possible split variables
-  for (auto& varID : possible_split_varIDs) {
-    // Find best split value, if ordered consider all values as split values, else all 2-partitions
-    if (data->isOrderedVariable(varID)) {
-      findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-          best_decrease);
-    } else {
-      findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
-          best_varID, best_decrease);
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * min_bucket) {
+
+    // For all possible split variables
+    for (auto& varID : possible_split_varIDs) {
+      // Find best split value, if ordered consider all values as split values, else all 2-partitions
+      if (data->isOrderedVariable(varID)) {
+        findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+            best_decrease);
+      } else {
+        findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
+            best_varID, best_decrease);
+      }
     }
   }
 
@@ -532,6 +573,11 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -611,6 +657,11 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
     // Stop if one child empty
     size_t n_left = num_samples_node - n_right[i];
     if (n_left == 0 || n_right[i] == 0) {
+      continue;
+    }
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right[i] < min_bucket) {
       continue;
     }
 
@@ -719,6 +770,11 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
       }
     }
     size_t n_left = num_samples_node - n_right;
+
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
 
     // Sum of squares
     double sum_left = 0;

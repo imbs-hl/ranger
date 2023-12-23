@@ -5,3 +5,8 @@ ranger.Rcheck/
 *.Rproj
 .project
 .cproject
+docs
+ranger*.tar.gz
+ranger*.tgz
+revdep/*
+.vscode

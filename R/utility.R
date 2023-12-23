@@ -38,7 +38,7 @@ save.sample <- function(x, ...) {
 }
 
 # Order factor levels with PCA approach 
-# Reference: Coppersmith, D., Hong, S.J. & Hosking, J.R. (1999) Partitioning Nominal Attributes in Decision Trees. Data Min Knowl Discov 3:197. \url{https://doi.org/10.1023/A:1009869804967}.
+# Reference: Coppersmith, D., Hong, S.J. & Hosking, J.R. (1999) Partitioning Nominal Attributes in Decision Trees. Data Min Knowl Discov 3:197. \doi{10.1023/A:1009869804967}.
 pca.order <- function(y, x) {
   x <- droplevels(x)
   if (nlevels(x) < 2) {
