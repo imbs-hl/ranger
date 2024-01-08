@@ -1037,6 +1037,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   result$dependent.variable.name <- dependent.variable.name
   result$status.variable.name <- status.variable.name
   
+  ## Save max.depth
+  if (!is.null(max.depth)) {
+    result$max.depth <- max.depth
+  }
+  
   class(result) <- "ranger"
   
   ## Prepare quantile prediction
