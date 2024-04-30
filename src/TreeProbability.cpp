@@ -80,10 +80,19 @@ void TreeProbability::appendToFileInternal(std::ofstream& file) { // #nocov star
 
 bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-  // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
-  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  
+  // Save node statistics
+  if (save_node_stats) {
+    num_samples_nodes[nodeID] = num_samples_node;
     addToTerminalNodes(nodeID);
+  }
+  
+  // Stop if maximum node size or depth reached
+  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -100,7 +109,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
     pure_value = value;
   }
   if (pure) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -113,7 +124,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   }
 
   if (stop) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -196,6 +209,11 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -555,6 +573,11 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {

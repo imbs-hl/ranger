@@ -88,6 +88,14 @@ double TreeSurvival::computePredictionAccuracyInternal(std::vector<double>* pred
 
 bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
+  // Save node statistics
+  if (save_node_stats) {
+    size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
+    num_samples_nodes[nodeID] = num_samples_node;
+    computeDeathCounts(nodeID);
+    computeSurvival(nodeID);
+  }
+  
   // Stop if node is pure
   bool pure = true;
   double pure_time = 0;
@@ -104,8 +112,10 @@ bool TreeSurvival::splitNodeInternal(size_t nodeID, std::vector<size_t>& possibl
     pure_status = status;
   }
   if (pure) {
-    computeDeathCounts(nodeID);
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeDeathCounts(nodeID);
+      computeSurvival(nodeID);
+    }
     return true;
   }
 
@@ -125,11 +135,15 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
   size_t best_varID = 0;
   double best_value = 0;
 
-  computeDeathCounts(nodeID);
+  if (!save_node_stats) {
+    computeDeathCounts(nodeID);
+  }
 
   // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeSurvival(nodeID);
+    }
     return true;
   }
 
@@ -155,12 +169,19 @@ bool TreeSurvival::findBestSplit(size_t nodeID, std::vector<size_t>& possible_sp
 
   // Stop and save CHF if no good split found (this is terminal node).
   if (best_decrease < 0) {
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeSurvival(nodeID);
+    }
     return true;
   } else {
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+    
+    // Save split statistics
+    if (save_node_stats) {
+      split_stats[nodeID] = best_decrease;
+    }
 
     // Compute decrease of impurity for this node and add to variable importance if needed
     if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -180,8 +201,10 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
 
   // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
-    computeDeathCounts(nodeID);
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeDeathCounts(nodeID);
+      computeSurvival(nodeID);
+    }
     return true;
   }
 
@@ -281,13 +304,20 @@ bool TreeSurvival::findBestSplitMaxstat(size_t nodeID, std::vector<size_t>& poss
 
   // Stop and save CHF if no good split found (this is terminal node).
   if (adjusted_best_pvalue > alpha) {
-    computeDeathCounts(nodeID);
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeDeathCounts(nodeID);
+      computeSurvival(nodeID);
+    }
     return true;
   } else {
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+    
+    // Save split statistics
+    if (save_node_stats) {
+      split_stats[nodeID] = best_maxstat;
+    }
 
     // Compute decrease of impurity for this node and add to variable importance if needed
     if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -676,11 +706,15 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
   size_t best_varID = 0;
   double best_value = 0;
 
-  computeDeathCounts(nodeID);
+  if (!save_node_stats) {
+    computeDeathCounts(nodeID);
+  }
 
   // Stop if maximum node size or depth reached
   if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeSurvival(nodeID);
+    }
     return true;
   }
 
@@ -702,12 +736,19 @@ bool TreeSurvival::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>& p
 
   // Stop and save CHF if no good split found (this is terminal node).
   if (best_decrease < 0) {
-    computeSurvival(nodeID);
+    if (!save_node_stats) {
+      computeSurvival(nodeID);
+    }
     return true;
   } else {
     // If not terminal node save best values
     split_varIDs[nodeID] = best_varID;
     split_values[nodeID] = best_value;
+    
+    // Save split statistics
+    if (save_node_stats) {
+      split_stats[nodeID] = best_decrease;
+    }
 
     // Compute decrease of impurity for this node and add to variable importance if needed
     if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {

@@ -41,7 +41,7 @@ public:
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
       uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth,
-      std::vector<bool>* split_varIDs_used);
+      std::vector<bool>* split_varIDs_used, bool save_node_stats);
 
   virtual void allocateMemory() = 0;
 
@@ -74,6 +74,16 @@ public:
 
   const std::vector<size_t>& getInbagCounts() const {
     return inbag_counts;
+  }
+  
+  const std::vector<size_t>& getNumSamplesNodes() const {
+    return num_samples_nodes;
+  }
+  const std::vector<double>& getNodePredictions() const {
+    return node_predictions;
+  }
+  const std::vector<double>& getSplitStats() const {
+    return split_stats;
   }
 
 protected:
@@ -191,6 +201,12 @@ protected:
 
   // IDs of OOB individuals, sorted
   std::vector<size_t> oob_sampleIDs;
+  
+  // Node statistics
+  bool save_node_stats;
+  std::vector<size_t> num_samples_nodes;
+  std::vector<double> node_predictions;
+  std::vector<double> split_stats;
 
   // Holdout mode
   bool holdout;
