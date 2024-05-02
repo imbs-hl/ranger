@@ -289,10 +289,10 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
   std::vector<size_t> class_counts_left(num_classes);
 
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
+  for (size_t i = 0; i < possible_split_values.size(); ++i) {
     
     // Stop if nothing here
-    if (counter[i] == 0) {
+    if (i < (possible_split_values.size() - 1) && counter[i] == 0) {
       continue;
     }
 
@@ -300,12 +300,17 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
 
     // Stop if right child empty
     size_t n_right = num_samples_node - num_samples_node_nan - n_left;
-    if (n_right == 0) {
+    if ((n_right + num_samples_node_nan) == 0) {
       break;
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (i < (possible_split_values.size() - 1) && (n_left < min_bucket || n_right < min_bucket)) {
+      continue;
+    }
+    
+    // Stop if only NAs
+    if ((n_right + n_left) == 0) {
       continue;
     }
 
@@ -348,7 +353,12 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       decrease_nanleft = sum_right / (double) n_right + sum_left_withnan / (double) (n_left + num_samples_node_nan);
       decrease_nanright = sum_right_withnan / (double) (n_right + num_samples_node_nan) + sum_left / (double) n_left;
     }
-
+    
+    if (n_right == 0) {
+      decrease = decrease_nanright;
+      decrease_nanleft = 0;
+    }
+    
     // Regularization
     regularize(decrease, varID);
 
@@ -358,6 +368,11 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
+      
+      if (n_right == 0) {
+        // Split value infinity -> all non-missing values go left
+        best_value = std::numeric_limits<double>::infinity(); 
+      }
       
       if (decrease_nanright > decrease_nanleft) {
         nan_go_right = true;
@@ -381,7 +396,7 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
   size_t num_unique = data->getNumUniqueDataValues(varID);
   std::fill_n(counter_per_class.begin(), num_unique * num_classes, 0);
   std::fill_n(counter.begin(), num_unique, 0);
-  
+
   // Counters without NaNs
   std::vector<size_t> class_counts_nan(num_classes, 0);
   size_t num_samples_node_nan = 0;
@@ -417,10 +432,10 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
   std::vector<size_t> class_counts_left(num_classes);
 
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < num_unique - 1; ++i) {
+  for (size_t i = 0; i < num_unique; ++i) {
 
     // Stop if nothing here
-    if (counter[i] == 0) {
+    if (i < (num_unique - 1) && counter[i] == 0) {
       continue;
     }
 
@@ -428,12 +443,12 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
 
     // Stop if right child empty
     size_t n_right = num_samples_node - num_samples_node_nan - n_left;
-    if (n_right == 0) {
+    if ((n_right + num_samples_node_nan) == 0) {
       break;
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (i < (num_unique - 1) && (n_left < min_bucket || n_right < min_bucket)) {
       continue;
     }
 
@@ -476,6 +491,11 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       decrease_nanleft = sum_right / (double) n_right + sum_left_withnan / (double) (n_left + num_samples_node_nan);
       decrease_nanright = sum_right_withnan / (double) (n_right + num_samples_node_nan) + sum_left / (double) n_left;
     }
+    
+    if (n_right == 0) {
+      decrease = decrease_nanright;
+      decrease_nanleft = 0;
+    }
 
     // Regularization
     regularize(decrease, varID);
@@ -492,6 +512,11 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
+      
+      if (n_right == 0) {
+        // Split value infinity -> all non-missing values go left
+        best_value = std::numeric_limits<double>::infinity(); 
+      }
       
       if (decrease_nanright > decrease_nanleft) {
         nan_go_right = true;
