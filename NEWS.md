@@ -1,4 +1,7 @@
 
+# ranger 0.16.1
+* Allow vector min.node.size and min.bucket for class-specific limits
+
 # ranger 0.16.0
 * New CRAN version
 
