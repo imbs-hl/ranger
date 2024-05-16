@@ -96,10 +96,10 @@
 ##' To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
 ##' Note that missing values are treated as an extra category while splitting.
 ##' 
-##' See \url{https://github.com/imbs-hl/ranger} for the development version.
+##' By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+##' R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 ##' 
-##' With recent R versions, multithreading on Windows platforms should just work. 
-##' If you compile yourself, the new RTools toolchain is required.
+##' See \url{https://github.com/imbs-hl/ranger} for the development version.
 ##' 
 ##' @title Ranger
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
@@ -109,8 +109,8 @@
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
-##' @param min.node.size Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
-##' @param min.bucket Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types. 
+##' @param min.node.size Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability. For classification, this can be a vector of class-specific values. 
+##' @param min.bucket Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types. For classification, this can be a vector of class-specific values. 
 ##' @param max.depth Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
@@ -133,7 +133,7 @@
 ##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
 ##' @param time.interest Time points of interest (survival only). Can be \code{NULL} (default, use all observed time points), a vector of time points or a single number to use as many time points (grid over observed time points).
 ##' @param oob.error Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.
-##' @param num.threads Number of threads. Default is number of CPUs available.
+##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
 ##' @param node.stats Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.
@@ -359,6 +359,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Unsupported type of dependent variable.")
   }
   
+  ## Number of levels
+  if (treetype %in% c(1, 9)) {
+    if (is.factor(y)) {
+      num_levels <- nlevels(y)
+    } else {
+      num_levels <- length(unique(y))
+    }
+  }
+  
   ## Quantile prediction only for regression
   if (quantreg && treetype != 3) {
     stop("Error: Quantile prediction implemented only for regression outcomes.")
@@ -514,7 +523,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Num threads
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
-    num.threads = 0
+    num.threads <- as.integer(Sys.getenv("R_RANGER_NUM_THREADS", getOption("ranger.num.threads", getOption("Ncpus", 2L))))
   } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
@@ -522,15 +531,45 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Minimum node size
   if (is.null(min.node.size)) {
     min.node.size <- 0
-  } else if (!is.numeric(min.node.size) || min.node.size < 0) {
-    stop("Error: Invalid value for min.node.size")
+  } else if (!is.numeric(min.node.size)) {
+    stop("Error: Invalid value for min.node.size.")
+  }
+  if (length(min.node.size) > 1) {
+    if (!(treetype %in% c(1, 9))) {
+      stop("Error: Invalid value for min.node.size. Vector values only valid for classification forests.")
+    }
+    if (any(min.node.size < 0)) {
+      stop("Error: Invalid value for min.node.size. Please give a nonnegative value or a vector of nonnegative values.")
+    }
+    if (length(min.node.size) != num_levels) {
+      stop("Error: Invalid value for min.node.size Expecting ", num_levels, " values, provided ", length(min.node.size), ".")
+    }
+  } else {
+    if (min.node.size < 0) {
+      stop("Error: Invalid value for min.node.size. Please give a nonnegative value or a vector of nonnegative values.")
+    }
   }
 
   ## Minimum bucket size
   if (is.null(min.bucket)) {
     min.bucket <- 0
-  } else if (!is.numeric(min.bucket) || min.bucket < 0) {
+  } else if (!is.numeric(min.bucket)) {
     stop("Error: Invalid value for min.bucket")
+  }
+  if (length(min.bucket) > 1) {
+    if (!(treetype %in% c(1, 9))) {
+      stop("Error: Invalid value for min.bucket Vector values only valid for classification forests.")
+    }
+    if (any(min.bucket < 0)) {
+      stop("Error: Invalid value for min.bucket Please give a nonnegative value or a vector of nonnegative values.")
+    }
+    if (length(min.bucket) != num_levels) {
+      stop("Error: Invalid value for min.bucket Expecting ", num_levels, " values, provided ", length(min.bucket), ".")
+    }
+  } else {
+    if (min.bucket < 0) {
+      stop("Error: Invalid value for min.bucket Please give a nonnegative value or a vector of nonnegative values.")
+    }
   }
   
   ## Tree depth
@@ -554,8 +593,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if (sum(sample.fraction) <= 0) {
       stop("Error: Invalid value for sample.fraction. Sum of values must be >0.")
     }
-    if (length(sample.fraction) != nlevels(y)) {
-      stop("Error: Invalid value for sample.fraction. Expecting ", nlevels(y), " values, provided ", length(sample.fraction), ".")
+    if (length(sample.fraction) != num_levels) {
+      stop("Error: Invalid value for sample.fraction. Expecting ", num_levels, " values, provided ", length(sample.fraction), ".")
     }
     if (!replace & any(sample.fraction * length(y) > table(y))) {
       idx <- which(sample.fraction * length(y) > table(y))[1]
@@ -1036,6 +1075,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## will be NULL only when x/y interface is used
   result$dependent.variable.name <- dependent.variable.name
   result$status.variable.name <- status.variable.name
+  
+  ## Save max.depth
+  if (!is.null(max.depth)) {
+    result$max.depth <- max.depth
+  }
   
   class(result) <- "ranger"
   
