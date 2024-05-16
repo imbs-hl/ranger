@@ -4,6 +4,14 @@
 ^NEWS\.md$
 ^README\.md$
 ^.*\.tar.gz$
-^\.travis.yml$
 ^cpp\_version$
-^appveyor\.yml$
+^\.github$
+^revdep$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^ranger\.Rcheck$
+^ranger.*\.tar\.gz$
+^ranger.*\.tgz$
+revdep/*
+^\.vscode$

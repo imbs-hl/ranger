@@ -31,6 +31,8 @@ test_that("Tree-wise split select weights work", {
 test_that("always split variables work", {
   expect_silent(ranger(Species ~ ., iris, num.trees = 10, 
                        always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
+  expect_silent(ranger(Species ~ ., iris, num.trees = 10, 
+                       always.split.variables = c("Petal.Width", "Petal.Length"), mtry = 2))
   expect_silent(ranger(dependent.variable.name = "Species", data = iris, num.trees = 10, 
                        always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
 })
@@ -45,3 +47,16 @@ test_that("Tree-wise split select weights work with 0s", {
   })
   expect_true(all(selected_correctly))
 })
+
+test_that("always split variables respect split select weights", {
+    iris_vars <- setdiff(names(iris), 'Species')
+    n_vars <- length(iris_vars)
+    last_var <- iris_vars[n_vars]
+    with_last_zero <- c(rep(1, n_vars-1), 0)
+    expect_silent(
+        ranger(Species ~ ., iris, num.trees=5,
+               always.split.variables=last_var, mtry=n_vars-1,
+               split.select.weights=with_last_zero)
+    )
+})
+

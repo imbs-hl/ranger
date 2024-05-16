@@ -52,6 +52,8 @@
 #'       \code{splitval} \tab The splitting value. For numeric or ordinal variables, all values smaller or equal go to the left, larger values to the right. For unordered factor variables see above. \cr
 #'       \code{terminal} \tab Logical, TRUE for terminal nodes. \cr
 #'       \code{prediction} \tab One column with the predicted class (factor) for classification and the predicted numerical value for regression. One probability per class for probability estimation in several columns. Nothing for survival, refer to \code{object$forest$chf} for the CHF node predictions. \cr
+#'       \code{numSamples} \tab Number of samples in the node (only if ranger called with \code{node.stats = TRUE}). \cr
+#'       \code{splitStat} \tab Split statistics, i.e., value of the splitting criterion (only if ranger called with \code{node.stats = TRUE}). \cr
 #'   }
 #' @examples
 #' rf <- ranger(Species ~ ., data = iris)
@@ -117,23 +119,56 @@ treeInfo <- function(object, tree = 1) {
   
   ## Prediction
   if (forest$treetype == "Classification") {
-    result$prediction <- forest$split.values[[tree]]
-    result$prediction[!result$terminal] <- NA
+    if (is.null(forest$num.samples.nodes)) {
+      # split.stats=FALSE
+      result$prediction <- forest$split.values[[tree]]
+      result$prediction[!result$terminal] <- NA
+    } else {
+      # split.stats=TRUE
+      result$prediction <- forest$node.predictions[[tree]]
+    }
     if (!is.null(forest$levels)) {
-      result$prediction <- factor(result$prediction, levels = forest$class.values, labels = forest$levels)
+      result$prediction <- integer.to.factor(result$prediction, labels = forest$levels)
     }
   } else if (forest$treetype == "Regression") {
-    result$prediction <- forest$split.values[[tree]]
-    result$prediction[!result$terminal] <- NA
+    if (is.null(forest$num.samples.nodes)) {
+      # split.stats=FALSE
+      result$prediction <- forest$split.values[[tree]]
+      result$prediction[!result$terminal] <- NA
+    } else {
+      # split.stats=TRUE
+      result$prediction <- forest$node.predictions[[tree]]
+    }
   } else if (forest$treetype == "Probability estimation") {
-    predictions <- matrix(nrow = nrow(result), ncol = length(forest$levels))
-    predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
-    colnames(predictions) <- paste0("pred.", forest$levels)
+    predictions <- matrix(nrow = nrow(result), ncol = length(forest$class.values))
+    if (is.null(forest$num.samples.nodes)) {
+      # split.stats=FALSE
+      predictions[result$terminal, ] <- do.call(rbind, forest$terminal.class.counts[[tree]])
+    } else {
+      # split.stats=TRUE
+      predictions <- do.call(rbind, forest$terminal.class.counts[[tree]])
+    }
+    if (!is.null(forest$levels)) {
+      colnames(predictions) <- forest$levels[forest$class.values]
+      predictions <- predictions[, forest$levels[sort(forest$class.values)], drop = FALSE]
+    } else {
+      colnames(predictions) <- forest$class.values
+    }
+    colnames(predictions) <- paste0("pred.", colnames(predictions))
     result <- data.frame(result, predictions)
   } else if (forest$treetype == "Survival") {
     # No prediction for survival (CHF too large?)
   } else {
     stop("Error: Unknown tree type.")
+  }
+  
+  ## Node statistics
+  if (!is.null(forest$num.samples.nodes)) {
+    result$numSamples <- forest$num.samples.nodes[[tree]]
+  }
+  if (!is.null(forest$split.stats)) {
+    result$splitStat <- forest$split.stats[[tree]]
+    result$splitStat[result$terminal] <- NA
   }
   
   result

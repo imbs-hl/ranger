@@ -23,7 +23,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
     caseweights(""), depvarname(""), fraction(0), holdout(false), memmode(MEM_DOUBLE), savemem(false), skipoob(false), predict(
         ""), predictiontype(DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), nthreads(
         DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), maxdepth(
-        DEFAULT_MAXDEPTH), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), mtry(0), outprefix(
+        DEFAULT_MAXDEPTH), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), minbucket(0), mtry(0), outprefix(
         "ranger_out"), probability(false), splitrule(DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(
         true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0), usedepth(false) {
   this->argc = argc;
@@ -33,7 +33,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hi:j:kl:m:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:U:XZa:b:c:d:f:hi:j:kl:m:n:o:pr:s:t:uvwy:z:";
 
 // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -53,7 +53,6 @@ int ArgumentHandler::processArguments() {
       { "nthreads",             required_argument,  0, 'U'},
       { "predall",              no_argument,        0, 'X'},
       { "version",              no_argument,        0, 'Z'},
-
       { "alpha",                required_argument,  0, 'a'},
       { "minprop",              required_argument,  0, 'b'},
       { "catvars",              required_argument,  0, 'c'},
@@ -65,6 +64,7 @@ int ArgumentHandler::processArguments() {
       { "usedepth",             no_argument,        0, 'k'},
       { "targetpartitionsize",  required_argument,  0, 'l'},
       { "mtry",                 required_argument,  0, 'm'},
+      { "minbucket",            required_argument,  0, 'n'},
       { "outprefix",            required_argument,  0, 'o'},
       { "probability",          no_argument,        0, 'p'},
       { "splitrule",            required_argument,  0, 'r'},
@@ -306,6 +306,20 @@ int ArgumentHandler::processArguments() {
       }
       break;
 
+    case 'n':
+      try {
+        int temp = std::stoi(optarg);
+        if (temp < 1) {
+          throw std::runtime_error("");
+        } else {
+          minbucket = temp;
+        }
+      } catch (...) {
+        throw std::runtime_error(
+            "Illegal argument for option 'minbucket'. Please give a positive integer. See '--help' for details.");
+      }
+      break;
+      
     case 'o':
       outprefix = optarg;
       break;
@@ -461,11 +475,25 @@ void ArgumentHandler::checkArguments() {
       throw std::runtime_error("Could not read from input file: " + predict + ".");
     }
 
-    // Do not read num_variables, num_trees and is_ordered_variable
-    infile.seekg(sizeof(size_t));
+    // Do not read dependent variable names
+    uint num_dependent_variables;
+    infile.read((char*) &num_dependent_variables, sizeof(num_dependent_variables));
+    for (size_t i = 0; i < num_dependent_variables; ++i) {
+      size_t length;
+      infile.read((char*) &length, sizeof(size_t));
+      infile.ignore(length);
+    }
+
+    // Do not read num_trees
+    infile.ignore(sizeof(size_t));
+
+    // Do not read is_ordered_variable
     size_t length;
     infile.read((char*) &length, sizeof(length));
-    infile.seekg(4 * sizeof(size_t) + length * sizeof(bool));
+    infile.ignore(length * sizeof(bool));
+
+    // Do not read number of variables
+    infile.ignore(sizeof(size_t));
 
     // Get treetype
     infile.read((char*) &treetype, sizeof(treetype));
@@ -520,7 +548,7 @@ void ArgumentHandler::checkArguments() {
     }
 
     if (nthreads != 1) {
-      std::cout << "Warning: Paralellization deactivated (regularization used)." << std::endl;
+      std::cout << "Warning: Parallelization deactivated (regularization used)." << std::endl;
       nthreads = 1;
     }
   }
@@ -559,6 +587,7 @@ void ArgumentHandler::displayHelp() {
   std::cout << "    " << "                              (Default: sqrt(p) with p = number of independent variables)"
       << std::endl;
   std::cout << "    " << "--targetpartitionsize N       Set minimal node size to N." << std::endl;
+  std::cout << "    " << "--minbucket N                 Set min bucket size to N." << std::endl;
   std::cout << "    "
       << "                              For Classification and Regression growing is stopped if a node reaches a size smaller than N."
       << std::endl;

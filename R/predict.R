@@ -36,6 +36,9 @@
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 ##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+##' 
+##' By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+##' R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 ##'
 ##' @title Ranger prediction
 ##' @param object Ranger \code{ranger.forest} object.
@@ -45,7 +48,7 @@
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes', 'quantiles' with default 'response'. See below for details.
 ##' @param se.method Method to compute standard errors. One of 'jack', 'infjack' with default 'infjack'. Only applicable if type = 'se'. See below for details.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
-##' @param num.threads Number of threads. Default is number of CPUs available.
+##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param verbose Verbose output on or off.
 ##' @param inbag.counts Number of times the observations are in-bag in the trees.
 ##' @param ... further arguments passed to or from other methods.
@@ -62,8 +65,8 @@
 ##'   }
 ##' @references
 ##' \itemize{
-##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
-##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
+##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \doi{10.18637/jss.v077.i01}.
+##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{https://jmlr.org/papers/v15/wager14a.html}.
 ##'   }
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
@@ -164,7 +167,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Recode factors if forest grown 'order' mode
-  if (!is.null(forest$covariate.levels) && !all(sapply(forest$covariate.levels, is.null))) {
+  if (!is.null(forest$covariate.levels) && !all(sapply(forest$covariate.levels, is.null)) && !is.matrix(x)) {
     x <- mapply(function(xx, yy) {
       if(is.null(yy)) {
         xx
@@ -193,7 +196,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Num threads
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
-    num.threads = 0
+    num.threads <- as.integer(Sys.getenv("R_RANGER_NUM_THREADS", getOption("ranger.num.threads", getOption("Ncpus", 2L))))
   } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
@@ -219,6 +222,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   mtry <- 0
   importance <- 0
   min.node.size <- 0
+  min.bucket <- 0
   split.select.weights <- list(c(0, 0))
   use.split.select.weights <- FALSE
   always.split.variables <- c("0", "0")
@@ -249,6 +253,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   regularization.factor <- c(0, 0)
   use.regularization.factor <- FALSE
   regularization.usedepth <- FALSE
+  node.stats <- FALSE
+  time.interest <- c(0, 0)
+  use.time.interest <- FALSE
   
   ## Use sparse matrix
   if (inherits(x, "dgCMatrix")) {
@@ -264,7 +271,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   ## Call Ranger
   result <- rangerCpp(treetype, x, y, forest$independent.variable.names, mtry,
                       num.trees, verbose, seed, num.threads, write.forest, importance,
-                      min.node.size, split.select.weights, use.split.select.weights,
+                      min.node.size, min.bucket, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       prediction.mode, forest, snp.data, replace, probability,
                       unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
@@ -272,7 +279,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, 
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth)
+                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      node.stats, time.interest, use.time.interest)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -428,6 +436,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
 ##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+##' 
+##' By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+##' R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 ##'
 ##' @title Ranger prediction
 ##' @param object Ranger \code{ranger} object.
@@ -439,7 +450,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param quantiles Vector of quantiles for quantile prediction. Set \code{type = 'quantiles'} to use.
 ##' @param what User specified function for quantile prediction used instead of \code{quantile}. Must return numeric vector, see examples.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
-##' @param num.threads Number of threads. Default is number of CPUs available.
+##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param verbose Verbose output on or off.
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements
@@ -476,9 +487,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' 
 ##' @references
 ##' \itemize{
-##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
-##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
-##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
+##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \doi{10.18637/jss.v077.i01}.
+##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{https://jmlr.org/papers/v15/wager14a.html}.
+##'   \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{https://www.jmlr.org/papers/v7/meinshausen06a.html}.  
 ##'   }
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
@@ -515,7 +526,7 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
       node.values <- object$random.node.values.oob
     } else {
       ## New data prediction
-      terminal.nodes <- predict(object, data, type = "terminalNodes")$predictions + 1
+      terminal.nodes <- predict(object, data, num.threads = num.threads, type = "terminalNodes")$predictions + 1
       node.values <- 0 * terminal.nodes
       for (tree in 1:num.trees) {
         node.values[, tree] <- object$random.node.values[terminal.nodes[, tree], tree]

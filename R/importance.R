@@ -91,7 +91,7 @@ importance.ranger <- function(x, ...) {
 ##' @seealso \code{\link{ranger}}
 ##' @author Marvin N. Wright
 ##' @references
-##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2016). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{https://doi.org/10.1007/s11634-016-0276-4}. \cr
+##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2016). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \doi{10.1007/s11634-016-0276-4}. \cr
 ##'   Altmann, A., Tolosi, L., Sander, O. & Lengauer, T. (2010). Permutation importance: a corrected feature importance measure, Bioinformatics 26:1340-1347.
 ##' @export 
 importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutations = 100, formula = NULL, data = NULL, ...) {

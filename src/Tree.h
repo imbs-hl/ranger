@@ -36,12 +36,12 @@ public:
   Tree& operator=(const Tree&) = delete;
 
   void init(const Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
-      std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
+      std::vector<double>* split_select_weights, ImportanceMode importance_mode, std::vector<uint>* min_node_size, std::vector<uint>* min_bucket,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
       uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth,
-      std::vector<bool>* split_varIDs_used);
+      std::vector<bool>* split_varIDs_used, bool save_node_stats);
 
   virtual void allocateMemory() = 0;
 
@@ -74,6 +74,16 @@ public:
 
   const std::vector<size_t>& getInbagCounts() const {
     return inbag_counts;
+  }
+  
+  const std::vector<size_t>& getNumSamplesNodes() const {
+    return num_samples_nodes;
+  }
+  const std::vector<double>& getNodePredictions() const {
+    return node_predictions;
+  }
+  const std::vector<double>& getSplitStats() const {
+    return split_stats;
   }
 
 protected:
@@ -155,8 +165,11 @@ protected:
   // Number of OOB samples
   size_t num_samples_oob;
 
-  // Minimum node size to split, like in original RF nodes of smaller size can be produced
-  uint min_node_size;
+  // Minimum node size to split, nodes of smaller size can be produced
+  std::vector<uint>* min_node_size;
+  
+  // Minimum bucket size, minimum number of samples in each node
+  std::vector<uint>* min_bucket;
 
   // Weight vector for selecting possible split variables, one weight between 0 (never select) and 1 (always select) for each variable
   // Deterministic variables are always selected
@@ -188,6 +201,12 @@ protected:
 
   // IDs of OOB individuals, sorted
   std::vector<size_t> oob_sampleIDs;
+  
+  // Node statistics
+  bool save_node_stats;
+  std::vector<size_t> num_samples_nodes;
+  std::vector<double> node_predictions;
+  std::vector<double> split_stats;
 
   // Holdout mode
   bool holdout;

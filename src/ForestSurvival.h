@@ -34,6 +34,8 @@ public:
       std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
       std::vector<std::vector<std::vector<double>> >& forest_chf, std::vector<double>& unique_timepoints,
       std::vector<bool>& is_ordered_variable);
+  
+  void setUniqueTimepoints(const std::vector<double>& time_interest);
 
   std::vector<std::vector<std::vector<double>>> getChf() const;
 

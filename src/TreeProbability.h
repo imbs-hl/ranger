@@ -105,7 +105,7 @@ private:
   const std::vector<uint>* response_classIDs;
   const std::vector<std::vector<size_t>>* sampleIDs_per_class;
 
-  // Class counts in terminal nodes. Empty for non-terminal nodes.
+  // Class counts in terminal nodes. Empty for non-terminal nodes (except if save_node_stats).
   std::vector<std::vector<double>> terminal_class_counts;
 
   // Splitting weights

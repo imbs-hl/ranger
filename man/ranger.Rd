@@ -13,6 +13,7 @@ ranger(
   write.forest = TRUE,
   probability = FALSE,
   min.node.size = NULL,
+  min.bucket = NULL,
   max.depth = NULL,
   replace = TRUE,
   sample.fraction = ifelse(replace, 1, 0.632),
@@ -33,10 +34,12 @@ ranger(
   inbag = NULL,
   holdout = FALSE,
   quantreg = FALSE,
+  time.interest = NULL,
   oob.error = TRUE,
   num.threads = NULL,
   save.memory = FALSE,
   verbose = TRUE,
+  node.stats = FALSE,
   seed = NULL,
   dependent.variable.name = NULL,
   status.variable.name = NULL,
@@ -61,7 +64,9 @@ ranger(
 
 \item{probability}{Grow a probability forest as in Malley et al. (2012).}
 
-\item{min.node.size}{Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.}
+\item{min.node.size}{Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability. For classification, this can be a vector of class-specific values.}
+
+\item{min.bucket}{Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types. For classification, this can be a vector of class-specific values.}
 
 \item{max.depth}{Maximal tree depth. A value of NULL or 0 (the default) corresponds to unlimited depth, 1 to tree stumps (1 split per tree).}
 
@@ -81,7 +86,7 @@ ranger(
 
 \item{minprop}{For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.}
 
-\item{split.select.weights}{Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
+\item{split.select.weights}{Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 
 \item{always.split.variables}{Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.}
 
@@ -103,13 +108,17 @@ ranger(
 
 \item{quantreg}{Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.}
 
+\item{time.interest}{Time points of interest (survival only). Can be \code{NULL} (default, use all observed time points), a vector of time points or a single number to use as many time points (grid over observed time points).}
+
 \item{oob.error}{Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.}
 
-\item{num.threads}{Number of threads. Default is number of CPUs available.}
+\item{num.threads}{Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).}
 
 \item{save.memory}{Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
 
 \item{verbose}{Show computation status and estimated runtime.}
+
+\item{node.stats}{Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
 
@@ -128,12 +137,12 @@ ranger(
 \value{
 Object of class \code{ranger} with elements
   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
-  \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
+  \item{\code{predictions}}{Predicted classes/values, based on out-of-bag samples (classification and regression only).}
   \item{\code{variable.importance}}{Variable importance for each independent variable.}
   \item{\code{variable.importance.local}}{Variable importance for each independent variable and each sample, if \code{local.importance} is set to TRUE and \code{importance} is set to 'permutation'.}
-  \item{\code{prediction.error}}{Overall out of bag prediction error. For classification this is the fraction of missclassified samples, for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
-  \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out of bag data.}
-  \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out of bag samples (classification only).}
+  \item{\code{prediction.error}}{Overall out-of-bag prediction error. For classification this is accuracy (proportion of misclassified observations), for probability estimation the Brier score, for regression the mean squared error and for survival one minus Harrell's C-index.}
+  \item{\code{r.squared}}{R squared. Also called explained variance or coefficient of determination (regression only). Computed on out-of-bag data.}
+  \item{\code{confusion.matrix}}{Contingency table for classes and predictions based on out-of-bag samples (classification only).}
   \item{\code{unique.death.times}}{Unique death times (survival only).}
   \item{\code{chf}}{Estimated cumulative hazard function for each sample (survival only).}
   \item{\code{survival}}{Estimated survival function for each sample (survival only).}
@@ -146,6 +155,8 @@ Object of class \code{ranger} with elements
   \item{\code{importance.mode}}{Importance mode used.}
   \item{\code{num.samples}}{Number of samples.}
   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
+  \item{\code{dependent.variable.name}}{Name of the dependent variable. This is NULL when x/y interface is used.}
+  \item{\code{status.variable.name}}{Name of the status variable (survival only). This is NULL when x/y interface is used.}
 }
 \description{
 Ranger is a fast implementation of random forests (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
@@ -167,12 +178,13 @@ Predictions are class probabilities for each sample.
 In contrast to other implementations, each tree returns a probability estimate and these estimates are averaged for the forest probability estimate.
 For details see Malley et al. (2012).
 
-Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
-For survival all nodes contain at \code{min.node.size} samples. 
+Note that nodes with size smaller than \code{min.node.size} can occur because \code{min.node.size} is the minimal node size \emph{to split at}, as in original Random Forests.
+To restrict the size of terminal nodes, set \code{min.bucket}. 
 Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
 In \code{split.select.weights}, weights do not need to sum up to 1, they will be normalized later. 
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 Names of the \code{split.select.weights} vector are ignored.
+Weights assigned by \code{split.select.weights} to variables in \code{always.split.variables} are ignored. 
 The usage of \code{split.select.weights} can increase the computation times for large forests.
 
 Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
@@ -183,9 +195,25 @@ The use of 'order' is recommended, as it computationally fast and can handle an 
 Note that the factors are only reordered once and not again in each split. 
 
 The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
-It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
-See Nembrini et al. (2018) for details.
-This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
+It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. See Nembrini et al. (2018) for details.
+This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}. 
+We recommend not to use the 'impurity_corrected' importance when making predictions since the feature permutation step might reduce predictive performance (a warning is raised when predicting on new data). 
+
+Note that ranger has different default values than other packages.
+For example, our default for \code{mtry} is the square root of the number of variables for all tree types, whereas other packages use different values for regression.
+Also, changing one hyperparameter does not change other hyperparameters (where possible). 
+For example, \code{splitrule="extratrees"} uses randomized splitting but does not disable bagging as in Geurts et al. (2006).
+To disable bagging, use \code{replace = FALSE, sample.fraction = 1}. 
+This can also be used to grow a single decision tree without bagging and feature subsetting: \code{ranger(..., num.trees = 1, mtry = p, replace = FALSE, sample.fraction = 1)}, where p is the number of independent variables.
+
+While random forests are known for their robustness, default hyperparameters not always work well. 
+For example, for high dimensional data, increasing the \code{mtry} value and the number of trees \code{num.trees} is recommended. 
+For more details and recommendations, see Probst et al. (2019). 
+To find the best hyperparameters, consider hyperparameter tuning with the \code{tuneRanger} or \code{mlr3} packages.
+
+Out-of-bag prediction error is calculated as accuracy (proportion of misclassified observations) for classification, as Brier score for probability estimation, as mean squared error (MSE) for regression and as one minus Harrell's C-index for survival.
+Harrell's C-index is calculated based on the sum of the cumulative hazard function (CHF) over all timepoints, i.e., \code{rowSums(chf)}, where \code{chf} is the the out-of-bag CHF; for details, see Ishwaran et al. (2008).
+Calculation of the out-of-bag prediction error can be turned off with \code{oob.error = FALSE}.
 
 Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
 If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
@@ -202,10 +230,10 @@ All SNPs in the \code{GenABEL} object will be used for splitting.
 To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
 Note that missing values are treated as an extra category while splitting.
 
-See \url{https://github.com/imbs-hl/ranger} for the development version.
+By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 
-With recent R versions, multithreading on Windows platforms should just work. 
-If you compile yourself, the new RTools toolchain is required.
+See \url{https://github.com/imbs-hl/ranger} for the development version.
 }
 \examples{
 ## Classification forest with default settings
@@ -250,19 +278,20 @@ ranger(trait ~ ., data = dat.gwaa)
 }
 \references{
 \itemize{
-  \item Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
-  \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}. 
-  \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. \url{https://doi.org/10.1002/sim.7212}.
-  \item Nembrini, S., Koenig, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \url{https://doi.org/10.1093/bioinformatics/bty373}.
-  \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \url{https://doi.org/10.1023/A:1010933404324}. 
-  \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}. 
-  \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{https://doi.org/10.3414/ME00-01-0052}.
+  \item Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. \doi{10.18637/jss.v077.i01}.
+  \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \doi{10.1016/j.eswa.2016.07.018}. 
+  \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. \doi{10.1002/sim.7212}.
+  \item Nembrini, S., Koenig, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \doi{10.1093/bioinformatics/bty373}.
+  \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \doi{10.1023/A:1010933404324}. 
+  \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \doi{10.1097/JTO.0b013e318233d835}. 
+  \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \doi{10.3414/ME00-01-0052}.
   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-  \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}.
-  \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
-  \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{https://doi.org/10.1198/106186008X344522}.
-  \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
-  \item Deng & Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. \url{https://doi.org/10.1109/IJCNN.2012.6252640}.
+  \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \doi{10.1007/s10994-006-6226-1}.
+  \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{https://www.jmlr.org/papers/v7/meinshausen06a.html}.  
+  \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \doi{10.1198/106186008X344522}.
+  \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \doi{10.1023/A:1009869804967}.
+  \item Deng & Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. \doi{10.1109/IJCNN.2012.6252640}.
+  \item Probst, P., Wright, M. N. & Boulesteix, A-L. (2019). Hyperparameters and tuning strategies for random forest. WIREs Data Mining Knowl Discov 9:e1301.\doi{10.1002/widm.1301}.
   }
 }
 \seealso{

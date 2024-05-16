@@ -86,6 +86,14 @@ test_that("Inbag counts match sample fraction, classification", {
   expect_equal(unique(colSums(inbag[dat$Species == "setosa", ])), 15)
   expect_equal(unique(colSums(inbag[dat$Species == "versicolor", ])), 30)
   expect_equal(unique(colSums(inbag[dat$Species == "virginica", ])), 45)
+  
+  ## No factor outcome
+  rf <- ranger(Species ~ ., data.matrix(iris), num.trees = 5, sample.fraction = c(0.2, 0.3, 0.4), 
+               replace = TRUE, keep.inbag = TRUE, classification = TRUE)
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[iris$Species == "setosa", ])), 30)
+  expect_equal(unique(colSums(inbag[iris$Species == "versicolor", ])), 45)
+  expect_equal(unique(colSums(inbag[iris$Species == "virginica", ])), 60)
 })
 
 test_that("Inbag counts match sample fraction, probability", {
@@ -104,6 +112,14 @@ test_that("Inbag counts match sample fraction, probability", {
   expect_equal(unique(colSums(inbag[1:50, ])), 15)
   expect_equal(unique(colSums(inbag[51:100, ])), 30)
   expect_equal(unique(colSums(inbag[101:150, ])), 45)
+  
+  ## No factor outcome
+  rf <- ranger(Species ~ ., data.matrix(iris), num.trees = 5, sample.fraction = c(0.2, 0.3, 0.4), 
+               replace = TRUE, keep.inbag = TRUE, probability = TRUE)
+  inbag <- do.call(cbind, rf$inbag.counts)
+  expect_equal(unique(colSums(inbag[1:50, ])), 30)
+  expect_equal(unique(colSums(inbag[51:100, ])), 45)
+  expect_equal(unique(colSums(inbag[101:150, ])), 60)
 })
 
 test_that("as.factor() in formula works", {
@@ -348,3 +364,119 @@ test_that("mtry function error halts the ranger function", {
     ranger(Species ~ ., data = iris, mtry = function(n) stop("this is some error")), 
     "mtry function evaluation resulted in an error.")
 })
+
+test_that("min.bucket creates nodes of correct size", {
+  
+  # Size 2
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = 2, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  smallest_node <- min(sapply(1:ncol(pred), function(i) {
+    min(table(pred[inbag[, i], i]))
+  }))
+  expect_gte(smallest_node, 2)
+  
+  # Size 10
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = 10, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  smallest_node <- min(sapply(1:ncol(pred), function(i) {
+    min(table(pred[inbag[, i], i]))
+  }))
+  expect_gte(smallest_node, 10)
+  
+  # Random size
+  min.bucket <- round(runif(1, 1, 40))
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = min.bucket, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  smallest_node <- min(sapply(1:ncol(pred), function(i) {
+    min(table(pred[inbag[, i], i]))
+  }))
+  expect_gte(smallest_node, min.bucket)
+})
+
+test_that("Vector min.bucket creates nodes of correct size", {
+  
+  # Size 2,3,4
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = c(2, 3, 4), keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  
+  smallest_nodes <- sapply(1:ncol(pred), function(i) {
+    pred1 <- pred[which(inbag[, i][1:50]), i]
+    pred2 <- pred[which(inbag[, i][51:100]) + 50, i]
+    pred3 <- pred[which(inbag[, i][101:150]) + 100, i]
+    
+    pred <- rbind(data.frame(class = 1, node = pred1),
+                  data.frame(class = 2, node = pred2), 
+                  data.frame(class = 3, node = pred3))
+    apply(table(pred), 1, min)
+  })
+  
+  expect_true(all(smallest_nodes >= matrix(c(2, 3, 4), ncol = 5, nrow = 3)))
+  
+  # Size 4,3,2
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = c(4, 3, 2), keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  
+  smallest_nodes <- sapply(1:ncol(pred), function(i) {
+    pred1 <- pred[which(inbag[, i][1:50]), i]
+    pred2 <- pred[which(inbag[, i][51:100]) + 50, i]
+    pred3 <- pred[which(inbag[, i][101:150]) + 100, i]
+    
+    pred <- rbind(data.frame(class = 1, node = pred1),
+                  data.frame(class = 2, node = pred2), 
+                  data.frame(class = 3, node = pred3))
+    apply(table(pred), 1, min)
+  })
+  
+  expect_true(all(smallest_nodes >= matrix(c(4, 3, 2), ncol = 5, nrow = 3)))
+  
+  # Random size
+  min.bucket <- round(runif(3, 1, 10))
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+               min.bucket = min.bucket, keep.inbag = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  
+  smallest_nodes <- sapply(1:ncol(pred), function(i) {
+    pred1 <- pred[which(inbag[, i][1:50]), i]
+    pred2 <- pred[which(inbag[, i][51:100]) + 50, i]
+    pred3 <- pred[which(inbag[, i][101:150]) + 100, i]
+    
+    pred <- rbind(data.frame(class = 1, node = pred1),
+                  data.frame(class = 2, node = pred2), 
+                  data.frame(class = 3, node = pred3))
+    apply(table(pred), 1, min)
+  })
+  
+  expect_true(all(smallest_nodes >= matrix(min.bucket, ncol = 5, nrow = 3)))
+  
+  # No factor outcome
+  rf <- ranger(Species ~ ., data.matrix(iris), num.trees = 5, replace = FALSE, 
+               min.bucket = c(2, 3, 4), keep.inbag = TRUE, classification = TRUE)
+  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  inbag <- sapply(rf$inbag.counts, function(x) x == 1)
+  
+  smallest_nodes <- sapply(1:ncol(pred), function(i) {
+    pred1 <- pred[which(inbag[, i][1:50]), i]
+    pred2 <- pred[which(inbag[, i][51:100]) + 50, i]
+    pred3 <- pred[which(inbag[, i][101:150]) + 100, i]
+    
+    pred <- rbind(data.frame(class = 1, node = pred1),
+                  data.frame(class = 2, node = pred2), 
+                  data.frame(class = 3, node = pred3))
+    apply(table(pred), 1, min)
+  })
+  
+  expect_true(all(smallest_nodes >= matrix(c(2, 3, 4), ncol = 5, nrow = 3)))
+})
+
+

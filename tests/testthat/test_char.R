@@ -19,3 +19,13 @@ test_that("no warning or error if character vector in data, alternative interfac
                              num.trees = 5, write.forest = TRUE))
   expect_silent(predict(rf, dat))
 })
+
+test_that("same result for single row", {
+  rf <- ranger(Species ~ ., dat, num.trees = 5, probability = TRUE)
+  pred1 <- predict(rf, dat)$predictions
+  pred2 <- t(sapply(1:nrow(dat), function(i) {
+    predict(rf, dat[i, ])$predictions
+  }))
+  colnames(pred2) <- colnames(pred1)
+  expect_equal(pred1, pred2)
+})

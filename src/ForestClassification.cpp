@@ -37,7 +37,7 @@ void ForestClassification::loadForest(size_t num_trees,
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(
-        make_unique<TreeClassification>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
+        std::make_unique<TreeClassification>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i],
             &this->class_values, &response_classIDs));
   }
 
@@ -54,8 +54,13 @@ void ForestClassification::initInternal() {
   }
 
   // Set minimal node size
-  if (min_node_size == 0) {
-    min_node_size = DEFAULT_MIN_NODE_SIZE_CLASSIFICATION;
+  if (min_node_size.size() == 1 && min_node_size[0] == 0) {
+    min_node_size[0] = DEFAULT_MIN_NODE_SIZE_CLASSIFICATION;
+  }
+
+  // Set minimal bucket size
+  if (min_bucket.size() == 1 && min_bucket[0] == 0) {
+    min_bucket[0] = DEFAULT_MIN_BUCKET;
   }
 
   // Create class_values and response_classIDs
@@ -101,7 +106,7 @@ void ForestClassification::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(
-        make_unique<TreeClassification>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
+        std::make_unique<TreeClassification>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
   }
 }
 
@@ -314,7 +319,7 @@ void ForestClassification::loadFromFileInternal(std::ifstream& infile) {
 
     // Create tree
     trees.push_back(
-        make_unique<TreeClassification>(child_nodeIDs, split_varIDs, split_values, &class_values, &response_classIDs));
+        std::make_unique<TreeClassification>(child_nodeIDs, split_varIDs, split_values, &class_values, &response_classIDs));
   }
 }
 

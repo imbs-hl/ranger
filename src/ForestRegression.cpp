@@ -32,7 +32,7 @@ void ForestRegression::loadForest(size_t num_trees,
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(
-        make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
+        std::make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
   }
 
   // Create thread ranges
@@ -48,8 +48,13 @@ void ForestRegression::initInternal() {
   }
 
   // Set minimal node size
-  if (min_node_size == 0) {
-    min_node_size = DEFAULT_MIN_NODE_SIZE_REGRESSION;
+  if (min_node_size.size() == 1 && min_node_size[0] == 0) {
+    min_node_size[0] = DEFAULT_MIN_NODE_SIZE_REGRESSION;
+  }
+
+  // Set minimal bucket size
+  if (min_bucket.size() == 1 && min_bucket[0] == 0) {
+    min_bucket[0] = DEFAULT_MIN_BUCKET;
   }
 
   // Error if beta splitrule used with data outside of [0,1]
@@ -71,7 +76,7 @@ void ForestRegression::initInternal() {
 void ForestRegression::growInternal() {
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(make_unique<TreeRegression>());
+    trees.push_back(std::make_unique<TreeRegression>());
   }
 }
 
@@ -241,7 +246,7 @@ void ForestRegression::loadFromFileInternal(std::ifstream& infile) {
     }
 
     // Create tree
-    trees.push_back(make_unique<TreeRegression>(child_nodeIDs, split_varIDs, split_values));
+    trees.push_back(std::make_unique<TreeRegression>(child_nodeIDs, split_varIDs, split_values));
   }
 }
 

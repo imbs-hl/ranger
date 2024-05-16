@@ -80,10 +80,19 @@ void TreeProbability::appendToFileInternal(std::ofstream& file) { // #nocov star
 
 bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
 
-  // Stop if maximum node size or depth reached
   size_t num_samples_node = end_pos[nodeID] - start_pos[nodeID];
-  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  
+  // Save node statistics
+  if (save_node_stats) {
+    num_samples_nodes[nodeID] = num_samples_node;
     addToTerminalNodes(nodeID);
+  }
+  
+  // Stop if maximum node size or depth reached
+  if ((min_node_size->size() == 1 && num_samples_node <= (*min_node_size)[0]) || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -100,7 +109,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
     pure_value = value;
   }
   if (pure) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -113,7 +124,9 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   }
 
   if (stop) {
-    addToTerminalNodes(nodeID);
+    if (!save_node_stats) {
+      addToTerminalNodes(nodeID);
+    }
     return true;
   }
 
@@ -157,6 +170,30 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
     uint sample_classID = (*response_classIDs)[sampleID];
     ++class_counts[sample_classID];
   }
+  
+  // Stop if class-wise minimal node size reached
+  if (min_node_size->size() > 1) {
+    for (size_t j = 0; j < num_classes; ++j) {
+      if (class_counts[j] < (*min_node_size)[j]) {
+        return true;
+      }
+    }
+  }
+  
+  // Stop early if no split posssible
+  if (min_bucket->size() == 1) {
+    if (num_samples_node < 2 * (*min_bucket)[0]) {
+      return true;
+    }
+  } else {
+    uint sum_min_bucket = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      sum_min_bucket += (*min_bucket)[j];
+    }
+    if (num_samples_node < sum_min_bucket) {
+      return true;
+    } 
+  }
 
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
@@ -192,6 +229,11 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -264,6 +306,11 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
       break;
     }
 
+    // Stop if minimal bucket size reached
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
+      continue;
+    }
+
     double decrease;
     if (splitrule == HELLINGER) {
       for (size_t j = 0; j < num_classes; ++j) {
@@ -293,6 +340,21 @@ void TreeProbability::findBestSplitValueSmallQ(size_t nodeID, size_t varID, size
 
       // Decrease of impurity
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_right = class_counts[j] - class_counts_left[j];
+        if (class_counts_left[j] < (*min_bucket)[j] || class_count_right < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Regularization
@@ -351,6 +413,11 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
       break;
     }
 
+    // Stop if minimal bucket size reached
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
+      continue;
+    }
+
     double decrease;
     if (splitrule == HELLINGER) {
       for (size_t j = 0; j < num_classes; ++j) {
@@ -380,6 +447,21 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
 
       // Decrease of impurity
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_right = class_counts[j] - class_counts_left[j];
+        if (class_counts_left[j] < (*min_bucket)[j] || class_count_right < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Regularization
@@ -457,6 +539,11 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
     }
     size_t n_left = num_samples_node - n_right;
 
+    // Stop if minimal bucket size reached
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
+      continue;
+    }
+
     double decrease;
     if (splitrule == HELLINGER) {
       // TPR is number of outcome 1s in one node / total number of 1s
@@ -482,6 +569,21 @@ void TreeProbability::findBestSplitValueUnordered(size_t nodeID, size_t varID, s
 
       // Decrease of impurity
       decrease = sum_left / (double) n_left + sum_right / (double) n_right;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_left = class_counts[j] - class_counts_right[j];
+        if (class_count_left < (*min_bucket)[j] || class_counts_right[j] < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Regularization
@@ -511,6 +613,30 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
     uint sample_classID = (*response_classIDs)[sampleID];
     ++class_counts[sample_classID];
   }
+  
+  // Stop if class-wise minimal node size reached
+  if (min_node_size->size() > 1) {
+    for (size_t j = 0; j < num_classes; ++j) {
+      if (class_counts[j] < (*min_node_size)[j]) {
+        return true;
+      }
+    }
+  }
+  
+  // Stop early if no split posssible
+  if (min_bucket->size() == 1) {
+    if (num_samples_node < 2 * (*min_bucket)[0]) {
+      return true;
+    }
+  } else {
+    uint sum_min_bucket = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      sum_min_bucket += (*min_bucket)[j];
+    }
+    if (num_samples_node < sum_min_bucket) {
+      return true;
+    } 
+  }
 
   // For all possible split variables
   for (auto& varID : possible_split_varIDs) {
@@ -532,6 +658,11 @@ bool TreeProbability::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>
   // Save best values
   split_varIDs[nodeID] = best_varID;
   split_values[nodeID] = best_value;
+  
+  // Save split statistics
+  if (save_node_stats) {
+    split_stats[nodeID] = best_decrease;
+  }
 
   // Compute decrease of impurity for this node and add to variable importance if needed
   if (importance_mode == IMP_GINI || importance_mode == IMP_GINI_CORRECTED) {
@@ -614,6 +745,11 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
       continue;
     }
 
+    // Stop if minimal bucket size reached
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right[i] < (*min_bucket)[0])) {
+      continue;
+    }
+
     // Sum of squares
     double sum_left = 0;
     double sum_right = 0;
@@ -623,6 +759,21 @@ void TreeProbability::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, 
 
       sum_right += (*class_weights)[j] * class_count_right * class_count_right;
       sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_left = class_counts[j] - class_counts_right[j];
+        if (class_count_left < (*min_bucket)[j] || class_counts_right[j] < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Decrease of impurity
@@ -720,6 +871,11 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
     }
     size_t n_left = num_samples_node - n_right;
 
+    // Stop if minimal bucket size reached
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
+      continue;
+    }
+
     // Sum of squares
     double sum_left = 0;
     double sum_right = 0;
@@ -729,6 +885,21 @@ void TreeProbability::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_
 
       sum_right += (*class_weights)[j] * class_count_right * class_count_right;
       sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_left = class_counts[j] - class_counts_right[j];
+        if (class_count_left < (*min_bucket)[j] || class_counts_right[j] < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Decrease of impurity
