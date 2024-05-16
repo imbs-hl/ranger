@@ -20,6 +20,6 @@ Suggests:
     testthat
 Encoding: UTF-8
 RoxygenNote: 7.3.1
-URL: http://imbs-hl.github.io/ranger/,
+URL: https://imbs-hl.github.io/ranger/,
     https://github.com/imbs-hl/ranger
 BugReports: https://github.com/imbs-hl/ranger/issues

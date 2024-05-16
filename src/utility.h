@@ -525,6 +525,12 @@ std::stringstream& readFromStream(std::stringstream& in, double& token);
  */
 double betaLogLik(double y, double mean, double phi);
 
+/*
+ * Returns the natural logarithm of the absolute value of the gamma function of x.
+ * @param x Parameter for the log-gamma function.
+ */
+double mylgamma(double x);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {
