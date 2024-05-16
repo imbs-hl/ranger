@@ -50,7 +50,7 @@ using namespace ranger;
 // [[Rcpp::export]]
 Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericMatrix& input_y,
     std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose, uint seed, uint num_threads,
-    bool write_forest, uint importance_mode_r, uint min_node_size, uint min_bucket,
+    bool write_forest, uint importance_mode_r, std::vector<uint>& min_node_size, std::vector<uint>& min_bucket,
     std::vector<std::vector<double>>& split_select_weights, bool use_split_select_weights,
     std::vector<std::string>& always_split_variable_names, bool use_always_split_variable_names,
     bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,

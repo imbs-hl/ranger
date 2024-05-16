@@ -36,7 +36,7 @@ public:
   Tree& operator=(const Tree&) = delete;
 
   void init(const Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
-      std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size, uint min_bucket,
+      std::vector<double>* split_select_weights, ImportanceMode importance_mode, std::vector<uint>* min_node_size, std::vector<uint>* min_bucket,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, double poisson_tau, bool holdout, uint num_random_splits,
@@ -166,10 +166,10 @@ protected:
   size_t num_samples_oob;
 
   // Minimum node size to split, nodes of smaller size can be produced
-  uint min_node_size;
+  std::vector<uint>* min_node_size;
   
   // Minimum bucket size, minimum number of samples in each node
-  uint min_bucket;
+  std::vector<uint>* min_bucket;
 
   // Weight vector for selecting possible split variables, one weight between 0 (never select) and 1 (always select) for each variable
   // Deterministic variables are always selected

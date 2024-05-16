@@ -540,6 +540,12 @@ inline double xlogy(double x, double y) {
   }
 }
 
+/**
+ * Returns the natural logarithm of the absolute value of the gamma function of x.
+ * @param x Parameter for the log-gamma function.
+ */
+double mylgamma(double x);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {

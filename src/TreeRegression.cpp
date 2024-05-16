@@ -103,7 +103,7 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   }
 
   // Stop if maximum node size or depth reached
-  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  if (num_samples_node <= (*min_node_size)[0] || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     split_values[nodeID] = estimate(nodeID);
     return true;
   }
@@ -187,7 +187,7 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
   double sum_node = sumNodeResponse(nodeID);
 
   // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_bucket) {
+  if (num_samples_node >= 2 * (*min_bucket)[0]) {
 
     // For all possible split variables
     for (auto& varID : possible_split_varIDs) {
@@ -298,7 +298,7 @@ void TreeRegression::findBestSplitValueSmallQ(size_t nodeID, size_t varID, doubl
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
       continue;
     }
 
@@ -360,7 +360,7 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
       continue;
     }
 
@@ -442,7 +442,7 @@ void TreeRegression::findBestSplitValueUnordered(size_t nodeID, size_t varID, do
     size_t n_left = num_samples_node - n_right;
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
       continue;
     }
 
@@ -581,7 +581,7 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
   double sum_node = sumNodeResponse(nodeID);
 
   // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_bucket) {
+  if (num_samples_node >= 2 * (*min_bucket)[0]) {
   
     // For all possible split variables
     for (auto& varID : possible_split_varIDs) {
@@ -691,7 +691,7 @@ void TreeRegression::findBestSplitValueExtraTrees(size_t nodeID, size_t varID, d
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right[i] < min_bucket) {
+    if (n_left < (*min_bucket)[0] || n_right[i] < (*min_bucket)[0]) {
       continue;
     }
 
@@ -791,7 +791,7 @@ void TreeRegression::findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t
     size_t n_left = num_samples_node - n_right;
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
       continue;
     }
 
@@ -822,7 +822,7 @@ bool TreeRegression::findBestSplitBeta(size_t nodeID, std::vector<size_t>& possi
   double sum_node = sumNodeResponse(nodeID);
 
   // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_bucket) {
+  if (num_samples_node >= 2 * (*min_bucket)[0]) {
 
     // For all possible split variables find best split value
     for (auto& varID : possible_split_varIDs) {
@@ -915,7 +915,7 @@ void TreeRegression::findBestSplitValueBeta(size_t nodeID, size_t varID, double 
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right[i] < min_bucket) {
+    if (n_left < (*min_bucket)[0] || n_right[i] < (*min_bucket)[0]) {
       continue;
     }
 

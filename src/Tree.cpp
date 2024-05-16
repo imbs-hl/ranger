@@ -39,7 +39,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
 }
 
 void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std::vector<size_t>* deterministic_varIDs,
-    std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size, uint min_bucket,
+    std::vector<double>* split_select_weights, ImportanceMode importance_mode, std::vector<uint>* min_node_size, std::vector<uint>* min_bucket,
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
     double minprop, double poisson_tau, bool holdout, uint num_random_splits, uint max_depth, std::vector<double>* regularization_factor,
@@ -91,7 +91,7 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
 void Tree::grow(std::vector<double>* variable_importance) {
   // Allocate memory for tree growing
   allocateMemory();
-
+  
   this->variable_importance = variable_importance;
 
   // Bootstrap, dependent if weighted or not and with or without replacement
@@ -308,7 +308,7 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
 }
 
 bool Tree::splitNode(size_t nodeID) {
-
+  
   // Select random subset of variables to possibly split at
   std::vector<size_t> possible_split_varIDs;
   createPossibleSplitVarSubset(possible_split_varIDs);
