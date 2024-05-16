@@ -1001,10 +1001,14 @@ bool TreeRegression::findBestSplitPoisson(size_t nodeID, std::vector<size_t>& po
   // Compute sum of responses in node
   double sum_node = sumNodeResponse(nodeID);
   
-  // For all possible split variables find best split value
-  for (auto& varID : possible_split_varIDs) {
-    findBestSplitValuePoissonSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
-                                    best_decrease);
+  // Stop early if no split posssible
+  if (num_samples_node >= 2 * (*min_bucket)[0]) {
+    
+    // For all possible split variables find best split value
+    for (auto& varID : possible_split_varIDs) {
+      findBestSplitValuePoissonSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
+                                      best_decrease);
+    }
   }
   
   // Stop if no good split found
@@ -1086,6 +1090,11 @@ void TreeRegression::findBestSplitValuePoissonSmallQ(size_t nodeID, size_t varID
     size_t n_right = num_samples_node - n_left;
     if (n_right == 0) {
       break;
+    }
+    
+    // Stop if minimal bucket size reached
+    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
+      continue;
     }
     
     // Compute mean
