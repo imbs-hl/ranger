@@ -107,7 +107,7 @@
 
 
 <dt>num.threads</dt>
-<dd><p>Number of threads. Default is number of CPUs available.</p></dd>
+<dd><p>Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).</p></dd>
 
 
 <dt>verbose</dt>
@@ -134,6 +134,8 @@ For <code>type = 'quantiles'</code>, the selected quantiles for each observation
 <p>If <code>type = 'se'</code> is selected, the method to estimate the variances can be chosen with <code>se.method</code>. Set <code>se.method = 'jack'</code> for jackknife-after-bootstrap and <code>se.method = 'infjack'</code> for the infinitesimal jackknife for bagging.</p>
 <p>For classification and <code>predict.all = TRUE</code>, a factor levels are returned as numerics.
 To retrieve the corresponding factor levels, use <code>rf$forest$levels</code>, if <code>rf</code> is the ranger object.</p>
+<p>By default, ranger uses 2 threads. The default can be changed with: (1) <code>num.threads</code> in ranger/predict call, (2) environment variable
+R_RANGER_NUM_THREADS, (3) <code>options(ranger.num.threads = N)</code>, (4) <code>options(Ncpus = N)</code>, with precedence in that order.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
