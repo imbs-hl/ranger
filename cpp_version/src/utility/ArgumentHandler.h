@@ -60,6 +60,7 @@ public:
   PredictionType predictiontype;
   uint randomsplits;
   std::string splitweights;
+  double tau;
   uint nthreads;
   bool predall;
 
