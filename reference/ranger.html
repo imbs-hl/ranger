@@ -16,7 +16,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
     
     <a class="navbar-brand me-2" href="../index.html">ranger</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,11 +137,11 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 
 
 <dt>min.node.size</dt>
-<dd><p>Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.</p></dd>
+<dd><p>Minimal node size to split at. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability. For classification, this can be a vector of class-specific values.</p></dd>
 
 
 <dt>min.bucket</dt>
-<dd><p>Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types.</p></dd>
+<dd><p>Minimal terminal node size. No nodes smaller than this value can occur. Default 3 for survival and 1 for all other tree types. For classification, this can be a vector of class-specific values.</p></dd>
 
 
 <dt>max.depth</dt>
