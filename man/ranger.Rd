@@ -112,7 +112,7 @@ ranger(
 
 \item{oob.error}{Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.}
 
-\item{num.threads}{Number of threads. Default is number of CPUs available.}
+\item{num.threads}{Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).}
 
 \item{save.memory}{Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.}
 
@@ -230,10 +230,10 @@ All SNPs in the \code{GenABEL} object will be used for splitting.
 To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
 Note that missing values are treated as an extra category while splitting.
 
-See \url{https://github.com/imbs-hl/ranger} for the development version.
+By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 
-With recent R versions, multithreading on Windows platforms should just work. 
-If you compile yourself, the new RTools toolchain is required.
+See \url{https://github.com/imbs-hl/ranger} for the development version.
 }
 \examples{
 ## Classification forest with default settings

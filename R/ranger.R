@@ -96,10 +96,10 @@
 ##' To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
 ##' Note that missing values are treated as an extra category while splitting.
 ##' 
-##' See \url{https://github.com/imbs-hl/ranger} for the development version.
+##' By default, ranger uses 2 threads. The default can be changed with: (1) \code{num.threads} in ranger/predict call, (2) environment variable
+##' R_RANGER_NUM_THREADS, (3) \code{options(ranger.num.threads = N)}, (4) \code{options(Ncpus = N)}, with precedence in that order.
 ##' 
-##' With recent R versions, multithreading on Windows platforms should just work. 
-##' If you compile yourself, the new RTools toolchain is required.
+##' See \url{https://github.com/imbs-hl/ranger} for the development version.
 ##' 
 ##' @title Ranger
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
@@ -133,7 +133,7 @@
 ##' @param quantreg Prepare quantile prediction as in quantile regression forests (Meinshausen 2006). Regression only. Set \code{keep.inbag = TRUE} to prepare out-of-bag quantile prediction.
 ##' @param time.interest Time points of interest (survival only). Can be \code{NULL} (default, use all observed time points), a vector of time points or a single number to use as many time points (grid over observed time points).
 ##' @param oob.error Compute OOB prediction error. Set to \code{FALSE} to save computation time, e.g. for large survival forests.
-##' @param num.threads Number of threads. Default is number of CPUs available.
+##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
 ##' @param node.stats Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.
@@ -523,7 +523,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Num threads
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
-    num.threads = 0
+    num.threads <- as.integer(Sys.getenv("R_RANGER_NUM_THREADS", getOption("ranger.num.threads", getOption("Ncpus", 2L))))
   } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
