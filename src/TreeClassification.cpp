@@ -85,7 +85,7 @@ bool TreeClassification::splitNodeInternal(size_t nodeID, std::vector<size_t>& p
   }
   
   // Stop if maximum node size or depth reached
-  if (num_samples_node <= min_node_size || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
+  if ((min_node_size->size() == 1 && num_samples_node <= (*min_node_size)[0]) || (nodeID >= last_left_nodeID && max_depth > 0 && depth >= max_depth)) {
     split_values[nodeID] = estimate(nodeID);
     return true;
   }
@@ -166,34 +166,54 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
     uint sample_classID = (*response_classIDs)[sampleID];
     ++class_counts[sample_classID];
   }
+  
+  // Stop if class-wise minimal node size reached
+  if (min_node_size->size() > 1) {
+    for (size_t j = 0; j < num_classes; ++j) {
+      if (class_counts[j] < (*min_node_size)[j]) {
+        return true;
+      }
+    }
+  }
+  
+  // Stop early if no split posssible
+  if (min_bucket->size() == 1) {
+    if (num_samples_node < 2 * (*min_bucket)[0]) {
+      return true;
+    }
+  } else {
+    uint sum_min_bucket = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      sum_min_bucket += (*min_bucket)[j];
+    }
+    if (num_samples_node < sum_min_bucket) {
+      return true;
+    } 
+  }
 
-// Stop early if no split posssible
-  if (num_samples_node >= 2 * min_bucket) {
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if (data->isOrderedVariable(varID)) {
 
-    // For all possible split variables
-    for (auto& varID : possible_split_varIDs) {
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-
-        // Use memory saving method if option set
-        if (memory_saving_splitting) {
+      // Use memory saving method if option set
+      if (memory_saving_splitting) {
+        findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+            best_decrease);
+      } else {
+        // Use faster method for both cases
+        double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+        if (q < Q_THRESHOLD) {
           findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
               best_decrease);
         } else {
-          // Use faster method for both cases
-          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-          if (q < Q_THRESHOLD) {
-            findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                best_decrease);
-          } else {
-            findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                best_decrease);
-          }
+          findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+              best_decrease);
         }
-      } else {
-        findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
       }
+    } else {
+      findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+          best_decrease);
     }
   }
 
@@ -283,7 +303,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
       continue;
     }
 
@@ -316,6 +336,21 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
 
       // Decrease of impurity
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_right = class_counts[j] - class_counts_left[j];
+        if (class_counts_left[j] < (*min_bucket)[j] || class_count_right < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Regularization
@@ -375,7 +410,7 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
       continue;
     }
 
@@ -408,6 +443,21 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
 
       // Decrease of impurity
       decrease = sum_right / (double) n_right + sum_left / (double) n_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_right = class_counts[j] - class_counts_left[j];
+        if (class_counts_left[j] < (*min_bucket)[j] || class_count_right < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Regularization
@@ -486,7 +536,7 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
     size_t n_left = num_samples_node - n_right;
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
       continue;
     }
 
@@ -516,6 +566,21 @@ void TreeClassification::findBestSplitValueUnordered(size_t nodeID, size_t varID
       // Decrease of impurity
       decrease = sum_left / (double) n_left + sum_right / (double) n_right;
     }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_left = class_counts[j] - class_counts_right[j];
+        if (class_count_left < (*min_bucket)[j] || class_counts_right[j] < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
+    }
 
     // Regularization
     regularize(decrease, varID);
@@ -544,20 +609,40 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
     uint sample_classID = (*response_classIDs)[sampleID];
     ++class_counts[sample_classID];
   }
+  
+  // Stop if class-wise minimal node size reached
+  if (min_node_size->size() > 1) {
+    for (size_t j = 0; j < num_classes; ++j) {
+      if (class_counts[j] < (*min_node_size)[j]) {
+        return true;
+      }
+    }
+  }
 
   // Stop early if no split posssible
-  if (num_samples_node >= 2 * min_bucket) {
+  if (min_bucket->size() == 1) {
+    if (num_samples_node < 2 * (*min_bucket)[0]) {
+      return true;
+    }
+  } else {
+    uint sum_min_bucket = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      sum_min_bucket += (*min_bucket)[j];
+    }
+    if (num_samples_node < sum_min_bucket) {
+      return true;
+    } 
+  }
 
-    // For all possible split variables
-    for (auto& varID : possible_split_varIDs) {
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-        findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
-      } else {
-        findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
-            best_varID, best_decrease);
-      }
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if (data->isOrderedVariable(varID)) {
+      findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+          best_decrease);
+    } else {
+      findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
+          best_varID, best_decrease);
     }
   }
 
@@ -657,7 +742,7 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
     }
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right[i] < min_bucket) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right[i] < (*min_bucket)[0])) {
       continue;
     }
 
@@ -670,6 +755,21 @@ void TreeClassification::findBestSplitValueExtraTrees(size_t nodeID, size_t varI
 
       sum_right += (*class_weights)[j] * class_count_right * class_count_right;
       sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_left = class_counts[j] - class_counts_right[j];
+        if (class_count_left < (*min_bucket)[j] || class_counts_right[j] < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Decrease of impurity
@@ -768,7 +868,7 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
     size_t n_left = num_samples_node - n_right;
 
     // Stop if minimal bucket size reached
-    if (n_left < min_bucket || n_right < min_bucket) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
       continue;
     }
 
@@ -781,6 +881,21 @@ void TreeClassification::findBestSplitValueExtraTreesUnordered(size_t nodeID, si
 
       sum_right += (*class_weights)[j] * class_count_right * class_count_right;
       sum_left += (*class_weights)[j] * class_count_left * class_count_left;
+    }
+    
+    // Stop if class-wise minimal bucket size reached
+    if (min_bucket->size() > 1) {
+      bool stop = false;
+      for (size_t j = 0; j < num_classes; ++j) {
+        size_t class_count_left = class_counts[j] - class_counts_right[j];
+        if (class_count_left < (*min_bucket)[j] || class_counts_right[j] < (*min_bucket)[j]) {
+          stop = true;
+          break;
+        }
+      }
+      if (stop) {
+        continue;
+      }
     }
 
     // Decrease of impurity
