@@ -175,35 +175,45 @@ bool TreeClassification::findBestSplit(size_t nodeID, std::vector<size_t>& possi
       }
     }
   }
-
-  // TODO: Possible to stop early for class-wise min_bucket?
+  
   // Stop early if no split posssible
-  if (min_bucket->size() > 1 || (num_samples_node >= 2 * (*min_bucket)[0])) {
+  if (min_bucket->size() == 1) {
+    if (num_samples_node < 2 * (*min_bucket)[0]) {
+      return true;
+    }
+  } else {
+    uint sum_min_bucket = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      sum_min_bucket += (*min_bucket)[j];
+    }
+    if (num_samples_node < sum_min_bucket) {
+      return true;
+    } 
+  }
 
-    // For all possible split variables
-    for (auto& varID : possible_split_varIDs) {
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if (data->isOrderedVariable(varID)) {
 
-        // Use memory saving method if option set
-        if (memory_saving_splitting) {
+      // Use memory saving method if option set
+      if (memory_saving_splitting) {
+        findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+            best_decrease);
+      } else {
+        // Use faster method for both cases
+        double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+        if (q < Q_THRESHOLD) {
           findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
               best_decrease);
         } else {
-          // Use faster method for both cases
-          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-          if (q < Q_THRESHOLD) {
-            findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                best_decrease);
-          } else {
-            findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                best_decrease);
-          }
+          findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+              best_decrease);
         }
-      } else {
-        findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
       }
+    } else {
+      findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+          best_decrease);
     }
   }
 
@@ -609,20 +619,30 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
     }
   }
 
-  // TODO: Possible to stop early for class-wise min_bucket?
   // Stop early if no split posssible
-  if (min_bucket->size() > 1 || (num_samples_node >= 2 * (*min_bucket)[0])) {
+  if (min_bucket->size() == 1) {
+    if (num_samples_node < 2 * (*min_bucket)[0]) {
+      return true;
+    }
+  } else {
+    uint sum_min_bucket = 0;
+    for (size_t j = 0; j < num_classes; ++j) {
+      sum_min_bucket += (*min_bucket)[j];
+    }
+    if (num_samples_node < sum_min_bucket) {
+      return true;
+    } 
+  }
 
-    // For all possible split variables
-    for (auto& varID : possible_split_varIDs) {
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-        findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
-      } else {
-        findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
-            best_varID, best_decrease);
-      }
+  // For all possible split variables
+  for (auto& varID : possible_split_varIDs) {
+    // Find best split value, if ordered consider all values as split values, else all 2-partitions
+    if (data->isOrderedVariable(varID)) {
+      findBestSplitValueExtraTrees(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+          best_decrease);
+    } else {
+      findBestSplitValueExtraTreesUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value,
+          best_varID, best_decrease);
     }
   }
 
