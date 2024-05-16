@@ -13,3 +13,15 @@ randomObsNode <- function(groups, y, inbag_counts) {
     .Call(`_ranger_randomObsNode`, groups, y, inbag_counts)
 }
 
+hshrink_regr <- function(left_children, right_children, num_samples_nodes, node_predictions, split_values, lambda, nodeID, parent_n, parent_pred, cum_sum) {
+    invisible(.Call(`_ranger_hshrink_regr`, left_children, right_children, num_samples_nodes, node_predictions, split_values, lambda, nodeID, parent_n, parent_pred, cum_sum))
+}
+
+hshrink_prob <- function(left_children, right_children, num_samples_nodes, class_freq, lambda, nodeID, parent_n, parent_pred, cum_sum) {
+    invisible(.Call(`_ranger_hshrink_prob`, left_children, right_children, num_samples_nodes, class_freq, lambda, nodeID, parent_n, parent_pred, cum_sum))
+}
+
+replace_class_counts <- function(class_counts_old, class_counts_new) {
+    invisible(.Call(`_ranger_replace_class_counts`, class_counts_old, class_counts_new))
+}
+

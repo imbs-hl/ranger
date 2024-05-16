@@ -97,11 +97,62 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hshrink_regr
+void hshrink_regr(Rcpp::IntegerVector& left_children, Rcpp::IntegerVector& right_children, Rcpp::IntegerVector& num_samples_nodes, Rcpp::NumericVector& node_predictions, Rcpp::NumericVector& split_values, double lambda, size_t nodeID, size_t parent_n, double parent_pred, double cum_sum);
+RcppExport SEXP _ranger_hshrink_regr(SEXP left_childrenSEXP, SEXP right_childrenSEXP, SEXP num_samples_nodesSEXP, SEXP node_predictionsSEXP, SEXP split_valuesSEXP, SEXP lambdaSEXP, SEXP nodeIDSEXP, SEXP parent_nSEXP, SEXP parent_predSEXP, SEXP cum_sumSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type left_children(left_childrenSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type right_children(right_childrenSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type num_samples_nodes(num_samples_nodesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type node_predictions(node_predictionsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type split_values(split_valuesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< size_t >::type nodeID(nodeIDSEXP);
+    Rcpp::traits::input_parameter< size_t >::type parent_n(parent_nSEXP);
+    Rcpp::traits::input_parameter< double >::type parent_pred(parent_predSEXP);
+    Rcpp::traits::input_parameter< double >::type cum_sum(cum_sumSEXP);
+    hshrink_regr(left_children, right_children, num_samples_nodes, node_predictions, split_values, lambda, nodeID, parent_n, parent_pred, cum_sum);
+    return R_NilValue;
+END_RCPP
+}
+// hshrink_prob
+void hshrink_prob(Rcpp::IntegerVector& left_children, Rcpp::IntegerVector& right_children, Rcpp::IntegerVector& num_samples_nodes, Rcpp::NumericMatrix& class_freq, double lambda, size_t nodeID, size_t parent_n, Rcpp::NumericVector parent_pred, Rcpp::NumericVector cum_sum);
+RcppExport SEXP _ranger_hshrink_prob(SEXP left_childrenSEXP, SEXP right_childrenSEXP, SEXP num_samples_nodesSEXP, SEXP class_freqSEXP, SEXP lambdaSEXP, SEXP nodeIDSEXP, SEXP parent_nSEXP, SEXP parent_predSEXP, SEXP cum_sumSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type left_children(left_childrenSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type right_children(right_childrenSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type num_samples_nodes(num_samples_nodesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix& >::type class_freq(class_freqSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< size_t >::type nodeID(nodeIDSEXP);
+    Rcpp::traits::input_parameter< size_t >::type parent_n(parent_nSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type parent_pred(parent_predSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type cum_sum(cum_sumSEXP);
+    hshrink_prob(left_children, right_children, num_samples_nodes, class_freq, lambda, nodeID, parent_n, parent_pred, cum_sum);
+    return R_NilValue;
+END_RCPP
+}
+// replace_class_counts
+void replace_class_counts(Rcpp::List& class_counts_old, Rcpp::NumericMatrix& class_counts_new);
+RcppExport SEXP _ranger_replace_class_counts(SEXP class_counts_oldSEXP, SEXP class_counts_newSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type class_counts_old(class_counts_oldSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix& >::type class_counts_new(class_counts_newSEXP);
+    replace_class_counts(class_counts_old, class_counts_new);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ranger_rangerCpp", (DL_FUNC) &_ranger_rangerCpp, 50},
     {"_ranger_numSmaller", (DL_FUNC) &_ranger_numSmaller, 2},
     {"_ranger_randomObsNode", (DL_FUNC) &_ranger_randomObsNode, 3},
+    {"_ranger_hshrink_regr", (DL_FUNC) &_ranger_hshrink_regr, 10},
+    {"_ranger_hshrink_prob", (DL_FUNC) &_ranger_hshrink_prob, 9},
+    {"_ranger_replace_class_counts", (DL_FUNC) &_ranger_replace_class_counts, 2},
     {NULL, NULL, 0}
 };
 

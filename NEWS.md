@@ -1,5 +1,7 @@
 
 # ranger 0.16.1
+* Set num.threads=2 as default; respect environment variables and options
+* Add hierarchical shrinkage
 * Allow vector min.node.size and min.bucket for class-specific limits
 
 # ranger 0.16.0
