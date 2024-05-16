@@ -82,13 +82,8 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
 
   // Call other init function
   init(loadDataFromFile(input_file), mtry, output_prefix, num_trees, seed, num_threads, importance_mode,
-<<<<<<< HEAD
-      min_node_size, min_bucket, prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting,
-      splitrule, predict_all, sample_fraction_vector, alpha, minprop, poisson_tau, holdout, prediction_type, num_random_splits,
-=======
       min_node_size_vector, min_bucket_vector, prediction_mode, sample_with_replacement, unordered_variable_names, memory_saving_splitting,
-      splitrule, predict_all, sample_fraction_vector, alpha, minprop, holdout, prediction_type, num_random_splits,
->>>>>>> master
+      splitrule, predict_all, sample_fraction_vector, alpha, minprop, poisson_tau, holdout, prediction_type, num_random_splits,
       false, max_depth, regularization_factor, regularization_usedepth, false);
 
   if (prediction_mode) {
@@ -482,13 +477,8 @@ void Forest::grow() {
     }
 
     trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs, tree_split_select_weights,
-<<<<<<< HEAD
-        importance_mode, min_node_size, min_bucket, sample_with_replacement, memory_saving_splitting, splitrule, &case_weights,
-        tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, poisson_tau, holdout, num_random_splits, max_depth,
-=======
         importance_mode, &min_node_size, &min_bucket, sample_with_replacement, memory_saving_splitting, splitrule, &case_weights,
-        tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, holdout, num_random_splits, max_depth,
->>>>>>> master
+        tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, poisson_tau, holdout, num_random_splits, max_depth,
         &regularization_factor, regularization_usedepth, &split_varIDs_used, save_node_stats);
   }
 
