@@ -82,6 +82,9 @@ public:
   const std::vector<double>& getNodePredictions() const {
     return node_predictions;
   }
+  const std::vector<double>& getSplitStats() const {
+    return split_stats;
+  }
 
 protected:
   void createPossibleSplitVarSubset(std::vector<size_t>& result);
@@ -203,6 +206,7 @@ protected:
   bool save_node_stats;
   std::vector<size_t> num_samples_nodes;
   std::vector<double> node_predictions;
+  std::vector<double> split_stats;
 
   // Holdout mode
   bool holdout;

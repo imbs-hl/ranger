@@ -8,12 +8,14 @@ test_that("if node.stats FALSE, no nodestats saved, classification", {
   rf <- ranger(Species ~ ., iris, num.trees = 5)
   expect_null(rf$forest$num.samples.nodes)
   expect_null(rf$forest$node.predictions)
+  expect_null(rf$forest$split.stats)
 })
 
 test_that("if node.stats FALSE, no nodestats saved, probability", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE)
   expect_null(rf$forest$num.samples.nodes)
   expect_null(rf$forest$node.predictions)
+  expect_null(rf$forest$split.stats)
   expect_length(rf$forest$terminal.class.counts[[1]][[1]], 0)
 })
 
@@ -21,12 +23,14 @@ test_that("if node.stats FALSE, no nodestats saved, regression", {
   rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5)
   expect_null(rf$forest$num.samples.nodes)
   expect_null(rf$forest$node.predictions)
+  expect_null(rf$forest$split.stats)
 })
 
 test_that("if node.stats FALSE, no nodestats saved, survival", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
   expect_null(rf$forest$num.samples.nodes)
   expect_null(rf$forest$node.predictions)
+  expect_null(rf$forest$split.stats)
   expect_length(rf$forest$chf[[1]][[1]], 0)
 })
 
@@ -40,6 +44,10 @@ test_that("if node.stats TRUE, nodestats saved, classification", {
   expect_is(rf$forest$node.predictions, "list")
   expect_length(rf$forest$node.predictions, rf$num.trees)
   expect_is(rf$forest$node.predictions[[1]], "numeric")
+  
+  expect_is(rf$forest$split.stats, "list")
+  expect_length(rf$forest$split.stats, rf$num.trees)
+  expect_is(rf$forest$split.stats[[1]], "numeric")
 })
 
 test_that("if node.stats TRUE, nodestats saved, probability", {
@@ -54,6 +62,10 @@ test_that("if node.stats TRUE, nodestats saved, probability", {
   expect_is(rf$forest$terminal.class.counts, "list")
   expect_length(rf$forest$terminal.class.counts, rf$num.trees)
   expect_length(rf$forest$terminal.class.counts[[1]][[1]], nlevels(iris$Species))
+  
+  expect_is(rf$forest$split.stats, "list")
+  expect_length(rf$forest$split.stats, rf$num.trees)
+  expect_is(rf$forest$split.stats[[1]], "numeric")
 })
 
 test_that("if node.stats TRUE, nodestats saved, regression", {
@@ -66,6 +78,10 @@ test_that("if node.stats TRUE, nodestats saved, regression", {
   expect_is(rf$forest$node.predictions, "list")
   expect_length(rf$forest$node.predictions, rf$num.trees)
   expect_is(rf$forest$node.predictions[[1]], "numeric")
+  
+  expect_is(rf$forest$split.stats, "list")
+  expect_length(rf$forest$split.stats, rf$num.trees)
+  expect_is(rf$forest$split.stats[[1]], "numeric")
 })
 
 test_that("if node.stats TRUE, nodestats saved, survival", {
@@ -82,26 +98,11 @@ test_that("if node.stats TRUE, nodestats saved, survival", {
   expect_is(rf$forest$chf[[1]], "list")
   expect_is(rf$forest$chf[[1]][[1]], "numeric")
   expect_length(rf$forest$chf[[1]][[1]], length(rf$unique.death.times))
+  
+  expect_is(rf$forest$split.stats, "list")
+  expect_length(rf$forest$split.stats, rf$num.trees)
+  expect_is(rf$forest$split.stats[[1]], "numeric")
 })
-
-
-
-rf <- ranger(Species ~ ., iris, num.trees = 10, probability = TRUE, node.stats = TRUE)
-rf$forest$num.samples.nodes
-rf$forest$node.predictions
-rf$forest$terminal.class.counts
-
-
-rf <- ranger(Sepal.Length ~ ., iris, num.trees = 10, node.stats = TRUE)
-rf$forest$num.samples.nodes
-rf$forest$node.predictions
-
-# Survival
-
-rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10, node.stats = TRUE)
-rf$forest$num.samples.nodes
-rf$forest$node.predictions
-rf$forest$chf
 
 
 

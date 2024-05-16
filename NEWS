@@ -1,4 +1,11 @@
 
+##### Version 0.16.0
+* Add node.stats option to save node statistics of all nodes
+* Add time.interest option to restrict unique survival times (faster and saves memory)
+* Fix min bucket option in C++ version
+* Fix memory error for always.split.variables in certain settings
+* Fix quantile regression for factor variables in "order" mode
+
 ##### Version 0.15.0
 * Switch to C++14 standard
 * Add min.bucket parameter to restrict terminal node size

@@ -8,9 +8,9 @@ context("ranger_surv")
 rg.surv <- ranger(Surv(time, status) ~ ., data = veteran, num.trees = 10)
 
 ## Basic tests (for all random forests equal)
-test_that("survival result is of class ranger with 15 elements", {
+test_that("survival result is of class ranger with 17 elements", {
   expect_is(rg.surv, "ranger")
-  expect_equal(length(rg.surv), 15)
+  expect_equal(length(rg.surv), 17)
 })
 
 test_that("results have right number of trees", {
@@ -57,7 +57,7 @@ test_that("predict works for single observations, survival", {
 
 ## Special tests for random forests for survival analysis
 test_that("unique death times in survival result is right", {
-  expect_equal(rg.surv$unique.death.times, sort(unique(veteran$time)))
+  expect_equal(rg.surv$unique.death.times, sort(unique(veteran$time[veteran$status > 0])))
 })
 
 test_that("C-index splitting works", {
@@ -124,3 +124,57 @@ test_that("Survival error for competing risk data", {
   expect_error(ranger(y = sobj, x = veteran[, 1:2], num.trees = 5), 
                "Error: Competing risks not supported yet\\. Use status=1 for events and status=0 for censoring\\.")
 })
+
+test_that("Right unique time points without time.interest", {
+  times <- sort(unique(veteran$time[veteran$status > 0]))
+  
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
+  expect_equal(timepoints(rf), times)
+  
+  rf <- ranger(y = Surv(veteran$time, veteran$status), x = veteran[, c(-3, -4)], num.trees = 5)
+  expect_equal(timepoints(rf), times)
+})
+
+test_that("time.interest results in the right number of time points", {
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, time.interest = 20)
+  expect_equal(length(timepoints(rf)), 20)
+  
+  rf <- ranger(y = Surv(veteran$time, veteran$status), x = veteran[, c(-3, -4)], 
+               num.trees = 5, time.interest = 20)
+  expect_equal(length(timepoints(rf)), 20)
+  
+  rf <- ranger(y = cbind(veteran$time, veteran$status), x = veteran[, c(-3, -4)], 
+               num.trees = 5, time.interest = 20)
+  expect_equal(length(timepoints(rf)), 20)
+  
+  rf <- ranger(dependent.variable.name = "time", status.variable.name = "status", 
+               data = veteran, num.trees = 5, time.interest = 20)
+  expect_equal(length(timepoints(rf)), 20)
+})
+
+test_that("time.interest results in the right time points", {
+  times <- c(20, 100, 200, 1000)
+  
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, time.interest = times)
+  expect_equal(timepoints(rf), times)
+  
+  rf <- ranger(y = Surv(veteran$time, veteran$status), x = veteran[, c(-3, -4)], 
+               num.trees = 5, time.interest = times)
+  expect_equal(timepoints(rf), times)
+  
+  rf <- ranger(y = cbind(veteran$time, veteran$status), x = veteran[, c(-3, -4)], 
+               num.trees = 5, time.interest = times)
+  expect_equal(timepoints(rf), times)
+  
+  rf <- ranger(dependent.variable.name = "time", status.variable.name = "status", 
+               data = veteran, num.trees = 5, time.interest = times)
+  expect_equal(timepoints(rf), times)
+})
+
+test_that("If more unique time points requested then observed, use observed times", {
+  times <- sort(unique(veteran$time[veteran$status > 0]))
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, time.interest = 200)
+  expect_equal(timepoints(rf), times)
+})
+
+
