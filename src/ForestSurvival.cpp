@@ -98,13 +98,13 @@ void ForestSurvival::initInternal() {
   }
 
   // Set minimal node size
-  if (min_node_size == 0) {
-    min_node_size = DEFAULT_MIN_NODE_SIZE_SURVIVAL;
+  if (min_node_size.size() == 1 && min_node_size[0] == 0) {
+    min_node_size[0] = DEFAULT_MIN_NODE_SIZE_SURVIVAL;
   }
 
   // Set minimal bucket size
-  if (min_bucket == 0) {
-    min_bucket = DEFAULT_MIN_BUCKET_SURVIVAL;
+  if (min_bucket.size() == 1 && min_bucket[0] == 0) {
+    min_bucket[0] = DEFAULT_MIN_BUCKET_SURVIVAL;
   }
 
   // Sort data if extratrees and not memory saving mode
