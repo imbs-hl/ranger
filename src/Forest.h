@@ -147,6 +147,7 @@ public:
   
   std::vector<std::vector<size_t>> getNumSamplesNodes() {
     std::vector<std::vector<size_t>> result;
+    result.reserve(trees.size());
     for (auto& tree : trees) {
       result.push_back(tree->getNumSamplesNodes());
     }
@@ -154,6 +155,7 @@ public:
   }
   std::vector<std::vector<double>> getNodePredictions() {
     std::vector<std::vector<double>> result;
+    result.reserve(trees.size());
     for (auto& tree : trees) {
       result.push_back(tree->getNodePredictions());
     }
@@ -161,6 +163,7 @@ public:
   }
   std::vector<std::vector<double>> getSplitStats() {
     std::vector<std::vector<double>> result;
+    result.reserve(trees.size());
     for (auto& tree : trees) {
       result.push_back(tree->getSplitStats());
     }
