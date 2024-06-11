@@ -16,7 +16,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
     
     <a class="navbar-brand me-2" href="../index.html">ranger</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,6 +79,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 <span>  num.random.splits <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  minprop <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  poisson.tau <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  split.select.weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  always.split.variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  respect.unordered.factors <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -165,7 +166,9 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 
 
 <dt>splitrule</dt>
-<dd><p>Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".</p></dd>
+<dd><p>Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini".
+For regression "variance", "extratrees", "maxstat", "beta" or "poisson" with default "variance".
+For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".</p></dd>
 
 
 <dt>num.random.splits</dt>
@@ -178,6 +181,11 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 
 <dt>minprop</dt>
 <dd><p>For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.</p></dd>
+
+
+<dt>poisson.tau</dt>
+<dd><p>For "poisson" splitrule: The coefficient of variation of the (expected) frequency is \(1/\tau\).
+If a terminal node has only 0 responses, the estimate is set to \(\alpha 0 + (1-\alpha) mean(parent)\) with \(\alpha = samples(child) mean(parent) / (\tau + samples(child) mean(parent))\).</p></dd>
 
 
 <dt>split.select.weights</dt>
