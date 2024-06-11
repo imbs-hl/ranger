@@ -45,7 +45,7 @@ public:
       std::string status_variable_name, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
-      bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth,
+      double poisson_tau, bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth,
       const std::vector<double>& regularization_factor, bool regularization_usedepth);
   void initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, std::ostream* verbose_out, uint seed,
       uint num_threads, ImportanceMode importance_mode, std::vector<uint>& min_node_size, std::vector<uint>& min_bucket,
@@ -53,7 +53,7 @@ public:
       const std::vector<std::string>& always_split_variable_names, bool prediction_mode, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
-      bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
+      bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, double poisson_tau, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth,
       const std::vector<double>& regularization_factor, bool regularization_usedepth,
       bool node_stats);
@@ -61,8 +61,8 @@ public:
       uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, std::vector<uint>& min_node_size, std::vector<uint>& min_bucket,
       bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
       bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
-      double alpha, double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits,
-      bool order_snps, uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth, 
+      double alpha, double minprop, double poisson_tau, bool holdout, PredictionType prediction_type, uint num_random_splits,
+      bool order_snps, uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth,
       bool node_stats);
   virtual void initInternal() = 0;
 
@@ -234,6 +234,9 @@ protected:
   // MAXSTAT splitrule
   double alpha;
   double minprop;
+  
+  // POISSON splitrule
+  double poisson_tau;
 
   // Multithreading
   uint num_threads;

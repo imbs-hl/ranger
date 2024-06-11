@@ -60,7 +60,8 @@ enum SplitRule {
   MAXSTAT = 4,
   EXTRATREES = 5,
   BETA = 6,
-  HELLINGER = 7
+  HELLINGER = 7,
+  POISSON = 8
 };
 
 // Prediction type
@@ -84,6 +85,8 @@ const uint DEFAULT_MIN_BUCKET_SURVIVAL = 3;
 const SplitRule DEFAULT_SPLITRULE = LOGRANK;
 const double DEFAULT_ALPHA = 0.5;
 const double DEFAULT_MINPROP = 0.1;
+
+const double DEFAULT_POISSON_TAU = 1;
 
 const uint DEFAULT_MAXDEPTH = 0;
 const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
