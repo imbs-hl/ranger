@@ -1,4 +1,7 @@
 
+# ranger 0.16.2
+* Add Poisson splitting rule for regression trees
+
 # ranger 0.16.1
 * Set num.threads=2 as default; respect environment variables and options
 * Add hierarchical shrinkage
