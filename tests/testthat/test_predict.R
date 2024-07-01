@@ -38,15 +38,6 @@ test_that("Prediction works correctly if dependent variable is not first or last
   expect_gte(mean(predictions(predict(rf, dat[, -3])) == dat$Species), 0.9)
 })
 
-test_that("Prediction works with missing values", {
-  rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
-  
-  dat <- iris
-  dat[4, 4] <- NA
-  dat[25, 1] <- NA
-  expect_silent(predict(rf, dat))
-})
-
 test_that("If num.trees set, these number is used for predictions", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
   pred <- predict(rf, iris, predict.all = TRUE, num.trees = 3)

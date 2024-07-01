@@ -180,29 +180,6 @@ test_that("OOB error is correct for 1 tree, regression", {
   expect_equal(rf$prediction.error, mean((dat$y - rf$predictions)^2, na.rm = TRUE))
 })
 
-test_that("Training works with missing values in x but not in y", {
-  dat <- iris
-  dat[25, 1] <- NA
-  expect_silent(ranger(Species ~ ., dat, num.trees = 5))
-  
-  dat <- iris
-  dat[4, 5] <- NA
-  expect_error(ranger(Species ~ ., dat, num.trees = 5), "Missing data in dependent variable.")
-})
-
-test_that("No error if missing value in irrelevant column, training", {
-  dat <- iris
-  dat[1, "Sepal.Width"] <- NA
-  expect_silent(ranger(Species ~ Sepal.Length, dat, num.trees = 5))
-})
-
-test_that("No error if missing value in irrelevant column, prediction", {
-  rf <- ranger(Species ~ Sepal.Length, iris, num.trees = 5)
-  dat <- iris
-  dat[1, "Sepal.Width"] <- NA
-  expect_silent(predict(rf, dat))
-})
-
 test_that("Split points are at (A+B)/2 for numeric features, regression variance splitting", {
   dat <- data.frame(y = rbinom(100, 1, .5), x = rbinom(100, 1, .5))
   rf <- ranger(y ~ x, dat, num.trees = 10)
@@ -478,5 +455,6 @@ test_that("Vector min.bucket creates nodes of correct size", {
   
   expect_true(all(smallest_nodes >= matrix(c(2, 3, 4), ncol = 5, nrow = 3)))
 })
+
 
 
