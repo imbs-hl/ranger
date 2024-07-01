@@ -321,22 +321,25 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Check missing values
+  any.na <- FALSE
   if (na.action == "na.fail") {
-    if (any(is.na(x))) {
+    if (anyNA(x)) {
       offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
-      stop("Missing data in columns: ",
+      stop("Error: Missing data in columns: ",
            paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
     }
-    if (any(is.na(y))) {
-      stop("Missing data in dependent variable.", call. = FALSE)
+    if (anyNA(y)) {
+      stop("Error: Missing data in dependent variable.", call. = FALSE)
     }
   } else if (na.action == "na.omit") {
     # TODO: Implement na.omit
     stop("na.omit not implemented yet.")
   } else if (na.action == "na.learn") {
-    # TODO: fix y
-    if (any(is.na(y))) {
-      stop("Missing data in dependent variable.", call. = FALSE)
+    if (anyNA(y)) {
+      stop("Error: Missing data in dependent variable.", call. = FALSE)
+    }
+    if (anyNA(x)) {
+      any.na <- TRUE
     }
   } else {
     stop("Error: Invalid value for na.action. Use 'na.learn', 'na.omit' or 'na.fail'.")
@@ -449,7 +452,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           levels.missing <- setdiff(levels(xx), levels.ordered)
           levels.ordered <- c(levels.missing, levels.ordered)
         } else if (is.factor(y) & nlevels(y) > 2) {
-          # TODO: Fix missings here
           levels.ordered <- pca.order(y = y, x = xx)
         } else {
           ## Order factor levels by mean response
@@ -985,7 +987,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
                       inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth, 
-                      node.stats, time.interest, use.time.interest)
+                      node.stats, time.interest, use.time.interest, any.na)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

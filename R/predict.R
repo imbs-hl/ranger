@@ -185,6 +185,13 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (!is.matrix(x) & !inherits(x, "Matrix")) {
     x <- data.matrix(x)
   }
+  
+  ## Missing values
+  if (anyNA(x)) {
+    any.na <- TRUE
+  } else {
+    any.na <- FALSE
+  }
 
   ## Num threads
   ## Default 0 -> detect from system in C++.
@@ -273,7 +280,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth, 
-                      node.stats, time.interest, use.time.interest)
+                      node.stats, time.interest, use.time.interest, any.na)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

@@ -41,7 +41,7 @@ public:
   DataSparse() = default;
   
   DataSparse(Eigen::SparseMatrix<double>& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows,
-      size_t num_cols);
+      size_t num_cols, bool any_na);
 
   DataSparse(const DataSparse&) = delete;
   DataSparse& operator=(const DataSparse&) = delete;
