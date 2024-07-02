@@ -81,3 +81,53 @@ test_that("Missing values for survival not yet working", {
   
   expect_error(ranger(Surv(time, status) ~ ., dat, num.trees = 5), "Error: Missing value handling not yet implemented for survival forests\\.")
 })
+
+test_that("na.omit leads to same result as manual removal, classification", {
+  dat <- iris
+  dat[1, 1] <- NA
+  rf1 <- ranger(Species ~ ., dat, num.trees = 5, seed = 10, na.action = "na.omit")
+  
+  dat2 <- na.omit(dat)
+  rf2 <- ranger(Species ~ ., dat2, num.trees = 5, seed = 10)
+  
+  expect_equal(rf1$predictions, rf2$predictions)
+})
+
+test_that("na.omit leads to same result as manual removal, probability", {
+  dat <- iris
+  dat[1, 1] <- NA
+  rf1 <- ranger(Species ~ ., dat, num.trees = 5, probability = TRUE, seed = 10, na.action = "na.omit")
+  
+  dat2 <- na.omit(dat)
+  rf2 <- ranger(Species ~ ., dat2, num.trees = 5, probability = TRUE, seed = 10)
+  
+  expect_equal(rf1$predictions, rf2$predictions)
+})
+
+test_that("na.omit leads to same result as manual removal, regression", {
+  dat <- iris
+  dat[1, 1] <- NA
+  rf1 <- ranger(Sepal.Width ~ ., dat, num.trees = 5, seed = 10, na.action = "na.omit")
+  
+  dat2 <- na.omit(dat)
+  rf2 <- ranger(Sepal.Width ~ ., dat2, num.trees = 5, seed = 10)
+  
+  expect_equal(rf1$predictions, rf2$predictions)
+})
+
+test_that("na.omit leads to same result as manual removal, survival", {
+  dat <- veteran
+  dat[1, 1] <- NA
+  rf1 <- ranger(Surv(time, status) ~ ., dat, num.trees = 5, seed = 10, na.action = "na.omit")
+  
+  dat2 <- na.omit(dat)
+  rf2 <- ranger(Surv(time, status) ~ ., dat2, num.trees = 5, seed = 10)
+  
+  expect_equal(rf1$chf, rf2$chf)
+})
+
+test_that("na.omit not working if no observations left", {
+  dat <- iris
+  dat[1:150, 1] <- NA
+  expect_error(ranger(Species ~ ., dat, num.trees = 5, na.action = "na.omit"), "Error: No observations left after removing missing values\\.")
+})

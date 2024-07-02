@@ -332,16 +332,22 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Missing data in dependent variable.", call. = FALSE)
     }
   } else if (na.action == "na.omit") {
-    # TODO: Implement na.omit
-    stop("na.omit not implemented yet.")
+    if (anyNA(x)) {
+      idx_keep <- stats::complete.cases(x)  
+      x <- x[idx_keep, , drop = FALSE]
+      y <- y[idx_keep, drop = FALSE]
+      if (nrow(x) < 1) {
+        stop("Error: No observations left after removing missing values.")
+      }
+    }
   } else if (na.action == "na.learn") {
     if (anyNA(y)) {
       stop("Error: Missing data in dependent variable.", call. = FALSE)
     }
     if (anyNA(x)) {
       any.na <- TRUE
-      if (!is.null(splitrule) && !(splitrule %in% c("gini", "variance", "logrank"))) {
-        stop("Error: Missing value handling currently only implemented for gini, variance and logrank splitrules.")
+      if (!is.null(splitrule) && !(splitrule %in% c("gini", "variance"))) {
+        stop("Error: Missing value handling currently only implemented for gini and variance splitrules.")
       }
     }
   } else {
@@ -376,6 +382,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     treetype <- 5
   } else {
     stop("Error: Unsupported type of dependent variable.")
+  }
+  
+  ## No missing value handling for survival yet
+  if (any.na & treetype == 5) {
+    stop("Error: Missing value handling not yet implemented for survival forests.")
   }
   
   ## Number of levels
@@ -447,7 +458,6 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
           ## Don't order if only one level
           levels.ordered <- levels(xx)
         } else if (inherits(y, "Surv")) {
-          # TODO: Fix missings here
           ## Use median survival if available or largest quantile available in all strata if median not available
           levels.ordered <- largest.quantile(y ~ xx)
           
