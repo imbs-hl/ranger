@@ -90,6 +90,14 @@ private:
       double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
       std::vector<double>& sums, std::vector<size_t>& counter);
 
+  void findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+                                   double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+                                   double& best_value, size_t& best_varID, double& best_decrease, std::vector<double> possible_split_values,
+                                   std::vector<double>& sums, std::vector<size_t>& counter);
+  void findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
+                                   double& best_value, size_t& best_varID, double& best_decrease);
+
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
   double computePredictionMSE();

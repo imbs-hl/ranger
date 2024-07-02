@@ -31,7 +31,7 @@
 namespace ranger {
 
 DataSparse::DataSparse(Eigen::SparseMatrix<double>& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows,
-    size_t num_cols) :
+    size_t num_cols, bool any_na) :
     x { }{
   this->x.swap(x);
   this->y = y;
@@ -39,6 +39,7 @@ DataSparse::DataSparse(Eigen::SparseMatrix<double>& x, Rcpp::NumericMatrix& y, s
   this->num_rows = num_rows;
   this->num_cols = num_cols;
   this->num_cols_no_snp = num_cols;
+  this->any_na = any_na;
 }
 
 } // namespace ranger

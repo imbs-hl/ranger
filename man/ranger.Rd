@@ -42,6 +42,7 @@ ranger(
   verbose = TRUE,
   node.stats = FALSE,
   seed = NULL,
+  na.action = "na.learn",
   dependent.variable.name = NULL,
   status.variable.name = NULL,
   classification = NULL,
@@ -127,6 +128,8 @@ If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + 
 \item{node.stats}{Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
+
+\item{na.action}{Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.}
 
 \item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 

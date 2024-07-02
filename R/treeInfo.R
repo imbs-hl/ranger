@@ -78,7 +78,7 @@ treeInfo <- function(object, tree = 1) {
   if (forest$treetype == "Survival" && (is.null(forest$chf) || is.null(forest$unique.death.times))) {
     stop("Error: Invalid forest object.")
   }
-  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
+  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) < 2 || length(forest$child.nodeIDs[[1]]) > 3) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try with the same version the forest was grown.")
   }
   if (!is.null(forest$dependent.varID)) {

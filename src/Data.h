@@ -185,6 +185,10 @@ public:
     }
     return varID;
   }
+  
+  const bool hasNA() const {
+    return any_na;
+  }
 
   // #nocov start (cannot be tested anymore because GenABEL not on CRAN)
   const std::vector<std::vector<size_t>>& getSnpOrder() const {
@@ -221,6 +225,9 @@ protected:
   // Order of 0/1/2 for ordered splitting
   std::vector<std::vector<size_t>> snp_order;
   bool order_snps;
+  
+  // Any missing values?
+  bool any_na;
 };
 
 } // namespace ranger

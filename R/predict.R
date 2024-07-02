@@ -106,7 +106,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Check for old ranger version
-  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
+  if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) < 2 || length(forest$child.nodeIDs[[1]]) > 3) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
   }
   if (!is.null(forest$dependent.varID)) {
@@ -185,12 +185,12 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (!is.matrix(x) & !inherits(x, "Matrix")) {
     x <- data.matrix(x)
   }
-
-  ## Check missing values
-  if (any(is.na(x))) {
-    offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
+  
+  ## Missing values
+  if (anyNA(x)) {
+    any.na <- TRUE
+  } else {
+    any.na <- FALSE
   }
 
   ## Num threads
@@ -281,7 +281,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth, 
-                      node.stats, time.interest, use.time.interest)
+                      node.stats, time.interest, use.time.interest, any.na)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

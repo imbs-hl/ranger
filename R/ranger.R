@@ -142,6 +142,7 @@
 ##' @param verbose Show computation status and estimated runtime.
 ##' @param node.stats Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. 
+##' @param na.action Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
@@ -250,7 +251,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    keep.inbag = FALSE, inbag = NULL, holdout = FALSE,
                    quantreg = FALSE, time.interest = NULL, oob.error = TRUE,
                    num.threads = NULL, save.memory = FALSE,
-                   verbose = TRUE, node.stats = FALSE, seed = NULL, 
+                   verbose = TRUE, node.stats = FALSE, seed = NULL, na.action = "na.learn",
                    dependent.variable.name = NULL, status.variable.name = NULL, 
                    classification = NULL, x = NULL, y = NULL, ...) {
   
@@ -325,13 +326,37 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Check missing values
-  if (any(is.na(x))) {
-    offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
-  }
-  if (any(is.na(y))) {
-    stop("Missing data in dependent variable.", call. = FALSE)
+  any.na <- FALSE
+  if (na.action == "na.fail") {
+    if (anyNA(x)) {
+      offending_columns <- colnames(x)[colSums(is.na(x)) > 0]
+      stop("Error: Missing data in columns: ",
+           paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
+    }
+    if (anyNA(y)) {
+      stop("Error: Missing data in dependent variable.", call. = FALSE)
+    }
+  } else if (na.action == "na.omit") {
+    if (anyNA(x)) {
+      idx_keep <- stats::complete.cases(x)  
+      x <- x[idx_keep, , drop = FALSE]
+      y <- y[idx_keep, drop = FALSE]
+      if (nrow(x) < 1) {
+        stop("Error: No observations left after removing missing values.")
+      }
+    }
+  } else if (na.action == "na.learn") {
+    if (anyNA(y)) {
+      stop("Error: Missing data in dependent variable.", call. = FALSE)
+    }
+    if (anyNA(x)) {
+      any.na <- TRUE
+      if (!is.null(splitrule) && !(splitrule %in% c("gini", "variance"))) {
+        stop("Error: Missing value handling currently only implemented for gini and variance splitrules.")
+      }
+    }
+  } else {
+    stop("Error: Invalid value for na.action. Use 'na.learn', 'na.omit' or 'na.fail'.")
   }
   
   ## Check response levels
@@ -362,6 +387,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     treetype <- 5
   } else {
     stop("Error: Unsupported type of dependent variable.")
+  }
+  
+  ## No missing value handling for survival yet
+  if (any.na & treetype == 5) {
+    stop("Error: Missing value handling not yet implemented for survival forests.")
   }
   
   ## Number of levels
@@ -444,7 +474,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
         } else {
           ## Order factor levels by mean response
           means <- sapply(levels(xx), function(y) {
-            mean(num.y[xx == y])
+            mean(num.y[xx == y], na.rm = TRUE)
           })
           levels.ordered <- as.character(levels(xx)[order(means)])
         }
@@ -992,7 +1022,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       holdout, prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth,
-                      node.stats, time.interest, use.time.interest)
+                      node.stats, time.interest, use.time.interest, any.na)
+
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
