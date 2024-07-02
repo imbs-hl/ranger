@@ -340,6 +340,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
     if (anyNA(x)) {
       any.na <- TRUE
+      if (!(splitrule %in% c("gini", "variance", "logrank"))) {
+        stop("Error: Missing value handling currently only implemented for gini, variance and logrank splitrules.")
+      }
     }
   } else {
     stop("Error: Invalid value for na.action. Use 'na.learn', 'na.omit' or 'na.fail'.")
