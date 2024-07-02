@@ -284,13 +284,12 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
     double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& counter_per_class,
     std::vector<size_t>& counter) {
   
-  size_t last_index = possible_split_values.size() - 1;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
     uint sample_classID = (*response_classIDs)[sampleID];
     size_t idx = std::lower_bound(possible_split_values.begin(), possible_split_values.end(),
-                                  data->get_x(sampleID, varID)) - possible_split_values.begin();
-    
+        data->get_x(sampleID, varID)) - possible_split_values.begin();
+
     ++counter_per_class[idx * num_classes + sample_classID];
     ++counter[idx];
   }
@@ -374,7 +373,7 @@ void TreeClassification::findBestSplitValueSmallQ(size_t nodeID, size_t varID, s
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
-      
+
       // Use smaller value if average is numerically the same as the larger value
       if (best_value == possible_split_values[i + 1]) {
         best_value = possible_split_values[i];
@@ -393,12 +392,11 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
   std::fill_n(counter.begin(), num_unique, 0);
 
   // Count values
-  size_t last_index = data->getNumUniqueDataValues(varID) - 1;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
     size_t index = data->getIndex(sampleID, varID);
     size_t classID = (*response_classIDs)[sampleID];
-    
+
     ++counter[index];
     ++counter_per_class[index * num_classes + classID];
   }
@@ -475,7 +473,7 @@ void TreeClassification::findBestSplitValueLargeQ(size_t nodeID, size_t varID, s
 
     // Regularization
     regularize(decrease, varID);
-    
+
     // If better than before, use this
     if (decrease > best_decrease) {
       // Find next value in this node
