@@ -16,6 +16,8 @@ test_that("Training works with missing values in x but not in y", {
   dat <- iris
   dat[25, 1] <- NA
   expect_silent(ranger(Species ~ ., dat, num.trees = 5))
+  expect_silent(ranger(Petal.Width ~ ., dat, num.trees = 5))
+  expect_error(ranger(Sepal.Length ~ ., dat, num.trees = 5), "Missing data in dependent variable.")
   
   dat <- iris
   dat[4, 5] <- NA
@@ -35,8 +37,17 @@ test_that("No error if missing value in irrelevant column, prediction", {
   expect_silent(predict(rf, dat))
 })
 
-test_that("Prediction works with missing values", {
+test_that("Prediction works with missing values, classification", {
   rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
+  
+  dat <- iris
+  dat[4, 4] <- NA
+  dat[25, 1] <- NA
+  expect_silent(predict(rf, dat))
+})
+
+test_that("Prediction works with missing values, regression", {
+  rf <- ranger(Sepal.Width ~ ., iris, num.trees = 5, write.forest = TRUE)
   
   dat <- iris
   dat[4, 4] <- NA
@@ -62,4 +73,11 @@ test_that("Order splitting working with missing values for multiclass classifica
   
   rf <- ranger(y ~ ., data = dt, num.trees = 5, min.node.size = n/2, respect.unordered.factors = 'order')
   expect_true(all(rf$forest$is.ordered))
+})
+
+test_that("Missing values for survival not yet working", {
+  dat <- veteran
+  dat[1, 1] <- NA
+  
+  expect_error(ranger(Surv(time, status) ~ ., dat, num.trees = 5), "Error: Missing value handling not yet implemented for survival forests\\.")
 })
