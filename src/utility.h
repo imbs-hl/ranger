@@ -12,6 +12,7 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+#include <math.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -541,7 +542,21 @@ std::stringstream& readFromStream(std::stringstream& in, double& token);
  */
 double betaLogLik(double y, double mean, double phi);
 
-/*
+/**
+ * Compute x * log(y) with 0 * log(..) equal to 0.
+ * @param x
+ * @param y
+ * @return x * log(y)
+ */
+inline double xlogy(double x, double y) {
+  if (x == 0) {
+    return 0;
+  } else {
+    return x * log(y);
+  }
+}
+
+/**
  * Returns the natural logarithm of the absolute value of the gamma function of x.
  * @param x Parameter for the log-gamma function.
  */

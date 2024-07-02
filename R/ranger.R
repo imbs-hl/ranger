@@ -116,10 +116,14 @@
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
-##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini".
+##'   For regression "variance", "extratrees", "maxstat", "beta" or "poisson" with default "variance".
+##'   For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
+##' @param poisson.tau For "poisson" splitrule: The coefficient of variation of the (expected) frequency is \eqn{1/\tau}.
+##'   If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parent) / (\tau + samples(child) mean(parent))}.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
 ##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
@@ -238,6 +242,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632), 
                    case.weights = NULL, class.weights = NULL, splitrule = NULL, 
                    num.random.splits = 1, alpha = 0.5, minprop = 0.1,
+                   poisson.tau = 1,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
@@ -848,6 +853,17 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     if ((is.factor(y) && nlevels(y) > 2) || (length(unique(y)) > 2)) {
       stop("Error: Hellinger splitrule only implemented for binary classification.")
     }  
+  } else if (splitrule == "poisson") {
+    if (treetype == 3) {
+      splitrule.num <- 8
+    } else {
+      stop("Error: poisson splitrule applicable to regression data only.")
+    }
+    
+    ## Check for valid responses
+    if (min(y) < 0 || sum(y) <= 0) {
+      stop("Error: poisson splitrule applicable to regression data with non-positive outcome (y>=0 and sum(y)>0) only.")
+    }
   } else {
     stop("Error: Unknown splitrule.")
   }
@@ -872,6 +888,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   if (num.random.splits > 1 && splitrule.num != 5) {
     warning("Argument 'num.random.splits' ignored if splitrule is not 'extratrees'.")
+  }
+  
+  if (!is.numeric(poisson.tau) || poisson.tau <= 0) {
+    stop("Error: Invalid value for poisson.tau, please give a positive number.")
   }
 
   ## Unordered factors  
@@ -909,6 +929,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       stop("Error: Unordered factor splitting not implemented for 'C' splitting rule.")
     } else if (splitrule == "beta") {
       stop("Error: Unordered factor splitting not implemented for 'beta' splitting rule.")
+    } else if (splitrule == "poisson") {
+      stop("Error: Unordered factor splitting not implemented for 'poisson' splitting rule.")
     }
   }
   
@@ -996,11 +1018,12 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       prediction.mode, loaded.forest, snp.data,
                       replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
-                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag, 
-                      regularization.factor, use.regularization.factor, regularization.usedepth, 
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, poisson.tau,
+                      holdout, prediction.type, num.random.splits, sparse.x, use.sparse.data,
+                      order.snps, oob.error, max.depth, inbag, use.inbag, 
+                      regularization.factor, use.regularization.factor, regularization.usedepth,
                       node.stats, time.interest, use.time.interest, any.na)
+
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

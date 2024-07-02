@@ -39,7 +39,7 @@ public:
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, std::vector<uint>* min_node_size, std::vector<uint>* min_bucket,
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
-      std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
+      std::vector<double>* sample_fraction, double alpha, double minprop, double poisson_tau, bool holdout, uint num_random_splits,
       uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth,
       std::vector<bool>* split_varIDs_used, bool save_node_stats);
 
@@ -242,6 +242,7 @@ protected:
   SplitRule splitrule;
   double alpha;
   double minprop;
+  double poisson_tau;
   uint num_random_splits;
   uint max_depth;
   uint depth;
