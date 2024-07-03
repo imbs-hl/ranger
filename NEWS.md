@@ -1,4 +1,7 @@
 
+# ranger 0.16.3
+* Add handling of missing values for classification and regression
+
 # ranger 0.16.2
 * Add Poisson splitting rule for regression trees
 

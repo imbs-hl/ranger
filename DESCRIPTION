@@ -1,8 +1,8 @@
 Package: ranger
 Type: Package
 Title: A Fast Implementation of Random Forests
-Version: 0.16.2
-Date: 2024-05-16
+Version: 0.16.3
+Date: 2024-07-03
 Author: Marvin N. Wright [aut, cre], Stefan Wager [ctb], Philipp Probst [ctb]
 Maintainer: Marvin N. Wright <cran@wrig.de>
 Description: A fast implementation of Random Forests, particularly suited for high
@@ -19,7 +19,7 @@ Suggests:
     survival,
     testthat
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 URL: https://imbs-hl.github.io/ranger/,
     https://github.com/imbs-hl/ranger
 BugReports: https://github.com/imbs-hl/ranger/issues

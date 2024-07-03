@@ -85,6 +85,10 @@
 ##' If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
 ##' If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.
 ##'
+##' Missing values can be internally handled by setting \code{na.action = "na.learn"} (default), by omitting observations with missing values with \code{na.action = "na.omit"} or by stopping if missing values are found with \code{na.action = "na.fail"}.
+##' With \code{na.action = "na.learn"}, missing values are ignored for calculating an initial split criterion value (i.e., decrease of impurity). Then for the best split, all missings are tried in both child nodes and the choice is made based again on the split criterion value. 
+##' For prediction, this direction is saved as the "default" direction. If a missing occurs in prediction at a node where there is no default direction, it goes left.
+##'
 ##' For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 ##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
 ##' Use \code{x} and \code{y} with a matrix for \code{x} to avoid conversions and save memory.
