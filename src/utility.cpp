@@ -83,22 +83,22 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
   }
 } // #nocov end
 
-void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t range_length,
     size_t num_samples) {
   // options = [0, 1, 2, ..., max-1]
-  std::vector<size_t> options(max);
+  std::vector<size_t> options(range_length);
   std::iota(options.begin(), options.end(), 0);
   std::sample(options.begin(), options.end(), std::back_inserter(result), num_samples, random_number_generator);
 }
 
-void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t range_length,
     const std::vector<size_t>& skip, size_t num_samples) {
   const std::set<size_t> skip_set(skip.begin(), skip.end());
 
-  // options = [0, 1, 2, ..., max-1] skipping all values in `skip`.
+  // Vector of all non-skipped values from 0 to max-1
   std::vector<size_t> options;
-  options.reserve(max - skip_set.size());
-  for (int i = 0; i < max; ++i) {
+  options.reserve(range_length - skip_set.size());
+  for (int i = 0; i < range_length; ++i) {
     if (skip_set.find(i) == skip_set.end()) {
       options.push_back(i);
     }
