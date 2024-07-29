@@ -202,21 +202,28 @@ TEST(drawWithoutReplacementSkip, small_small1) {
   size_t num_samples = 4;
   size_t num_replicates = 10000;
 
-  size_t expected_count = num_samples * num_replicates / max;
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
 
   for (size_t i = 0; i < num_replicates; ++i) {
     result.clear();
     drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
     for (auto& idx : result) {
+      EXPECT_LE(idx, max);
       ++counts[idx];
     }
   }
 
   // Check if counts are expected +- 5%
-  for (auto& c : counts) {
-    EXPECT_NEAR(expected_count, c.second, expected_count * 0.05);
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
   }
-  EXPECT_EQ(0, counts[skip[0]]);
 }
 
 TEST(drawWithoutReplacementSkip, small_small2) {
@@ -232,21 +239,28 @@ TEST(drawWithoutReplacementSkip, small_small2) {
   size_t num_samples = 4;
   size_t num_replicates = 10000;
 
-  size_t expected_count = num_samples * num_replicates / max;
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
 
   for (size_t i = 0; i < num_replicates; ++i) {
     result.clear();
     drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
     for (auto& idx : result) {
+      EXPECT_LE(idx, max);
       ++counts[idx];
     }
   }
 
   // Check if counts are expected +- 5%
-  for (auto& c : counts) {
-    EXPECT_NEAR(expected_count, c.second, expected_count * 0.05);
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
   }
-  EXPECT_EQ(0, counts[skip[0]]);
 }
 
 TEST(drawWithoutReplacementSkip, small_small3) {
@@ -262,21 +276,102 @@ TEST(drawWithoutReplacementSkip, small_small3) {
   size_t num_samples = 4;
   size_t num_replicates = 10000;
 
-  size_t expected_count = num_samples * num_replicates / max;
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
 
   for (size_t i = 0; i < num_replicates; ++i) {
     result.clear();
     drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
     for (auto& idx : result) {
+      EXPECT_LE(idx, max);
       ++counts[idx];
     }
   }
 
   // Check if counts are expected +- 5%
-  for (auto& c : counts) {
-    EXPECT_NEAR(expected_count, c.second, expected_count * 0.05);
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
   }
-  EXPECT_EQ(0, counts[skip[0]]);
+}
+
+TEST(drawWithoutReplacementSkip, small_small4) {
+
+  std::vector<size_t> result;
+  std::mt19937_64 random_number_generator;
+  std::random_device random_device;
+  random_number_generator.seed(random_device());
+  std::map<size_t, uint> counts;
+
+  size_t max = 9;
+  std::vector<size_t> skip = std::vector<size_t>({7, 0, 1, 3});
+  size_t num_samples = 4;
+  size_t num_replicates = 10000;
+
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
+
+  for (size_t i = 0; i < num_replicates; ++i) {
+    result.clear();
+    drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
+    for (auto& idx : result) {
+      EXPECT_LE(idx, max);
+      ++counts[idx];
+    }
+  }
+
+  // Check if counts are expected +- 5%
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
+  }
+}
+
+TEST(drawWithoutReplacementSkip, small_small5) {
+
+  std::vector<size_t> result;
+  std::mt19937_64 random_number_generator;
+  std::random_device random_device;
+  random_number_generator.seed(random_device());
+  std::map<size_t, uint> counts;
+
+  size_t max = 9;
+  std::vector<size_t> skip = std::vector<size_t>({});
+  size_t num_samples = 4;
+  size_t num_replicates = 10000;
+
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
+
+  for (size_t i = 0; i < num_replicates; ++i) {
+    result.clear();
+    drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
+    for (auto& idx : result) {
+      EXPECT_LE(idx, max);
+      ++counts[idx];
+    }
+  }
+
+  // Check if counts are expected +- 5%
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
+  }
 }
 
 TEST(drawWithoutReplacementSkip, small_large1) {
@@ -292,21 +387,65 @@ TEST(drawWithoutReplacementSkip, small_large1) {
   size_t num_samples = 50;
   size_t num_replicates = 100000;
 
-  size_t expected_count = num_samples * num_replicates / max;
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
 
   for (size_t i = 0; i < num_replicates; ++i) {
     result.clear();
     drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
     for (auto& idx : result) {
+      EXPECT_LE(idx, max);
       ++counts[idx];
     }
   }
 
-  // Check if counts are expected +- 10%
-  for (auto& c : counts) {
-    EXPECT_NEAR(expected_count, c.second, expected_count * 0.1);
+  // Check if counts are expected +- 5%
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
   }
-  EXPECT_EQ(0, counts[skip[0]]);
+}
+
+TEST(drawWithoutReplacementSkip, small_large2) {
+
+  std::vector<size_t> result;
+  std::mt19937_64 random_number_generator;
+  std::random_device random_device;
+  random_number_generator.seed(random_device());
+  std::map<size_t, uint> counts;
+
+  size_t max = 1000;
+  std::vector<size_t> skip = std::vector<size_t>({7, 1, 0, 138});
+  size_t num_samples = 50;
+  size_t num_replicates = 100000;
+
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
+
+  for (size_t i = 0; i < num_replicates; ++i) {
+    result.clear();
+    drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
+    for (auto& idx : result) {
+      EXPECT_LE(idx, max);
+      ++counts[idx];
+    }
+  }
+
+  // Check if counts are expected +- 5%
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
+  }
 }
 
 TEST(drawWithoutReplacementSkip, large_large1) {
@@ -322,21 +461,28 @@ TEST(drawWithoutReplacementSkip, large_large1) {
   size_t num_samples = 500;
   size_t num_replicates = 10000;
 
-  size_t expected_count = num_samples * num_replicates / max;
+  size_t expected_count = num_samples * num_replicates / (max + 1 - skip.size());
 
   for (size_t i = 0; i < num_replicates; ++i) {
     result.clear();
     drawWithoutReplacementSkip(result, random_number_generator, max + 1, skip, num_samples);
+    EXPECT_EQ(num_samples, result.size());
     for (auto& idx : result) {
+      EXPECT_LE(idx, max);
       ++counts[idx];
     }
   }
 
   // Check if counts are expected +- 5%
-  for (auto& c : counts) {
-    EXPECT_NEAR(expected_count, c.second, expected_count * 0.05);
+  for (size_t c = 0; c <= max; ++c) {
+    if (std::find(skip.begin(), skip.end(), c) == skip.end()) {
+      // c should not be skipped
+      EXPECT_NEAR(expected_count, counts[c], expected_count * 0.05);
+    } else {
+      // c should be skipped
+      EXPECT_EQ(0, counts[c]);
+    }
   }
-  EXPECT_EQ(0, counts[skip[0]]);
 }
 
 TEST(mostFrequentClass, notEqual1) {
