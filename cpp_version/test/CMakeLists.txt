@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.0)
 ## ======================================================================================##
 ## Compiler flags
 ## ======================================================================================##
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17")
 set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS -pthread)
 
 ## ======================================================================================##

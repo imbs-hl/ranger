@@ -10,20 +10,22 @@
  #-------------------------------------------------------------------------------*/
 
 #include <math.h>
-#include <iostream>
-#include <sstream>
-#include <unordered_set>
-#include <unordered_map>
+
 #include <algorithm>
+#include <iostream>
 #include <random>
+#include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "utility.h"
-#include "globals.h"
 #include "Data.h"
+#include "globals.h"
+#include "utility.h"
 
 namespace ranger {
 
@@ -83,106 +85,26 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
 
 void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     size_t num_samples) {
-  if (num_samples < max / 10) {
-    drawWithoutReplacementSimple(result, random_number_generator, max, num_samples);
-  } else {
-    //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
-    drawWithoutReplacementFisherYates(result, random_number_generator, max, num_samples);
-  }
+  // options = [0, 1, 2, ..., max-1]
+  std::vector<size_t> options(max);
+  std::iota(options.begin(), options.end(), 0);
+  std::sample(options.begin(), options.end(), std::back_inserter(result), num_samples, random_number_generator);
 }
 
 void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
     const std::vector<size_t>& skip, size_t num_samples) {
-  if (num_samples < max / 10) {
-    drawWithoutReplacementSimple(result, random_number_generator, max, skip, num_samples);
-  } else {
-    //drawWithoutReplacementKnuth(result, random_number_generator, max, skip, num_samples);
-    drawWithoutReplacementFisherYates(result, random_number_generator, max, skip, num_samples);
-  }
-}
+  const std::set<size_t> skip_set(skip.begin(), skip.end());
 
-void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    size_t num_samples) {
-
-  result.reserve(num_samples);
-
-  // Set all to not selected
-  std::vector<bool> temp;
-  temp.resize(max, false);
-
-  std::uniform_int_distribution<size_t> unif_dist(0, max - 1);
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t draw;
-    do {
-      draw = unif_dist(random_number_generator);
-    } while (temp[draw]);
-    temp[draw] = true;
-    result.push_back(draw);
-  }
-}
-
-void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
-    const std::vector<size_t>& skip, size_t num_samples) {
-
-  result.reserve(num_samples);
-
-  // Set all to not selected
-  std::vector<bool> temp;
-  temp.resize(max, false);
-
-  std::uniform_int_distribution<size_t> unif_dist(0, max - 1 - skip.size());
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t draw;
-    do {
-      draw = unif_dist(random_number_generator);
-      for (auto& skip_value : skip) {
-        if (draw >= skip_value) {
-          ++draw;
-        }
-      }
-    } while (temp[draw]);
-    temp[draw] = true;
-    result.push_back(draw);
-  }
-}
-
-void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t max, size_t num_samples) {
-
-  // Create indices
-  result.resize(max);
-  std::iota(result.begin(), result.end(), 0);
-
-  // Draw without replacement using Fisher Yates algorithm
-  std::uniform_real_distribution<double> distribution(0.0, 1.0);
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t j = i + distribution(random_number_generator) * (max - i);
-    std::swap(result[i], result[j]);
+  // options = [0, 1, 2, ..., max-1] skipping all values in `skip`.
+  std::vector<size_t> options;
+  options.reserve(max - skip_set.size());
+  for (int i = 0; i < max; ++i) {
+    if (skip_set.find(i) == skip_set.end()) {
+      options.push_back(i);
+    }
   }
 
-  result.resize(num_samples);
-}
-
-void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
-    size_t max, const std::vector<size_t>& skip, size_t num_samples) {
-
-  // Create indices
-  result.resize(max);
-  std::iota(result.begin(), result.end(), 0);
-
-  // Skip indices
-  for (size_t i = 0; i < skip.size(); ++i) {
-    result.erase(result.begin() + skip[i]);
-  }
-
-  // Draw without replacement using Fisher Yates algorithm
-  std::uniform_real_distribution<double> distribution(0.0, 1.0);
-  for (size_t i = 0; i < num_samples; ++i) {
-    size_t j = i + distribution(random_number_generator) * (max - skip.size() - i);
-    std::swap(result[i], result[j]);
-  }
-
-  result.resize(num_samples);
+  std::sample(options.begin(), options.end(), std::back_inserter(result), num_samples, random_number_generator);
 }
 
 void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
