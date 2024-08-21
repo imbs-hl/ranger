@@ -953,8 +953,8 @@ void Forest::setAlwaysSplitVariables(const std::vector<std::string>& always_spli
     }
   }
   
-  // Sort in reverse order for removing with erase later
-  std::sort(deterministic_varIDs.rbegin(), deterministic_varIDs.rend());
+  // Sort for removing later
+  std::sort(deterministic_varIDs.begin(), deterministic_varIDs.end());
 }
 
 void Forest::showProgress(std::string operation, size_t max_progress) {

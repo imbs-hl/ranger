@@ -181,7 +181,8 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
     size_t num_samples);
 
 /**
- * Simple algorithm for sampling without replacement (skip values), faster for smaller num_samples
+ * Simple algorithm for sampling without replacement (skip values), faster for smaller num_samples. 
+ * skip values are expected to be sorted in ascending order.
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param range_length Length of range. Interval to draw from: 0..max-1
@@ -203,6 +204,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
 
 /**
  * Fisher Yates algorithm for sampling without replacement (skip values).
+ * skip values are expected to be sorted in ascending order.
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param max Length of range. Interval to draw from: 0..max-1
