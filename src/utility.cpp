@@ -171,8 +171,8 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
   std::iota(result.begin(), result.end(), 0);
 
   // Skip indices
-  for (size_t i = 0; i < skip.size(); ++i) {
-    result.erase(result.begin() + skip[i]);
+  for (auto it = skip.rbegin(); it != skip.rend(); it++) {
+    result.erase(result.begin() + *it);
   }
 
   // Draw without replacement using Fisher Yates algorithm

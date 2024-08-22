@@ -1,4 +1,7 @@
 
+# ranger 0.16.3
+* Fix a bug for always.split.variables (for some settings)
+
 # ranger 0.16.2
 * Add Poisson splitting rule for regression trees
 
