@@ -309,7 +309,7 @@ TEST(drawWithoutReplacementSkip, small_small4) {
   std::map<size_t, uint> counts;
 
   size_t max = 9;
-  std::vector<size_t> skip = std::vector<size_t>({7, 0, 1, 3});
+  std::vector<size_t> skip = std::vector<size_t>({0, 1, 3, 7});
   size_t num_samples = 4;
   size_t num_replicates = 10000;
 
@@ -420,7 +420,7 @@ TEST(drawWithoutReplacementSkip, small_large2) {
   std::map<size_t, uint> counts;
 
   size_t max = 1000;
-  std::vector<size_t> skip = std::vector<size_t>({7, 1, 0, 138});
+  std::vector<size_t> skip = std::vector<size_t>({0, 1, 7, 138});
   size_t num_samples = 50;
   size_t num_replicates = 100000;
 
