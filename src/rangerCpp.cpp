@@ -62,7 +62,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
     std::vector<std::vector<size_t>>& inbag, bool use_inbag,
     std::vector<double>& regularization_factor, bool use_regularization_factor, bool regularization_usedepth,
-    bool node_stats, std::vector<double>& time_interest, bool use_time_interest) {
+    bool node_stats, std::vector<double>& time_interest, bool use_time_interest, bool any_na) {
   
   Rcpp::List result;
 
@@ -112,9 +112,9 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
 
     // Initialize data 
     if (use_sparse_data) {
-      data = std::make_unique<DataSparse>(sparse_x, input_y, variable_names, num_rows, num_cols);
+      data = std::make_unique<DataSparse>(sparse_x, input_y, variable_names, num_rows, num_cols, any_na);
     } else {
-      data = std::make_unique<DataRcpp>(input_x, input_y, variable_names, num_rows, num_cols);
+      data = std::make_unique<DataRcpp>(input_x, input_y, variable_names, num_rows, num_cols, any_na);
     }
 
     // If there is snp data, add it

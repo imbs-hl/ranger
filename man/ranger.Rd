@@ -42,6 +42,7 @@ ranger(
   verbose = TRUE,
   node.stats = FALSE,
   seed = NULL,
+  na.action = "na.learn",
   dependent.variable.name = NULL,
   status.variable.name = NULL,
   classification = NULL,
@@ -127,6 +128,8 @@ If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + 
 \item{node.stats}{Save node statistics. Set to \code{TRUE} to save prediction, number of observations and split statistics for each node.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
+
+\item{na.action}{Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.}
 
 \item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 
@@ -224,6 +227,10 @@ Calculation of the out-of-bag prediction error can be turned off with \code{oob.
 Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng & Runger (2012) for details.  
 If \code{regularization.usedepth=TRUE}, \eqn{f^d} is used, where \emph{f} is the regularization factor and \emph{d} the depth of the node.
 If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.
+
+Missing values can be internally handled by setting \code{na.action = "na.learn"} (default), by omitting observations with missing values with \code{na.action = "na.omit"} or by stopping if missing values are found with \code{na.action = "na.fail"}.
+With \code{na.action = "na.learn"}, missing values are ignored for calculating an initial split criterion value (i.e., decrease of impurity). Then for the best split, all missings are tried in both child nodes and the choice is made based again on the split criterion value. 
+For prediction, this direction is saved as the "default" direction. If a missing occurs in prediction at a node where there is no default direction, it goes left.
 
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.

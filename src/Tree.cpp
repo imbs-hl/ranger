@@ -54,6 +54,9 @@ void Tree::init(const Data* data, uint mtry, size_t num_samples, uint seed, std:
   // Create root node, assign bootstrap sample and oob samples
   child_nodeIDs.push_back(std::vector<size_t>());
   child_nodeIDs.push_back(std::vector<size_t>());
+  if (data->hasNA()) {
+    child_nodeIDs.push_back(std::vector<size_t>());
+  }
   createEmptyNode();
 
   // Initialize random number generator and set seed
@@ -149,7 +152,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
 }
 
 void Tree::predict(const Data* prediction_data, bool oob_prediction) {
-
+  
   size_t num_samples_predict;
   if (oob_prediction) {
     num_samples_predict = num_samples_oob;
@@ -158,6 +161,8 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
   }
 
   prediction_terminal_nodeIDs.resize(num_samples_predict, 0);
+
+  bool any_na = prediction_data->hasNA();
 
   // For each sample start in root, drop down the tree and return final value
   for (size_t i = 0; i < num_samples_predict; ++i) {
@@ -180,13 +185,24 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 
       double value = prediction_data->get_x(sample_idx, split_varID);
       if (prediction_data->isOrderedVariable(split_varID)) {
-        if (value <= split_values[nodeID]) {
-          // Move to left child
-          nodeID = child_nodeIDs[0][nodeID];
+        if (any_na && std::isnan(value)) {
+          if (child_nodeIDs.size() >= 3 && child_nodeIDs[2][nodeID] > 0) {
+            // Move to default child
+            nodeID = child_nodeIDs[2][nodeID];
+          } else {
+            // Move to left child
+            nodeID = child_nodeIDs[0][nodeID];
+          }
         } else {
-          // Move to right child
-          nodeID = child_nodeIDs[1][nodeID];
+          if (value <= split_values[nodeID]) {
+            // Move to left child
+            nodeID = child_nodeIDs[0][nodeID];
+          } else {
+            // Move to right child
+            nodeID = child_nodeIDs[1][nodeID];
+          }
         }
+        
       } else {
         size_t factorID = floor(value) - 1;
         size_t splitID = floor(split_values[nodeID]);
@@ -313,6 +329,9 @@ bool Tree::splitNode(size_t nodeID) {
   std::vector<size_t> possible_split_varIDs;
   createPossibleSplitVarSubset(possible_split_varIDs);
 
+  bool any_na = data->hasNA();
+  nan_go_right = false;
+  
   // Call subclass method, sets split_varIDs and split_values
   bool stop = splitNodeInternal(nodeID, possible_split_varIDs);
   if (stop) {
@@ -343,13 +362,27 @@ bool Tree::splitNode(size_t nodeID) {
     size_t pos = start_pos[nodeID];
     while (pos < start_pos[right_child_nodeID]) {
       size_t sampleID = sampleIDs[pos];
-      if (data->get_x(sampleID, split_varID) <= split_value) {
-        // If going to left, do nothing
-        ++pos;
+      
+      if (any_na && std::isnan(data->get_x(sampleID, split_varID))) {
+        if (nan_go_right) {
+          // If going to right, move to right end
+          --start_pos[right_child_nodeID];
+          std::swap(sampleIDs[pos], sampleIDs[start_pos[right_child_nodeID]]);
+          child_nodeIDs[2][nodeID] = right_child_nodeID;
+        } else {
+          // If going to left, do nothing
+          ++pos;
+          child_nodeIDs[2][nodeID] = left_child_nodeID;
+        }
       } else {
-        // If going to right, move to right end
-        --start_pos[right_child_nodeID];
-        std::swap(sampleIDs[pos], sampleIDs[start_pos[right_child_nodeID]]);
+        if (data->get_x(sampleID, split_varID) <= split_value) {
+          // If going to left, do nothing
+          ++pos;
+        } else {
+          // If going to right, move to right end
+          --start_pos[right_child_nodeID];
+          std::swap(sampleIDs[pos], sampleIDs[start_pos[right_child_nodeID]]);
+        }
       }
     }
   } else {
@@ -386,6 +419,9 @@ void Tree::createEmptyNode() {
   split_values.push_back(0);
   child_nodeIDs[0].push_back(0);
   child_nodeIDs[1].push_back(0);
+  if (data->hasNA()) {
+    child_nodeIDs[2].push_back(0);
+  }
   start_pos.push_back(0);
   end_pos.push_back(0);
   
