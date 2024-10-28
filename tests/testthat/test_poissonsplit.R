@@ -34,8 +34,8 @@ test_that("poisson splitting works on poisson distributed data", {
   n_test = (max(n_train)+1):n
   df_train = df[n_train, ]
   df_test = df[n_test, ]
-  rf_poi <- ranger(y ~ ., df_train, splitrule = "poisson", num.trees = 50, min.node.size = 50, poisson.tau = 1, seed = 12)
-  rf_mse <- ranger(y ~ ., df_train, splitrule = "variance", num.trees = 50, min.node.size = 50, seed = 13)
+  rf_poi <- ranger(y ~ ., df_train, splitrule = "poisson", num.trees = 50, min.node.size = 50, poisson.tau = 1, seed = 123)
+  rf_mse <- ranger(y ~ ., df_train, splitrule = "variance", num.trees = 50, min.node.size = 50, seed = 123)
   
   expect_is(rf_poi, "ranger")
   # deviance on test set
