@@ -1,4 +1,7 @@
 
+# ranger 0.16.4
+* Add handling of missing values for classification and regression
+
 # ranger 0.16.3
 * Fix a bug for always.split.variables (for some settings)
 
