@@ -13,7 +13,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 
     <a class="navbar-brand me-2" href="../index.html">ranger</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,6 +86,7 @@ Includes implementations of extremely randomized trees (Geurts et al. 2006) and 
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  node.stats <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na.action <span class="op">=</span> <span class="st">"na.learn"</span>,</span>
 <span>  dependent.variable.name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  status.variable.name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  classification <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -250,6 +251,10 @@ If a terminal node has only 0 responses, the estimate is set to \(\alpha 0 + (1-
 <dd><p>Random seed. Default is <code>NULL</code>, which generates the seed from <code>R</code>. Set to <code>0</code> to ignore the <code>R</code> seed.</p></dd>
 
 
+<dt id="arg-na-action">na.action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.</p></dd>
+
+
 <dt id="arg-dependent-variable-name">dependent.variable.name<a class="anchor" aria-label="anchor" href="#arg-dependent-variable-name"></a></dt>
 <dd><p>Name of dependent variable, needed if no formula given. For survival forests this is the time variable.</p></dd>
 
@@ -388,6 +393,9 @@ Calculation of the out-of-bag prediction error can be turned off with <code>oob.
 <p>Regularization works by penalizing new variables by multiplying the splitting criterion by a factor, see Deng &amp; Runger (2012) for details.
 If <code>regularization.usedepth=TRUE</code>, \(f^d\) is used, where <em>f</em> is the regularization factor and <em>d</em> the depth of the node.
 If regularization is used, multithreading is deactivated because all trees need access to the list of variables that are already included in the model.</p>
+<p>Missing values can be internally handled by setting <code>na.action = "na.learn"</code> (default), by omitting observations with missing values with <code>na.action = "na.omit"</code> or by stopping if missing values are found with <code>na.action = "na.fail"</code>.
+With <code>na.action = "na.learn"</code>, missing values are ignored for calculating an initial split criterion value (i.e., decrease of impurity). Then for the best split, all missings are tried in both child nodes and the choice is made based again on the split criterion value.
+For prediction, this direction is saved as the "default" direction. If a missing occurs in prediction at a node where there is no default direction, it goes left.</p>
 <p>For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 Alternatively <code>dependent.variable.name</code> (and <code>status.variable.name</code> for survival) or <code>x</code> and <code>y</code> can be used.
 Use <code>x</code> and <code>y</code> with a matrix for <code>x</code> to avoid conversions and save memory.
