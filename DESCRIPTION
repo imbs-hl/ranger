@@ -1,10 +1,12 @@
 Package: ranger
 Type: Package
 Title: A Fast Implementation of Random Forests
-Version: 0.16.4
-Date: 2024-10-28
-Author: Marvin N. Wright [aut, cre], Stefan Wager [ctb], Philipp Probst [ctb]
-Maintainer: Marvin N. Wright <cran@wrig.de>
+Version: 0.17.0
+Date: 2024-11-08
+Authors@R: c(
+    person("Marvin N.", "Wright", email = "cran@wrig.de", role = c("aut", "cre")),
+    person("Stefan", "Wager", role = "ctb"),
+    person("Philipp", "Probst", role = "ctb"))
 Description: A fast implementation of Random Forests, particularly suited for high
           dimensional data. Ensembles of classification, regression, survival and
           probability prediction trees are supported. Data from genome-wide association

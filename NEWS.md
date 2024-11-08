@@ -1,4 +1,7 @@
 
+# ranger 0.17.0
+* New CRAN version
+
 # ranger 0.16.4
 * Add handling of missing values for classification and regression
 

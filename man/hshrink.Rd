@@ -19,6 +19,11 @@ Apply hierarchical shrinkage to a ranger object.
 Hierarchical shrinkage is a regularization technique that recursively shrinks node predictions towards parent node predictions. 
 For details see Agarwal et al. (2022).
 }
+\examples{
+## Hierarchical shrinkage for a probablity forest
+rf <- ranger(Species ~ ., iris, node.stats = TRUE, probability = TRUE)
+hshrink(rf, lambda = 5)
+}
 \references{
 \itemize{
   \item Agarwal, A., Tan, Y.S., Ronen, O., Singh, C. & Yu, B. (2022). Hierarchical Shrinkage: Improving the accuracy and interpretability of tree-based models. Proceedings of the 39th International Conference on Machine Learning, PMLR 162:111-135.
