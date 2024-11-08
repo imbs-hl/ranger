@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ranger</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.17.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -157,7 +157,7 @@ R_RANGER_NUM_THREADS, (3) <code>options(ranger.num.threads = N)</code>, (4) <cod
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target node size:                 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variable importance mode:         none </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Splitrule:                        gini </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.00 % </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OOB prediction error:             4.67 % </span>
 <span class="r-in"><span><span class="va">train.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">iris.train</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">train.idx</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">iris.test</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">train.idx</span>, <span class="op">]</span></span></span>
