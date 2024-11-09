@@ -9,6 +9,12 @@
  R package "ranger" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
+#ifdef __APPLE__
+#ifndef _REENTRANT
+#define _REENTRANT // Some macOS versions require this for lgamma_r
+#endif
+#endif
+
 #include <math.h>
 #include <iostream>
 #include <sstream>
