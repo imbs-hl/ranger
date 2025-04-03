@@ -1205,12 +1205,18 @@ void TreeRegression::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, do
   
   size_t n_left = 0;
   double sum_left = 0;
+
+  // If MIA approach, use one additional split
+  size_t num_possible_splits = possible_split_values.size() - 1;
+  if (mia) {
+    num_possible_splits = possible_split_values.size();
+  } 
   
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
+  for (size_t i = 0; i < num_possible_splits; ++i) {
     
     // Stop if nothing here
-    if (counter[i] == 0) {
+    if (counter[i] == 0 && (!mia || i < num_possible_splits - 1)) {
       continue;
     }
     
@@ -1219,12 +1225,18 @@ void TreeRegression::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, do
     
     // Stop if right child empty
     size_t n_right = num_samples_node - num_samples_node_nan - n_left;
-    if (n_right == 0) {
+    if (n_right == 0 && (!mia || num_samples_node_nan == 0)) {
       break;
     }
     
     // Stop if minimal bucket size reached
-    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
+    if ((n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) && 
+    (!mia || i < num_possible_splits - 1)) {
+      continue;
+    }
+
+    // Stop if only NAs
+    if ((n_right + n_left) == 0) {
       continue;
     }
     
@@ -1233,6 +1245,12 @@ void TreeRegression::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, do
     
     double decrease_nanleft = (sum_left + sum_nan) * (sum_left + sum_nan)  / (double) (n_left + num_samples_node_nan) + sum_right * sum_right / (double) n_right;
     double decrease_nanright = sum_left * sum_left / (double) n_left + (sum_right + sum_nan)  * (sum_right + sum_nan)  / (double) (n_right + num_samples_node_nan);
+
+    // If right child empty, put NAs right
+    if (n_right == 0) {
+      decrease = decrease_nanright;
+      decrease_nanleft = 0;
+    }
     
     // Regularization
     regularize(decrease, varID);
@@ -1243,6 +1261,11 @@ void TreeRegression::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, do
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
+
+      if (n_right == 0) {
+        // Split value infinity -> all non-missing values go left
+        best_value = std::numeric_limits<double>::infinity(); 
+      }
       
       if (decrease_nanright > decrease_nanleft) {
         nan_go_right = true;
@@ -1297,12 +1320,18 @@ void TreeRegression::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, do
   
   size_t n_left = 0;
   double sum_left = 0;
+
+  // If MIA approach, use one additional split
+  size_t num_possible_splits = num_unique - 1;
+  if (mia) {
+    num_possible_splits = num_unique;
+  } 
   
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < num_unique - 1; ++i) {
+  for (size_t i = 0; i < num_possible_splits; ++i) {
     
     // Stop if nothing here
-    if (counter[i] == 0) {
+    if (counter[i] == 0 && (!mia || i < num_possible_splits - 1)) {
       continue;
     }
     
@@ -1311,12 +1340,18 @@ void TreeRegression::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, do
     
     // Stop if right child empty
     size_t n_right = num_samples_node - num_samples_node_nan - n_left;
-    if (n_right == 0) {
+    if (n_right == 0 && (!mia || num_samples_node_nan == 0)) {
       break;
     }
     
     // Stop if minimal bucket size reached
-    if (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) {
+    if ((n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) && 
+    (!mia || i < num_possible_splits - 1)) {
+      continue;
+    }
+
+    // Stop if only NAs
+    if ((n_right + n_left) == 0) {
       continue;
     }
     
@@ -1325,6 +1360,13 @@ void TreeRegression::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, do
     
     double decrease_nanleft = (sum_left + sum_nan) * (sum_left + sum_nan)  / (double) (n_left + num_samples_node_nan) + sum_right * sum_right / (double) n_right;
     double decrease_nanright = sum_left * sum_left / (double) n_left + (sum_right + sum_nan)  * (sum_right + sum_nan)  / (double) (n_right + num_samples_node_nan);
+    
+    // If right child empty, put NAs right
+    if (n_right == 0) {
+      decrease = decrease_nanright;
+      decrease_nanleft = 0;
+    }
+    
     
     // Regularization
     regularize(decrease, varID);
@@ -1341,6 +1383,11 @@ void TreeRegression::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, do
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
+
+      if (n_right == 0) {
+        // Split value infinity -> all non-missing values go left
+        best_value = std::numeric_limits<double>::infinity(); 
+      }
       
       if (decrease_nanright > decrease_nanleft) {
         nan_go_right = true;

@@ -1,4 +1,7 @@
 
+# ranger 0.17.1
+* Add mia option for missing value handling
+
 # ranger 0.17.0
 * New CRAN version
 
