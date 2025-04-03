@@ -43,6 +43,7 @@ ranger(
   node.stats = FALSE,
   seed = NULL,
   na.action = "na.learn",
+  mia = FALSE,
   dependent.variable.name = NULL,
   status.variable.name = NULL,
   classification = NULL,
@@ -130,6 +131,8 @@ If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed.}
 
 \item{na.action}{Handling of missing values. Set to "na.learn" to internally handle missing values (default, see below), to "na.omit" to omit observations with missing values and to "na.fail" to stop if missing values are found.}
+
+\item{mia}{Allow splitting missing vs. non-missing (only for \code{na.action = "na.learn"}).}
 
 \item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 
@@ -231,6 +234,7 @@ If regularization is used, multithreading is deactivated because all trees need 
 Missing values can be internally handled by setting \code{na.action = "na.learn"} (default), by omitting observations with missing values with \code{na.action = "na.omit"} or by stopping if missing values are found with \code{na.action = "na.fail"}.
 With \code{na.action = "na.learn"}, missing values are ignored for calculating an initial split criterion value (i.e., decrease of impurity). Then for the best split, all missings are tried in both child nodes and the choice is made based again on the split criterion value. 
 For prediction, this direction is saved as the "default" direction. If a missing occurs in prediction at a node where there is no default direction, it goes left.
+With \code{mia = TRUE} it is additionally allowed to split missing values vs. non-missing values, as in the MIA algorithm (Twala et al. 2008). 
 
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) or \code{x} and \code{y} can be used.
@@ -305,6 +309,7 @@ ranger(trait ~ ., data = dat.gwaa)
   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \doi{10.1023/A:1009869804967}.
   \item Deng & Runger (2012). Feature selection via regularized trees. The 2012 International Joint Conference on Neural Networks (IJCNN), Brisbane, Australia. \doi{10.1109/IJCNN.2012.6252640}.
   \item Probst, P., Wright, M. N. & Boulesteix, A-L. (2019). Hyperparameters and tuning strategies for random forest. WIREs Data Mining Knowl Discov 9:e1301.\doi{10.1002/widm.1301}.
+  \item Twala, B. E., Jones, M. C., & Hand, D. J. (2008). Good methods for coping with missing data in decision trees. Pattern Recognit Lett 29:950-956. \doi{10.1016/j.patrec.2008.01.010}.
   }
 }
 \seealso{

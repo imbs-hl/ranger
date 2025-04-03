@@ -131,3 +131,51 @@ test_that("na.omit not working if no observations left", {
   dat[1:150, 1] <- NA
   expect_error(ranger(Species ~ ., dat, num.trees = 5, na.action = "na.omit"), "Error: No observations left after removing missing values\\.")
 })
+
+test_that("NA vs no-NA split is done with MIA but not without, classification", {
+  x <- c(rep(NA, 10), rep(1, 10))
+  y <- factor(c(rep(0, 10), rep(1, 10)))
+  dat <- data.frame(x = x, y = y)
+  
+  # Should not split at all
+  rf <- ranger(y~., dat, num.trees = 1, sample.fraction = 1, replace = FALSE, na.action = "na.learn", mia = FALSE)
+  expect_length(rf$forest$split.values[[1]], 1)
+  
+  # Should split NA vs non-NA (inf. split value)
+  rf <- ranger(y~., dat, num.trees = 1, sample.fraction = 1, replace = FALSE, na.action = "na.learn", mia = TRUE)
+  expect_length(rf$forest$split.values[[1]], 3)
+  expect_equal(rf$forest$split.values[[1]][[1]], Inf)
+})
+
+test_that("NA vs no-NA split is done with MIA but not without, probablity", {
+  x <- c(rep(NA, 10), rep(1, 10))
+  y <- factor(c(rep(0, 10), rep(1, 10)))
+  dat <- data.frame(x = x, y = y)
+  
+  # Should not split at all
+  rf <- ranger(y~., dat, num.trees = 1, sample.fraction = 1, replace = FALSE, na.action = "na.learn", mia = FALSE, 
+               probability = TRUE)
+  expect_length(rf$forest$split.values[[1]], 1)
+  
+  # Should split NA vs non-NA (inf. split value)
+  rf <- ranger(y~., dat, num.trees = 1, sample.fraction = 1, replace = FALSE, na.action = "na.learn", mia = TRUE, 
+               probability = TRUE)
+  expect_length(rf$forest$split.values[[1]], 3)
+  expect_equal(rf$forest$split.values[[1]][[1]], Inf)
+})
+
+test_that("NA vs no-NA split is done with MIA but not without, regression", {
+  x <- c(rep(NA, 10), rep(1, 10))
+  y <- c(rep(0, 10), rep(1, 10))
+  dat <- data.frame(x = x, y = y)
+  
+  # Should not split at all
+  rf <- ranger(y~., dat, num.trees = 1, sample.fraction = 1, replace = FALSE, na.action = "na.learn", mia = FALSE)
+  expect_length(rf$forest$split.values[[1]], 1)
+  
+  # Should split NA vs non-NA (inf. split value)
+  rf <- ranger(y~., dat, num.trees = 1, sample.fraction = 1, replace = FALSE, na.action = "na.learn", mia = TRUE)
+  expect_length(rf$forest$split.values[[1]], 3)
+  expect_equal(rf$forest$split.values[[1]][[1]], Inf)
+})
+

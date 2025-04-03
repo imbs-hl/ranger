@@ -192,6 +192,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   } else {
     any.na <- FALSE
   }
+  mia <- FALSE
 
   ## Num threads
   ## Default 0 -> detect from system in C++.
@@ -281,7 +282,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth, 
-                      node.stats, time.interest, use.time.interest, any.na)
+                      node.stats, time.interest, use.time.interest, any.na, mia)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

@@ -992,12 +992,18 @@ void TreeProbability::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, s
   
   size_t n_left = 0;
   std::vector<size_t> class_counts_left(num_classes);
+
+  // If MIA approach, use one additional split
+  size_t num_possible_splits = possible_split_values.size() - 1;
+  if (mia) {
+    num_possible_splits = possible_split_values.size();
+  } 
   
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < possible_split_values.size() - 1; ++i) {
+  for (size_t i = 0; i < num_possible_splits; ++i) {
     
     // Stop if nothing here
-    if (counter[i] == 0) {
+    if (counter[i] == 0 && (!mia || i < num_possible_splits - 1)) {
       continue;
     }
     
@@ -1005,12 +1011,18 @@ void TreeProbability::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, s
     
     // Stop if right child empty
     size_t n_right = num_samples_node - num_samples_node_nan - n_left;
-    if (n_right == 0) {
+    if (n_right == 0 && (!mia || num_samples_node_nan == 0)) {
       break;
     }
     
     // Stop if minimal bucket size reached
-    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) && 
+        (!mia || i < num_possible_splits - 1)) {
+      continue;
+    }
+
+    // Stop if only NAs
+    if (mia && (n_right + n_left) == 0) {
       continue;
     }
     
@@ -1039,6 +1051,11 @@ void TreeProbability::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, s
     decrease_nanleft = sum_right / (double) n_right + sum_left_withnan / (double) (n_left + num_samples_node_nan);
     decrease_nanright = sum_right_withnan / (double) (n_right + num_samples_node_nan) + sum_left / (double) n_left;
 
+    // If right child empty, put NAs right
+    if (n_right == 0) {
+      decrease = decrease_nanright;
+      decrease_nanleft = 0;
+    }
     
     // Stop if class-wise minimal bucket size reached
     if (min_bucket->size() > 1) {
@@ -1064,6 +1081,11 @@ void TreeProbability::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, s
       best_value = (possible_split_values[i] + possible_split_values[i + 1]) / 2;
       best_varID = varID;
       best_decrease = decrease;
+
+      if (n_right == 0) {
+        // Split value infinity -> all non-missing values go left
+        best_value = std::numeric_limits<double>::infinity(); 
+      }
       
       if (decrease_nanright > decrease_nanleft) {
         nan_go_right = true;
@@ -1122,12 +1144,18 @@ void TreeProbability::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, s
   
   size_t n_left = 0;
   std::vector<size_t> class_counts_left(num_classes);
+
+  // If MIA approach, use one additional split
+  size_t num_possible_splits = num_unique - 1;
+  if (mia) {
+    num_possible_splits = num_unique;
+  } 
   
   // Compute decrease of impurity for each split
-  for (size_t i = 0; i < num_unique - 1; ++i) {
+  for (size_t i = 0; i <num_possible_splits; ++i) {
     
     // Stop if nothing here
-    if (counter[i] == 0) {
+    if (counter[i] == 0 && (!mia || i < num_possible_splits - 1)) {
       continue;
     }
     
@@ -1135,12 +1163,18 @@ void TreeProbability::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, s
     
     // Stop if right child empty
     size_t n_right = num_samples_node - num_samples_node_nan - n_left;
-    if (n_right == 0) {
+    if (n_right == 0 && (!mia || num_samples_node_nan == 0)) {
       break;
     }
     
     // Stop if minimal bucket size reached
-    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0])) {
+    if (min_bucket->size() == 1 && (n_left < (*min_bucket)[0] || n_right < (*min_bucket)[0]) && 
+    (!mia || i < num_possible_splits - 1)) {
+      continue;
+    }
+
+    // Stop if only NAs
+    if (mia && (n_right + n_left) == 0) {
       continue;
     }
     
@@ -1168,6 +1202,12 @@ void TreeProbability::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, s
     decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     decrease_nanleft = sum_right / (double) n_right + sum_left_withnan / (double) (n_left + num_samples_node_nan);
     decrease_nanright = sum_right_withnan / (double) (n_right + num_samples_node_nan) + sum_left / (double) n_left;
+
+    // If right child empty, put NAs right
+    if (n_right == 0) {
+      decrease = decrease_nanright;
+      decrease_nanleft = 0;
+    }
 
     // Stop if class-wise minimal bucket size reached
     if (min_bucket->size() > 1) {
@@ -1199,6 +1239,11 @@ void TreeProbability::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, s
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
+
+      if (n_right == 0) {
+        // Split value infinity -> all non-missing values go left
+        best_value = std::numeric_limits<double>::infinity(); 
+      }
       
       if (decrease_nanright > decrease_nanleft) {
         nan_go_right = true;

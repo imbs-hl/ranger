@@ -41,7 +41,7 @@ public:
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, double poisson_tau, bool holdout, uint num_random_splits,
       uint max_depth, std::vector<double>* regularization_factor, bool regularization_usedepth,
-      std::vector<bool>* split_varIDs_used, bool save_node_stats);
+      std::vector<bool>* split_varIDs_used, bool save_node_stats, bool mia);
 
   virtual void allocateMemory() = 0;
 
@@ -247,6 +247,7 @@ protected:
   uint max_depth;
   uint depth;
   size_t last_left_nodeID;
+  bool mia;
   
   // Should NaNs go to right child for the current split?
   bool nan_go_right;
