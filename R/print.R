@@ -103,11 +103,13 @@ print.ranger.prediction <- function(x, ...) {
   }
 }
 
+##' @export
 str.ranger.forest <- function(object, max.level = 2, ...) {
   class(object) <- "list"
   str(object, max.level = max.level, ...)
 }
 
+##' @export
 str.ranger <- function(object, max.level = 2, ...) {
   class(object) <- "list"
   str(object, max.level = max.level, ...)

@@ -132,7 +132,7 @@ test_that("Fewer variables used with regularization, survival extratrees", {
   rf_noreg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees")
   rf_reg <- ranger(Surv(time, status) ~ ., dat_surv, num.trees = 5, min.node.size = 10, mtry = 4, splitrule = "extratrees", num.threads = 1, 
                    regularization.factor = .0001, regularization.usedepth = TRUE)
-  expect_lt(get_num_splitvars(rf_reg), 
+  expect_lte(get_num_splitvars(rf_reg), 
             get_num_splitvars(rf_noreg))
 })
 

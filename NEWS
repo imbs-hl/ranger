@@ -1,4 +1,12 @@
 
+##### Version 0.17.0
+* Set num.threads=2 as default; respect environment variables and options
+* Add handling of missing values for classification and regression
+* Allow vector min.node.size and min.bucket for class-specific limits
+* Add Poisson splitting rule for regression trees
+* Add hierarchical shrinkage
+* Fix a bug for always.split.variables (for some settings)
+
 ##### Version 0.16.0
 * Add node.stats option to save node statistics of all nodes
 * Add time.interest option to restrict unique survival times (faster and saves memory)

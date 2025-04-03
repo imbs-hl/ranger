@@ -8,14 +8,14 @@ test_that("No error if class weights used", {
 })
 
 test_that("Prediction accuracy for minority class increases with higher weight", {
-  n <- 100
+  n <- 500
   x <- rnorm(n)
   beta0 <- -3
   beta <- 1
   y <- factor(rbinom(n, 1, plogis(beta0 + beta * x)))
   dat <- data.frame(y = y, x)
 
-  rf <- ranger(y ~ ., dat, num.trees = 5, min.node.size = 50, class.weights = c(1, 1))
+  rf <- ranger(y ~ ., dat, num.trees = 50, min.node.size = 50, class.weights = c(1, 1))
   acc_major <- mean((rf$predictions == dat$y)[dat$y == "0"], na.rm = TRUE)
   acc_minor <- mean((rf$predictions == dat$y)[dat$y == "1"], na.rm = TRUE)
 

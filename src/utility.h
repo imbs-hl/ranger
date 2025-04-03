@@ -35,6 +35,22 @@
 namespace ranger {
 
 /**
+ * Returns whether first value (a) is less than second value (b). NaN treated as Inf.
+ * @param a First value to compare
+ * @param b Second value to compare
+ */
+template<typename T>
+inline bool less_nan(const T& a, const T& b) {
+  if (std::isnan(a)) {
+    return false;
+  } else if (std::isnan(b)) {
+    return true;
+  } else {
+    return a < b;
+  }
+}
+
+/**
  * Split sequence start..end in num_parts parts with sizes as equal as possible.
  * @param result Result vector of size num_parts+1. Ranges for the parts are then result[0]..result[1]-1, result[1]..result[2]-1, ..
  * @param start minimum value
@@ -181,7 +197,8 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
     size_t num_samples);
 
 /**
- * Simple algorithm for sampling without replacement (skip values), faster for smaller num_samples
+ * Simple algorithm for sampling without replacement (skip values), faster for smaller num_samples. 
+ * skip values are expected to be sorted in ascending order.
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param range_length Length of range. Interval to draw from: 0..max-1
@@ -203,6 +220,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
 
 /**
  * Fisher Yates algorithm for sampling without replacement (skip values).
+ * skip values are expected to be sorted in ascending order.
  * @param result Vector to add results to. Will not be cleaned before filling.
  * @param random_number_generator Random number generator
  * @param max Length of range. Interval to draw from: 0..max-1

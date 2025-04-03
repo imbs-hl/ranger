@@ -1,6 +1,6 @@
 [![R-CMD-check](https://github.com/imbs-hl/ranger/workflows/R-CMD-check/badge.svg)](https://github.com/imbs-hl/ranger/actions)
-![CRAN Downloads month](http://cranlogs.r-pkg.org/badges/ranger?color=brightgreen)
-![CRAN Downloads overall](http://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen)
+![CRAN Downloads month](https://cranlogs.r-pkg.org/badges/ranger?color=brightgreen)
+![CRAN Downloads overall](https://cranlogs.r-pkg.org/badges/grand-total/ranger?color=brightgreen)
 ## ranger: A Fast Implementation of Random Forests
 Marvin N. Wright
 
