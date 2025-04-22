@@ -52,7 +52,7 @@ public:
       std::vector<std::vector<double>>& split_select_weights,
       const std::vector<std::string>& always_split_variable_names, bool prediction_mode, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
-      std::vector<double>& case_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
+      std::vector<double>& case_weights, bool use_loss_weights, std::vector<std::vector<size_t>>& manual_inbag, bool predict_all,
       bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth,
       const std::vector<double>& regularization_factor, bool regularization_usedepth);
@@ -194,6 +194,7 @@ protected:
   MemoryMode memory_mode;
   bool sample_with_replacement;
   bool memory_saving_splitting;
+  bool use_loss_weights;
   SplitRule splitrule;
   bool predict_all;
   bool keep_inbag;

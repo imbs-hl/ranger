@@ -45,12 +45,14 @@ double TreeRegression::estimate(size_t nodeID) {
 
   // Mean of responses of samples in node
   double sum_responses_in_node = 0;
+  double sum_weights = 0;
   size_t num_samples_in_node = end_pos[nodeID] - start_pos[nodeID];
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    sum_responses_in_node += data->get_y(sampleID, 0);
+    sum_responses_in_node += data->get_y(sampleID, 0) * data->get_w(sampleID, 0);
+    sum_weights += data->get_w(sampleID, 0);
   }
-  return (sum_responses_in_node / (double) num_samples_in_node);
+  return (sum_responses_in_node / sum_weights);
 }
 
 void TreeRegression::appendToFileInternal(std::ofstream& file) { // #nocov start
@@ -72,7 +74,7 @@ bool TreeRegression::splitNodeInternal(size_t nodeID, std::vector<size_t>& possi
   double pure_value = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get_y(sampleID, 0);
+    double value = data->get_y(sampleID, 0) * data->get_w(sampleID, 0);
     if (pos != start_pos[nodeID] && value != pure_value) {
       pure = false;
       break;
@@ -112,19 +114,23 @@ double TreeRegression::computePredictionAccuracyInternal(std::vector<double>* pr
 
   size_t num_predictions = prediction_terminal_nodeIDs.size();
   double sum_of_squares = 0;
+  double sum_weights = 0;
+  for (size_t i = 0; i < num_predictions; ++i) {
+    sum_weights += data->get_w(oob_sampleIDs[i], 0);
+  }
   for (size_t i = 0; i < num_predictions; ++i) {
     size_t terminal_nodeID = prediction_terminal_nodeIDs[i];
     double predicted_value = split_values[terminal_nodeID];
     double real_value = data->get_y(oob_sampleIDs[i], 0);
     if (predicted_value != real_value) {
-      double diff = (predicted_value - real_value) * (predicted_value - real_value);
+      double diff = (predicted_value - real_value) * (predicted_value - real_value) * data->get_w(oob_sampleIDs[i], 0);
       if (prediction_error_casewise) {
         (*prediction_error_casewise)[i] = diff;
       }
       sum_of_squares += diff;
     }
   }
-  return (1.0 - sum_of_squares / (double) num_predictions);
+  return (1.0 - sum_of_squares / sum_weights);
 }
 
 bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
@@ -136,9 +142,21 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
 
   // Compute sum of responses in node
   double sum_node = 0;
+  double sum_node_weights = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    sum_node += data->get_y(sampleID, 0);
+    sum_node += data->get_y(sampleID, 0) * data->get_w(sampleID, 0);
+    sum_node_weights += data->get_w(sampleID, 0);
+  }
+
+  // For loss weights
+  double cost_node = 0;
+  if (use_loss_weights) {
+    double y_w = sum_node / sum_node_weights;
+    for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+      size_t sampleID = sampleIDs[pos];
+      cost_node += data->get_w(sampleID, 0) * (data->get_y(sampleID, 0) - y_w) * (data->get_y(sampleID, 0) - y_w);
+    }
   }
 
   // Stop early if no split posssible
@@ -146,24 +164,30 @@ bool TreeRegression::findBestSplit(size_t nodeID, std::vector<size_t>& possible_
 
     // For all possible split variables
     for (auto& varID : possible_split_varIDs) {
-
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-
-        // Use memory saving method if option set
-        if (memory_saving_splitting) {
-          findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
-        } else {
-          // Use faster method for both cases
-          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-          if (q < Q_THRESHOLD) {
+      
+      if (use_loss_weights) {
+        findBestSplitValueLossWeights(nodeID, varID, sum_node, cost_node, num_samples_node, sum_node_weights, 
+            best_value, best_varID, best_decrease);
+      } else {
+        
+        // Find best split value, if ordered consider all values as split values, else all 2-partitions
+        if (data->isOrderedVariable(varID)) {
+          
+          // Use memory saving method if option set
+          if (memory_saving_splitting) {
             findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
           } else {
-            findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+            // Use faster method for both cases
+            double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+            if (q < Q_THRESHOLD) {
+              findBestSplitValueSmallQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+            } else {
+              findBestSplitValueLargeQ(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
+            }
           }
+        } else {
+          findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
         }
-      } else {
-        findBestSplitValueUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID, best_decrease);
       }
     }
   }
@@ -332,7 +356,96 @@ void TreeRegression::findBestSplitValueLargeQ(size_t nodeID, size_t varID, doubl
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
+      
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == data->getUniqueDataValue(varID, j)) {
+        best_value = data->getUniqueDataValue(varID, i);
+      }
+    }
+  }
+}
 
+void TreeRegression::findBestSplitValueLossWeights(size_t nodeID, size_t varID, double sum_node, double cost_node, size_t num_samples_node, double sum_node_weights,
+                                              double& best_value, size_t& best_varID, double& best_decrease) {
+  
+  // Set counters to 0
+  size_t num_unique = data->getNumUniqueDataValues(varID);
+  std::fill_n(counter.begin(), num_unique, 0);
+  std::fill_n(sums.begin(), num_unique, 0);
+  std::vector<double> counter_weight(num_unique, 0.0);
+  
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    size_t index = data->getIndex(sampleID, varID);
+    
+    sums[index] += data->get_y(sampleID, 0) * data->get_w(sampleID, 0);
+    ++counter[index];
+    counter_weight[index] += data->get_w(sampleID, 0);
+  }
+  
+  size_t n_left = 0;
+  double sum_left = 0;
+  double weight_left = 0;
+  
+  // Compute decrease of impurity for each split
+  for (size_t i = 0; i < num_unique - 1; ++i) {
+    
+    // Stop if nothing here
+    if (counter[i] == 0) {
+      continue;
+    }
+    
+    n_left += counter[i];
+    weight_left += counter_weight[i];
+    sum_left += sums[i];
+    
+    // Stop if right child empty
+    size_t n_right = num_samples_node - n_left;
+    if (n_right == 0) {
+      break;
+    }
+    double weight_right = sum_node_weights - weight_left;
+    
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
+    
+    double y_w_left = sum_left / weight_left;
+    double y_w_right = (sum_node - sum_left) / weight_right;
+    
+    double cost_left = 0;
+    double cost_right = 0;
+    for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+      size_t sampleID = sampleIDs[pos];
+      size_t index = data->getIndex(sampleID, varID);
+      if(index <= i) {
+        // is left side of split
+        cost_left += data->get_w(sampleID, 0) * (data->get_y(sampleID, 0) - y_w_left) * (data->get_y(sampleID, 0) - y_w_left);
+      } else {
+        // is right side of split
+        cost_right += data->get_w(sampleID, 0) * (data->get_y(sampleID, 0) - y_w_right) * (data->get_y(sampleID, 0) - y_w_right);
+      }
+    }
+    
+    double decrease = cost_node - (cost_left + cost_right);
+    
+    // Regularization
+    regularize(decrease, varID);
+    
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      // Find next value in this node
+      size_t j = i + 1;
+      while (j < num_unique && counter[j] == 0) {
+        ++j;
+      }
+      
+      // Use mid-point split
+      best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
+      best_varID = varID;
+      best_decrease = decrease;
+      
       // Use smaller value if average is numerically the same as the larger value
       if (best_value == data->getUniqueDataValue(varID, j)) {
         best_value = data->getUniqueDataValue(varID, i);
@@ -941,12 +1054,13 @@ void TreeRegression::addImpurityImportance(size_t nodeID, size_t varID, double d
   double best_decrease = decrease;
   if (splitrule != MAXSTAT) {
     double sum_node = 0;
+    double sum_weights = 0;
     for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
       size_t sampleID = sampleIDs[pos];
-      sum_node += data->get_y(sampleID, 0);
+      sum_weights += data->get_w(sampleID, 0);
+      sum_node += data->get_y(sampleID, 0) * data->get_w(sampleID, 0);
     }
-
-    double impurity_node = (sum_node * sum_node / (double) num_samples_node);
+    double impurity_node = (sum_node * sum_node / sum_weights);
 
     // Account for the regularization
     regularize(impurity_node, varID);

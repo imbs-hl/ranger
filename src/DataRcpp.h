@@ -39,9 +39,10 @@ namespace ranger {
 class DataRcpp: public Data {
 public:
   DataRcpp() = default;
-  DataRcpp(Rcpp::NumericMatrix& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
+  DataRcpp(Rcpp::NumericMatrix& x, Rcpp::NumericMatrix& y, Rcpp::NumericMatrix& w, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols) {
       this->x = x;
       this->y = y;
+      this->w = w;
       this->variable_names = variable_names;
       this->num_rows = num_rows;
       this->num_cols = num_cols;
@@ -71,8 +72,12 @@ public:
   double get_y(size_t row, size_t col) const override {
     return y(row, col);
   }
-  
-  // #nocov start 
+
+  double get_w(size_t row, size_t col) const override {
+    return w(row, col);
+  }
+
+  // #nocov start
   void reserveMemory(size_t y_cols) override {
     // Not needed
   }
@@ -84,11 +89,16 @@ public:
   void set_y(size_t col, size_t row, double value, bool& error) override {
     y(row, col) = value;
   }
-  // #nocov end 
-  
+
+  void set_w(size_t col, size_t row, double value, bool& error) override {
+    w(row, col) = value;
+  }
+  // #nocov end
+
 private:
   Rcpp::NumericMatrix x;
   Rcpp::NumericMatrix y;
+  Rcpp::NumericMatrix w;
 };
 
 } // namespace ranger

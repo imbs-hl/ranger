@@ -99,6 +99,7 @@
 ##' @param replace Sample with replacement. 
 ##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values. 
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
+##' @param loss.weights Weights for the contribution to the loss function of training observations. Observations with larger weights will have more impact in the node splitting rule for the trees.
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini", "extratrees" or "hellinger" with default "gini". For regression "variance", "extratrees", "maxstat" or "beta" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
@@ -214,8 +215,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    importance = "none", write.forest = TRUE, probability = FALSE,
                    min.node.size = NULL, min.bucket = NULL, max.depth = NULL, 
                    replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632), 
-                   case.weights = NULL, class.weights = NULL, splitrule = NULL, 
-                   num.random.splits = 1, alpha = 0.5, minprop = 0.1,
+                   case.weights = NULL, loss.weights = NULL, class.weights = NULL, 
+                   splitrule = NULL, num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                    split.select.weights = NULL, always.split.variables = NULL,
                    respect.unordered.factors = NULL,
                    scale.permutation.importance = FALSE,
@@ -310,6 +311,47 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   }
   
+  
+  # Check parameters for loss.weights
+  n_samples <- if(is.null(data)) nrow(x) else nrow(data)
+  if (!is.null(loss.weights)) {
+    
+    if (!is.null(case.weights) || !is.null(class.weights)) {
+      stop("Only one of 'loss.weights', 'case.weights' or 'class.weights' may be supplied.")
+    }
+    if (anyNA(loss.weights) || any(loss.weights < 0)) {
+      stop("All 'loss.weights' must be non-negative and non-missing.")
+    }
+    if(length(loss.weights) != n_samples) {
+      stop(sprintf("Length of 'loss.weights' (%d) does not match number of samples (%d).", length(loss.weights), n_samples))
+    }
+    
+    # splitrule must stay NULL
+    if (!missing(splitrule) && !is.null(splitrule) && !splitrule %in% c("gini", "variance")) {
+      stop("Only splitrule = 'gini' or 'variance' are currently supported when using 'loss.weights'.")
+      # Revert to defaults
+      splitrule <- NULL
+    }
+    
+    # save.memory must stay FALSE
+    if (isTRUE(save.memory)) {
+      warning(
+        "The 'save.memory' argument is not (yet) supported when using 'loss.weights'; ",
+        "resetting save.memory to FALSE."
+      )
+      save.memory <- FALSE
+    }
+    
+    # probability must stay TRUE
+    if ( (is.factor(y) || is.logical(y)) && isFALSE(probability)) {
+      warning(
+        "Only probability = TRUE is supported when using 'loss.weights'; ",
+        "resetting probability to TRUE."
+      )
+      probability <- TRUE
+    }
+  }
+  
   ## Treetype
   if (is.factor(y) || is.logical(y)) {
     if (probability) {
@@ -329,6 +371,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     treetype <- 5
   } else {
     stop("Error: Unsupported type of dependent variable.")
+  }
+  
+  ## Current implementations of loss.weights
+  if (!missing(loss.weights) && !treetype %in% c(3, 9)) {
+    stop("Error: 'loss.weights' implemented only for regression and probability trees yet.")
+  }
+  # Supply Ones-vector for unused loss.weights
+  if(is.null(loss.weights)) {
+    loss.weights <- rep(1, n_samples)
   }
   
   ## Quantile prediction only for regression
@@ -848,7 +899,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   } else {
     y.mat <- as.matrix(as.numeric(y))
   }
-  
+  loss.weights.mat <- as.matrix(loss.weights)
+
   if (respect.unordered.factors == "order"){
     order.snps <- TRUE
   } else {
@@ -868,11 +920,11 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       min.node.size, min.bucket, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       prediction.mode, loaded.forest, snp.data,
-                      replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
-                      save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
-                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag, 
+                      replace, probability, unordered.factor.variables, use.unordered.factor.variables,
+                      save.memory, splitrule.num, case.weights, use.case.weights, loss.weights.mat, class.weights,
+                      predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type,
+                      num.random.splits, sparse.x, use.sparse.data, order.snps, oob.error, max.depth,
+                      inbag, use.inbag,
                       regularization.factor, use.regularization.factor, regularization.usedepth)
   
   if (length(result) == 0) {

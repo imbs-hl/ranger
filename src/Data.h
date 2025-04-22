@@ -33,6 +33,7 @@ public:
 
   virtual double get_x(size_t row, size_t col) const = 0;
   virtual double get_y(size_t row, size_t col) const = 0;
+  virtual double get_w(size_t row, size_t col) const = 0;
 
   size_t getVariableID(const std::string& variable_name) const;
 
@@ -40,6 +41,7 @@ public:
 
   virtual void set_x(size_t col, size_t row, double value, bool& error) = 0;
   virtual void set_y(size_t col, size_t row, double value, bool& error) = 0;
+  virtual void set_w(size_t col, size_t row, double value, bool& error) = 0;
 
   void addSnpData(unsigned char* snp_data, size_t num_cols_snp);
 

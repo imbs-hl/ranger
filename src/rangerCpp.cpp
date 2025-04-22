@@ -56,7 +56,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,
     bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, std::vector<double>& case_weights,
-    bool use_case_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
+    bool use_case_weights, Rcpp::NumericMatrix& loss_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_x, 
     bool use_sparse_data, bool order_snps, bool oob_error, uint max_depth, 
@@ -105,14 +105,24 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
       num_rows = input_x.nrow();
       num_cols = input_x.ncol();
     }
-
+    
     // Initialize data 
     if (use_sparse_data) {
-      data = std::make_unique<DataSparse>(sparse_x, input_y, variable_names, num_rows, num_cols);
+      data = std::make_unique<DataSparse>(sparse_x, input_y, loss_weights, variable_names, num_rows, num_cols);
     } else {
-      data = std::make_unique<DataRcpp>(input_x, input_y, variable_names, num_rows, num_cols);
+      data = std::make_unique<DataRcpp>(input_x, input_y, loss_weights, variable_names, num_rows, num_cols);
     }
-
+    
+    // Use Loss weights if not Ones-vector supplied
+    bool use_loss_weights = false;
+    for (int i = 0; i < loss_weights.nrow(); ++i) {
+      for (int j = 0; j < loss_weights.ncol(); ++j) {
+        if (loss_weights(i, j) != 1.0) {
+          use_loss_weights = true;
+        }
+      }
+    }
+    
     // If there is snp data, add it
     if (snp_data.nrow() > 1) {
       data->addSnpData(snp_data.begin(), snp_data.ncol());
@@ -150,7 +160,7 @@ Rcpp::List rangerCpp(uint treetype, Rcpp::NumericMatrix& input_x, Rcpp::NumericM
     // Init Ranger
     forest->initR(std::move(data), mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, min_bucket, split_select_weights, always_split_variable_names,
-        prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
+        prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights, use_loss_weights,
         inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
         order_snps, max_depth, regularization_factor, regularization_usedepth);
 

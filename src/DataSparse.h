@@ -39,8 +39,8 @@ namespace ranger {
 class DataSparse: public Data {
 public:
   DataSparse() = default;
-  
-  DataSparse(Eigen::SparseMatrix<double>& x, Rcpp::NumericMatrix& y, std::vector<std::string> variable_names, size_t num_rows,
+
+  DataSparse(Eigen::SparseMatrix<double>& x, Rcpp::NumericMatrix& y, Rcpp::NumericMatrix& w, std::vector<std::string> variable_names, size_t num_rows,
       size_t num_cols);
 
   DataSparse(const DataSparse&) = delete;
@@ -61,7 +61,11 @@ public:
     return y[col * num_rows + row];
   }
 
-  // #nocov start 
+  double get_w(size_t row, size_t col) const override {
+    return w[col * num_rows + row];
+  }
+
+  // #nocov start
   void reserveMemory(size_t y_cols) override {
     // Not needed
   }
@@ -73,11 +77,16 @@ public:
   void set_y(size_t col, size_t row, double value, bool& error) override {
     y[col * num_rows + row] = value;
   }
-  // #nocov end 
+
+  void set_w(size_t col, size_t row, double value, bool& error) override {
+    w[col * num_rows + row] = value;
+  }
+  // #nocov end
 
 private:
   Eigen::SparseMatrix<double> x;
   Rcpp::NumericMatrix y;
+  Rcpp::NumericMatrix w;
 };
 
 } // namespace ranger

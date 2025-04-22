@@ -136,7 +136,7 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
     uint num_threads, ImportanceMode importance_mode, uint min_node_size, uint min_bucket,
     std::vector<std::vector<double>>& split_select_weights, const std::vector<std::string>& always_split_variable_names,
     bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
-    bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights,
+    bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights, bool use_loss_weights,
     std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
     uint num_random_splits, bool order_snps, uint max_depth, const std::vector<double>& regularization_factor,
@@ -159,7 +159,10 @@ void Forest::initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, 
   if (!split_select_weights.empty()) {
     setSplitWeightVector(split_select_weights);
   }
-
+  
+  // Set if loss weights supplied
+  this->use_loss_weights = use_loss_weights;
+  
   // Set case weights
   if (!case_weights.empty()) {
     if (case_weights.size() != num_samples) {
@@ -473,7 +476,7 @@ void Forest::grow() {
 
     trees[i]->init(data.get(), mtry, num_samples, tree_seed, &deterministic_varIDs, tree_split_select_weights,
         importance_mode, min_node_size, min_bucket, sample_with_replacement, memory_saving_splitting, splitrule, &case_weights,
-        tree_manual_inbag, keep_inbag, &sample_fraction, alpha, minprop, holdout, num_random_splits, max_depth,
+        tree_manual_inbag, keep_inbag, &sample_fraction, use_loss_weights, alpha, minprop, holdout, num_random_splits, max_depth,
         &regularization_factor, regularization_usedepth, &split_varIDs_used);
   }
 

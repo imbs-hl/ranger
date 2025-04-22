@@ -72,6 +72,9 @@ private:
   void findBestSplitValueLargeQ(size_t nodeID, size_t varID, size_t num_classes,
       const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
       double& best_decrease);
+  void findBestSplitValueLossWeights(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, double cost_node, size_t num_samples_node, double sum_node_weights, 
+      double& best_value, size_t& best_varID, double& best_decrease);
   void findBestSplitValueUnordered(size_t nodeID, size_t varID, size_t num_classes,
       const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
       double& best_decrease);
@@ -113,6 +116,7 @@ private:
 
   std::vector<size_t> counter;
   std::vector<size_t> counter_per_class;
+  std::vector<double> counter_per_class_double;
 };
 
 } // namespace ranger

@@ -18,14 +18,14 @@ namespace ranger {
 TreeProbability::TreeProbability(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<size_t>>* sampleIDs_per_class, std::vector<double>* class_weights) :
     class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(sampleIDs_per_class), class_weights(
-        class_weights), counter(0), counter_per_class(0) {
+        class_weights), counter(0), counter_per_class(0), counter_per_class_double(0) {
 }
 
 TreeProbability::TreeProbability(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values, std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<double>>& terminal_class_counts) :
     Tree(child_nodeIDs, split_varIDs, split_values), class_values(class_values), response_classIDs(response_classIDs), sampleIDs_per_class(
-        0), terminal_class_counts(terminal_class_counts), class_weights(0), counter(0), counter_per_class(0) {
+        0), terminal_class_counts(terminal_class_counts), class_weights(0), counter(0), counter_per_class(0), counter_per_class_double(0) {
 }
 
 void TreeProbability::allocateMemory() {
@@ -41,24 +41,26 @@ void TreeProbability::allocateMemory() {
 
     counter.resize(max_num_splits);
     counter_per_class.resize(num_classes * max_num_splits);
+    counter_per_class_double.resize(num_classes * max_num_splits);
   }
 }
 
 void TreeProbability::addToTerminalNodes(size_t nodeID) {
 
-  size_t num_samples_in_node = end_pos[nodeID] - start_pos[nodeID];
   terminal_class_counts[nodeID].resize(class_values->size(), 0);
 
   // Compute counts
+  double sum_weights = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
     size_t classID = (*response_classIDs)[sampleID];
-    ++terminal_class_counts[nodeID][classID];
+    terminal_class_counts[nodeID][classID] += data->get_w(sampleID, 0);
+    sum_weights += data->get_w(sampleID, 0);
   }
 
   // Compute fractions
   for (size_t i = 0; i < terminal_class_counts[nodeID].size(); ++i) {
-    terminal_class_counts[nodeID][i] /= num_samples_in_node;
+    terminal_class_counts[nodeID][i] /= sum_weights;
   }
 }
 
@@ -92,7 +94,7 @@ bool TreeProbability::splitNodeInternal(size_t nodeID, std::vector<size_t>& poss
   double pure_value = 0;
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
-    double value = data->get_y(sampleID, 0);
+    double value = data->get_y(sampleID, 0) * data->get_w(sampleID, 0);
     if (pos != start_pos[nodeID] && value != pure_value) {
       pure = false;
       break;
@@ -128,18 +130,21 @@ double TreeProbability::computePredictionAccuracyInternal(std::vector<double>* p
 
   size_t num_predictions = prediction_terminal_nodeIDs.size();
   double sum_of_squares = 0;
+  double sum_weight = 0;
   for (size_t i = 0; i < num_predictions; ++i) {
     size_t sampleID = oob_sampleIDs[i];
+
     size_t real_classID = (*response_classIDs)[sampleID];
     size_t terminal_nodeID = prediction_terminal_nodeIDs[i];
     double predicted_value = terminal_class_counts[terminal_nodeID][real_classID];
-    double err = (1 - predicted_value) * (1 - predicted_value);
+    double err = (1 - predicted_value) * (1 - predicted_value) * data->get_w(sampleID, 0);
+    sum_weight += data->get_w(sampleID, 0);
     if (prediction_error_casewise) {
       (*prediction_error_casewise)[i] = err;
     }
     sum_of_squares += err;
   }
-  return (1.0 - sum_of_squares / (double) num_predictions);
+  return (1.0 - sum_of_squares / sum_weight);
 }
 
 bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible_split_varIDs) {
@@ -151,39 +156,66 @@ bool TreeProbability::findBestSplit(size_t nodeID, std::vector<size_t>& possible
   double best_value = 0;
 
   std::vector<size_t> class_counts(num_classes);
+  std::vector<double> nu_k(num_classes, 0);
+  double sum_node_weights = 0;
   // Compute overall class counts
   for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
     size_t sampleID = sampleIDs[pos];
     uint sample_classID = (*response_classIDs)[sampleID];
     ++class_counts[sample_classID];
+    nu_k[sample_classID] += data->get_w(sampleID, 0);
+    sum_node_weights += data->get_w(sampleID, 0);
   }
+  for (size_t j = 0; j < num_classes; ++j) {
+    nu_k[j] /= sum_node_weights;
+  }
+
+  // Calculate brier score of node before split
+  double cost_node = 0;
+  if (use_loss_weights) {
+    for (size_t j = 0; j < num_classes; ++j) {
+      for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+        size_t sampleID = sampleIDs[pos];
+        uint sample_classID = (*response_classIDs)[sampleID];
+        cost_node += data->get_w(sampleID, 0) * (nu_k[j] - (double) (sample_classID == j)) * (nu_k[j] - (double) (sample_classID == j));
+      }
+    }
+  }
+  
 
   // Stop early if no split posssible
   if (num_samples_node >= 2 * min_bucket) {
 
     // For all possible split variables
     for (auto& varID : possible_split_varIDs) {
-      // Find best split value, if ordered consider all values as split values, else all 2-partitions
-      if (data->isOrderedVariable(varID)) {
-
-        // Use memory saving method if option set
-        if (memory_saving_splitting) {
-          findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-              best_decrease);
-        } else {
-          // Use faster method for both cases
-          double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
-          if (q < Q_THRESHOLD) {
+      
+      if (use_loss_weights) {
+        findBestSplitValueLossWeights(nodeID, varID, num_classes, class_counts, cost_node, num_samples_node, 
+            sum_node_weights, best_value, best_varID, best_decrease);
+      } else {
+        
+        // Find best split value, if ordered consider all values as split values, else all 2-partitions
+        if (data->isOrderedVariable(varID)) {
+          
+          // Use memory saving method if option set
+          if (memory_saving_splitting) {
             findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
                 best_decrease);
           } else {
-            findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-                best_decrease);
+            // Use faster method for both cases
+            double q = (double) num_samples_node / (double) data->getNumUniqueDataValues(varID);
+            if (q < Q_THRESHOLD) {
+              findBestSplitValueSmallQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+                  best_decrease);
+            } else {
+              findBestSplitValueLargeQ(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+                  best_decrease);
+            }
           }
+        } else {
+          findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
+              best_decrease);
         }
-      } else {
-        findBestSplitValueUnordered(nodeID, varID, num_classes, class_counts, num_samples_node, best_value, best_varID,
-            best_decrease);
       }
     }
   }
@@ -411,7 +443,120 @@ void TreeProbability::findBestSplitValueLargeQ(size_t nodeID, size_t varID, size
       best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
       best_varID = varID;
       best_decrease = decrease;
+      
+      // Use smaller value if average is numerically the same as the larger value
+      if (best_value == data->getUniqueDataValue(varID, j)) {
+        best_value = data->getUniqueDataValue(varID, i);
+      }
+    }
+  }
+}
 
+void TreeProbability::findBestSplitValueLossWeights(size_t nodeID, size_t varID, size_t num_classes,
+      const std::vector<size_t>& class_counts, double cost_node, size_t num_samples_node, double sum_node_weights, double& best_value, size_t& best_varID,
+      double& best_decrease) {
+  
+  // Set counters to 0
+  size_t num_unique = data->getNumUniqueDataValues(varID);
+  std::fill_n(counter_per_class.begin(), num_unique * num_classes, 0);
+  std::fill_n(counter_per_class_double.begin(), num_unique * num_classes, 0.0);
+  std::fill_n(counter.begin(), num_unique, 0);
+  
+  // weight segments per split point for iterative summation
+  std::vector<double> counter_weight(num_unique, 0.0);
+  // total weight per class for deriving nu_k on right side
+  std::vector<double> class_counts_total(num_classes);
+  
+  // Count values
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    size_t index = data->getIndex(sampleID, varID);
+    size_t classID = (*response_classIDs)[sampleID];
+    
+    ++counter[index];
+    ++counter_per_class[index * num_classes + classID];
+    counter_per_class_double[index * num_classes + classID] += data->get_w(sampleID, 0);
+    
+    counter_weight[index] += data->get_w(sampleID, 0);
+    class_counts_total[classID] += data->get_w(sampleID, 0);
+  }
+  
+  
+  size_t n_left = 0;
+  double weight_left = 0;
+  
+  // keeps track of \hat\nu_k
+  std::vector<double> class_counts_left(num_classes);
+  
+  // Compute decrease of impurity for each split
+  for (size_t i = 0; i < num_unique - 1; ++i) {
+    
+    // Stop if nothing here
+    if (counter[i] == 0) {
+      continue;
+    }
+    
+    n_left += counter[i];
+    weight_left += counter_weight[i];
+    
+    // Stop if right child empty
+    size_t n_right = num_samples_node - n_left;
+    if (n_right == 0) {
+      break;
+    }
+    double weight_right = sum_node_weights - weight_left;
+    
+    // Stop if minimal bucket size reached
+    if (n_left < min_bucket || n_right < min_bucket) {
+      continue;
+    }
+    
+    // Brier Score with weighting
+    double sum_left = 0;
+    double sum_right = 0;
+    std::vector<double> nu_k_left(num_classes);
+    std::vector<double> nu_k_right(num_classes);
+    
+    for (size_t j = 0; j < num_classes; ++j) {
+      class_counts_left[j] += counter_per_class_double[i * num_classes + j];
+      nu_k_left[j] = class_counts_left[j] / weight_left;
+      
+      double class_count_right = class_counts_total[j] - class_counts_left[j];
+      nu_k_right[j] = class_count_right / weight_right;
+      
+      for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+        size_t sampleID = sampleIDs[pos];
+        size_t index = data->getIndex(sampleID, varID);
+        size_t classID = (*response_classIDs)[sampleID];
+        if(index <= i) {
+          // is left side of split
+          sum_left += data->get_w(sampleID, 0) * (nu_k_left[j] - (double) (classID == j)) * (nu_k_left[j] - (double) (classID == j));
+        } else {
+          // is right side of split
+          sum_right += data->get_w(sampleID, 0) * (nu_k_right[j] - (double) (classID == j)) * (nu_k_right[j] - (double) (classID == j));
+        }
+      }
+    }
+    
+    // Decrease of impurity
+    double decrease = cost_node - (sum_left + sum_right);
+    
+    // Regularization
+    regularize(decrease, varID);
+    
+    // If better than before, use this
+    if (decrease > best_decrease) {
+      // Find next value in this node
+      size_t j = i + 1;
+      while (j < num_unique && counter[j] == 0) {
+        ++j;
+      }
+      
+      // Use mid-point split
+      best_value = (data->getUniqueDataValue(varID, i) + data->getUniqueDataValue(varID, j)) / 2;
+      best_varID = varID;
+      best_decrease = decrease;
+      
       // Use smaller value if average is numerically the same as the larger value
       if (best_value == data->getUniqueDataValue(varID, j)) {
         best_value = data->getUniqueDataValue(varID, i);

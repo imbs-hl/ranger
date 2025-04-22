@@ -18,6 +18,7 @@ ranger(
   replace = TRUE,
   sample.fraction = ifelse(replace, 1, 0.632),
   case.weights = NULL,
+  loss.weights = NULL,
   class.weights = NULL,
   splitrule = NULL,
   num.random.splits = 1,
@@ -73,6 +74,8 @@ ranger(
 \item{sample.fraction}{Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. For classification, this can be a vector of class-specific values.}
 
 \item{case.weights}{Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.}
+
+\item{loss.weights}{Weights for the contribution to the loss function of training observations. Observations with larger weights will have more impact in the node splitting rule for the trees.}
 
 \item{class.weights}{Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.}
 

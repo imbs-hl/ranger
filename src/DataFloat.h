@@ -51,9 +51,14 @@ public:
     return y[col * num_rows + row];
   }
 
+  double get_w(size_t row, size_t col) const override {
+    return w[col * num_rows + row];
+  }
+
   void reserveMemory(size_t y_cols) override {
     x.resize(num_cols * num_rows);
     y.resize(y_cols * num_rows);
+    w.resize(y_cols * num_rows);
   }
 
   void set_x(size_t col, size_t row, double value, bool& error) override {
@@ -64,9 +69,14 @@ public:
     y[col * num_rows + row] = value;
   }
 
+  void set_w(size_t col, size_t row, double value, bool& error) override {
+    w[col * num_rows + row] = value;
+  }
+
 private:
   std::vector<float> x;
   std::vector<float> y;
+  std::vector<float> w;
 };
 
 } // namespace ranger

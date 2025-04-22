@@ -62,6 +62,8 @@ private:
       std::vector<double>& sums, std::vector<size_t>& counter);
   void findBestSplitValueLargeQ(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
+  void findBestSplitValueLossWeights(size_t nodeID, size_t varID, double sum_node, double cost_node, 
+      size_t num_samples_node, double sum_node_weights, double& best_value, size_t& best_varID, double& best_decrease);
   void findBestSplitValueUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
 
@@ -75,7 +77,6 @@ private:
       std::vector<double>& sums_right, std::vector<size_t>& n_right);
   void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node,
       double& best_value, size_t& best_varID, double& best_decrease);
-
   bool findBestSplitBeta(size_t nodeID, std::vector<size_t>& possible_split_varIDs);
   void findBestSplitValueBeta(size_t nodeID, size_t varID, double sum_node, size_t num_samples_node, double& best_value,
       size_t& best_varID, double& best_decrease);
