@@ -601,6 +601,11 @@ bool TreeRegression::findBestSplitExtraTrees(size_t nodeID, std::vector<size_t>&
         findBestSplitValueExtraTreesUnordered(nodeID, varID, sum_node, num_samples_node, best_value, best_varID,
             best_decrease);
       }
+      
+      // Completely randomized: stop if valid split found
+      if (best_decrease >= 0) {
+        break;
+      }
     }
   }
 
