@@ -2,14 +2,14 @@ library(ranger)
 library(survival)
 context("genabel")
 
-test_that("classification gwaa rf is of class ranger with 14 elements", {
+test_that("classification gwaa rf is of class ranger with 16 elements", {
   skip_if_not_installed("GenABEL")
   skip_if_not_installed("MASS")
   library(GenABEL)
   dat.gwaa <- readRDS("../test_gwaa.rds")
   rf <- ranger(CHD ~ ., data = dat.gwaa)
   expect_is(rf, "ranger")
-  expect_equal(length(rf), 14)
+  expect_equal(length(rf), 16)
 })
 
 test_that("GenABEL prediction works if no covariates and formula used", {
