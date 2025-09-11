@@ -24,6 +24,7 @@ ranger(
   alpha = 0.5,
   minprop = 0.1,
   poisson.tau = 1,
+  risk.set.size = 0,
   split.select.weights = NULL,
   always.split.variables = NULL,
   respect.unordered.factors = NULL,
@@ -92,6 +93,8 @@ For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
 
 \item{poisson.tau}{For "poisson" splitrule: The coefficient of variation of the (expected) frequency is \eqn{1/\tau}.
 If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + (1-\alpha) mean(parent)} with \eqn{\alpha = samples(child) mean(parent) / (\tau + samples(child) mean(parent))}.}
+
+\item{risk.set.size}{Number of individuals in the risk set for each split in survival trees. 0 (the default) corresponds to all individuals in the node.}
 
 \item{split.select.weights}{Numeric vector with weights between 0 and 1, used to calculate the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.}
 

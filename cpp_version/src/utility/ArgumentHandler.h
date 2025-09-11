@@ -86,6 +86,7 @@ public:
   uint seed;
   std::vector<double> regcoef;
   bool usedepth;
+  size_t risksetsize;
 
 private:
   // Display messages

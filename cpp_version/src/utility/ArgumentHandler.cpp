@@ -33,7 +33,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:T:U:XZa:b:c:d:f:hi:j:kl:m:n:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:T:U:XZa:b:c:d:f:hi:j:kl:m:n:o:pr:s:t:uvwx:y:z:";
 
 // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -74,6 +74,7 @@ int ArgumentHandler::processArguments() {
       { "noreplace",            no_argument,        0, 'u'},
       { "verbose",              no_argument,        0, 'v'},
       { "write",                no_argument,        0, 'w'},
+      { "risksetsize",          required_argument,  0, 'x'},
       { "treetype",             required_argument,  0, 'y'},
       { "seed",                 required_argument,  0, 'z'},
 
@@ -408,6 +409,20 @@ int ArgumentHandler::processArguments() {
     case 'w':
       write = true;
       break;
+      
+    case 'x':
+      try {
+        int temp = std::stoi(optarg);
+        if (temp < 0) {
+          throw std::runtime_error("");
+        } else {
+          risksetsize = temp;
+        }
+      } catch (...) {
+        throw std::runtime_error(
+            "Illegal argument for option 'risksetsize'. Please give a positive integer or 0 for no sampling. See '--help' for details.");
+      }
+      break;
 
     case 'y':
       try {
@@ -692,6 +707,9 @@ void ArgumentHandler::displayHelp() {
       << std::endl;
   std::cout << "    "
             << "--tau VAL               Tau parameter for Poisson splitting (Poisson splitrule only)."
+            << std::endl;
+  std::cout << "    "
+            << "--risksetsize VAL       Risk set size (Risk set sampling, survival only)."
             << std::endl;
   std::cout << "    " << "--caseweights FILE            Filename of case weights file." << std::endl;
   std::cout << "    "

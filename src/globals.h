@@ -95,6 +95,8 @@ const uint DEFAULT_NUM_RANDOM_SPLITS = 1;
 const double DEFAULT_SAMPLE_FRACTION_REPLACE = 1;
 const double DEFAULT_SAMPLE_FRACTION_NOREPLACE = 0.632;
 
+const uint DEFAULT_RISK_SET_SIZE = 0;
+
 // Interval to print progress in seconds
 const double STATUS_INTERVAL = 30.0;
 
