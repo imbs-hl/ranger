@@ -1054,10 +1054,32 @@ void TreeSurvival::findBestSplitValueLogRankSampled(size_t nodeID, size_t varID,
     }
   }
   
+  // Count obs in right child per possbile split
+  for (size_t pos = start_pos[nodeID]; pos < end_pos[nodeID]; ++pos) {
+    size_t sampleID = sampleIDs[pos];
+    double value = data->get_x(sampleID, varID);
+
+    // Count deaths until split_value reached
+    for (size_t i = 0; i < num_splits; ++i) {
+      if (value > possible_split_values[i]) {
+        ++num_samples_right_child[i];
+      } else {
+        break;
+      }
+    }
+  }
+  
+  // std::cout << "node " << nodeID << ", risk_set_size: " << risk_set_size << std::endl;
+  // for (size_t t = 0; t < num_timepoints; ++t) {
+  //   std::cout << "t: " << t << ", num_samples_at_risk_sampled: " << num_samples_at_risk_sampled[t] << " num_deaths_sampled: " << num_deaths_sampled[t] << std::endl;
+  // }
+  
   // Compute logrank test for all splits and use best
   for (size_t i = 0; i < num_splits; ++i) {
     double numerator = 0;
     double denominator_squared = 0;
+    
+    //std::cout << "split " << i << ", num_samples_node: " << num_samples_node << ", num_samples_right_child: " << num_samples_right_child[i] << std::endl;
     
     // Stop if minimal bucket size reached
     size_t num_samples_left_child = num_samples_node - num_samples_right_child[i];
@@ -1070,6 +1092,8 @@ void TreeSurvival::findBestSplitValueLogRankSampled(size_t nodeID, size_t varID,
       if (num_samples_at_risk_sampled[t] < 2 || num_samples_at_risk_right_child[i * num_timepoints + t] < 1) {
         break;
       }
+      
+      //std::cout << "t: " << t << ", num_samples_at_risk_sampled: " << num_samples_at_risk_sampled[t] << ", num_samples_at_risk_right_child: " << num_samples_at_risk_right_child[i * num_timepoints + t] << std::endl;
       
       if (num_deaths[t] > 0) {
         // Numerator and demoninator for log-rank test, notation from Ishwaran et al.
