@@ -1022,7 +1022,6 @@ void TreeSurvival::findBestSplitValueLogRankSampled(size_t nodeID, size_t varID,
     }
   }
   
-  // TODO: num_samples_at_risk and num_deaths is still for all, need to have it only for at_risk here
   // This is computeChildDeathCounts but only for samples in at_risk
   std::vector<size_t> num_samples_at_risk_sampled(num_timepoints);
   std::vector<size_t> num_deaths_sampled(num_timepoints);
