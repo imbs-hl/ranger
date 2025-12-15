@@ -1,4 +1,7 @@
 
+# ranger 0.17.2
+* Add support for plink bed/bim/fam files for genotypes
+
 # ranger 0.17.1
 * Fix bug where missing value handling lead to negative impurity importance values
 * Slightly change the missing value algorithm (see docs)

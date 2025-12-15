@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iterator>
+#include <cstring>
 
 #include "Data.h"
 #include "utility.h"
@@ -211,6 +212,65 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
   }
   num_rows = row;
   return error;
+}
+
+void Data::loadSnpsFromFilePlink(std::ifstream& bed_file, std::ifstream& fam_file, std::ifstream& bim_file) {
+  if (!bed_file) {
+    throw std::runtime_error("Cannot open .bed file.");
+  }
+  
+  uint8_t header[3];
+  bed_file.read(reinterpret_cast<char*>(header), 3);
+  
+  if (header[0] != 0x6C || header[1] != 0x1B || header[2] != 0x01) {
+    throw std::runtime_error("Invalid or unsupported .bed file");
+  }
+
+  // Get dimensions
+  size_t n_samples = count_fam_samples(fam_file);
+  size_t n_snps = count_bim_snps(bim_file);
+
+  if (n_samples == 0 || n_snps == 0) {
+    throw std::runtime_error("Empty .fam or .bim file.");
+  }
+  // if ((bed_file.tellg() - 3) != n_snps * ((n_samples + 3) / 4)) {
+  //   throw std::runtime_error("BED/FAM/BIM dimension mismatch.");
+  // }
+  if (n_samples != num_rows) {
+    throw std::runtime_error("Geno/Pheno sample size mismatch.");
+  }
+
+  const size_t bytes_per_snp = (n_samples + 3) / 4;
+  std::vector<uint8_t> buffer(bytes_per_snp);
+
+  // Reserve memory
+  const size_t total_genotypes = n_samples * n_snps;
+  const size_t total_bytes = (total_genotypes + 3) / 4;
+  snp_data = new unsigned char[total_bytes];
+  std::memset(snp_data, 0, total_bytes);
+
+  for (size_t snp = 0; snp < n_snps; ++snp) {
+      bed_file.read(reinterpret_cast<char*>(buffer.data()), bytes_per_snp);
+
+      for (size_t i = 0; i < n_samples; ++i) {
+          // Decode PLINK
+          uint8_t byte = buffer[i >> 2];
+          uint8_t plink_bits = (byte >> ((i & 3) << 1)) & 0x03;
+
+          uint8_t genabel_bits = plink2genabel[plink_bits];
+
+          // Store in GenABEL format
+          size_t idx = i * n_snps + snp; 
+
+          size_t byte_idx = idx >> 2;
+          size_t bit_pos  = 6 - ((idx & 3) << 1);
+
+          snp_data[byte_idx] |= (genabel_bits << bit_pos);
+      }
+  }
+  num_cols = num_cols_no_snp + n_snps;
+  num_rows_rounded = roundToNextMultiple(num_rows, 4);
+  owns_snp_data = true;
 }
 // #nocov end
 

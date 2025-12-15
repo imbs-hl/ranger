@@ -70,6 +70,7 @@ public:
   std::vector<std::string> catvars;
   uint maxdepth;
   std::string file;
+  std::string plinkfile;
   ImportanceMode impmeasure;
   uint targetpartitionsize;
   uint minbucket;

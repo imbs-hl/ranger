@@ -699,4 +699,36 @@ double mylgamma(double x) {
 
 }
 
+size_t count_fam_samples(std::ifstream& fam_file) {
+  if (!fam_file) {
+    throw std::runtime_error("Cannot open .fam file.");
+  }
+
+  size_t n = 0;
+  std::string line;
+  while (std::getline(fam_file, line)) {
+    if (!line.empty()) {
+      ++n;
+    }   
+  }
+  
+  return n;
+}
+
+size_t count_bim_snps(std::ifstream& bim_file) {
+  if (!bim_file) {
+    throw std::runtime_error("Cannot open .bim file");
+  }
+      
+  size_t n = 0;
+  std::string line;
+  while (std::getline(bim_file, line)) {
+    if (!line.empty()) {
+      ++n;
+    }
+  }
+
+  return n;
+}
+
 } // namespace ranger
