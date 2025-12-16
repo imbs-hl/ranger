@@ -1040,10 +1040,14 @@ void TreeProbability::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, s
     }
     
     // Decrease of impurity
-    decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     decrease_nanleft = sum_right / (double) n_right + sum_left_withnan / (double) (n_left + num_samples_node_nan);
     decrease_nanright = sum_right_withnan / (double) (n_right + num_samples_node_nan) + sum_left / (double) n_left;
 
+    if (decrease_nanright > decrease_nanleft) {
+      decrease = decrease_nanright;
+    } else {
+      decrease = decrease_nanleft;
+    }
     
     // Stop if class-wise minimal bucket size reached
     if (min_bucket->size() > 1) {
@@ -1170,10 +1174,15 @@ void TreeProbability::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, s
     }
     
     // Decrease of impurity
-    decrease = sum_right / (double) n_right + sum_left / (double) n_left;
     decrease_nanleft = sum_right / (double) n_right + sum_left_withnan / (double) (n_left + num_samples_node_nan);
     decrease_nanright = sum_right_withnan / (double) (n_right + num_samples_node_nan) + sum_left / (double) n_left;
 
+    if (decrease_nanright > decrease_nanleft) {
+      decrease = decrease_nanright;
+    } else {
+      decrease = decrease_nanleft;
+    }
+    
     // Stop if class-wise minimal bucket size reached
     if (min_bucket->size() > 1) {
       bool stop = false;

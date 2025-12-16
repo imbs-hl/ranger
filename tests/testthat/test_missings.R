@@ -131,3 +131,10 @@ test_that("na.omit not working if no observations left", {
   dat[1:150, 1] <- NA
   expect_error(ranger(Species ~ ., dat, num.trees = 5, na.action = "na.omit"), "Error: No observations left after removing missing values\\.")
 })
+
+test_that("No negative importance values with na.learn", {
+  dat <- iris
+  dat[sample(nrow(dat), 50), 1:4] <- NA 
+  rf <- ranger(Species ~ ., dat, importance = "impurity", na.action = "na.learn", num.trees = 5)
+  lapply(rf$variable.importance, expect_gte, 0)
+})

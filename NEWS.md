@@ -1,4 +1,8 @@
 
+# ranger 0.17.1
+* Fix bug where missing value handling lead to negative impurity importance values
+* Slightly change the missing value algorithm (see docs)
+
 # ranger 0.17.0
 * New CRAN version
 

@@ -1234,10 +1234,16 @@ void TreeRegression::findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, do
     }
     
     double sum_right = sum_node - sum_left - sum_nan;
-    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
-    
+
     double decrease_nanleft = (sum_left + sum_nan) * (sum_left + sum_nan)  / (double) (n_left + num_samples_node_nan) + sum_right * sum_right / (double) n_right;
     double decrease_nanright = sum_left * sum_left / (double) n_left + (sum_right + sum_nan)  * (sum_right + sum_nan)  / (double) (n_right + num_samples_node_nan);
+    
+    double decrease;
+    if (decrease_nanright > decrease_nanleft) {
+      decrease = decrease_nanright;
+    } else {
+      decrease = decrease_nanleft;
+    }
     
     // Regularization
     regularize(decrease, varID);
@@ -1326,10 +1332,16 @@ void TreeRegression::findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, do
     }
     
     double sum_right = sum_node - sum_left;
-    double decrease = sum_left * sum_left / (double) n_left + sum_right * sum_right / (double) n_right;
-    
+
     double decrease_nanleft = (sum_left + sum_nan) * (sum_left + sum_nan)  / (double) (n_left + num_samples_node_nan) + sum_right * sum_right / (double) n_right;
     double decrease_nanright = sum_left * sum_left / (double) n_left + (sum_right + sum_nan)  * (sum_right + sum_nan)  / (double) (n_right + num_samples_node_nan);
+    
+    double decrease;
+    if (decrease_nanright > decrease_nanleft) {
+      decrease = decrease_nanright;
+    } else {
+      decrease = decrease_nanleft;
+    }
     
     // Regularization
     regularize(decrease, varID);
