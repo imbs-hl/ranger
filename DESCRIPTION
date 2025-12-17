@@ -1,8 +1,8 @@
 Package: ranger
 Type: Package
 Title: A Fast Implementation of Random Forests
-Version: 0.17.1
-Date: 2025-06-04
+Version: 0.17.2
+Date: 2025-12-15
 Authors@R: c(
     person("Marvin N.", "Wright", email = "cran@wrig.de", role = c("aut", "cre")),
     person("Stefan", "Wager", role = "ctb"),
@@ -21,7 +21,7 @@ Suggests:
     survival,
     testthat
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://imbs-hl.github.io/ranger/,
     https://github.com/imbs-hl/ranger
 BugReports: https://github.com/imbs-hl/ranger/issues

@@ -51,6 +51,7 @@
 ##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param verbose Verbose output on or off.
 ##' @param inbag.counts Number of times the observations are in-bag in the trees.
+##' @param plink.file.prefix Prefix of plink bed/fam/bim files. The files will be used to read genotype data only. 
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements
 ##'   \tabular{ll}{
@@ -76,7 +77,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                                   num.trees = object$num.trees, 
                                   type = "response", se.method = "infjack",
                                   seed = NULL, num.threads = NULL,
-                                  verbose = TRUE, inbag.counts = NULL, ...) {
+                                  verbose = TRUE, inbag.counts = NULL, 
+                                  plink.file.prefix = "", ...) {
 
   ## GenABEL GWA data
   if (inherits(data, "gwaa.data")) {
@@ -180,6 +182,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (is.list(x) && !is.data.frame(x)) {
     x <- as.data.frame(x)
   }
+  if (is.null(x)) {
+    x <- data.frame()
+  }
 
   ## Convert to data matrix
   if (!is.matrix(x) & !inherits(x, "Matrix")) {
@@ -281,7 +286,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
                       prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth, 
-                      node.stats, time.interest, use.time.interest, any.na)
+                      node.stats, time.interest, use.time.interest, any.na, path.expand(plink.file.prefix))
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -453,6 +458,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. Set to \code{0} to ignore the \code{R} seed. The seed is used in case of ties in classification mode.
 ##' @param num.threads Number of threads. Use 0 for all available cores. Default is 2 if not set by options/environment variables (see below).
 ##' @param verbose Verbose output on or off.
+##' @param plink.file.prefix Prefix of plink bed/fam/bim files. The files will be used to read genotype data only. 
 ##' @param ... further arguments passed to or from other methods.
 ##' @return Object of class \code{ranger.prediction} with elements
 ##'   \tabular{ll}{
@@ -501,7 +507,7 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
                            quantiles = c(0.1, 0.5, 0.9), 
                            what = NULL,
                            seed = NULL, num.threads = NULL,
-                           verbose = TRUE, ...) {
+                           verbose = TRUE, plink.file.prefix = "", ...) {
   forest <- object$forest
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
@@ -560,9 +566,9 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
     result
   } else {
     ## Non-quantile prediction
-    if (is.null(data)) {
+    if (is.null(data) & plink.file.prefix == "") {
      stop("Error: Argument 'data' is required for non-quantile prediction.") 
     }
-    predict(forest, data, predict.all, num.trees, type, se.method, seed, num.threads, verbose, object$inbag.counts, ...)
+    predict(forest, data, predict.all, num.trees, type, se.method, seed, num.threads, verbose, object$inbag.counts, plink.file.prefix, ...)
   }
 }

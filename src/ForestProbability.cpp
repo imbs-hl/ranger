@@ -28,6 +28,10 @@ void ForestProbability::loadForest(size_t num_trees,
   this->class_values = class_values;
   data->setIsOrderedVariable(is_ordered_variable);
 
+  if (num_independent_variables != is_ordered_variable.size()) {
+    throw std::runtime_error("Number of independent variables in data does not match with the loaded forest.");
+  }
+
   // Create trees
   trees.reserve(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {

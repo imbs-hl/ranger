@@ -46,7 +46,7 @@ public:
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
       double poisson_tau, bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth,
-      const std::vector<double>& regularization_factor, bool regularization_usedepth);
+      const std::vector<double>& regularization_factor, bool regularization_usedepth, std::string plink_file);
   void initR(std::unique_ptr<Data> input_data, uint mtry, uint num_trees, std::ostream* verbose_out, uint seed,
       uint num_threads, ImportanceMode importance_mode, std::vector<uint>& min_node_size, std::vector<uint>& min_bucket,
       std::vector<std::vector<double>>& split_select_weights,
@@ -56,14 +56,14 @@ public:
       bool keep_inbag, std::vector<double>& sample_fraction, double alpha, double minprop, double poisson_tau, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth,
       const std::vector<double>& regularization_factor, bool regularization_usedepth,
-      bool node_stats);
+      bool node_stats, std::string plink_file);
   void init(std::unique_ptr<Data> input_data, uint mtry, std::string output_prefix,
       uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode, std::vector<uint>& min_node_size, std::vector<uint>& min_bucket,
       bool prediction_mode, bool sample_with_replacement, const std::vector<std::string>& unordered_variable_names,
       bool memory_saving_splitting, SplitRule splitrule, bool predict_all, std::vector<double>& sample_fraction,
       double alpha, double minprop, double poisson_tau, bool holdout, PredictionType prediction_type, uint num_random_splits,
       bool order_snps, uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth,
-      bool node_stats);
+      bool node_stats, std::string plink_file);
   virtual void initInternal() = 0;
 
   // Grow or predict

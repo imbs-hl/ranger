@@ -29,7 +29,12 @@ public:
   Data(const Data&) = delete;
   Data& operator=(const Data&) = delete;
 
-  virtual ~Data() = default;
+  virtual ~Data() {
+    if (owns_snp_data && snp_data != nullptr) {
+        delete[] snp_data;
+        snp_data = nullptr;
+    }
+  }
 
   virtual double get_x(size_t row, size_t col) const = 0;
   virtual double get_y(size_t row, size_t col) const = 0;
@@ -48,6 +53,7 @@ public:
       std::vector<std::string>& dependent_variable_names);
   bool loadFromFileOther(std::ifstream& input_file, std::string header_line,
       std::vector<std::string>& dependent_variable_names, char separator);
+  void loadSnpsFromFilePlink(std::ifstream& bed_file, std::ifstream& fam_file, std::ifstream& bim_file);
 
   void getAllValues(std::vector<double>& all_values, std::vector<size_t>& sampleIDs, size_t varID, size_t start,
       size_t end) const;
@@ -209,6 +215,7 @@ protected:
 
   unsigned char* snp_data;
   size_t num_cols_no_snp;
+  bool owns_snp_data = false;
 
   bool externalData;
 

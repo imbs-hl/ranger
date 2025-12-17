@@ -152,6 +152,7 @@
 ##' @param classification Set to \code{TRUE} to grow a classification forest. Only needed if the data is a matrix or the response numeric. 
 ##' @param x Predictor data (independent variables), alternative interface to data with formula or dependent.variable.name.
 ##' @param y Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.
+##' @param plink.file.prefix Prefix of plink bed/fam/bim files. The files will be used to read genotype data only. 
 ##' @param ... Further arguments passed to or from other methods (currently ignored).
 ##' @return Object of class \code{ranger} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
@@ -257,7 +258,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, node.stats = FALSE, seed = NULL, na.action = "na.learn",
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL, x = NULL, y = NULL, ...) {
+                   classification = NULL, x = NULL, y = NULL, plink.file.prefix = "", ...) {
   
   ## Handle ... arguments
   if (length(list(...)) > 0) {
@@ -270,8 +271,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   if (is.null(data)) {
     ## x/y interface
-    if (is.null(x) | is.null(y)) {
+    if (is.null(y) | (is.null(x) & plink.file.prefix == "")) {
       stop("Error: Either data or x and y is required.")
+    }
+    if (is.null(x)) {
+      n <- nrow(y)
+      if (is.null(n)) {
+        n <- length(y)
+      }
+      x <- data.frame()[1:n, ]
     }
   }  else {
     ## GenABEL GWA data
@@ -505,7 +513,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Error if no covariates
-  if (length(all.independent.variable.names) < 1) {
+  if (length(all.independent.variable.names) < 1 & plink.file.prefix == "") {
     stop("Error: No covariates found.")
   }
   
@@ -1026,7 +1034,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       holdout, prediction.type, num.random.splits, sparse.x, use.sparse.data,
                       order.snps, oob.error, max.depth, inbag, use.inbag, 
                       regularization.factor, use.regularization.factor, regularization.usedepth,
-                      node.stats, time.interest, use.time.interest, any.na)
+                      node.stats, time.interest, use.time.interest, any.na, path.expand(plink.file.prefix))
 
   
   if (length(result) == 0) {

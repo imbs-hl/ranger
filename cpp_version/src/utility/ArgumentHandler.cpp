@@ -23,7 +23,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
     caseweights(""), depvarname(""), fraction(0), holdout(false), memmode(MEM_DOUBLE), savemem(false), skipoob(false), predict(
         ""), predictiontype(DEFAULT_PREDICTIONTYPE), randomsplits(DEFAULT_NUM_RANDOM_SPLITS), splitweights(""), tau(DEFAULT_POISSON_TAU), nthreads(
         DEFAULT_NUM_THREADS), predall(false), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), maxdepth(
-        DEFAULT_MAXDEPTH), file(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), minbucket(0), mtry(0), outprefix(
+        DEFAULT_MAXDEPTH), file(""), plinkfile(""), impmeasure(DEFAULT_IMPORTANCE_MODE), targetpartitionsize(0), minbucket(0), mtry(0), outprefix(
         "ranger_out"), probability(false), splitrule(DEFAULT_SPLITRULE), statusvarname(""), ntree(DEFAULT_NUM_TREE), replace(
         true), verbose(false), write(false), treetype(TREE_CLASSIFICATION), seed(0), usedepth(false) {
   this->argc = argc;
@@ -33,7 +33,7 @@ ArgumentHandler::ArgumentHandler(int argc, char **argv) :
 int ArgumentHandler::processArguments() {
 
   // short options
-  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:T:U:XZa:b:c:d:f:hi:j:kl:m:n:o:pr:s:t:uvwy:z:";
+  char const *short_options = "A:C:D:F:HM:NOP:Q:R:S:T:U:XZa:b:c:d:f:g:hi:j:kl:m:n:o:pr:s:t:uvwy:z:";
 
 // long options: longname, no/optional/required argument?, flag(not used!), shortname
     const struct option long_options[] = {
@@ -59,6 +59,7 @@ int ArgumentHandler::processArguments() {
       { "catvars",              required_argument,  0, 'c'},
       { "maxdepth",             required_argument,  0, 'd'},
       { "file",                 required_argument,  0, 'f'},
+      { "plinkfile",            required_argument,  0, 'g'},
       { "help",                 no_argument,        0, 'h'},
       { "impmeasure",           required_argument,  0, 'i'},
       { "regcoef",              required_argument,  0, 'j'},
@@ -266,6 +267,10 @@ int ArgumentHandler::processArguments() {
 
     case 'f':
       file = optarg;
+      break;
+
+    case 'g':
+      plinkfile = optarg;
       break;
 
     case 'h':
@@ -691,9 +696,10 @@ void ArgumentHandler::displayHelp() {
       << "--minprop VAL                 Lower quantile of covariate distribtuion to be considered for splitting (MAXSTAT splitrule only)."
       << std::endl;
   std::cout << "    "
-            << "--tau VAL               Tau parameter for Poisson splitting (Poisson splitrule only)."
-            << std::endl;
+      << "--tau VAL                     Tau parameter for Poisson splitting (Poisson splitrule only)."
+      << std::endl;
   std::cout << "    " << "--caseweights FILE            Filename of case weights file." << std::endl;
+  std::cout << "    " << "--plinkfile FILE              Filename prefix of plink files." << std::endl;
   std::cout << "    "
       << "--holdout                     Hold-out mode. Hold-out all samples with case weight 0 and use these for variable "
       << std::endl;

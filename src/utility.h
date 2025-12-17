@@ -564,6 +564,20 @@ inline double xlogy(double x, double y) {
  */
 double mylgamma(double x);
 
+/**
+ * Counts the number of samples in a fam file. 
+ * @param fam_file FAM file stream.
+ * @return Number of samples.
+ */
+size_t count_fam_samples(std::ifstream& fam_file);
+
+/**
+ * Counts the number of SNPs in a bim file. 
+ * @param bim_file BIM file stream.
+ * @return Number of SNPs.
+ */
+size_t count_bim_snps(std::ifstream& bim_file);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {

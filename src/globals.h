@@ -12,6 +12,8 @@ R package "ranger" under GPL3 license.
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
+#include <cstdint>
+
 namespace ranger {
 
 #ifndef M_PI
@@ -100,6 +102,16 @@ const double STATUS_INTERVAL = 30.0;
 
 // Threshold for q value split method switch
 const double Q_THRESHOLD = 0.02;
+
+// Plinkt to GenABEL coding
+// index = PLINK 2-bit code (0..3)
+// value = GenABEL 2-bit code
+static const uint8_t plink2genabel[4] = {
+    1,  // 00 -> AA -> 01
+    0,  // 01 -> missing -> 00
+    2,  // 10 -> AB -> 10
+    3   // 11 -> BB -> 11
+};
 
 } // namespace ranger
 
