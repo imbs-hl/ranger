@@ -16,7 +16,7 @@
   seed = NULL,
   num.threads = NULL,
   verbose = TRUE,
-  plink.file = "",
+  plink.file.prefix = "",
   ...
 )
 }
@@ -43,7 +43,7 @@
 
 \item{verbose}{Verbose output on or off.}
 
-\item{plink.file}{Prefix of plink bed/fam/bim files. The files will be used to read genotype data only.}
+\item{plink.file.prefix}{Prefix of plink bed/fam/bim files. The files will be used to read genotype data only.}
 
 \item{...}{further arguments passed to or from other methods.}
 }

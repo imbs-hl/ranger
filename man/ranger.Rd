@@ -48,7 +48,7 @@ ranger(
   classification = NULL,
   x = NULL,
   y = NULL,
-  plink.file = "",
+  plink.file.prefix = "",
   ...
 )
 }
@@ -142,7 +142,7 @@ If a terminal node has only 0 responses, the estimate is set to \eqn{\alpha 0 + 
 
 \item{y}{Response vector (dependent variable), alternative interface to data with formula or dependent.variable.name. For survival use a \code{Surv()} object or a matrix with time and status.}
 
-\item{plink.file}{Prefix of plink bed/fam/bim files. The files will be used to read genotype data only.}
+\item{plink.file.prefix}{Prefix of plink bed/fam/bim files. The files will be used to read genotype data only.}
 
 \item{...}{Further arguments passed to or from other methods (currently ignored).}
 }

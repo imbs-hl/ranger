@@ -15,7 +15,7 @@
   num.threads = NULL,
   verbose = TRUE,
   inbag.counts = NULL,
-  plink.file = "",
+  plink.file.prefix = "",
   ...
 )
 }
@@ -40,7 +40,7 @@
 
 \item{inbag.counts}{Number of times the observations are in-bag in the trees.}
 
-\item{plink.file}{Prefix of plink bed/fam/bim files. The files will be used to read genotype data only.}
+\item{plink.file.prefix}{Prefix of plink bed/fam/bim files. The files will be used to read genotype data only.}
 
 \item{...}{further arguments passed to or from other methods.}
 }
