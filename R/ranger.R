@@ -271,8 +271,15 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   if (is.null(data)) {
     ## x/y interface
-    if (is.null(x) | is.null(y)) {
+    if (is.null(y) | (is.null(x) & plink.file.prefix == "")) {
       stop("Error: Either data or x and y is required.")
+    }
+    if (is.null(x)) {
+      n <- nrow(y)
+      if (is.null(n)) {
+        n <- length(y)
+      }
+      x <- data.frame()[1:n, ]
     }
   }  else {
     ## GenABEL GWA data
@@ -506,7 +513,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   }
   
   ## Error if no covariates
-  if (length(all.independent.variable.names) < 1) {
+  if (length(all.independent.variable.names) < 1 & plink.file.prefix == "") {
     stop("Error: No covariates found.")
   }
   

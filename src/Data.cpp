@@ -233,11 +233,12 @@ void Data::loadSnpsFromFilePlink(std::ifstream& bed_file, std::ifstream& fam_fil
   if (n_samples == 0 || n_snps == 0) {
     throw std::runtime_error("Empty .fam or .bim file.");
   }
-  // if ((bed_file.tellg() - 3) != n_snps * ((n_samples + 3) / 4)) {
-  //   throw std::runtime_error("BED/FAM/BIM dimension mismatch.");
-  // }
   if (n_samples != num_rows) {
-    throw std::runtime_error("Geno/Pheno sample size mismatch.");
+    if (num_cols == 0) {
+      num_rows = n_samples;
+    } else {
+      throw std::runtime_error("Geno/Pheno sample size mismatch.");
+    }
   }
 
   const size_t bytes_per_snp = (n_samples + 3) / 4;

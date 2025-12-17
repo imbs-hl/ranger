@@ -182,6 +182,9 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   if (is.list(x) && !is.data.frame(x)) {
     x <- as.data.frame(x)
   }
+  if (is.null(x)) {
+    x <- data.frame()
+  }
 
   ## Convert to data matrix
   if (!is.matrix(x) & !inherits(x, "Matrix")) {
@@ -563,7 +566,7 @@ predict.ranger <- function(object, data = NULL, predict.all = FALSE,
     result
   } else {
     ## Non-quantile prediction
-    if (is.null(data)) {
+    if (is.null(data) & plink.file.prefix == "") {
      stop("Error: Argument 'data' is required for non-quantile prediction.") 
     }
     predict(forest, data, predict.all, num.trees, type, se.method, seed, num.threads, verbose, object$inbag.counts, plink.file.prefix, ...)
