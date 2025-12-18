@@ -658,6 +658,8 @@ bool TreeClassification::findBestSplitExtraTrees(size_t nodeID, std::vector<size
     
     // Completely randomized: stop if valid split found
     if (best_decrease >= 0) {
+      std::bernoulli_distribution dist(0.5);
+      nan_go_right = dist(random_number_generator);
       break;
     }
   }

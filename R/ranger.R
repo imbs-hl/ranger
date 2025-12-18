@@ -355,7 +355,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
     if (anyNA(x)) {
       any.na <- TRUE
-      if (!is.null(splitrule) && !(splitrule %in% c("gini", "variance"))) {
+      if (!is.null(splitrule) && !(splitrule %in% c("gini", "variance", "extratrees"))) {
         stop("Error: Missing value handling currently only implemented for gini and variance splitrules.")
       }
     }
