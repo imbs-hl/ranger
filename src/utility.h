@@ -26,6 +26,7 @@
 #include <utility> 
 
 #ifdef R_BUILD
+#include <Rcpp.h>
 #include <Rinternals.h>
 #endif
 
@@ -172,7 +173,7 @@ void loadDoubleVectorFromFile(std::vector<double>& result, std::string filename)
  * @param range_length Length of range. Interval to draw from: 0..max-1
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t range_length,
+void drawWithoutReplacement(std::vector<size_t>& result, pcg64& random_number_generator, size_t range_length,
     size_t num_samples);
 
 /**
@@ -183,7 +184,7 @@ void drawWithoutReplacement(std::vector<size_t>& result, std::mt19937_64& random
  * @param skip Values to skip
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+void drawWithoutReplacementSkip(std::vector<size_t>& result, pcg64& random_number_generator,
     size_t range_length, const std::vector<size_t>& skip, size_t num_samples);
 
 /**
@@ -193,7 +194,7 @@ void drawWithoutReplacementSkip(std::vector<size_t>& result, std::mt19937_64& ra
  * @param range_length Length of range. Interval to draw from: 0..max-1
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+void drawWithoutReplacementSimple(std::vector<size_t>& result, pcg64& random_number_generator, size_t max,
     size_t num_samples);
 
 /**
@@ -205,7 +206,7 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
  * @param skip Values to skip
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& random_number_generator, size_t max,
+void drawWithoutReplacementSimple(std::vector<size_t>& result, pcg64& random_number_generator, size_t max,
     const std::vector<size_t>& skip, size_t num_samples);
 
 /**
@@ -215,7 +216,7 @@ void drawWithoutReplacementSimple(std::vector<size_t>& result, std::mt19937_64& 
  * @param max Length of range. Interval to draw from: 0..max-1
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, pcg64& random_number_generator,
     size_t max, size_t num_samples);
 
 /**
@@ -227,7 +228,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
  * @param skip Values to skip
  * @param num_samples Number of samples to draw
  */
-void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+void drawWithoutReplacementFisherYates(std::vector<size_t>& result, pcg64& random_number_generator,
     size_t max, const std::vector<size_t>& skip, size_t num_samples);
 
 /**
@@ -238,7 +239,7 @@ void drawWithoutReplacementFisherYates(std::vector<size_t>& result, std::mt19937
  * @param num_samples Number of samples to draw
  * @param weights A weight for each element of indices
  */
-void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64& random_number_generator,
+void drawWithoutReplacementWeighted(std::vector<size_t>& result, pcg64& random_number_generator,
     size_t max_index, size_t num_samples, const std::vector<double>& weights);
 
 /**
@@ -250,7 +251,7 @@ void drawWithoutReplacementWeighted(std::vector<size_t>& result, std::mt19937_64
  */
 template<typename T>
 void drawWithoutReplacementFromVector(std::vector<T>& result, const std::vector<T>& input,
-    std::mt19937_64& random_number_generator, size_t num_samples) {
+    pcg64& random_number_generator, size_t num_samples) {
 
   // Draw random indices
   std::vector<size_t> result_idx;
@@ -271,7 +272,7 @@ void drawWithoutReplacementFromVector(std::vector<T>& result, const std::vector<
  * @return Most frequent class index. Out of range index if all 0.
  */
 template<typename T>
-size_t mostFrequentClass(const std::vector<T>& class_count, std::mt19937_64 random_number_generator) {
+size_t mostFrequentClass(const std::vector<T>& class_count, pcg64 random_number_generator) {
   std::vector<size_t> major_classes;
 
 // Find maximum count
@@ -305,7 +306,7 @@ size_t mostFrequentClass(const std::vector<T>& class_count, std::mt19937_64 rand
  * @return Most frequent value
  */
 double mostFrequentValue(const std::unordered_map<double, size_t>& class_count,
-    std::mt19937_64 random_number_generator);
+    pcg64 random_number_generator);
 
 /**
  * Compute concordance index for given data and summed cumulative hazard function/estimate
@@ -366,7 +367,7 @@ void splitString(std::vector<double>& result, const std::string& input, char spl
  * @param random_number_generator Random number generator
  */
 void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all, size_t n_first,
-    std::mt19937_64 random_number_generator);
+    pcg64 random_number_generator);
 
 /**
  * Create numbers from 0 to n_all-1, shuffle and split in two parts. Append to existing data.
@@ -378,7 +379,7 @@ void shuffleAndSplit(std::vector<size_t>& first_part, std::vector<size_t>& secon
  * @param random_number_generator Random number generator
  */
 void shuffleAndSplitAppend(std::vector<size_t>& first_part, std::vector<size_t>& second_part, size_t n_all,
-    size_t n_first, const std::vector<size_t>& mapping, std::mt19937_64 random_number_generator);
+    size_t n_first, const std::vector<size_t>& mapping, pcg64 random_number_generator);
 
 /**
  * Check if not too many factor levels and all values in unordered categorical variables are positive integers.

@@ -1,2 +1,1 @@
-PKG_CPPFLAGS = -DR_BUILD
-
+PKG_CPPFLAGS = -DR_BUILD -I../inst/include/

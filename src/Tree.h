@@ -216,7 +216,7 @@ protected:
   std::vector<size_t> inbag_counts;
 
   // Random number generator
-  std::mt19937_64 random_number_generator;
+  pcg64 random_number_generator;
 
   // Pointer to original data
   const Data* data;
