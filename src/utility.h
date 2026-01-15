@@ -12,6 +12,10 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+#ifdef R_BUILD
+#include <Rcpp.h>
+#endif
+
 #include <math.h>
 #include <vector>
 #include <iostream>
@@ -24,10 +28,6 @@
 #include <memory> 
 #include <type_traits> 
 #include <utility> 
-
-#ifdef R_BUILD
-#include <Rinternals.h>
-#endif
 
 #include "globals.h"
 #include "Data.h"
