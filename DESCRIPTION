@@ -1,7 +1,7 @@
 Package: ranger
 Type: Package
 Title: A Fast Implementation of Random Forests
-Version: 0.17.2
+Version: 0.18.0
 Date: 2026-01-15
 Authors@R: c(
     person("Marvin N.", "Wright", email = "cran@wrig.de", role = c("aut", "cre")),
