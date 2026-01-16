@@ -2,7 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles: {}
-last_built: 2026-01-15T15:19Z
+last_built: 2026-01-16T15:11Z
 urls:
   reference: http://imbs-hl.github.io/ranger/reference
   article: http://imbs-hl.github.io/ranger/articles

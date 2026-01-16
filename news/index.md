@@ -1,5 +1,9 @@
 # Changelog
 
+## ranger 0.18.0
+
+- New CRAN version
+
 ## ranger 0.17.2
 
 - Fix compilation with C++20
