@@ -148,9 +148,20 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   x <- data
+  var.indices.used <- unique(unlist(rg.iris$forest$split.varIDs))
+  var.names.used <- rg.iris$forest$independent.variable.names[var.indices.used]
+  var.names.not.test <- setdiff(forest$independent.variable.names, colnames(x))
   
-  if (sum(!(forest$independent.variable.names %in% colnames(x))) > 0) {
-    stop("Error: One or more independent variables not found in data.")
+  if (length(var.names.not.test) > 0) {
+    used.missing <- intersect(var.names.used, var.names.not.test)
+    if(length(used.missing) > 0) {
+      stop("Error: Some independent variables are used in trees but not found in test data: ", paste(used.missing, collapse = ", "), '.')
+    } else{ # Pad the data with uninformative dummy values.
+      unused <- setdiff(var.names.not.test, var.names.used)
+      unused <- setNames(unused, unused)
+      padding <- do.call(cbind, lapply(unused, function(variable) rep(0, nrow(data))))
+      x <- cbind(x, padding)
+    }
   }
 
   ## Subset to same column as in training if necessary
