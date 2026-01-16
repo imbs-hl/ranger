@@ -1,4 +1,9 @@
 
+##### Version 0.18.0
+* Fix compilation with C++20
+* Fix bug where missing value handling lead to negative impurity importance values
+* Slightly change the missing value algorithm (see docs)
+
 ##### Version 0.17.0
 * Set num.threads=2 as default; respect environment variables and options
 * Add handling of missing values for classification and regression
