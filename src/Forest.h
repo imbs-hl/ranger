@@ -65,6 +65,7 @@ public:
       bool order_snps, uint max_depth, const std::vector<double>& regularization_factor, bool regularization_usedepth,
       bool node_stats);
   virtual void initInternal() = 0;
+  void loadDataForPrediction(std::unique_ptr<Data> input_data, std::vector<bool>& is_ordered_variable, bool predict_all = false);
 
   // Grow or predict
   void run(bool verbose, bool compute_oob_error);

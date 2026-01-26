@@ -281,6 +281,26 @@ void Forest::init(std::unique_ptr<Data> input_data, uint mtry, std::string outpu
   }
 }
 
+void Forest::loadDataForPrediction(std::unique_ptr<Data> input_data, std::vector<bool>& is_ordered_variable, bool predict_all) {
+  this->data = std::move(input_data);
+  this->prediction_mode = true;
+  this->predict_all = predict_all;
+
+  // Set number of samples and variables
+  num_samples = data->getNumRows();
+  num_independent_variables = data->getNumCols();
+
+  // Set unordered factor variables
+  data->setIsOrderedVariable(is_ordered_variable);
+
+  initInternal();
+
+  // Permute samples for corrected Gini importance
+  if (importance_mode == IMP_GINI_CORRECTED) {
+    data->permuteSampleIDs(random_number_generator);
+  }
+}
+
 void Forest::run(bool verbose, bool compute_oob_error) {
 
   if (prediction_mode) {
