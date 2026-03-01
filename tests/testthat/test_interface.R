@@ -60,13 +60,13 @@ test_that("Error if interaction of factor variable included", {
 test_that("Working if dependent variable has attributes other than names", {
   iris2 <- iris
   attr(iris2$Sepal.Width, "aaa") <- "bbb"
-  expect_silent(ranger(data = iris2, dependent.variable = "Sepal.Width"))
+  expect_silent(ranger(data = iris2, dependent.variable.name = "Sepal.Width"))
 })
 
 test_that("Working if dependent variable is matrix with one column", {
   iris2 <- iris
   iris2$Sepal.Width = scale(iris$Sepal.Width)
-  expect_silent(ranger(data = iris2, dependent.variable = "Sepal.Width"))
+  expect_silent(ranger(data = iris2, dependent.variable.name = "Sepal.Width"))
 })
 
 test_that("Same result with x/y interface, classification", {

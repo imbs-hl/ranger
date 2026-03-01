@@ -347,28 +347,28 @@ test_that("min.bucket creates nodes of correct size", {
   # Size 2
   rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
                min.bucket = 2, keep.inbag = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   smallest_node <- min(sapply(1:ncol(pred), function(i) {
     min(table(pred[inbag[, i], i]))
   }))
   expect_gte(smallest_node, 2)
-  
+
   # Size 10
-  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE,
                min.bucket = 10, keep.inbag = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   smallest_node <- min(sapply(1:ncol(pred), function(i) {
     min(table(pred[inbag[, i], i]))
   }))
   expect_gte(smallest_node, 10)
-  
+
   # Random size
   min.bucket <- round(runif(1, 1, 40))
-  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
+  rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE,
                min.bucket = min.bucket, keep.inbag = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   smallest_node <- min(sapply(1:ncol(pred), function(i) {
     min(table(pred[inbag[, i], i]))
@@ -381,7 +381,7 @@ test_that("Vector min.bucket creates nodes of correct size", {
   # Size 2,3,4
   rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
                min.bucket = c(2, 3, 4), keep.inbag = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   
   smallest_nodes <- sapply(1:ncol(pred), function(i) {
@@ -400,7 +400,7 @@ test_that("Vector min.bucket creates nodes of correct size", {
   # Size 4,3,2
   rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
                min.bucket = c(4, 3, 2), keep.inbag = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   
   smallest_nodes <- sapply(1:ncol(pred), function(i) {
@@ -420,7 +420,7 @@ test_that("Vector min.bucket creates nodes of correct size", {
   min.bucket <- round(runif(3, 1, 10))
   rf <- ranger(Species ~ ., iris, num.trees = 5, replace = FALSE, 
                min.bucket = min.bucket, keep.inbag = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   
   smallest_nodes <- sapply(1:ncol(pred), function(i) {
@@ -439,7 +439,7 @@ test_that("Vector min.bucket creates nodes of correct size", {
   # No factor outcome
   rf <- ranger(Species ~ ., data.matrix(iris), num.trees = 5, replace = FALSE, 
                min.bucket = c(2, 3, 4), keep.inbag = TRUE, classification = TRUE)
-  pred <- predict(rf, iris, type = "terminalNodes")$prediction
+  pred <- predict(rf, iris, type = "terminalNodes")$predictions
   inbag <- sapply(rf$inbag.counts, function(x) x == 1)
   
   smallest_nodes <- sapply(1:ncol(pred), function(i) {

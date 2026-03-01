@@ -66,7 +66,7 @@ largest.quantile <- function(formula) {
   
   ## Use median survival if available or largest quantile available in all strata if median not available
   max_quant <- max(aggregate(smry$surv ~ smry$strata, FUN = min)[, "smry$surv"])
-  quantiles <- quantile(fit, conf.int = FALSE, prob = min(0.5, 1 - max_quant))[, 1]
+  quantiles <- quantile(fit, conf.int = FALSE, probs = min(0.5, 1 - max_quant))[, 1]
   names(quantiles) <- gsub(".+=", "", names(quantiles))
   
   ## Return ordered levels
