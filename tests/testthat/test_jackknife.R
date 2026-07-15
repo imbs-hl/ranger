@@ -195,3 +195,32 @@ test_that("Standard error prediction working for single observation, probability
   pred <- expect_warning(predict(rf, test, type = "se", se.method = "infjack"))
   expect_equal(dim(pred$se), c(1, 3))
 })
+
+test_that("calibrateEB uses exact branch below 200 and interpolation at/above 200", {
+  # Regression test: previously `length(vars >= 200)` made the interpolation
+  # branch run for every non-empty input, leaving the intended exact branch
+  # dead. The correct condition is `length(vars) >= 200`.
+  set.seed(42)
+  sigma2 <- 0.1
+  sigma <- sqrt(sigma2)
+
+  # Below the threshold: the exact per-observation branch must be used.
+  vars_small <- runif(199, 0.01, 2)
+  res_small <- ranger:::calibrateEB(vars_small, sigma2)
+  expect_length(res_small, 199)
+  expect_true(all(is.finite(res_small)))
+  expect_true(all(res_small >= 0))
+  # A direct gbayes evaluation per observation (no interpolation) must match,
+  # which only holds when the exact branch is taken.
+  eb_prior <- ranger:::gfit(vars_small, sigma)
+  exact_small <- sapply(vars_small, function(xx) ranger:::gbayes(xx, eb_prior, sigma))
+  expect_equal(res_small, exact_small, tolerance = 1e-8)
+
+  # At/above the threshold: the interpolation branch is used. Only sanity-check
+  # the output (interpolation introduces approximation, so no exact assertions).
+  vars_large <- runif(200, 0.01, 2)
+  res_large <- ranger:::calibrateEB(vars_large, sigma2)
+  expect_length(res_large, 200)
+  expect_true(all(is.finite(res_large)))
+  expect_true(all(res_large >= 0))
+})
