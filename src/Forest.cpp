@@ -10,6 +10,7 @@
  #-------------------------------------------------------------------------------*/
 
 #include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <stdexcept>
 #include <string>
@@ -615,18 +616,25 @@ void Forest::computePermutationImportance() {
   std::vector<std::vector<double>> variance_threads(num_threads);
   std::vector<std::vector<double>> variable_importance_casewise_threads(num_threads);
 
+  // Count trees with NaN importance so they can be dropped from the average
+  std::vector<std::vector<double>> variable_importance_nan_threads(num_threads);
+  std::vector<std::vector<double>> variable_importance_casewise_nan_threads(num_threads);
+
   // Compute importance
   for (uint i = 0; i < num_threads; ++i) {
     variable_importance_threads[i].resize(num_independent_variables, 0);
+    variable_importance_nan_threads[i].resize(num_independent_variables, 0);
     if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
       variance_threads[i].resize(num_independent_variables, 0);
     }
     if (importance_mode == IMP_PERM_CASEWISE) {
       variable_importance_casewise_threads[i].resize(num_independent_variables * num_samples, 0);
+      variable_importance_casewise_nan_threads[i].resize(num_independent_variables * num_samples, 0);
     }
     threads.emplace_back(&Forest::computeTreePermutationImportanceInThread, this, i,
         std::ref(variable_importance_threads[i]), std::ref(variance_threads[i]),
-        std::ref(variable_importance_casewise_threads[i]));
+        std::ref(variable_importance_casewise_threads[i]), std::ref(variable_importance_nan_threads[i]),
+        std::ref(variable_importance_casewise_nan_threads[i]));
   }
   showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
@@ -648,6 +656,15 @@ void Forest::computePermutationImportance() {
   }
   variable_importance_threads.clear();
 
+  // Sum thread NaN counts
+  std::vector<double> variable_importance_nan(num_independent_variables, 0);
+  for (size_t i = 0; i < num_independent_variables; ++i) {
+    for (uint j = 0; j < num_threads; ++j) {
+      variable_importance_nan[i] += variable_importance_nan_threads[j][i];
+    }
+  }
+  variable_importance_nan_threads.clear();
+
   // Sum thread variances
   std::vector<double> variance(num_independent_variables, 0);
   if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
@@ -660,6 +677,7 @@ void Forest::computePermutationImportance() {
   }
 
   // Sum thread casewise importances
+  std::vector<double> variable_importance_casewise_nan;
   if (importance_mode == IMP_PERM_CASEWISE) {
     variable_importance_casewise.resize(num_independent_variables * num_samples, 0);
     for (size_t i = 0; i < variable_importance_casewise.size(); ++i) {
@@ -668,23 +686,37 @@ void Forest::computePermutationImportance() {
       }
     }
     variable_importance_casewise_threads.clear();
+
+    // Sum thread casewise NaN counts
+    variable_importance_casewise_nan.resize(num_independent_variables * num_samples, 0);
+    for (size_t i = 0; i < variable_importance_casewise_nan.size(); ++i) {
+      for (uint j = 0; j < num_threads; ++j) {
+        variable_importance_casewise_nan[i] += variable_importance_casewise_nan_threads[j][i];
+      }
+    }
+    variable_importance_casewise_nan_threads.clear();
   }
 
   for (size_t i = 0; i < variable_importance.size(); ++i) {
-    variable_importance[i] /= num_trees;
+    // Mean over trees, ignoring trees with NaN importance
+    double num_valid = (double) num_trees - variable_importance_nan[i];
+    // If no valid trees, num_valid == 0 yields NaN (0.0 / 0), as intended
+    variable_importance[i] /= num_valid;
 
     // Normalize by variance for scaled permutation importance
     if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
       if (variance[i] != 0) {
-        variance[i] = variance[i] / num_trees - variable_importance[i] * variable_importance[i];
-        variable_importance[i] /= sqrt(variance[i] / num_trees);
+        variance[i] = variance[i] / num_valid - variable_importance[i] * variable_importance[i];
+        variable_importance[i] /= sqrt(variance[i] / num_valid);
       }
     }
   }
 
   if (importance_mode == IMP_PERM_CASEWISE) {
     for (size_t i = 0; i < variable_importance_casewise.size(); ++i) {
-      variable_importance_casewise[i] /= num_trees;
+      // Mean over trees, ignoring trees with NaN importance
+      double num_valid = (double) num_trees - variable_importance_casewise_nan[i];
+      variable_importance_casewise[i] /= num_valid;
     }
   }
 }
@@ -763,10 +795,12 @@ void Forest::predictInternalInThread(uint thread_idx) {
 }
 
 void Forest::computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>& importance,
-    std::vector<double>& variance, std::vector<double>& importance_casewise) {
+    std::vector<double>& variance, std::vector<double>& importance_casewise,
+    std::vector<double>& importance_nan, std::vector<double>& importance_casewise_nan) {
   if (thread_ranges.size() > thread_idx + 1) {
     for (size_t i = thread_ranges[thread_idx]; i < thread_ranges[thread_idx + 1]; ++i) {
-      trees[i]->computePermutationImportance(importance, variance, importance_casewise);
+      trees[i]->computePermutationImportance(importance, variance, importance_casewise, importance_nan,
+          importance_casewise_nan);
 
       // Check for user interrupt
 #ifdef R_BUILD

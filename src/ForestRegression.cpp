@@ -10,6 +10,7 @@
  #-------------------------------------------------------------------------------*/
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 
@@ -117,12 +118,18 @@ void ForestRegression::predictInternal(size_t sample_idx) {
       }
     }
   } else {
-    // Mean over trees
+    // Mean over trees, ignoring NaN tree predictions
     double prediction_sum = 0;
+    size_t num_valid = 0;
     for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-      prediction_sum += getTreePrediction(tree_idx, sample_idx);
+      double value = getTreePrediction(tree_idx, sample_idx);
+      if (!std::isnan(value)) {
+        prediction_sum += value;
+        ++num_valid;
+      }
     }
-    predictions[0][0][sample_idx] = prediction_sum / num_trees;
+    // If no valid predictions, num_valid == 0 yields NaN (0.0 / 0), as intended
+    predictions[0][0][sample_idx] = prediction_sum / (double) num_valid;
   }
 }
 
@@ -138,8 +145,11 @@ void ForestRegression::computePredictionErrorInternal() {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
       double value = getTreePrediction(tree_idx, sample_idx);
 
-      predictions[0][0][sampleID] += value;
-      ++samples_oob_count[sampleID];
+      // Ignore NaN tree predictions so they do not poison the OOB mean/MSE
+      if (!std::isnan(value)) {
+        predictions[0][0][sampleID] += value;
+        ++samples_oob_count[sampleID];
+      }
     }
   }
 

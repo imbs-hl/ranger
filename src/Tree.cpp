@@ -9,6 +9,7 @@
  R package "ranger" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
+#include <cmath>
 #include <iterator>
 
 #include "Tree.h"
@@ -223,7 +224,8 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 }
 
 void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance,
-    std::vector<double>& forest_importance_casewise) {
+    std::vector<double>& forest_importance_casewise, std::vector<double>& forest_importance_nan,
+    std::vector<double>& forest_importance_casewise_nan) {
 
   size_t num_independent_variables = data->getNumCols();
 
@@ -267,20 +269,31 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
         accuracy_permuted = computePredictionAccuracyInternal(&prederr_shuf_casewise);
         for (size_t j = 0; j < num_samples_oob; ++j) {
           size_t pos = i * num_samples + oob_sampleIDs[j];
-          forest_importance_casewise[pos] += prederr_shuf_casewise[j] - prederr_normal_casewise[j];
+          // Ignore NaN casewise differences so they do not poison the average
+          double value = prederr_shuf_casewise[j] - prederr_normal_casewise[j];
+          if (!std::isnan(value)) {
+            forest_importance_casewise[pos] += value;
+          } else {
+            ++forest_importance_casewise_nan[pos];
+          }
         }
       } else {
         accuracy_permuted = computePredictionAccuracyInternal(NULL);
       }
   
       double accuracy_difference = accuracy_normal - accuracy_permuted;
-      forest_importance[i] += accuracy_difference;
-  
-      // Compute variance
-      if (importance_mode == IMP_PERM_BREIMAN) {
-        forest_variance[i] += accuracy_difference * accuracy_difference;
-      } else if (importance_mode == IMP_PERM_LIAW) {
-        forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
+      // Ignore NaN importance so it does not poison the average across trees
+      if (!std::isnan(accuracy_difference)) {
+        forest_importance[i] += accuracy_difference;
+
+        // Compute variance
+        if (importance_mode == IMP_PERM_BREIMAN) {
+          forest_variance[i] += accuracy_difference * accuracy_difference;
+        } else if (importance_mode == IMP_PERM_LIAW) {
+          forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
+        }
+      } else {
+        ++forest_importance_nan[i];
       }
     }
   }

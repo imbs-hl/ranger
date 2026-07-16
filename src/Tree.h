@@ -50,7 +50,8 @@ public:
   void predict(const Data* prediction_data, bool oob_prediction);
 
   void computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance,
-      std::vector<double>& forest_importance_casewise);
+      std::vector<double>& forest_importance_casewise, std::vector<double>& forest_importance_nan,
+      std::vector<double>& forest_importance_casewise_nan);
 
   void appendToFile(std::ofstream& file);
   virtual void appendToFileInternal(std::ofstream& file) = 0;

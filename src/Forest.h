@@ -189,7 +189,8 @@ protected:
   void predictTreesInThread(uint thread_idx, const Data* prediction_data, bool oob_prediction);
   void predictInternalInThread(uint thread_idx);
   void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>& importance,
-      std::vector<double>& variance, std::vector<double>& importance_casewise);
+      std::vector<double>& variance, std::vector<double>& importance_casewise,
+      std::vector<double>& importance_nan, std::vector<double>& importance_casewise_nan);
 
   // Load forest from file
   void loadFromFile(std::string filename);
