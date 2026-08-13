@@ -12,6 +12,7 @@
 #ifndef TREE_H_
 #define TREE_H_
 
+#include <cmath>
 #include <vector>
 #include <random>
 #include <iostream>
